@@ -1,0 +1,12 @@
+{
+	"name": "@repo/tailwind-config",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./tailwind.preset.ts",
+	"types": "./tailwind.preset.ts",
+	"files": ["tailwind.preset.ts", "postcss.config.js"],
+	"dependencies": {
+		"tailwindcss": "3.4.17"
+	}
+}

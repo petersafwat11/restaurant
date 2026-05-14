@@ -1,0 +1,17 @@
+{
+	"extends": "@repo/tsconfig/react-native.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		}
+	},
+	"include": [
+		"app/**/*.ts",
+		"app/**/*.tsx",
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"expo-env.d.ts"
+	],
+	"exclude": ["node_modules", ".expo", "dist"]
+}

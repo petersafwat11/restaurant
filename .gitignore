@@ -1,0 +1,58 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# build output
+dist
+build
+out
+.next
+.expo
+.turbo
+*.tsbuildinfo
+
+# testing
+coverage
+.nyc_output
+
+# environments
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# generated
+packages/db/src/generated
+.prisma
+prisma/migrations/dev.db*
+
+# react native
+.expo
+.expo-shared
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# misc
+.cache
+.eslintcache
+.parcel-cache

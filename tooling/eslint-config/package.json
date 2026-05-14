@@ -1,0 +1,14 @@
+{
+	"name": "@repo/eslint-config",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./index.js",
+	"files": ["index.js", "nextjs.js"],
+	"dependencies": {
+		"eslint-config-next": "15.1.3"
+	},
+	"peerDependencies": {
+		"eslint": "^9.0.0"
+	}
+}

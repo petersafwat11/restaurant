@@ -1,0 +1,36 @@
+{
+	"name": "restaurant-app",
+	"version": "0.0.0",
+	"private": true,
+	"packageManager": "pnpm@9.15.0",
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"scripts": {
+		"dev": "turbo run dev --parallel",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"format": "biome format --write .",
+		"format:check": "biome format .",
+		"db:migrate": "pnpm --filter @repo/db migrate:dev",
+		"db:migrate:deploy": "pnpm --filter @repo/db migrate:deploy",
+		"db:generate": "pnpm --filter @repo/db generate",
+		"db:seed": "pnpm --filter @repo/db seed",
+		"db:studio": "pnpm --filter @repo/db studio",
+		"clean": "turbo run clean && rimraf node_modules"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"rimraf": "6.0.1",
+		"turbo": "2.3.3",
+		"typescript": "5.6.3"
+	},
+	"pnpm": {
+		"overrides": {
+			"@types/react": "18.3.18",
+			"@types/react-dom": "18.3.5"
+		}
+	}
+}

@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`receipt-pdf > extracted text matches the snapshot (happy path) 1`] = `
+[
+  "The Test Kitchen",
+  "Order R-2026-000001 · 2026-05-15 12:30",
+  "2 × Kotlet Schabowy",
+  "96,00 zł",
+  "1 × Pierogi Ruskie",
+  "22,00 zł",
+  "Subtotal",
+  "118,00 zł",
+  "Tax",
+  "9,44 zł",
+  "Total",
+  "127,44 zł",
+  "Paid with: STRIPE_CARD",
+]
+`;
+
+exports[`receipt-pdf > extracted text matches the snapshot (refunded variant) 1`] = `
+[
+  "The Test Kitchen",
+  "Order R-2026-000002 · 2026-05-15 12:30",
+  "2 × Kotlet Schabowy",
+  "96,00 zł",
+  "1 × Pierogi Ruskie",
+  "22,00 zł",
+  "Subtotal",
+  "118,00 zł",
+  "Tax",
+  "9,44 zł",
+  "Total",
+  "127,44 zł",
+  "Paid with: STRIPE_CARD",
+  "Refunded: 127,44 zł",
+]
+`;
