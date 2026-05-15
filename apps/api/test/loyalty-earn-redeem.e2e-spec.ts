@@ -156,4 +156,60 @@ describe('loyalty earn/redeem (e2e)', () => {
     const me = await inject('GET', '/api/v1/loyalty/me', undefined, userToken);
     expect(me.json().points).toBe(500); // 1000 - 500 burned
   });
+
+  it('caps redemption against the post-coupon subtotal (no wasted point burn)', async () => {
+    const loyalty = app.get(LoyaltyService);
+    await loyalty.grantPoints(userId, 5000, 'seed', 'ADJUST');
+
+    // 80%-off coupon on a 50.00 subtotal → 40.00 coupon discount,
+    // leaving only 10.00 of subtotal for loyalty to discount.
+    const promo = await inject(
+      'POST',
+      '/api/v1/promotions',
+      { restaurantId, name: '80 off', type: 'PERCENT', value: '80' },
+      ownerToken,
+    );
+    await inject(
+      'POST',
+      `/api/v1/promotions/${promo.json().id}/coupons`,
+      { code: 'EIGHTY' },
+      ownerToken,
+    );
+
+    await inject(
+      'POST',
+      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      { menuItemId: itemId, quantity: 1, modifierSelections: [] },
+      userToken,
+    );
+    await inject(
+      'POST',
+      `/api/v1/cart/coupon?restaurantId=${restaurantId}`,
+      { code: 'EIGHTY' },
+      userToken,
+    );
+    // Ask to redeem far more than the post-coupon remainder allows.
+    await inject(
+      'PATCH',
+      `/api/v1/cart/loyalty?restaurantId=${restaurantId}`,
+      { points: 5000 },
+      userToken,
+    );
+
+    const order = await inject(
+      'POST',
+      '/api/v1/orders',
+      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      userToken,
+      { 'Idempotency-Key': 'loyalty-coupon-cap' },
+    );
+    expect(order.statusCode).toBe(201);
+    // 40 coupon + 10 loyalty = 50 total discount (never clamped away).
+    expect(order.json().discountTotal).toBe('50.00');
+    // Only 1000 pts ($10) burned — not the requested 5000.
+    expect(order.json().loyaltyPointsUsed).toBe(1000);
+
+    const me = await inject('GET', '/api/v1/loyalty/me', undefined, userToken);
+    expect(me.json().points).toBe(4000); // 5000 - 1000 burned
+  });
 });

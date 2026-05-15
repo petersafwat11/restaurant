@@ -183,3 +183,24 @@ hand-authored to match the existing `prisma/migrations/*` convention.
 - `OrderDto` gained `loyaltyPointsUsed/Earned` (default 0) — any new order
   fixture must include them if explicitly typed `: OrderDto`.
 - Sprint 12 (hardening/launch) is the final master-plan sprint.
+
+---
+
+## Post-review correction (cross-sprint audit, 2026-05-15)
+
+Review of Sprints 9–12 found two Sprint 11 bugs; both fixed:
+
+1. **Loyalty/coupon over-burn (HIGH, money).** `OrdersService.create` quoted
+   loyalty redemption against the full subtotal, ignoring an applied coupon.
+   `PricingService` clamps the *combined* coupon+loyalty discount to the
+   subtotal, so a large coupon+loyalty clamped the loyalty discount away
+   while the full points were still burned (lost point value). **Fix:** quote
+   loyalty against the post-coupon basis (`subtotal − couponDiscount`, floored
+   at 0). New e2e case in `loyalty-earn-redeem.e2e-spec.ts` locks it.
+2. **Favorite of a missing item → 500 (LOW).** `favorites.add` used
+   `findUniqueOrThrow` (Prisma P2025 → 500). **Fix:** explicit
+   `NotFoundException` (404).
+
+Feature-flag `enabled:true + rolloutPercent:0 = "nobody"` was reviewed and
+confirmed **intentional** (matches the canary step in
+`docs/runbooks/soft-launch.md`; seed sets default-on flags to 100%).
