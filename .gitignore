@@ -56,3 +56,6 @@ prisma/migrations/dev.db*
 .cache
 .eslintcache
 .parcel-cache
+
+# local services runtime artifacts (redis dump from native e2e bring-up)
+dump.rdb
