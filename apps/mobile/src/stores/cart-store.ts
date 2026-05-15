@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
 
 const SESSION_KEY_STORAGE = 'cart.sessionKey';
+const CART_SNAPSHOT_STORAGE = 'cart.snapshot';
 
 async function readOrCreateSessionKey(): Promise<string> {
   const existing = await SecureStore.getItemAsync(SESSION_KEY_STORAGE);
@@ -14,6 +15,26 @@ async function readOrCreateSessionKey(): Promise<string> {
 
 async function clearStoredSessionKey(): Promise<void> {
   await SecureStore.deleteItemAsync(SESSION_KEY_STORAGE);
+}
+
+async function readCartSnapshot(): Promise<CartDto | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(CART_SNAPSHOT_STORAGE);
+    return raw ? (JSON.parse(raw) as CartDto) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCartSnapshot(cart: CartDto | null): void {
+  // Best-effort offline cache; never throw from the store.
+  if (cart) {
+    void SecureStore.setItemAsync(CART_SNAPSHOT_STORAGE, JSON.stringify(cart)).catch(
+      () => undefined,
+    );
+  } else {
+    void SecureStore.deleteItemAsync(CART_SNAPSHOT_STORAGE).catch(() => undefined);
+  }
 }
 
 function generateUuid(): string {
@@ -48,16 +69,25 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   hydrate: async () => {
     if (get().isHydrated) return;
-    const sessionKey = await readOrCreateSessionKey();
-    set({ sessionKey, isHydrated: true });
+    const [sessionKey, snapshot] = await Promise.all([
+      readOrCreateSessionKey(),
+      readCartSnapshot(),
+    ]);
+    // Show the last-known cart immediately (offline-friendly); a live fetch
+    // overwrites it via setCart once the network is back.
+    set({ sessionKey, cart: snapshot, isHydrated: true });
   },
 
   clearSessionKey: async () => {
     await clearStoredSessionKey();
-    set({ sessionKey: null });
+    writeCartSnapshot(null);
+    set({ sessionKey: null, cart: null });
   },
 
-  setCart: (cart) => set({ cart }),
+  setCart: (cart) => {
+    writeCartSnapshot(cart);
+    set({ cart });
+  },
   beginMutation: () => set({ pendingMutationCount: get().pendingMutationCount + 1 }),
   endMutation: () => set({ pendingMutationCount: Math.max(0, get().pendingMutationCount - 1) }),
 }));

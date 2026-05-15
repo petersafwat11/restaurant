@@ -76,6 +76,17 @@ export class NotificationDispatcherService {
         })
       : null;
 
+    // Per-user channel opt-outs (Sprint 9). In-app is never gated; the feed is
+    // the user's source of truth. Missing row → defaults (order updates on).
+    const prefs = user
+      ? await this.prisma.notificationPreference.findUnique({
+          where: { userId: user.id },
+        })
+      : null;
+    const allowEmail = prefs ? prefs.orderUpdatesEmail : true;
+    const allowSms = prefs ? prefs.orderUpdatesSms : true;
+    const allowPush = prefs ? prefs.orderUpdatesPush : true;
+
     const copy = notificationCopyFor(input.to, input.orderNumber);
 
     // In-app notification — persist directly, no queue.
@@ -91,7 +102,7 @@ export class NotificationDispatcherService {
       });
     }
 
-    if (channels.email && user?.email) {
+    if (channels.email && allowEmail && user?.email) {
       await this.emailQueue.add(JOB_EMAIL_ORDER_STATUS, {
         orderId: input.orderId,
         userId: user.id,
@@ -102,7 +113,7 @@ export class NotificationDispatcherService {
       });
     }
 
-    if (channels.sms && user?.phone) {
+    if (channels.sms && allowSms && user?.phone) {
       await this.smsQueue.add(JOB_SMS_ORDER_STATUS, {
         orderId: input.orderId,
         userId: user.id,
@@ -112,7 +123,7 @@ export class NotificationDispatcherService {
       });
     }
 
-    if (channels.push && user) {
+    if (channels.push && allowPush && user) {
       await this.pushQueue.add(JOB_PUSH_ORDER_STATUS, {
         orderId: input.orderId,
         userId: user.id,

@@ -30,6 +30,7 @@ export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
 export const JOB_PUSH_WELCOME = 'push.welcome';
 export const JOB_PUSH_ORDER_STATUS = 'push.order-status';
+export const JOB_PUSH_TOKEN_CLEANUP = 'push.token-cleanup';
 export const JOB_RECEIPT_GENERATE = 'receipt.generate';
 export const JOB_REPORTS_GENERATE = 'reports.generate';
 export const JOB_REPORTS_CLEANUP = 'reports.cleanup';

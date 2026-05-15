@@ -1114,6 +1114,92 @@ async function seedStaff() {
   }
 }
 
+async function seedLoyalty() {
+  const customer = await prisma.user.findUnique({
+    where: { email: 'customer@local.test' },
+  });
+  if (!customer) return;
+  console.log('▸ Seeding loyalty account + ledger for customer@local.test');
+  const account = await prisma.loyaltyAccount.upsert({
+    where: { userId: customer.id },
+    update: {},
+    create: { userId: customer.id, points: 120, tier: 'silver' },
+  });
+  const existing = await prisma.loyaltyTransaction.count({
+    where: { accountId: account.id },
+  });
+  if (existing === 0) {
+    await prisma.loyaltyTransaction.createMany({
+      data: [
+        { accountId: account.id, delta: 100, reason: 'signup_bonus', orderId: null },
+        { accountId: account.id, delta: 20, reason: 'order_earned', orderId: null },
+      ],
+    });
+  }
+}
+
+async function seedNotifications() {
+  const customer = await prisma.user.findUnique({
+    where: { email: 'customer@local.test' },
+  });
+  if (!customer) return;
+  const count = await prisma.notification.count({ where: { userId: customer.id } });
+  if (count > 0) {
+    console.log('▸ Skipping notifications — already seeded');
+  } else {
+    console.log('▸ Seeding 3 notifications for customer@local.test');
+    await prisma.notification.createMany({
+      data: [
+        {
+          userId: customer.id,
+          type: 'system',
+          title: 'Welcome to the app',
+          body: 'Thanks for joining — your first order earns bonus points.',
+        },
+        {
+          userId: customer.id,
+          type: 'promo',
+          title: 'Weekend offer',
+          body: 'Free delivery on orders over 50 PLN this weekend.',
+        },
+        {
+          userId: customer.id,
+          type: 'order_status',
+          title: 'Order delivered',
+          body: 'Hope you enjoyed your meal!',
+          readAt: new Date(),
+        },
+      ],
+    });
+  }
+  await prisma.notificationPreference.upsert({
+    where: { userId: customer.id },
+    update: {},
+    create: { userId: customer.id },
+  });
+}
+
+async function seedReviewImages() {
+  const reviews = await prisma.review.findMany({
+    where: { images: { none: {} } },
+    take: 3,
+  });
+  if (reviews.length === 0) {
+    console.log('▸ Skipping review images — no reviews without images');
+    return;
+  }
+  console.log(`▸ Seeding images for ${reviews.length} review(s)`);
+  for (const r of reviews) {
+    await prisma.reviewImage.create({
+      data: {
+        reviewId: r.id,
+        url: 'http://localhost/no-r2/reviews/sample.jpg',
+        position: 0,
+      },
+    });
+  }
+}
+
 async function main() {
   console.log('Seeding…');
   await seedPermissions();
@@ -1126,8 +1212,11 @@ async function main() {
   await seedReservations(restaurant.id);
   await seedOrders(restaurant.id);
   await seedReviews();
+  await seedReviewImages();
   await seedDeliveryZones(restaurant.id);
   await seedStaff();
+  await seedLoyalty();
+  await seedNotifications();
   console.log('✓ Seed complete');
 }
 

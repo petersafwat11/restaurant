@@ -165,3 +165,22 @@ export const OrderListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).optional(),
 });
 export type OrderListQuery = z.infer<typeof OrderListQuerySchema>;
+
+// Sprint 9 — order tracking snapshot for the live-tracking screen. Realtime
+// updates still flow through the socket; this is the initial map/ETA payload.
+export const GeoPointSchema = z.object({ lat: z.number(), lng: z.number() });
+export type GeoPointDto = z.infer<typeof GeoPointSchema>;
+
+export const OrderTrackingSchema = z.object({
+  orderId: z.string(),
+  orderNumber: z.string(),
+  type: z.enum(ORDER_TYPES),
+  status: z.enum(ORDER_STATUSES),
+  isTerminal: z.boolean(),
+  timeline: z.array(OrderStatusEventSchema),
+  etaMinutes: z.number().int().nullable(),
+  estimatedReadyAt: z.string().nullable(),
+  restaurantGeo: GeoPointSchema.nullable(),
+  deliveryGeo: GeoPointSchema.nullable(),
+});
+export type OrderTrackingDto = z.infer<typeof OrderTrackingSchema>;

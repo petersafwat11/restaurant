@@ -34,6 +34,7 @@ const KIND_PREFIX: Record<UploadKind, string> = {
 	"menu-item-image": "menu-items",
 	"restaurant-logo": "restaurants/logos",
 	"restaurant-cover": "restaurants/covers",
+	"review-image": "reviews",
 };
 
 @Injectable()

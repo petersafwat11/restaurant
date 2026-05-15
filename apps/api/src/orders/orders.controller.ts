@@ -94,6 +94,21 @@ export class OrdersController {
     );
   }
 
+  @Get(':id/tracking')
+  getTracking(
+    @CurrentUserOptional() user: OptionalUser | null,
+    @Param('id') id: string,
+  ) {
+    return this.orders.getTracking(
+      {
+        userId: user?.id ?? null,
+        sessionKey: null,
+        permissions: user?.permissions ?? [],
+      },
+      id,
+    );
+  }
+
   @Post(':id/status')
   @AuditAction('order:status_changed', 'order')
   updateStatus(

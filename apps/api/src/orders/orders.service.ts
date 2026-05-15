@@ -10,6 +10,7 @@ import { Prisma } from '@repo/db';
 import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
 import type {
   CreateOrderDto,
+  GeoPointDto,
   ModifierSnapshotEntry,
   OrderCreatedEvent,
   OrderCustomerDto,
@@ -19,9 +20,11 @@ import type {
   OrderListQuery,
   OrderPaymentDto,
   OrderStatusChangedEvent,
+  OrderTrackingDto,
   PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils';
+import { computeEta, isTerminalStatus } from './order-tracking';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
@@ -510,6 +513,53 @@ export class OrdersService {
     return dto;
   }
 
+  async getTracking(actor: OrderActor, id: string): Promise<OrderTrackingDto> {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        statusEvents: { orderBy: { createdAt: 'asc' } },
+        restaurant: { select: { geoPoint: true } },
+      },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    const isOwner = actor.userId !== null && order.userId === actor.userId;
+    const canReadAny = actor.permissions.includes('order:read');
+    if (!isOwner && !canReadAny) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const lastEvent = order.statusEvents[order.statusEvents.length - 1];
+    const anchorAt = lastEvent?.createdAt ?? order.createdAt;
+    const { etaMinutes, estimatedReadyAt } = computeEta({
+      type: order.type,
+      status: order.status,
+      anchorAt,
+    });
+
+    return {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      type: order.type,
+      status: order.status,
+      isTerminal: isTerminalStatus(order.status),
+      timeline: order.statusEvents.map((e) => ({
+        id: e.id,
+        orderId: e.orderId,
+        status: e.status,
+        byUserId: e.byUserId,
+        note: e.note,
+        createdAt: e.createdAt.toISOString(),
+      })),
+      etaMinutes,
+      estimatedReadyAt,
+      restaurantGeo: parseGeoPoint(order.restaurant.geoPoint),
+      deliveryGeo: parseGeoPoint(
+        (order.deliveryAddress as { geoPoint?: unknown } | null)?.geoPoint,
+      ),
+    };
+  }
+
   private async loadOrderCustomer(userId: string | null): Promise<OrderCustomerDto | null> {
     if (!userId) return null;
     const u = await this.prisma.user.findUnique({
@@ -629,6 +679,15 @@ type OrderListRow = Order & {
   items: { id: string }[];
   user: { firstName: string | null; lastName: string | null; email: string } | null;
 };
+
+function parseGeoPoint(value: unknown): GeoPointDto | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as { lat?: unknown; lng?: unknown };
+  if (typeof v.lat === 'number' && typeof v.lng === 'number') {
+    return { lat: v.lat, lng: v.lng };
+  }
+  return null;
+}
 
 function toListItem(r: OrderListRow): OrderListItemDto {
   return {

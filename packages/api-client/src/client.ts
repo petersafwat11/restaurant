@@ -72,6 +72,26 @@ import {
   OrderListQuerySchema,
   OrderListSchema,
   OrderSchema,
+  type OrderTrackingDto,
+  OrderTrackingSchema,
+  type LoyaltyAccountDto,
+  LoyaltyAccountSchema,
+  type LoyaltyHistoryDto,
+  type LoyaltyHistoryQuery,
+  LoyaltyHistoryQuerySchema,
+  LoyaltyHistorySchema,
+  type NotificationListDto,
+  type NotificationListQuery,
+  NotificationListQuerySchema,
+  NotificationListSchema,
+  type NotificationPreferenceDto,
+  NotificationPreferenceSchema,
+  type RegisterPushTokenDto,
+  RegisterPushTokenSchema,
+  type UpdateNotificationPreferenceDto,
+  UpdateNotificationPreferenceSchema,
+  type UnreadCountDto,
+  UnreadCountSchema,
   type PaymentConfigDto,
   PaymentConfigSchema,
   type PaymentDto,
@@ -705,6 +725,11 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: OrderSchema,
       }),
+    getTracking: (id: string): Promise<OrderTrackingDto> =>
+      request(`/orders/${encodeURIComponent(id)}/tracking`, {
+        method: 'GET',
+        responseSchema: OrderTrackingSchema,
+      }),
     updateStatus: (id: string, input: UpdateOrderStatusDto): Promise<OrderDto> =>
       request(`/orders/${encodeURIComponent(id)}/status`, {
         method: 'POST',
@@ -948,6 +973,74 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- notifications ---------------------------------------------------
+  const notifications = {
+    list: (q?: NotificationListQuery): Promise<NotificationListDto> =>
+      request('/notifications', {
+        method: 'GET',
+        query: q
+          ? (NotificationListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: NotificationListSchema,
+      }),
+    unreadCount: (): Promise<UnreadCountDto> =>
+      request('/notifications/unread-count', {
+        method: 'GET',
+        responseSchema: UnreadCountSchema,
+      }),
+    markRead: (id: string): Promise<{ success: true }> =>
+      request(`/notifications/${encodeURIComponent(id)}/read`, {
+        method: 'POST',
+      }),
+    markAllRead: (): Promise<{ success: true; count: number }> =>
+      request('/notifications/read-all', { method: 'POST' }),
+    registerPushToken: (input: RegisterPushTokenDto): Promise<{ success: true }> =>
+      request('/notifications/push-tokens', {
+        method: 'POST',
+        body: RegisterPushTokenSchema.parse(input),
+      }),
+    unregisterPushToken: (token: string): Promise<{ success: true }> =>
+      request(`/notifications/push-tokens/${encodeURIComponent(token)}`, {
+        method: 'DELETE',
+      }),
+    getPreferences: (): Promise<NotificationPreferenceDto> =>
+      request('/notifications/preferences', {
+        method: 'GET',
+        responseSchema: NotificationPreferenceSchema,
+      }),
+    updatePreferences: (
+      input: UpdateNotificationPreferenceDto,
+    ): Promise<NotificationPreferenceDto> =>
+      request('/notifications/preferences', {
+        method: 'PATCH',
+        body: UpdateNotificationPreferenceSchema.parse(input),
+        responseSchema: NotificationPreferenceSchema,
+      }),
+  };
+
+  // ---- loyalty ---------------------------------------------------------
+  const loyalty = {
+    me: (): Promise<LoyaltyAccountDto> =>
+      request('/loyalty/me', {
+        method: 'GET',
+        responseSchema: LoyaltyAccountSchema,
+      }),
+    history: (q?: LoyaltyHistoryQuery): Promise<LoyaltyHistoryDto> =>
+      request('/loyalty/me/history', {
+        method: 'GET',
+        query: q
+          ? (LoyaltyHistoryQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: LoyaltyHistorySchema,
+      }),
+  };
+
   // ---- customers (admin) -----------------------------------------------
   const customers = {
     list: (q?: CustomerListQuery): Promise<CustomerListDto> =>
@@ -1182,6 +1275,8 @@ export function createApiClient(opts: ApiClientOptions) {
     payments,
     reservations,
     reviews,
+    notifications,
+    loyalty,
     customers,
     staff,
     settings,

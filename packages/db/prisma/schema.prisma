@@ -32,18 +32,19 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  roles             UserRole[]
-  addresses         UserAddress[]
-  paymentMethods    PaymentMethod[]
-  carts             Cart[]
-  orders            Order[]
-  reviews           Review[]
-  reservations      Reservation[]
-  loyaltyAccount    LoyaltyAccount?
-  refreshTokens     RefreshToken[]
-  pushTokens        PushToken[]
-  notifications     Notification[]
-  couponRedemptions CouponRedemption[]
+  roles                  UserRole[]
+  addresses              UserAddress[]
+  paymentMethods         PaymentMethod[]
+  carts                  Cart[]
+  orders                 Order[]
+  reviews                Review[]
+  reservations           Reservation[]
+  loyaltyAccount         LoyaltyAccount?
+  refreshTokens          RefreshToken[]
+  pushTokens             PushToken[]
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  couponRedemptions      CouponRedemption[]
 }
 
 model Role {
@@ -134,11 +135,28 @@ model PaymentMethod {
 }
 
 model PushToken {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  platform  String
-  createdAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  platform   String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NotificationPreference {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  orderUpdatesPush Boolean  @default(true)
+  orderUpdatesEmail Boolean @default(true)
+  orderUpdatesSms  Boolean  @default(true)
+  promotionsPush   Boolean  @default(false)
+  promotionsEmail  Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -663,6 +681,19 @@ model Review {
   isVisible Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  order Order @relation(fields: [orderId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  order  Order         @relation(fields: [orderId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
+  images ReviewImage[]
+}
+
+model ReviewImage {
+  id        String   @id @default(cuid())
+  reviewId  String
+  url       String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
 }

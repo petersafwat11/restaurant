@@ -13,6 +13,8 @@ export * from './payment';
 export * from './realtime';
 export * from './reservation';
 export * from './review';
+export * from './notification';
+export * from './loyalty';
 export * from './customer';
 export * from './staff';
 export * from './settings';

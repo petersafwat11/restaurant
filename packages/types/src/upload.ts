@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const UPLOAD_KINDS = ['menu-item-image', 'restaurant-logo', 'restaurant-cover'] as const;
+export const UPLOAD_KINDS = [
+  'menu-item-image',
+  'restaurant-logo',
+  'restaurant-cover',
+  'review-image',
+] as const;
 export type UploadKind = (typeof UPLOAD_KINDS)[number];
 
 export const ALLOWED_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
