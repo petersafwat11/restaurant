@@ -103,6 +103,8 @@ export const OrderSchema = z.object({
   tipAmount: MoneyStringSchema,
   discountTotal: MoneyStringSchema,
   grandTotal: MoneyStringSchema,
+  loyaltyPointsUsed: z.number().int().default(0),
+  loyaltyPointsEarned: z.number().int().default(0),
   currency: z.string(),
   deliveryAddress: z
     .object({

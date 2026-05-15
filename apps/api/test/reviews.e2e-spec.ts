@@ -119,10 +119,7 @@ describe('reviews (e2e)', () => {
     expect(body.images).toHaveLength(2);
     expect(body.images[0].url).toContain('reviews/a.jpg');
 
-    const list = await inject(
-      'GET',
-      `/api/v1/restaurants/${restaurantId}/reviews`,
-    );
+    const list = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews`);
     expect(list.json().items[0].images).toHaveLength(2);
   });
 
@@ -141,10 +138,7 @@ describe('reviews (e2e)', () => {
     expect(res.statusCode).toBe(201);
     const id = res.json().id;
 
-    const publicList = await inject(
-      'GET',
-      `/api/v1/restaurants/${restaurantId}/reviews`,
-    );
+    const publicList = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews`);
     expect(publicList.json().items.find((x: { id: string }) => x.id === id)).toBeUndefined();
 
     const mod = await inject(
@@ -155,5 +149,48 @@ describe('reviews (e2e)', () => {
     );
     expect(mod.statusCode).toBe(200);
     expect(mod.json().isVisible).toBe(true);
+  });
+
+  it('lets an owner reply to a review (review:moderate)', async () => {
+    const order = await makeOrder('COMPLETED');
+    const created = await inject(
+      'POST',
+      '/api/v1/reviews',
+      { orderId: order.id, rating: 4, comment: 'Nice' },
+      userToken,
+    );
+    const id = created.json().id;
+
+    const forbidden = await inject(
+      'POST',
+      `/api/v1/admin/reviews/${id}/reply`,
+      { reply: 'Thanks!' },
+      userToken,
+    );
+    expect(forbidden.statusCode).toBe(403);
+
+    const ok = await inject(
+      'POST',
+      `/api/v1/admin/reviews/${id}/reply`,
+      { reply: 'Thanks for the kind words!' },
+      ownerToken,
+    );
+    expect(ok.statusCode).toBe(201);
+    expect(ok.json().ownerReply).toBe('Thanks for the kind words!');
+    expect(ok.json().ownerReplyAt).not.toBeNull();
+  });
+
+  it('exposes a public aggregate rating summary', async () => {
+    for (const rating of [5, 4, 5]) {
+      const order = await makeOrder('COMPLETED');
+      await inject('POST', '/api/v1/reviews', { orderId: order.id, rating }, userToken);
+    }
+    const res = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews/summary`);
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.count).toBe(3);
+    expect(body.average).toBeCloseTo(4.67, 1);
+    expect(body.histogram['5']).toBe(2);
+    expect(body.histogram['4']).toBe(1);
   });
 });

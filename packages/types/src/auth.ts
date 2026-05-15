@@ -22,6 +22,12 @@ export const RegisterSchema = z.object({
   firstName: z.string().min(1).max(80).optional(),
   lastName: z.string().min(1).max(80).optional(),
   phone: PhoneSchema.optional(),
+  referralCode: z
+    .string()
+    .min(6)
+    .max(16)
+    .regex(/^[A-Za-z0-9]+$/)
+    .optional(),
 });
 export type RegisterDto = z.infer<typeof RegisterSchema>;
 

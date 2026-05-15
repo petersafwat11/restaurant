@@ -1,4 +1,9 @@
 import {
+  type AboutDataDto,
+  AboutDataSchema,
+  // Sprint 7
+  type AcceptStaffInviteDto,
+  AcceptStaffInviteSchema,
   type AddCartItemDto,
   AddCartItemSchema,
   type AddMenuItemImageDto,
@@ -6,22 +11,47 @@ import {
   type AddressDto,
   AddressListSchema,
   AddressSchema,
+  // Sprint 8
+  type AnalyticsBaseQuery,
+  AnalyticsBaseQuerySchema,
+  type AnalyticsOverviewDto,
+  AnalyticsOverviewSchema,
   type ApplyCouponDto,
   ApplyCouponSchema,
+  type AuditLogListDto,
+  type AuditLogListQuery,
+  AuditLogListQuerySchema,
+  AuditLogListSchema,
   type AuthResponseDto,
   AuthResponseSchema,
   type AuthTokensDto,
   AuthTokensSchema,
+  type AvailabilityQueryDto,
+  AvailabilityResponseSchema,
+  type CancelReservationDto,
+  CancelReservationSchema,
   type CartDto,
   CartSchema,
   type ChangePasswordDto,
   ChangePasswordSchema,
+  type ContactMessageDto,
+  type ContactMessageListDto,
+  type ContactMessageListQuery,
+  ContactMessageListQuerySchema,
+  ContactMessageListSchema,
+  ContactMessageSchema,
   type CouponDto,
   CouponListSchema,
   type CreateAddressDto,
   CreateAddressSchema,
+  type CreateContactMessageDto,
+  CreateContactMessageSchema,
   type CreateCouponDto,
   CreateCouponSchema,
+  type CreateCustomerNoteDto,
+  CreateCustomerNoteSchema,
+  type CreateExportDto,
+  CreateExportSchema,
   type CreateMenuCategoryDto,
   CreateMenuCategorySchema,
   type CreateMenuItemDto,
@@ -38,14 +68,72 @@ import {
   CreatePromotionSchema,
   type CreateRefundDto,
   CreateRefundSchema,
+  type CreateReservationDto,
+  CreateReservationSchema,
   type CreateRestaurantDto,
   CreateRestaurantSchema,
+  type CreateReviewDto,
+  CreateReviewSchema,
+  type CreateTableDto,
+  CreateTableSchema,
+  type CustomerDetailDto,
+  CustomerDetailSchema,
+  type CustomerListDto,
+  type CustomerListQuery,
+  CustomerListQuerySchema,
+  CustomerListSchema,
+  CustomerNoteSchema,
+  type CustomerRetentionDto,
+  type CustomerRetentionQuery,
+  CustomerRetentionQuerySchema,
+  CustomerRetentionSchema,
+  type DeliveryZoneCheckQuery,
+  DeliveryZoneCheckQuerySchema,
+  type DeliveryZoneCheckResponseDto,
+  DeliveryZoneCheckResponseSchema,
+  type ExportDto,
+  ExportListSchema,
+  ExportSchema,
+  type FavoriteDto,
+  type FavoriteIdsDto,
+  FavoriteIdsSchema,
+  type FavoriteListDto,
+  type FavoriteListQuery,
+  FavoriteListQuerySchema,
+  FavoriteListSchema,
+  FavoriteSchema,
+  type FeatureFlagAdminDto,
+  FeatureFlagAdminSchema,
+  type FeatureFlagListDto,
+  FeatureFlagListSchema,
+  type FeatureFlagsResolvedDto,
+  FeatureFlagsResolvedSchema,
   type ForgotPasswordDto,
   ForgotPasswordSchema,
+  type HolidayDto,
+  HolidaySchema,
+  type I18nMessagesDto,
+  I18nMessagesSchema,
+  type InviteStaffDto,
+  InviteStaffSchema,
   type KitchenTicketDto,
   KitchenTicketsListSchema,
+  type LandingDataDto,
+  LandingDataSchema,
   type LoginDto,
   LoginSchema,
+  type LoyaltyAccountDto,
+  LoyaltyAccountSchema,
+  type LoyaltyHistoryDto,
+  type LoyaltyHistoryQuery,
+  LoyaltyHistoryQuerySchema,
+  LoyaltyHistorySchema,
+  type LoyaltyRedeemQuoteDto,
+  type LoyaltyRedeemQuoteRequest,
+  LoyaltyRedeemQuoteRequestSchema,
+  LoyaltyRedeemQuoteSchema,
+  type MarketingQuery,
+  MarketingQuerySchema,
   type MeDto,
   MeSchema,
   type MenuCategoryDto,
@@ -64,6 +152,12 @@ import {
   ModifierGroupSchema,
   type ModifierOptionDto,
   ModifierOptionSchema,
+  type NotificationListDto,
+  type NotificationListQuery,
+  NotificationListQuerySchema,
+  NotificationListSchema,
+  type NotificationPreferenceDto,
+  NotificationPreferenceSchema,
   type OperatingHoursDto,
   OperatingHoursListSchema,
   type OrderDto,
@@ -74,51 +168,17 @@ import {
   OrderSchema,
   type OrderTrackingDto,
   OrderTrackingSchema,
-  type LoyaltyAccountDto,
-  LoyaltyAccountSchema,
-  type LoyaltyHistoryDto,
-  type LoyaltyHistoryQuery,
-  LoyaltyHistoryQuerySchema,
-  LoyaltyHistorySchema,
-  type NotificationListDto,
-  type NotificationListQuery,
-  NotificationListQuerySchema,
-  NotificationListSchema,
-  type NotificationPreferenceDto,
-  NotificationPreferenceSchema,
-  type RegisterPushTokenDto,
-  RegisterPushTokenSchema,
-  type UpdateNotificationPreferenceDto,
-  UpdateNotificationPreferenceSchema,
-  type UnreadCountDto,
-  UnreadCountSchema,
-  type AboutDataDto,
-  AboutDataSchema,
-  type ContactMessageDto,
-  type ContactMessageListDto,
-  type ContactMessageListQuery,
-  ContactMessageListQuerySchema,
-  ContactMessageListSchema,
-  ContactMessageSchema,
-  type CreateContactMessageDto,
-  CreateContactMessageSchema,
-  type LandingDataDto,
-  LandingDataSchema,
-  type MarketingQuery,
-  MarketingQuerySchema,
-  type SeoMetaDto,
-  type SeoMetaQuery,
-  SeoMetaQuerySchema,
-  SeoMetaSchema,
-  type StructuredDataDto,
-  StructuredDataSchema,
-  type UpdateContactMessageDto,
-  UpdateContactMessageSchema,
+  type OrdersByStatusDto,
+  OrdersByStatusSchema,
+  type OwnerReplyDto,
+  OwnerReplySchema,
   type PaymentConfigDto,
   PaymentConfigSchema,
   type PaymentDto,
   type PaymentIntentResponseDto,
   PaymentIntentResponseSchema,
+  type PaymentMethodsBreakdownDto,
+  PaymentMethodsBreakdownSchema,
   PaymentSchema,
   type PresignUploadDto,
   PresignUploadSchema,
@@ -127,11 +187,19 @@ import {
   type PromotionDto,
   PromotionListSchema,
   PromotionSchema,
+  type ReferralListDto,
+  type ReferralListQuery,
+  ReferralListQuerySchema,
+  ReferralListSchema,
+  type ReferralMeDto,
+  ReferralMeSchema,
   type RefreshDto,
   RefreshSchema,
   type RefundDto,
   RefundSchema,
   type RegisterDto,
+  type RegisterPushTokenDto,
+  RegisterPushTokenSchema,
   RegisterSchema,
   type ReorderDto,
   type ReorderItemsDto,
@@ -139,6 +207,12 @@ import {
   ReorderSchema,
   type RequestOtpDto,
   RequestOtpSchema,
+  type ReservationDto,
+  type ReservationListDto,
+  type ReservationListQuery,
+  ReservationListQuerySchema,
+  ReservationListSchema,
+  ReservationSchema,
   type ResetPasswordDto,
   ResetPasswordSchema,
   type RestaurantAdminDto,
@@ -146,12 +220,59 @@ import {
   RestaurantListSchema,
   type RestaurantPublicDto,
   RestaurantPublicSchema,
+  type RestaurantSettingsDto,
+  RestaurantSettingsSchema,
+  type RevenueTimeseriesPointDto,
+  type RevenueTimeseriesQuery,
+  RevenueTimeseriesQuerySchema,
+  RevenueTimeseriesSchema,
+  type ReviewDto,
+  type ReviewListDto,
+  type ReviewListQuery,
+  ReviewListQuerySchema,
+  ReviewListSchema,
+  ReviewModerationSchema,
+  ReviewSchema,
+  type ReviewSummaryDto,
+  ReviewSummarySchema,
+  type SalesByDayOfWeekDto,
+  SalesByDayOfWeekSchema,
+  type SalesByHourDto,
+  SalesByHourSchema,
+  type SeatReservationDto,
+  SeatReservationSchema,
+  type SeoMetaDto,
+  type SeoMetaQuery,
+  SeoMetaQuerySchema,
+  SeoMetaSchema,
+  type SetCartLoyaltyDto,
+  SetCartLoyaltySchema,
   type SetItemAvailabilityDto,
   SetItemAvailabilitySchema,
+  type StaffListQuery,
+  StaffListQuerySchema,
+  StaffListSchema,
+  type StaffMemberDto,
+  StaffMemberSchema,
+  type StructuredDataDto,
+  StructuredDataSchema,
+  type TableDto,
+  TableListSchema,
+  TableSchema,
+  type TopItemDto,
+  type TopItemsQuery,
+  TopItemsQuerySchema,
+  TopItemsSchema,
+  type UnreadCountDto,
+  UnreadCountSchema,
   type UpdateAddressDto,
   UpdateAddressSchema,
   type UpdateCartItemDto,
   UpdateCartItemSchema,
+  type UpdateContactMessageDto,
+  UpdateContactMessageSchema,
+  type UpdateFeatureFlagDto,
+  UpdateFeatureFlagSchema,
   type UpdateMenuCategoryDto,
   UpdateMenuCategorySchema,
   type UpdateMenuItemDto,
@@ -160,6 +281,8 @@ import {
   UpdateModifierGroupSchema,
   type UpdateModifierOptionDto,
   UpdateModifierOptionSchema,
+  type UpdateNotificationPreferenceDto,
+  UpdateNotificationPreferenceSchema,
   type UpdateOperatingHoursDto,
   UpdateOperatingHoursSchema,
   type UpdateOrderStatusDto,
@@ -168,8 +291,16 @@ import {
   UpdateProfileSchema,
   type UpdatePromotionDto,
   UpdatePromotionSchema,
+  type UpdateReservationDto,
+  UpdateReservationSchema,
   type UpdateRestaurantDto,
   UpdateRestaurantSchema,
+  type UpdateRestaurantSettingsDto,
+  UpdateRestaurantSettingsSchema,
+  type UpdateStaffRoleDto,
+  UpdateStaffRoleSchema,
+  type UpdateTableDto,
+  UpdateTableSchema,
   type ValidateCouponDto,
   type ValidateCouponResponseDto,
   ValidateCouponResponseSchema,
@@ -178,103 +309,6 @@ import {
   VerifyEmailSchema,
   type VerifyOtpDto,
   VerifyOtpSchema,
-  // Sprint 7
-  type AcceptStaffInviteDto,
-  AcceptStaffInviteSchema,
-  type AvailabilityQueryDto,
-  AvailabilityResponseSchema,
-  type CancelReservationDto,
-  CancelReservationSchema,
-  type CreateCustomerNoteDto,
-  CreateCustomerNoteSchema,
-  type CreateReservationDto,
-  CreateReservationSchema,
-  type CreateReviewDto,
-  CreateReviewSchema,
-  type CreateTableDto,
-  CreateTableSchema,
-  type CustomerDetailDto,
-  CustomerDetailSchema,
-  type CustomerListDto,
-  type CustomerListQuery,
-  CustomerListQuerySchema,
-  CustomerListSchema,
-  CustomerNoteSchema,
-  type DeliveryZoneCheckQuery,
-  DeliveryZoneCheckQuerySchema,
-  type DeliveryZoneCheckResponseDto,
-  DeliveryZoneCheckResponseSchema,
-  type HolidayDto,
-  HolidaySchema,
-  type InviteStaffDto,
-  InviteStaffSchema,
-  type RestaurantSettingsDto,
-  RestaurantSettingsSchema,
-  type ReservationDto,
-  type ReservationListDto,
-  type ReservationListQuery,
-  ReservationListQuerySchema,
-  ReservationListSchema,
-  ReservationSchema,
-  type ReviewDto,
-  type ReviewListDto,
-  type ReviewListQuery,
-  ReviewListQuerySchema,
-  ReviewListSchema,
-  ReviewModerationSchema,
-  ReviewSchema,
-  type SeatReservationDto,
-  SeatReservationSchema,
-  type StaffMemberDto,
-  StaffListSchema,
-  type StaffListQuery,
-  StaffListQuerySchema,
-  StaffMemberSchema,
-  type TableDto,
-  TableListSchema,
-  TableSchema,
-  type UpdateReservationDto,
-  UpdateReservationSchema,
-  type UpdateRestaurantSettingsDto,
-  UpdateRestaurantSettingsSchema,
-  type UpdateStaffRoleDto,
-  UpdateStaffRoleSchema,
-  type UpdateTableDto,
-  UpdateTableSchema,
-  // Sprint 8
-  type AnalyticsBaseQuery,
-  AnalyticsBaseQuerySchema,
-  type AnalyticsOverviewDto,
-  AnalyticsOverviewSchema,
-  type AuditLogListDto,
-  type AuditLogListQuery,
-  AuditLogListQuerySchema,
-  AuditLogListSchema,
-  type CreateExportDto,
-  CreateExportSchema,
-  type CustomerRetentionDto,
-  type CustomerRetentionQuery,
-  CustomerRetentionQuerySchema,
-  CustomerRetentionSchema,
-  type ExportDto,
-  ExportListSchema,
-  ExportSchema,
-  type OrdersByStatusDto,
-  OrdersByStatusSchema,
-  type PaymentMethodsBreakdownDto,
-  PaymentMethodsBreakdownSchema,
-  type RevenueTimeseriesPointDto,
-  type RevenueTimeseriesQuery,
-  RevenueTimeseriesQuerySchema,
-  RevenueTimeseriesSchema,
-  type SalesByDayOfWeekDto,
-  SalesByDayOfWeekSchema,
-  type SalesByHourDto,
-  SalesByHourSchema,
-  type TopItemDto,
-  type TopItemsQuery,
-  TopItemsQuerySchema,
-  TopItemsSchema,
 } from '@repo/types';
 import { z } from 'zod';
 import { ApiError } from './errors';
@@ -737,6 +771,13 @@ export function createApiClient(opts: ApiClientOptions) {
         query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
+    setLoyalty: (params: { restaurantId: string }, input: SetCartLoyaltyDto): Promise<CartDto> =>
+      request('/cart/loyalty', {
+        method: 'PATCH',
+        query: { restaurantId: params.restaurantId },
+        body: SetCartLoyaltySchema.parse(input),
+        responseSchema: CartSchema,
+      }),
   };
 
   // ---- orders -----------------------------------------------------------
@@ -753,7 +794,10 @@ export function createApiClient(opts: ApiClientOptions) {
       request('/orders', {
         method: 'GET',
         query: query
-          ? (OrderListQuerySchema.parse(query) as Record<string, string | number | boolean | undefined>)
+          ? (OrderListQuerySchema.parse(query) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
           : undefined,
         responseSchema: OrderListSchema,
       }),
@@ -880,7 +924,9 @@ export function createApiClient(opts: ApiClientOptions) {
 
   // ---- reservations (Sprint 7) ----------------------------------------
   const reservations = {
-    availability: (input: AvailabilityQueryDto): Promise<import('@repo/types').AvailabilityResponseDto> =>
+    availability: (
+      input: AvailabilityQueryDto,
+    ): Promise<import('@repo/types').AvailabilityResponseDto> =>
       request('/reservations/availability', {
         method: 'GET',
         auth: false,
@@ -903,7 +949,10 @@ export function createApiClient(opts: ApiClientOptions) {
       request('/reservations', {
         method: 'GET',
         query: q
-          ? (ReservationListQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
+          ? (ReservationListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
           : undefined,
         responseSchema: ReservationListSchema,
       }),
@@ -985,7 +1034,10 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         auth: false,
         query: q
-          ? (ReviewListQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
+          ? (ReviewListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
           : undefined,
         responseSchema: ReviewListSchema,
       }),
@@ -993,7 +1045,10 @@ export function createApiClient(opts: ApiClientOptions) {
       request('/admin/reviews', {
         method: 'GET',
         query: q
-          ? (ReviewListQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
+          ? (ReviewListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
           : undefined,
         responseSchema: ReviewListSchema,
       }),
@@ -1007,6 +1062,18 @@ export function createApiClient(opts: ApiClientOptions) {
       request(`/admin/reviews/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         responseSchema: ReviewSchema,
+      }),
+    reply: (id: string, input: OwnerReplyDto): Promise<ReviewDto> =>
+      request(`/admin/reviews/${encodeURIComponent(id)}/reply`, {
+        method: 'POST',
+        body: OwnerReplySchema.parse(input),
+        responseSchema: ReviewSchema,
+      }),
+    summary: (restaurantId: string): Promise<ReviewSummaryDto> =>
+      request(`/restaurants/${encodeURIComponent(restaurantId)}/reviews/summary`, {
+        method: 'GET',
+        auth: false,
+        responseSchema: ReviewSummarySchema,
       }),
   };
 
@@ -1076,6 +1143,94 @@ export function createApiClient(opts: ApiClientOptions) {
           : undefined,
         responseSchema: LoyaltyHistorySchema,
       }),
+    redeemQuote: (input: LoyaltyRedeemQuoteRequest): Promise<LoyaltyRedeemQuoteDto> =>
+      request('/loyalty/redeem/quote', {
+        method: 'POST',
+        body: LoyaltyRedeemQuoteRequestSchema.parse(input),
+        responseSchema: LoyaltyRedeemQuoteSchema,
+      }),
+  };
+
+  // ---- favorites -------------------------------------------------------
+  const favorites = {
+    list: (q?: FavoriteListQuery): Promise<FavoriteListDto> =>
+      request('/favorites', {
+        method: 'GET',
+        query: q
+          ? (FavoriteListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: FavoriteListSchema,
+      }),
+    ids: (): Promise<FavoriteIdsDto> =>
+      request('/favorites/ids', {
+        method: 'GET',
+        responseSchema: FavoriteIdsSchema,
+      }),
+    add: (menuItemId: string): Promise<FavoriteDto> =>
+      request(`/favorites/${encodeURIComponent(menuItemId)}`, {
+        method: 'PUT',
+        responseSchema: FavoriteSchema,
+      }),
+    remove: (menuItemId: string): Promise<{ removed: boolean }> =>
+      request(`/favorites/${encodeURIComponent(menuItemId)}`, {
+        method: 'DELETE',
+        responseSchema: z.object({ removed: z.boolean() }),
+      }),
+  };
+
+  // ---- referrals -------------------------------------------------------
+  const referrals = {
+    me: (): Promise<ReferralMeDto> =>
+      request('/referrals/me', {
+        method: 'GET',
+        responseSchema: ReferralMeSchema,
+      }),
+    list: (q?: ReferralListQuery): Promise<ReferralListDto> =>
+      request('/referrals', {
+        method: 'GET',
+        query: q
+          ? (ReferralListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: ReferralListSchema,
+      }),
+  };
+
+  // ---- i18n ------------------------------------------------------------
+  const i18n = {
+    messages: (locale?: 'en' | 'ar'): Promise<I18nMessagesDto> =>
+      request('/i18n/messages', {
+        method: 'GET',
+        auth: false,
+        query: locale ? { locale } : undefined,
+        responseSchema: I18nMessagesSchema,
+      }),
+  };
+
+  // ---- feature flags ---------------------------------------------------
+  const featureFlags = {
+    resolved: (): Promise<FeatureFlagsResolvedDto> =>
+      request('/feature-flags', {
+        method: 'GET',
+        auth: false,
+        responseSchema: FeatureFlagsResolvedSchema,
+      }),
+    listAdmin: (): Promise<FeatureFlagListDto> =>
+      request('/admin/feature-flags', {
+        method: 'GET',
+        responseSchema: FeatureFlagListSchema,
+      }),
+    update: (key: string, input: UpdateFeatureFlagDto): Promise<FeatureFlagAdminDto> =>
+      request(`/admin/feature-flags/${encodeURIComponent(key)}`, {
+        method: 'PATCH',
+        body: UpdateFeatureFlagSchema.parse(input),
+        responseSchema: FeatureFlagAdminSchema,
+      }),
   };
 
   // ---- marketing -------------------------------------------------------
@@ -1085,10 +1240,7 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         auth: false,
         query: q
-          ? (MarketingQuerySchema.parse(q) as Record<
-              string,
-              string | number | boolean | undefined
-            >)
+          ? (MarketingQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
           : undefined,
         responseSchema: LandingDataSchema,
       }),
@@ -1097,10 +1249,7 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         auth: false,
         query: q
-          ? (MarketingQuerySchema.parse(q) as Record<
-              string,
-              string | number | boolean | undefined
-            >)
+          ? (MarketingQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
           : undefined,
         responseSchema: AboutDataSchema,
       }),
@@ -1126,10 +1275,7 @@ export function createApiClient(opts: ApiClientOptions) {
           : undefined,
         responseSchema: ContactMessageListSchema,
       }),
-    updateStatus: (
-      id: string,
-      input: UpdateContactMessageDto,
-    ): Promise<ContactMessageDto> =>
+    updateStatus: (id: string, input: UpdateContactMessageDto): Promise<ContactMessageDto> =>
       request(`/admin/contact/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         body: UpdateContactMessageSchema.parse(input),
@@ -1154,10 +1300,7 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         auth: false,
         query: q
-          ? (SeoMetaQuerySchema.parse(q) as Record<
-              string,
-              string | number | boolean | undefined
-            >)
+          ? (SeoMetaQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
           : undefined,
         responseSchema: SeoMetaSchema,
       }),
@@ -1169,7 +1312,10 @@ export function createApiClient(opts: ApiClientOptions) {
       request('/admin/customers', {
         method: 'GET',
         query: q
-          ? (CustomerListQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
+          ? (CustomerListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
           : undefined,
         responseSchema: CustomerListSchema,
       }),
@@ -1178,7 +1324,10 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: CustomerDetailSchema,
       }),
-    addNote: (id: string, input: CreateCustomerNoteDto): Promise<import('@repo/types').CustomerNoteDto> =>
+    addNote: (
+      id: string,
+      input: CreateCustomerNoteDto,
+    ): Promise<import('@repo/types').CustomerNoteDto> =>
       request(`/admin/customers/${encodeURIComponent(id)}/notes`, {
         method: 'PATCH',
         body: CreateCustomerNoteSchema.parse(input),
@@ -1264,7 +1413,10 @@ export function createApiClient(opts: ApiClientOptions) {
       request(`/admin/restaurants/${encodeURIComponent(restaurantId)}/delivery-zones/check`, {
         method: 'GET',
         auth: false,
-        query: DeliveryZoneCheckQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>,
+        query: DeliveryZoneCheckQuerySchema.parse(q) as Record<
+          string,
+          string | number | boolean | undefined
+        >,
         responseSchema: DeliveryZoneCheckResponseSchema,
       }),
   };
@@ -1399,6 +1551,10 @@ export function createApiClient(opts: ApiClientOptions) {
     reviews,
     notifications,
     loyalty,
+    favorites,
+    referrals,
+    i18n,
+    featureFlags,
     marketing,
     contact,
     seo,

@@ -9,714 +9,713 @@
  * earlier seeders.
  */
 
-import { Prisma, PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import { Prisma, PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 // Keep this list in sync with packages/types/src/permissions.ts.
 const ALL_PERMISSIONS = [
-	"order:read",
-	"order:create",
-	"order:update",
-	"order:status_update",
-	"order:cancel",
-	"order:refund",
-	"menu:read",
-	"menu:write",
-	"restaurant:read",
-	"restaurant:write",
-	"customer:read",
-	"customer:write",
-	"customer:notes",
-	"promotion:read",
-	"promotion:write",
-	"reservation:read",
-	"reservation:write",
-	"review:read",
-	"review:moderate",
-	"staff:read",
-	"staff:write",
-	"reports:read",
-	"settings:read",
-	"settings:write",
-	"payment:create",
-	"payment:read",
-	"payment:refund",
-	"kitchen:read",
-	"analytics:read",
-	"report:read",
-	"report:export",
-	"audit:read",
-	"contact:read",
+  'order:read',
+  'order:create',
+  'order:update',
+  'order:status_update',
+  'order:cancel',
+  'order:refund',
+  'menu:read',
+  'menu:write',
+  'restaurant:read',
+  'restaurant:write',
+  'customer:read',
+  'customer:write',
+  'customer:notes',
+  'promotion:read',
+  'promotion:write',
+  'reservation:read',
+  'reservation:write',
+  'review:read',
+  'review:moderate',
+  'staff:read',
+  'staff:write',
+  'reports:read',
+  'settings:read',
+  'settings:write',
+  'payment:create',
+  'payment:read',
+  'payment:refund',
+  'kitchen:read',
+  'analytics:read',
+  'report:read',
+  'report:export',
+  'audit:read',
+  'contact:read',
+  'flags:write',
 ] as const;
 
 type PermissionKey = (typeof ALL_PERMISSIONS)[number];
 
 const ROLE_PERMISSIONS: Record<string, readonly PermissionKey[]> = {
-	owner: ALL_PERMISSIONS,
-	manager: ALL_PERMISSIONS.filter(
-		(p) => p !== "staff:write" && p !== "settings:write",
-	),
-	kitchen: ["order:read", "order:status_update", "kitchen:read"],
-	cashier: [
-		"order:read",
-		"order:create",
-		"payment:create",
-		"payment:read",
-		"kitchen:read",
-		"reservation:read",
-		"reservation:write",
-		"customer:read",
-	],
-	customer: [],
+  owner: ALL_PERMISSIONS,
+  manager: ALL_PERMISSIONS.filter((p) => p !== 'staff:write' && p !== 'settings:write'),
+  kitchen: ['order:read', 'order:status_update', 'kitchen:read'],
+  cashier: [
+    'order:read',
+    'order:create',
+    'payment:create',
+    'payment:read',
+    'kitchen:read',
+    'reservation:read',
+    'reservation:write',
+    'customer:read',
+  ],
+  customer: [],
 };
 
 const ROLE_NAMES: Record<string, string> = {
-	owner: "Owner",
-	manager: "Manager",
-	kitchen: "Kitchen",
-	cashier: "Cashier",
-	customer: "Customer",
+  owner: 'Owner',
+  manager: 'Manager',
+  kitchen: 'Kitchen',
+  cashier: 'Cashier',
+  customer: 'Customer',
 };
 
 async function seedPermissions() {
-	console.log(`▸ Seeding ${ALL_PERMISSIONS.length} permissions`);
-	for (const key of ALL_PERMISSIONS) {
-		await prisma.permission.upsert({
-			where: { key },
-			update: {},
-			create: { key },
-		});
-	}
+  console.log(`▸ Seeding ${ALL_PERMISSIONS.length} permissions`);
+  for (const key of ALL_PERMISSIONS) {
+    await prisma.permission.upsert({
+      where: { key },
+      update: {},
+      create: { key },
+    });
+  }
 }
 
 async function seedRoles() {
-	console.log(`▸ Seeding ${Object.keys(ROLE_PERMISSIONS).length} roles`);
-	for (const [roleKey, perms] of Object.entries(ROLE_PERMISSIONS)) {
-		const role = await prisma.role.upsert({
-			where: { key: roleKey },
-			update: { name: ROLE_NAMES[roleKey] ?? roleKey },
-			create: { key: roleKey, name: ROLE_NAMES[roleKey] ?? roleKey },
-		});
+  console.log(`▸ Seeding ${Object.keys(ROLE_PERMISSIONS).length} roles`);
+  for (const [roleKey, perms] of Object.entries(ROLE_PERMISSIONS)) {
+    const role = await prisma.role.upsert({
+      where: { key: roleKey },
+      update: { name: ROLE_NAMES[roleKey] ?? roleKey },
+      create: { key: roleKey, name: ROLE_NAMES[roleKey] ?? roleKey },
+    });
 
-		await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
+    await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
 
-		if (perms.length === 0) continue;
+    if (perms.length === 0) continue;
 
-		const permissionRows = await prisma.permission.findMany({
-			where: { key: { in: [...perms] } },
-			select: { id: true },
-		});
+    const permissionRows = await prisma.permission.findMany({
+      where: { key: { in: [...perms] } },
+      select: { id: true },
+    });
 
-		await prisma.rolePermission.createMany({
-			data: permissionRows.map((p) => ({
-				roleId: role.id,
-				permissionId: p.id,
-			})),
-			skipDuplicates: true,
-		});
-	}
+    await prisma.rolePermission.createMany({
+      data: permissionRows.map((p) => ({
+        roleId: role.id,
+        permissionId: p.id,
+      })),
+      skipDuplicates: true,
+    });
+  }
 }
 
 async function seedUsers() {
-	console.log("▸ Seeding 2 test users");
+  console.log('▸ Seeding 2 test users');
 
-	const password = "Password123!";
-	const passwordHash = await bcrypt.hash(password, 12);
+  const password = 'Password123!';
+  const passwordHash = await bcrypt.hash(password, 12);
 
-	const ownerRole = await prisma.role.findUniqueOrThrow({
-		where: { key: "owner" },
-	});
-	const customerRole = await prisma.role.findUniqueOrThrow({
-		where: { key: "customer" },
-	});
+  const ownerRole = await prisma.role.findUniqueOrThrow({
+    where: { key: 'owner' },
+  });
+  const customerRole = await prisma.role.findUniqueOrThrow({
+    where: { key: 'customer' },
+  });
 
-	const owner = await prisma.user.upsert({
-		where: { email: "owner@local.test" },
-		update: { passwordHash, emailVerifiedAt: new Date() },
-		create: {
-			email: "owner@local.test",
-			passwordHash,
-			emailVerifiedAt: new Date(),
-			firstName: "Olive",
-			lastName: "Owner",
-		},
-	});
+  const owner = await prisma.user.upsert({
+    where: { email: 'owner@local.test' },
+    update: { passwordHash, emailVerifiedAt: new Date() },
+    create: {
+      email: 'owner@local.test',
+      passwordHash,
+      emailVerifiedAt: new Date(),
+      firstName: 'Olive',
+      lastName: 'Owner',
+    },
+  });
 
-	await prisma.userRole.upsert({
-		where: { userId_roleId: { userId: owner.id, roleId: ownerRole.id } },
-		update: {},
-		create: { userId: owner.id, roleId: ownerRole.id },
-	});
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: owner.id, roleId: ownerRole.id } },
+    update: {},
+    create: { userId: owner.id, roleId: ownerRole.id },
+  });
 
-	const customer = await prisma.user.upsert({
-		where: { email: "customer@local.test" },
-		update: { passwordHash, emailVerifiedAt: new Date() },
-		create: {
-			email: "customer@local.test",
-			passwordHash,
-			emailVerifiedAt: new Date(),
-			firstName: "Casey",
-			lastName: "Customer",
-		},
-	});
+  const customer = await prisma.user.upsert({
+    where: { email: 'customer@local.test' },
+    update: { passwordHash, emailVerifiedAt: new Date() },
+    create: {
+      email: 'customer@local.test',
+      passwordHash,
+      emailVerifiedAt: new Date(),
+      firstName: 'Casey',
+      lastName: 'Customer',
+    },
+  });
 
-	await prisma.userRole.upsert({
-		where: { userId_roleId: { userId: customer.id, roleId: customerRole.id } },
-		update: {},
-		create: { userId: customer.id, roleId: customerRole.id },
-	});
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: customer.id, roleId: customerRole.id } },
+    update: {},
+    create: { userId: customer.id, roleId: customerRole.id },
+  });
 
-	console.log(`  • owner@local.test (password: ${password})`);
-	console.log(`  • customer@local.test (password: ${password})`);
+  console.log(`  • owner@local.test (password: ${password})`);
+  console.log(`  • customer@local.test (password: ${password})`);
 }
 
 // ---------------------------------------------------------------------------
 // Sprint 2 — restaurant + menu
 // ---------------------------------------------------------------------------
 
-const RESTAURANT_SLUG = "the-test-kitchen";
+const RESTAURANT_SLUG = 'the-test-kitchen';
 
 async function seedRestaurants() {
-	console.log("▸ Seeding restaurant: the-test-kitchen (Europe/Warsaw, PLN)");
+  console.log('▸ Seeding restaurant: the-test-kitchen (Europe/Warsaw, PLN)');
 
-	const restaurant = await prisma.restaurant.upsert({
-		where: { slug: RESTAURANT_SLUG },
-		update: {
-			name: "The Test Kitchen",
-			description: "A Polish demo restaurant seeded for local development.",
-			phone: "+48 22 555 0100",
-			email: "hello@thetestkitchen.local",
-			timezone: "Europe/Warsaw",
-			currency: "PLN",
-			isActive: true,
-		},
-		create: {
-			slug: RESTAURANT_SLUG,
-			name: "The Test Kitchen",
-			description: "A Polish demo restaurant seeded for local development.",
-			phone: "+48 22 555 0100",
-			email: "hello@thetestkitchen.local",
-			address: {
-				line1: "ul. Marszałkowska 1",
-				city: "Warsaw",
-				zip: "00-001",
-				country: "PL",
-			},
-			geoPoint: { lat: 52.2297, lng: 21.0122 },
-			timezone: "Europe/Warsaw",
-			currency: "PLN",
-			isActive: true,
-		},
-	});
+  const restaurant = await prisma.restaurant.upsert({
+    where: { slug: RESTAURANT_SLUG },
+    update: {
+      name: 'The Test Kitchen',
+      description: 'A Polish demo restaurant seeded for local development.',
+      phone: '+48 22 555 0100',
+      email: 'hello@thetestkitchen.local',
+      timezone: 'Europe/Warsaw',
+      currency: 'PLN',
+      isActive: true,
+    },
+    create: {
+      slug: RESTAURANT_SLUG,
+      name: 'The Test Kitchen',
+      description: 'A Polish demo restaurant seeded for local development.',
+      phone: '+48 22 555 0100',
+      email: 'hello@thetestkitchen.local',
+      address: {
+        line1: 'ul. Marszałkowska 1',
+        city: 'Warsaw',
+        zip: '00-001',
+        country: 'PL',
+      },
+      geoPoint: { lat: 52.2297, lng: 21.0122 },
+      timezone: 'Europe/Warsaw',
+      currency: 'PLN',
+      isActive: true,
+    },
+  });
 
-	// 7 days, 11:00-23:00 except Mondays closed.
-	const days: Array<{
-		dayOfWeek: number;
-		opensAt: string;
-		closesAt: string;
-		isClosed: boolean;
-	}> = [
-		{ dayOfWeek: 0, opensAt: "12:00", closesAt: "22:00", isClosed: false }, // Sun
-		{ dayOfWeek: 1, opensAt: "00:00", closesAt: "00:00", isClosed: true }, // Mon
-		{ dayOfWeek: 2, opensAt: "11:00", closesAt: "22:00", isClosed: false },
-		{ dayOfWeek: 3, opensAt: "11:00", closesAt: "22:00", isClosed: false },
-		{ dayOfWeek: 4, opensAt: "11:00", closesAt: "23:00", isClosed: false },
-		{ dayOfWeek: 5, opensAt: "11:00", closesAt: "23:00", isClosed: false },
-		{ dayOfWeek: 6, opensAt: "12:00", closesAt: "23:00", isClosed: false },
-	];
+  // 7 days, 11:00-23:00 except Mondays closed.
+  const days: Array<{
+    dayOfWeek: number;
+    opensAt: string;
+    closesAt: string;
+    isClosed: boolean;
+  }> = [
+    { dayOfWeek: 0, opensAt: '12:00', closesAt: '22:00', isClosed: false }, // Sun
+    { dayOfWeek: 1, opensAt: '00:00', closesAt: '00:00', isClosed: true }, // Mon
+    { dayOfWeek: 2, opensAt: '11:00', closesAt: '22:00', isClosed: false },
+    { dayOfWeek: 3, opensAt: '11:00', closesAt: '22:00', isClosed: false },
+    { dayOfWeek: 4, opensAt: '11:00', closesAt: '23:00', isClosed: false },
+    { dayOfWeek: 5, opensAt: '11:00', closesAt: '23:00', isClosed: false },
+    { dayOfWeek: 6, opensAt: '12:00', closesAt: '23:00', isClosed: false },
+  ];
 
-	for (const d of days) {
-		await prisma.operatingHours.upsert({
-			where: {
-				restaurantId_dayOfWeek: {
-					restaurantId: restaurant.id,
-					dayOfWeek: d.dayOfWeek,
-				},
-			},
-			update: { opensAt: d.opensAt, closesAt: d.closesAt, isClosed: d.isClosed },
-			create: { ...d, restaurantId: restaurant.id },
-		});
-	}
+  for (const d of days) {
+    await prisma.operatingHours.upsert({
+      where: {
+        restaurantId_dayOfWeek: {
+          restaurantId: restaurant.id,
+          dayOfWeek: d.dayOfWeek,
+        },
+      },
+      update: { opensAt: d.opensAt, closesAt: d.closesAt, isClosed: d.isClosed },
+      create: { ...d, restaurantId: restaurant.id },
+    });
+  }
 
-	return restaurant;
+  return restaurant;
 }
 
 interface SeedItem {
-	slug: string;
-	name: string;
-	description: string;
-	basePrice: string; // PLN, 2dp string
-	isVegetarian?: boolean;
-	isVegan?: boolean;
-	isGlutenFree?: boolean;
-	spiceLevel?: number;
-	isFeatured?: boolean;
-	calories?: number;
-	prepMinutes?: number;
-	modifierGroups?: Array<{
-		name: string;
-		isRequired?: boolean;
-		minSelect?: number;
-		maxSelect?: number;
-		options: Array<{ name: string; priceDelta?: string; isDefault?: boolean }>;
-	}>;
+  slug: string;
+  name: string;
+  description: string;
+  basePrice: string; // PLN, 2dp string
+  isVegetarian?: boolean;
+  isVegan?: boolean;
+  isGlutenFree?: boolean;
+  spiceLevel?: number;
+  isFeatured?: boolean;
+  calories?: number;
+  prepMinutes?: number;
+  modifierGroups?: Array<{
+    name: string;
+    isRequired?: boolean;
+    minSelect?: number;
+    maxSelect?: number;
+    options: Array<{ name: string; priceDelta?: string; isDefault?: boolean }>;
+  }>;
 }
 
 interface SeedCategory {
-	slug: string;
-	name: string;
-	description: string;
-	items: SeedItem[];
+  slug: string;
+  name: string;
+  description: string;
+  items: SeedItem[];
 }
 
 const CATEGORIES: SeedCategory[] = [
-	{
-		slug: "starters",
-		name: "Starters",
-		description: "Small plates to begin your meal.",
-		items: [
-			{
-				slug: "zurek",
-				name: "Żurek",
-				description: "Traditional sour rye soup with sausage and egg.",
-				basePrice: "22.00",
-				prepMinutes: 8,
-			},
-			{
-				slug: "pierogi-russkie",
-				name: "Pierogi Ruskie",
-				description: "Dumplings filled with potato and cottage cheese.",
-				basePrice: "28.00",
-				isVegetarian: true,
-				prepMinutes: 12,
-			},
-			{
-				slug: "bruschetta",
-				name: "Bruschetta",
-				description: "Toasted bread with tomato, basil and olive oil.",
-				basePrice: "18.00",
-				isVegan: true,
-				prepMinutes: 6,
-			},
-			{
-				slug: "tatar",
-				name: "Tatar wołowy",
-				description: "Hand-chopped beef tartare with onion and pickles.",
-				basePrice: "39.00",
-				prepMinutes: 10,
-			},
-		],
-	},
-	{
-		slug: "mains",
-		name: "Mains",
-		description: "Hearty main dishes.",
-		items: [
-			{
-				slug: "kotlet-schabowy",
-				name: "Kotlet Schabowy",
-				description: "Breaded pork cutlet served with mashed potatoes and cabbage.",
-				basePrice: "48.00",
-				isFeatured: true,
-				prepMinutes: 18,
-			},
-			{
-				slug: "golabki",
-				name: "Gołąbki",
-				description: "Cabbage rolls in tomato sauce.",
-				basePrice: "42.00",
-				prepMinutes: 16,
-			},
-			{
-				slug: "grilled-salmon",
-				name: "Grilled Salmon",
-				description: "Atlantic salmon with seasonal vegetables.",
-				basePrice: "62.00",
-				isGlutenFree: true,
-				prepMinutes: 14,
-			},
-			{
-				slug: "risotto-funghi",
-				name: "Risotto Funghi",
-				description: "Arborio rice with wild mushrooms and parmesan.",
-				basePrice: "45.00",
-				isVegetarian: true,
-				prepMinutes: 18,
-			},
-			{
-				slug: "lamb-shank",
-				name: "Braised Lamb Shank",
-				description: "Slow-cooked lamb shank with root vegetables.",
-				basePrice: "65.00",
-				prepMinutes: 25,
-			},
-		],
-	},
-	{
-		slug: "pizzas",
-		name: "Pizzas",
-		description: "Wood-fired Neapolitan-style pizzas.",
-		items: [
-			{
-				slug: "margherita",
-				name: "Margherita",
-				description: "San Marzano tomato, mozzarella, basil.",
-				basePrice: "35.00",
-				isVegetarian: true,
-				prepMinutes: 10,
-				isFeatured: true,
-				modifierGroups: [
-					{
-						name: "Size",
-						isRequired: true,
-						minSelect: 1,
-						maxSelect: 1,
-						options: [
-							{ name: "30 cm", priceDelta: "0", isDefault: true },
-							{ name: "40 cm", priceDelta: "12.00" },
-						],
-					},
-					{
-						name: "Toppings",
-						isRequired: false,
-						minSelect: 0,
-						maxSelect: 4,
-						options: [
-							{ name: "Extra mozzarella", priceDelta: "6.00" },
-							{ name: "Fresh basil", priceDelta: "2.00" },
-							{ name: "Mushrooms", priceDelta: "5.00" },
-							{ name: "Olives", priceDelta: "4.00" },
-						],
-					},
-				],
-			},
-			{
-				slug: "pepperoni",
-				name: "Pepperoni",
-				description: "Tomato, mozzarella, spicy pepperoni.",
-				basePrice: "42.00",
-				spiceLevel: 2,
-				prepMinutes: 10,
-				modifierGroups: [
-					{
-						name: "Size",
-						isRequired: true,
-						minSelect: 1,
-						maxSelect: 1,
-						options: [
-							{ name: "30 cm", priceDelta: "0", isDefault: true },
-							{ name: "40 cm", priceDelta: "12.00" },
-						],
-					},
-				],
-			},
-			{
-				slug: "quattro-formaggi",
-				name: "Quattro Formaggi",
-				description: "Mozzarella, gorgonzola, parmesan and goat cheese.",
-				basePrice: "48.00",
-				isVegetarian: true,
-				prepMinutes: 11,
-			},
-			{
-				slug: "diavola",
-				name: "Diavola",
-				description: "Hot salami, chili, mozzarella.",
-				basePrice: "44.00",
-				spiceLevel: 3,
-				prepMinutes: 11,
-			},
-		],
-	},
-	{
-		slug: "burgers",
-		name: "Burgers",
-		description: "Hand-formed Polish beef patties.",
-		items: [
-			{
-				slug: "classic-burger",
-				name: "Classic Burger",
-				description: "Beef patty, cheddar, lettuce, tomato, house sauce.",
-				basePrice: "38.00",
-				prepMinutes: 12,
-				isFeatured: true,
-				modifierGroups: [
-					{
-						name: "Doneness",
-						isRequired: true,
-						minSelect: 1,
-						maxSelect: 1,
-						options: [
-							{ name: "Medium-rare", priceDelta: "0" },
-							{ name: "Medium", priceDelta: "0", isDefault: true },
-							{ name: "Well done", priceDelta: "0" },
-						],
-					},
-					{
-						name: "Add-ons",
-						isRequired: false,
-						minSelect: 0,
-						maxSelect: 3,
-						options: [
-							{ name: "Bacon", priceDelta: "6.00" },
-							{ name: "Egg", priceDelta: "4.00" },
-							{ name: "Avocado", priceDelta: "5.00" },
-						],
-					},
-				],
-			},
-			{
-				slug: "bbq-burger",
-				name: "BBQ Burger",
-				description: "Beef patty, smoked cheddar, onion rings, BBQ sauce.",
-				basePrice: "44.00",
-				prepMinutes: 12,
-			},
-			{
-				slug: "veggie-burger",
-				name: "Veggie Burger",
-				description: "Black-bean patty, avocado, sprouts.",
-				basePrice: "36.00",
-				isVegetarian: true,
-				isVegan: false,
-				prepMinutes: 11,
-			},
-			{
-				slug: "chicken-burger",
-				name: "Chicken Burger",
-				description: "Buttermilk-fried chicken, slaw, pickles.",
-				basePrice: "40.00",
-				prepMinutes: 12,
-			},
-		],
-	},
-	{
-		slug: "desserts",
-		name: "Desserts",
-		description: "Sweet endings.",
-		items: [
-			{
-				slug: "sernik",
-				name: "Sernik",
-				description: "Polish cheesecake with raisins.",
-				basePrice: "18.00",
-				isVegetarian: true,
-				prepMinutes: 4,
-			},
-			{
-				slug: "szarlotka",
-				name: "Szarlotka",
-				description: "Warm apple pie with vanilla ice cream.",
-				basePrice: "20.00",
-				isVegetarian: true,
-				prepMinutes: 6,
-			},
-			{
-				slug: "tiramisu",
-				name: "Tiramisu",
-				description: "Layered mascarpone and coffee dessert.",
-				basePrice: "22.00",
-				isVegetarian: true,
-				prepMinutes: 4,
-			},
-			{
-				slug: "lava-cake",
-				name: "Chocolate Lava Cake",
-				description: "Molten chocolate cake with vanilla ice cream.",
-				basePrice: "24.00",
-				isVegetarian: true,
-				prepMinutes: 9,
-			},
-		],
-	},
-	{
-		slug: "drinks",
-		name: "Drinks",
-		description: "Soft drinks, juices, beer and coffee.",
-		items: [
-			{
-				slug: "still-water",
-				name: "Still Water",
-				description: "330ml bottle.",
-				basePrice: "8.00",
-				isVegan: true,
-				isGlutenFree: true,
-				prepMinutes: 1,
-				modifierGroups: [
-					{
-						name: "Size",
-						isRequired: true,
-						minSelect: 1,
-						maxSelect: 1,
-						options: [
-							{ name: "330 ml", priceDelta: "0", isDefault: true },
-							{ name: "500 ml", priceDelta: "3.00" },
-							{ name: "1 L", priceDelta: "6.00" },
-						],
-					},
-				],
-			},
-			{
-				slug: "sparkling-water",
-				name: "Sparkling Water",
-				description: "330ml bottle.",
-				basePrice: "8.00",
-				isVegan: true,
-				prepMinutes: 1,
-			},
-			{
-				slug: "cola",
-				name: "Cola",
-				description: "Chilled cola, 330ml.",
-				basePrice: "10.00",
-				prepMinutes: 1,
-			},
-			{
-				slug: "orange-juice",
-				name: "Fresh Orange Juice",
-				description: "Squeezed to order, 300ml.",
-				basePrice: "14.00",
-				isVegan: true,
-				prepMinutes: 3,
-			},
-			{
-				slug: "tyskie",
-				name: "Tyskie",
-				description: "Polish lager on tap, 500ml.",
-				basePrice: "13.00",
-				prepMinutes: 2,
-			},
-			{
-				slug: "espresso",
-				name: "Espresso",
-				description: "Single shot.",
-				basePrice: "9.00",
-				prepMinutes: 2,
-			},
-			{
-				slug: "cappuccino",
-				name: "Cappuccino",
-				description: "Espresso with steamed milk.",
-				basePrice: "12.00",
-				prepMinutes: 3,
-			},
-			{
-				slug: "lemonade",
-				name: "House Lemonade",
-				description: "Lemon, mint, ginger.",
-				basePrice: "15.00",
-				isVegan: true,
-				prepMinutes: 3,
-			},
-		],
-	},
+  {
+    slug: 'starters',
+    name: 'Starters',
+    description: 'Small plates to begin your meal.',
+    items: [
+      {
+        slug: 'zurek',
+        name: 'Żurek',
+        description: 'Traditional sour rye soup with sausage and egg.',
+        basePrice: '22.00',
+        prepMinutes: 8,
+      },
+      {
+        slug: 'pierogi-russkie',
+        name: 'Pierogi Ruskie',
+        description: 'Dumplings filled with potato and cottage cheese.',
+        basePrice: '28.00',
+        isVegetarian: true,
+        prepMinutes: 12,
+      },
+      {
+        slug: 'bruschetta',
+        name: 'Bruschetta',
+        description: 'Toasted bread with tomato, basil and olive oil.',
+        basePrice: '18.00',
+        isVegan: true,
+        prepMinutes: 6,
+      },
+      {
+        slug: 'tatar',
+        name: 'Tatar wołowy',
+        description: 'Hand-chopped beef tartare with onion and pickles.',
+        basePrice: '39.00',
+        prepMinutes: 10,
+      },
+    ],
+  },
+  {
+    slug: 'mains',
+    name: 'Mains',
+    description: 'Hearty main dishes.',
+    items: [
+      {
+        slug: 'kotlet-schabowy',
+        name: 'Kotlet Schabowy',
+        description: 'Breaded pork cutlet served with mashed potatoes and cabbage.',
+        basePrice: '48.00',
+        isFeatured: true,
+        prepMinutes: 18,
+      },
+      {
+        slug: 'golabki',
+        name: 'Gołąbki',
+        description: 'Cabbage rolls in tomato sauce.',
+        basePrice: '42.00',
+        prepMinutes: 16,
+      },
+      {
+        slug: 'grilled-salmon',
+        name: 'Grilled Salmon',
+        description: 'Atlantic salmon with seasonal vegetables.',
+        basePrice: '62.00',
+        isGlutenFree: true,
+        prepMinutes: 14,
+      },
+      {
+        slug: 'risotto-funghi',
+        name: 'Risotto Funghi',
+        description: 'Arborio rice with wild mushrooms and parmesan.',
+        basePrice: '45.00',
+        isVegetarian: true,
+        prepMinutes: 18,
+      },
+      {
+        slug: 'lamb-shank',
+        name: 'Braised Lamb Shank',
+        description: 'Slow-cooked lamb shank with root vegetables.',
+        basePrice: '65.00',
+        prepMinutes: 25,
+      },
+    ],
+  },
+  {
+    slug: 'pizzas',
+    name: 'Pizzas',
+    description: 'Wood-fired Neapolitan-style pizzas.',
+    items: [
+      {
+        slug: 'margherita',
+        name: 'Margherita',
+        description: 'San Marzano tomato, mozzarella, basil.',
+        basePrice: '35.00',
+        isVegetarian: true,
+        prepMinutes: 10,
+        isFeatured: true,
+        modifierGroups: [
+          {
+            name: 'Size',
+            isRequired: true,
+            minSelect: 1,
+            maxSelect: 1,
+            options: [
+              { name: '30 cm', priceDelta: '0', isDefault: true },
+              { name: '40 cm', priceDelta: '12.00' },
+            ],
+          },
+          {
+            name: 'Toppings',
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 4,
+            options: [
+              { name: 'Extra mozzarella', priceDelta: '6.00' },
+              { name: 'Fresh basil', priceDelta: '2.00' },
+              { name: 'Mushrooms', priceDelta: '5.00' },
+              { name: 'Olives', priceDelta: '4.00' },
+            ],
+          },
+        ],
+      },
+      {
+        slug: 'pepperoni',
+        name: 'Pepperoni',
+        description: 'Tomato, mozzarella, spicy pepperoni.',
+        basePrice: '42.00',
+        spiceLevel: 2,
+        prepMinutes: 10,
+        modifierGroups: [
+          {
+            name: 'Size',
+            isRequired: true,
+            minSelect: 1,
+            maxSelect: 1,
+            options: [
+              { name: '30 cm', priceDelta: '0', isDefault: true },
+              { name: '40 cm', priceDelta: '12.00' },
+            ],
+          },
+        ],
+      },
+      {
+        slug: 'quattro-formaggi',
+        name: 'Quattro Formaggi',
+        description: 'Mozzarella, gorgonzola, parmesan and goat cheese.',
+        basePrice: '48.00',
+        isVegetarian: true,
+        prepMinutes: 11,
+      },
+      {
+        slug: 'diavola',
+        name: 'Diavola',
+        description: 'Hot salami, chili, mozzarella.',
+        basePrice: '44.00',
+        spiceLevel: 3,
+        prepMinutes: 11,
+      },
+    ],
+  },
+  {
+    slug: 'burgers',
+    name: 'Burgers',
+    description: 'Hand-formed Polish beef patties.',
+    items: [
+      {
+        slug: 'classic-burger',
+        name: 'Classic Burger',
+        description: 'Beef patty, cheddar, lettuce, tomato, house sauce.',
+        basePrice: '38.00',
+        prepMinutes: 12,
+        isFeatured: true,
+        modifierGroups: [
+          {
+            name: 'Doneness',
+            isRequired: true,
+            minSelect: 1,
+            maxSelect: 1,
+            options: [
+              { name: 'Medium-rare', priceDelta: '0' },
+              { name: 'Medium', priceDelta: '0', isDefault: true },
+              { name: 'Well done', priceDelta: '0' },
+            ],
+          },
+          {
+            name: 'Add-ons',
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 3,
+            options: [
+              { name: 'Bacon', priceDelta: '6.00' },
+              { name: 'Egg', priceDelta: '4.00' },
+              { name: 'Avocado', priceDelta: '5.00' },
+            ],
+          },
+        ],
+      },
+      {
+        slug: 'bbq-burger',
+        name: 'BBQ Burger',
+        description: 'Beef patty, smoked cheddar, onion rings, BBQ sauce.',
+        basePrice: '44.00',
+        prepMinutes: 12,
+      },
+      {
+        slug: 'veggie-burger',
+        name: 'Veggie Burger',
+        description: 'Black-bean patty, avocado, sprouts.',
+        basePrice: '36.00',
+        isVegetarian: true,
+        isVegan: false,
+        prepMinutes: 11,
+      },
+      {
+        slug: 'chicken-burger',
+        name: 'Chicken Burger',
+        description: 'Buttermilk-fried chicken, slaw, pickles.',
+        basePrice: '40.00',
+        prepMinutes: 12,
+      },
+    ],
+  },
+  {
+    slug: 'desserts',
+    name: 'Desserts',
+    description: 'Sweet endings.',
+    items: [
+      {
+        slug: 'sernik',
+        name: 'Sernik',
+        description: 'Polish cheesecake with raisins.',
+        basePrice: '18.00',
+        isVegetarian: true,
+        prepMinutes: 4,
+      },
+      {
+        slug: 'szarlotka',
+        name: 'Szarlotka',
+        description: 'Warm apple pie with vanilla ice cream.',
+        basePrice: '20.00',
+        isVegetarian: true,
+        prepMinutes: 6,
+      },
+      {
+        slug: 'tiramisu',
+        name: 'Tiramisu',
+        description: 'Layered mascarpone and coffee dessert.',
+        basePrice: '22.00',
+        isVegetarian: true,
+        prepMinutes: 4,
+      },
+      {
+        slug: 'lava-cake',
+        name: 'Chocolate Lava Cake',
+        description: 'Molten chocolate cake with vanilla ice cream.',
+        basePrice: '24.00',
+        isVegetarian: true,
+        prepMinutes: 9,
+      },
+    ],
+  },
+  {
+    slug: 'drinks',
+    name: 'Drinks',
+    description: 'Soft drinks, juices, beer and coffee.',
+    items: [
+      {
+        slug: 'still-water',
+        name: 'Still Water',
+        description: '330ml bottle.',
+        basePrice: '8.00',
+        isVegan: true,
+        isGlutenFree: true,
+        prepMinutes: 1,
+        modifierGroups: [
+          {
+            name: 'Size',
+            isRequired: true,
+            minSelect: 1,
+            maxSelect: 1,
+            options: [
+              { name: '330 ml', priceDelta: '0', isDefault: true },
+              { name: '500 ml', priceDelta: '3.00' },
+              { name: '1 L', priceDelta: '6.00' },
+            ],
+          },
+        ],
+      },
+      {
+        slug: 'sparkling-water',
+        name: 'Sparkling Water',
+        description: '330ml bottle.',
+        basePrice: '8.00',
+        isVegan: true,
+        prepMinutes: 1,
+      },
+      {
+        slug: 'cola',
+        name: 'Cola',
+        description: 'Chilled cola, 330ml.',
+        basePrice: '10.00',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'orange-juice',
+        name: 'Fresh Orange Juice',
+        description: 'Squeezed to order, 300ml.',
+        basePrice: '14.00',
+        isVegan: true,
+        prepMinutes: 3,
+      },
+      {
+        slug: 'tyskie',
+        name: 'Tyskie',
+        description: 'Polish lager on tap, 500ml.',
+        basePrice: '13.00',
+        prepMinutes: 2,
+      },
+      {
+        slug: 'espresso',
+        name: 'Espresso',
+        description: 'Single shot.',
+        basePrice: '9.00',
+        prepMinutes: 2,
+      },
+      {
+        slug: 'cappuccino',
+        name: 'Cappuccino',
+        description: 'Espresso with steamed milk.',
+        basePrice: '12.00',
+        prepMinutes: 3,
+      },
+      {
+        slug: 'lemonade',
+        name: 'House Lemonade',
+        description: 'Lemon, mint, ginger.',
+        basePrice: '15.00',
+        isVegan: true,
+        prepMinutes: 3,
+      },
+    ],
+  },
 ];
 
 async function seedMenu(restaurantId: string) {
-	console.log("▸ Seeding 6 categories + ~30 menu items + modifier groups");
+  console.log('▸ Seeding 6 categories + ~30 menu items + modifier groups');
 
-	for (const [cIdx, cat] of CATEGORIES.entries()) {
-		const category = await prisma.menuCategory.upsert({
-			where: {
-				restaurantId_slug: { restaurantId, slug: cat.slug },
-			},
-			update: {
-				name: cat.name,
-				description: cat.description,
-				position: cIdx,
-				isActive: true,
-			},
-			create: {
-				restaurantId,
-				slug: cat.slug,
-				name: cat.name,
-				description: cat.description,
-				position: cIdx,
-				isActive: true,
-			},
-		});
+  for (const [cIdx, cat] of CATEGORIES.entries()) {
+    const category = await prisma.menuCategory.upsert({
+      where: {
+        restaurantId_slug: { restaurantId, slug: cat.slug },
+      },
+      update: {
+        name: cat.name,
+        description: cat.description,
+        position: cIdx,
+        isActive: true,
+      },
+      create: {
+        restaurantId,
+        slug: cat.slug,
+        name: cat.name,
+        description: cat.description,
+        position: cIdx,
+        isActive: true,
+      },
+    });
 
-		for (const [iIdx, it] of cat.items.entries()) {
-			const item = await prisma.menuItem.upsert({
-				where: {
-					categoryId_slug: { categoryId: category.id, slug: it.slug },
-				},
-				update: {
-					name: it.name,
-					description: it.description,
-					basePrice: new Prisma.Decimal(it.basePrice),
-					isVegetarian: it.isVegetarian ?? false,
-					isVegan: it.isVegan ?? false,
-					isGlutenFree: it.isGlutenFree ?? false,
-					spiceLevel: it.spiceLevel ?? 0,
-					isFeatured: it.isFeatured ?? false,
-					calories: it.calories ?? null,
-					prepMinutes: it.prepMinutes ?? null,
-					position: iIdx,
-					isAvailable: true,
-				},
-				create: {
-					categoryId: category.id,
-					slug: it.slug,
-					name: it.name,
-					description: it.description,
-					basePrice: new Prisma.Decimal(it.basePrice),
-					isVegetarian: it.isVegetarian ?? false,
-					isVegan: it.isVegan ?? false,
-					isGlutenFree: it.isGlutenFree ?? false,
-					spiceLevel: it.spiceLevel ?? 0,
-					isFeatured: it.isFeatured ?? false,
-					calories: it.calories ?? null,
-					prepMinutes: it.prepMinutes ?? null,
-					position: iIdx,
-					isAvailable: true,
-				},
-			});
+    for (const [iIdx, it] of cat.items.entries()) {
+      const item = await prisma.menuItem.upsert({
+        where: {
+          categoryId_slug: { categoryId: category.id, slug: it.slug },
+        },
+        update: {
+          name: it.name,
+          description: it.description,
+          basePrice: new Prisma.Decimal(it.basePrice),
+          isVegetarian: it.isVegetarian ?? false,
+          isVegan: it.isVegan ?? false,
+          isGlutenFree: it.isGlutenFree ?? false,
+          spiceLevel: it.spiceLevel ?? 0,
+          isFeatured: it.isFeatured ?? false,
+          calories: it.calories ?? null,
+          prepMinutes: it.prepMinutes ?? null,
+          position: iIdx,
+          isAvailable: true,
+        },
+        create: {
+          categoryId: category.id,
+          slug: it.slug,
+          name: it.name,
+          description: it.description,
+          basePrice: new Prisma.Decimal(it.basePrice),
+          isVegetarian: it.isVegetarian ?? false,
+          isVegan: it.isVegan ?? false,
+          isGlutenFree: it.isGlutenFree ?? false,
+          spiceLevel: it.spiceLevel ?? 0,
+          isFeatured: it.isFeatured ?? false,
+          calories: it.calories ?? null,
+          prepMinutes: it.prepMinutes ?? null,
+          position: iIdx,
+          isAvailable: true,
+        },
+      });
 
-			if (it.modifierGroups) {
-				for (const group of it.modifierGroups) {
-					// MenuItemModifierGroup has no natural unique key; look up by
-					// (itemId, name) and create if missing.
-					const existing = await prisma.menuItemModifierGroup.findFirst({
-						where: { itemId: item.id, name: group.name },
-					});
-					const row = existing
-						? await prisma.menuItemModifierGroup.update({
-								where: { id: existing.id },
-								data: {
-									isRequired: group.isRequired ?? false,
-									minSelect: group.minSelect ?? 0,
-									maxSelect: group.maxSelect ?? 1,
-								},
-							})
-						: await prisma.menuItemModifierGroup.create({
-								data: {
-									itemId: item.id,
-									name: group.name,
-									isRequired: group.isRequired ?? false,
-									minSelect: group.minSelect ?? 0,
-									maxSelect: group.maxSelect ?? 1,
-								},
-							});
+      if (it.modifierGroups) {
+        for (const group of it.modifierGroups) {
+          // MenuItemModifierGroup has no natural unique key; look up by
+          // (itemId, name) and create if missing.
+          const existing = await prisma.menuItemModifierGroup.findFirst({
+            where: { itemId: item.id, name: group.name },
+          });
+          const row = existing
+            ? await prisma.menuItemModifierGroup.update({
+                where: { id: existing.id },
+                data: {
+                  isRequired: group.isRequired ?? false,
+                  minSelect: group.minSelect ?? 0,
+                  maxSelect: group.maxSelect ?? 1,
+                },
+              })
+            : await prisma.menuItemModifierGroup.create({
+                data: {
+                  itemId: item.id,
+                  name: group.name,
+                  isRequired: group.isRequired ?? false,
+                  minSelect: group.minSelect ?? 0,
+                  maxSelect: group.maxSelect ?? 1,
+                },
+              });
 
-					// Replace options for that group to stay idempotent.
-					await prisma.menuItemModifierOption.deleteMany({
-						where: { groupId: row.id },
-					});
-					await prisma.menuItemModifierOption.createMany({
-						data: group.options.map((o) => ({
-							groupId: row.id,
-							name: o.name,
-							priceDelta: new Prisma.Decimal(o.priceDelta ?? "0"),
-							isDefault: o.isDefault ?? false,
-						})),
-					});
-				}
-			}
-		}
-	}
+          // Replace options for that group to stay idempotent.
+          await prisma.menuItemModifierOption.deleteMany({
+            where: { groupId: row.id },
+          });
+          await prisma.menuItemModifierOption.createMany({
+            data: group.options.map((o) => ({
+              groupId: row.id,
+              name: o.name,
+              priceDelta: new Prisma.Decimal(o.priceDelta ?? '0'),
+              isDefault: o.isDefault ?? false,
+            })),
+          });
+        }
+      }
+    }
+  }
 }
 
 async function seedPromotions(restaurantId: string) {
@@ -941,8 +940,7 @@ async function seedOrders(restaurantId: string) {
     const grandTotal = subtotal + taxTotal + deliveryFee;
 
     const trail = STATUS_TRAIL[s.status];
-    const paid =
-      s.status !== 'PENDING' && s.status !== 'CANCELLED';
+    const paid = s.status !== 'PENDING' && s.status !== 'CANCELLED';
     const refunded = s.status === 'DELIVERED'; // one partial-refund example
 
     const order = await prisma.order.create({
@@ -1123,8 +1121,13 @@ async function seedLoyalty() {
   console.log('▸ Seeding loyalty account + ledger for customer@local.test');
   const account = await prisma.loyaltyAccount.upsert({
     where: { userId: customer.id },
-    update: {},
-    create: { userId: customer.id, points: 120, tier: 'silver' },
+    update: { lifetimePoints: 120 },
+    create: {
+      userId: customer.id,
+      points: 120,
+      lifetimePoints: 120,
+      tier: 'bronze',
+    },
   });
   const existing = await prisma.loyaltyTransaction.count({
     where: { accountId: account.id },
@@ -1132,11 +1135,78 @@ async function seedLoyalty() {
   if (existing === 0) {
     await prisma.loyaltyTransaction.createMany({
       data: [
-        { accountId: account.id, delta: 100, reason: 'signup_bonus', orderId: null },
-        { accountId: account.id, delta: 20, reason: 'order_earned', orderId: null },
+        {
+          accountId: account.id,
+          delta: 100,
+          kind: 'REFERRAL',
+          reason: 'Welcome referral bonus',
+          orderId: null,
+        },
+        {
+          accountId: account.id,
+          delta: 20,
+          kind: 'ADJUST',
+          reason: 'Goodwill adjustment',
+          orderId: null,
+        },
       ],
     });
   }
+}
+
+async function seedFavorites() {
+  const customer = await prisma.user.findUnique({
+    where: { email: 'customer@local.test' },
+  });
+  if (!customer) return;
+  const already = await prisma.favorite.count({
+    where: { userId: customer.id },
+  });
+  if (already > 0) {
+    console.log('▸ Skipping favorites — already seeded');
+    return;
+  }
+  const items = await prisma.menuItem.findMany({ take: 3 });
+  if (items.length === 0) return;
+  console.log(`▸ Seeding ${items.length} favorites for customer@local.test`);
+  await prisma.favorite.createMany({
+    data: items.map((it) => ({ userId: customer.id, menuItemId: it.id })),
+    skipDuplicates: true,
+  });
+}
+
+async function seedReferrals() {
+  const customer = await prisma.user.findUnique({
+    where: { email: 'customer@local.test' },
+  });
+  const owner = await prisma.user.findUnique({
+    where: { email: 'owner@local.test' },
+  });
+  if (!customer || !owner) return;
+
+  const code = await prisma.referralCode.upsert({
+    where: { userId: customer.id },
+    update: {},
+    create: { userId: customer.id, code: 'WELCOME8' },
+  });
+  const already = await prisma.referral.findUnique({
+    where: { refereeId: owner.id },
+  });
+  if (already) {
+    console.log('▸ Skipping referrals — already seeded');
+    return;
+  }
+  console.log('▸ Seeding 1 completed referral (customer → owner)');
+  await prisma.referral.create({
+    data: {
+      codeId: code.id,
+      referrerId: customer.id,
+      refereeId: owner.id,
+      status: 'COMPLETED',
+      rewardGranted: true,
+      completedAt: new Date(),
+    },
+  });
 }
 
 async function seedNotifications() {
@@ -1229,6 +1299,44 @@ async function seedContactMessages(restaurantId: string) {
   });
 }
 
+// Mirror of @repo/feature-flags FLAG_CATALOG (kept inline so seed runs
+// standalone — same pattern as ALL_PERMISSIONS).
+const FEATURE_FLAGS: { key: string; description: string; default: boolean }[] = [
+  {
+    key: 'loyalty.redemption',
+    description: 'Allow redeeming loyalty points at checkout',
+    default: true,
+  },
+  {
+    key: 'referral.program',
+    description: 'Referral code capture + reward on first order',
+    default: true,
+  },
+  {
+    key: 'marketing.new_landing',
+    description: 'Serve the new marketing landing aggregation',
+    default: false,
+  },
+  { key: 'mobile.push_v2', description: 'New mobile push payload + deep links', default: false },
+  { key: 'soft_launch', description: 'Master soft-launch gate (kill switch)', default: false },
+];
+
+async function seedFeatureFlags() {
+  console.log(`▸ Seeding ${FEATURE_FLAGS.length} feature flags`);
+  for (const f of FEATURE_FLAGS) {
+    await prisma.featureFlag.upsert({
+      where: { key: f.key },
+      update: {},
+      create: {
+        key: f.key,
+        description: f.description,
+        enabled: f.default,
+        rolloutPercent: f.default ? 100 : 0,
+      },
+    });
+  }
+}
+
 async function main() {
   console.log('Seeding…');
   await seedPermissions();
@@ -1245,16 +1353,19 @@ async function main() {
   await seedDeliveryZones(restaurant.id);
   await seedStaff();
   await seedLoyalty();
+  await seedFavorites();
+  await seedReferrals();
   await seedNotifications();
   await seedContactMessages(restaurant.id);
+  await seedFeatureFlags();
   console.log('✓ Seed complete');
 }
 
 main()
-	.catch((err) => {
-		console.error(err);
-		process.exitCode = 1;
-	})
-	.finally(async () => {
-		await prisma.$disconnect();
-	});
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -12,6 +12,7 @@ import {
   type ReviewListDto,
   type ReviewListQuery,
   type ReviewModerationDto,
+  type ReviewSummaryDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadsService } from '../uploads/uploads.service';
@@ -74,10 +75,7 @@ export class ReviewsService {
     return toDto(created);
   }
 
-  async listForRestaurant(
-    restaurantId: string,
-    query: ReviewListQuery,
-  ): Promise<ReviewListDto> {
+  async listForRestaurant(restaurantId: string, query: ReviewListQuery): Promise<ReviewListDto> {
     const limit = query.limit ?? 20;
     const where: Prisma.ReviewWhereInput = {
       isVisible: true,
@@ -147,6 +145,35 @@ export class ReviewsService {
     });
     return toDto(updated);
   }
+
+  async reply(id: string, replyText: string): Promise<ReviewDto> {
+    const exists = await this.prisma.review.findUnique({ where: { id } });
+    if (!exists) throw new NotFoundException('Review not found');
+    const updated = await this.prisma.review.update({
+      where: { id },
+      data: { ownerReply: replyText, ownerReplyAt: new Date() },
+      include: REVIEW_INCLUDE,
+    });
+    return toDto(updated);
+  }
+
+  /** Public aggregate for marketing/SEO AggregateRating. Visible reviews only. */
+  async getSummary(restaurantId: string): Promise<ReviewSummaryDto> {
+    const rows = await this.prisma.review.findMany({
+      where: { isVisible: true, order: { restaurantId } },
+      select: { rating: true },
+    });
+    const histogram = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    let sum = 0;
+    for (const r of rows) {
+      const key = String(r.rating) as keyof typeof histogram;
+      if (key in histogram) histogram[key] += 1;
+      sum += r.rating;
+    }
+    const count = rows.length;
+    const average = count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
+    return { restaurantId, count, average, histogram };
+  }
 }
 
 function toDto(row: ReviewRow): ReviewDto {
@@ -157,6 +184,8 @@ function toDto(row: ReviewRow): ReviewDto {
     rating: row.rating,
     comment: row.comment,
     isVisible: row.isVisible,
+    ownerReply: row.ownerReply,
+    ownerReplyAt: row.ownerReplyAt ? row.ownerReplyAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
     images: row.images.map((img) => ({
       id: img.id,

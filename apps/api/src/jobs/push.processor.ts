@@ -1,9 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import {
+  JOB_PUSH_LOYALTY,
   JOB_PUSH_ORDER_STATUS,
   JOB_PUSH_TOKEN_CLEANUP,
   JOB_PUSH_WELCOME,
+  PushLoyaltyPayloadSchema,
   PushOrderStatusPayloadSchema,
   PushTokenCleanupPayloadSchema,
   PushWelcomePayloadSchema,
@@ -11,7 +13,7 @@ import {
 } from '@repo/jobs';
 import { orderDeepLink } from '@repo/utils';
 import type { Job } from 'bullmq';
-import { Expo, type ExpoPushMessage, type ExpoPushTicket } from 'expo-server-sdk';
+import { Expo, type ExpoPushMessage } from 'expo-server-sdk';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -59,6 +61,18 @@ export class PushProcessor extends WorkerHost {
       return;
     }
 
+    if (job.name === JOB_PUSH_LOYALTY) {
+      const payload = PushLoyaltyPayloadSchema.parse(job.data);
+      const title =
+        payload.reason === 'REFERRAL' ? 'Referral reward' : 'Points earned';
+      await this.sendToUser(payload.userId, {
+        title,
+        body: `You earned ${payload.points} loyalty points.`,
+        data: { type: 'loyalty', points: payload.points },
+      });
+      return;
+    }
+
     if (job.name === JOB_PUSH_TOKEN_CLEANUP) {
       const { staleDays } = PushTokenCleanupPayloadSchema.parse(job.data ?? {});
       await this.cleanupStaleTokens(staleDays ?? DEFAULT_STALE_DAYS);
@@ -95,47 +109,50 @@ export class PushProcessor extends WorkerHost {
       return;
     }
 
+    // Reconcile per-chunk: `chunkPushNotifications` preserves message order,
+    // so each chunk maps to a contiguous slice of `valid`. Aligning tickets
+    // to tokens within the chunk (not across a flattened array) means a
+    // failed/short early chunk can't shift every later token and prune a
+    // live device as `DeviceNotRegistered`.
     const chunks = this.expo.chunkPushNotifications(messages);
-    const tickets: ExpoPushTicket[] = [];
+    const dead: string[] = [];
+    const alive: string[] = [];
+    let offset = 0;
     for (const chunk of chunks) {
+      const chunkTokens = valid
+        .slice(offset, offset + chunk.length)
+        .map((t) => t.token);
+      offset += chunk.length;
       try {
         const res = await this.expo.sendPushNotificationsAsync(chunk);
-        tickets.push(...res);
+        res.forEach((ticket, i) => {
+          const token = chunkTokens[i];
+          if (!token) return;
+          if (
+            ticket.status === 'error' &&
+            ticket.details?.error === 'DeviceNotRegistered'
+          ) {
+            dead.push(token);
+          } else if (ticket.status === 'ok') {
+            alive.push(token);
+          }
+        });
       } catch (err) {
         this.logger.warn(`[push] send failed: ${(err as Error).message}`);
       }
     }
 
-    await this.reconcileTickets(
-      valid.map((t) => t.token),
-      tickets,
-    );
+    await this.applyTokenReconcile(dead, alive);
   }
 
   /**
-   * Tickets line up with messages by index. A `DeviceNotRegistered` error
-   * means the token is dead — delete it so we stop wasting sends. Successful
-   * sends bump `lastUsedAt` so the stale-token sweep keeps live devices.
+   * Prune dead tokens (`DeviceNotRegistered`) and bump `lastUsedAt` for live
+   * ones so the stale-token sweep keeps real devices.
    */
-  private async reconcileTickets(
-    orderedTokens: string[],
-    tickets: ExpoPushTicket[],
+  private async applyTokenReconcile(
+    dead: string[],
+    alive: string[],
   ): Promise<void> {
-    const dead: string[] = [];
-    const alive: string[] = [];
-    tickets.forEach((ticket, i) => {
-      const token = orderedTokens[i];
-      if (!token) return;
-      if (
-        ticket.status === 'error' &&
-        ticket.details?.error === 'DeviceNotRegistered'
-      ) {
-        dead.push(token);
-      } else if (ticket.status === 'ok') {
-        alive.push(token);
-      }
-    });
-
     if (dead.length > 0) {
       await this.prisma.pushToken.deleteMany({ where: { token: { in: dead } } });
       this.logger.log(`[push] pruned ${dead.length} unregistered token(s)`);

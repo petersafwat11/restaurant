@@ -42,6 +42,15 @@ const EnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional().default(''),
   STRIPE_PUBLISHABLE_KEY: z.string().optional().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default(''),
+
+  // Sprint 12 — observability + analytics + feature flags. All optional;
+  // empty → safe no-op (same contract as Stripe/R2 above).
+  SENTRY_DSN: z.string().optional().default(''),
+  SENTRY_ENV: z.string().optional().default(''),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
+  POSTHOG_KEY: z.string().optional().default(''),
+  POSTHOG_HOST: z.string().optional().default('https://app.posthog.com'),
+  FEATURE_FLAG_OVERRIDES: z.string().optional().default(''),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

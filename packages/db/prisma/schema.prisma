@@ -45,6 +45,10 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   couponRedemptions      CouponRedemption[]
+  favorites              Favorite[]
+  referralCode           ReferralCode?
+  referralsMade          Referral[]              @relation("ReferralReferrer")
+  referredBy             Referral?               @relation("ReferralReferee")
 }
 
 model Role {
@@ -268,6 +272,7 @@ model MenuItem {
   category       MenuCategory            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   images         MenuItemImage[]
   modifierGroups MenuItemModifierGroup[]
+  favoritedBy    Favorite[]
 
   @@unique([categoryId, slug])
 }
@@ -314,6 +319,7 @@ model Cart {
   restaurantId  String
   sessionKey    String?  @unique // for guest carts
   appliedCouponId String?
+  loyaltyPointsToRedeem Int @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -484,10 +490,11 @@ model WebhookEvent {
 // ---------------------------------------------------------------------------
 
 model LoyaltyAccount {
-  id     String @id @default(cuid())
-  userId String @unique
-  points Int    @default(0)
-  tier   String @default("bronze")
+  id             String @id @default(cuid())
+  userId         String @unique
+  points         Int    @default(0)
+  lifetimePoints Int    @default(0)
+  tier           String @default("bronze")
 
   user    User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   history LoyaltyTransaction[]
@@ -497,11 +504,14 @@ model LoyaltyTransaction {
   id        String   @id @default(cuid())
   accountId String
   delta     Int // + earn, - redeem
+  kind      String   @default("ADJUST") // EARN | REDEEM | REVOKE | REDEEM_REVERSAL | REFERRAL | ADJUST
   reason    String
   orderId   String?
   createdAt DateTime @default(now())
 
   account LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, orderId, kind])
 }
 
 model Promotion {
@@ -673,13 +683,15 @@ model AuditLog {
 // ---------------------------------------------------------------------------
 
 model Review {
-  id        String   @id @default(cuid())
-  orderId   String   @unique
-  userId    String
-  rating    Int // 1-5
-  comment   String?
-  isVisible Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id           String    @id @default(cuid())
+  orderId      String    @unique
+  userId       String
+  rating       Int // 1-5
+  comment      String?
+  isVisible    Boolean   @default(true)
+  ownerReply   String?
+  ownerReplyAt DateTime?
+  createdAt    DateTime  @default(now())
 
   order  Order         @relation(fields: [orderId], references: [id])
   user   User          @relation(fields: [userId], references: [id])
@@ -712,4 +724,62 @@ model ContactMessage {
 
   @@index([status, createdAt])
   @@index([restaurantId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 11 — Favorites & Referral
+// ---------------------------------------------------------------------------
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  menuItemId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, menuItemId])
+  @@index([userId, createdAt])
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String   @unique
+  createdAt DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referrals Referral[]
+}
+
+model Referral {
+  id            String    @id @default(cuid())
+  codeId        String
+  referrerId    String
+  refereeId     String    @unique
+  status        String    @default("PENDING") // PENDING | COMPLETED
+  rewardGranted Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
+
+  code     ReferralCode @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  referrer User         @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User         @relation("ReferralReferee", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId, createdAt])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 12 — Feature flags (soft launch)
+// ---------------------------------------------------------------------------
+
+model FeatureFlag {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  description    String?
+  enabled        Boolean  @default(false)
+  rolloutPercent Int      @default(0)
+  updatedAt      DateTime @updatedAt
 }

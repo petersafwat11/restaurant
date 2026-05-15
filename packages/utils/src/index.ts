@@ -5,3 +5,4 @@ export * from './money';
 export * from './deep-link';
 export * from './structured-data';
 export * from './sitemap';
+export * from './loyalty';

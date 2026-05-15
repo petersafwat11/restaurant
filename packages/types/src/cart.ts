@@ -76,10 +76,16 @@ export const CartSchema = z.object({
   currency: z.string(),
   items: z.array(CartItemSchema),
   appliedCoupon: CartAppliedCouponSchema.nullable(),
+  loyaltyPointsToRedeem: z.number().int().min(0).default(0),
   totals: CartTotalsSchema,
   updatedAt: z.string(),
 });
 export type CartDto = z.infer<typeof CartSchema>;
+
+export const SetCartLoyaltySchema = z.object({
+  points: z.number().int().min(0),
+});
+export type SetCartLoyaltyDto = z.infer<typeof SetCartLoyaltySchema>;
 
 // ---- Coupon + merge --------------------------------------------------------
 

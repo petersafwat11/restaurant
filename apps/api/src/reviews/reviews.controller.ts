@@ -2,11 +2,13 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiTags } from '@nestjs/swagger';
 import {
   CreateReviewSchema,
+  OwnerReplySchema,
   ReviewListQuerySchema,
   ReviewModerationSchema,
 } from '@repo/types';
 import type {
   CreateReviewDto,
+  OwnerReplyDto,
   ReviewListQuery,
   ReviewModerationDto,
 } from '@repo/types';
@@ -43,6 +45,12 @@ export class ReviewsController {
     return this.reviews.listForRestaurant(id, q);
   }
 
+  @Public()
+  @Get('restaurants/:id/reviews/summary')
+  summary(@Param('id') id: string) {
+    return this.reviews.getSummary(id);
+  }
+
   @Permissions('review:moderate')
   @Get('admin/reviews')
   listAdmin(@Query(new ZodValidationPipe(ReviewListQuerySchema)) q: ReviewListQuery) {
@@ -56,6 +64,15 @@ export class ReviewsController {
     @Body(new ZodValidationPipe(ReviewModerationSchema)) dto: ReviewModerationDto,
   ) {
     return this.reviews.setVisibility(id, dto);
+  }
+
+  @Permissions('review:moderate')
+  @Post('admin/reviews/:id/reply')
+  reply(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(OwnerReplySchema)) dto: OwnerReplyDto,
+  ) {
+    return this.reviews.reply(id, dto.reply);
   }
 
   @Permissions('review:moderate')
