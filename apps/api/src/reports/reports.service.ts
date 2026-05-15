@@ -6,6 +6,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ForbiddenException,
+  GoneException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -88,7 +89,7 @@ export class ReportsService {
     }
     if (row.status !== 'ready') throw new BadRequestException(`Export is ${row.status}`);
     if (row.expiresAt < new Date()) {
-      throw new BadRequestException('Export expired');
+      throw new GoneException('Export expired');
     }
     if (!row.filePath) throw new NotFoundException('Export file missing');
 

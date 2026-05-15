@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -179,9 +180,24 @@ export class OrdersService {
       };
     }
 
-    const orderNumber = await this.orderNumber.next();
+    // Atomically claim the idempotency key right before we create the order.
+    // A second concurrent request with the same key sees `done` (replay) or
+    // `pending` (reject) instead of racing into a duplicate order.
+    const reservation = await this.idempotency.reserve(scope, idempotencyKey);
+    if (reservation.status === 'done') {
+      return this.getById(actor, reservation.orderId);
+    }
+    if (reservation.status === 'pending') {
+      throw new ConflictException(
+        'A request with this Idempotency-Key is already being processed',
+      );
+    }
 
-    const created = await this.prisma.$transaction(async (tx) => {
+    let created!: Order;
+    try {
+      const orderNumber = await this.orderNumber.next();
+
+      created = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
           orderNumber,
@@ -239,9 +255,14 @@ export class OrdersService {
       });
 
       return order;
-    });
+      });
 
-    await this.idempotency.store(scope, idempotencyKey, created.id);
+      await this.idempotency.store(scope, idempotencyKey, created.id);
+    } catch (err) {
+      // Failed attempt — release the reservation so the client can retry.
+      await this.idempotency.release(scope, idempotencyKey);
+      throw err;
+    }
 
     // Emit an internal event so the realtime/notification dispatcher can react.
     const customerName = await this.loadCustomerName(created.userId);
@@ -292,7 +313,7 @@ export class OrdersService {
       throw new ForbiddenException('Not your order');
     }
 
-    const next = await this.applyTransition(orderId, to, actor.userId, note);
+    const next = await this.applyTransition(orderId, order.status, to, actor.userId, note);
     return this.toDtoById(next.id);
   }
 
@@ -319,11 +340,12 @@ export class OrdersService {
       throw new BadRequestException(result.reason);
     }
 
-    await this.applyTransition(orderId, to, byUserId, note);
+    await this.applyTransition(orderId, order.status, to, byUserId, note);
   }
 
   private async applyTransition(
     orderId: string,
+    from: OrderDto['status'],
     to: OrderDto['status'],
     byUserId: string | null,
     note: string | null,
@@ -338,14 +360,10 @@ export class OrdersService {
       }),
     ]);
 
-    // We don't strictly know the "from" here (it's the row BEFORE the update);
-    // load it for the event.
-    const prior = await this.prisma.orderStatusEvent.findMany({
-      where: { orderId },
-      orderBy: { createdAt: 'desc' },
-      take: 2,
-    });
-    const previousStatus = prior[1]?.status ?? prior[0]?.status ?? 'PENDING';
+    // `from` is the caller's pre-update status (both callers loaded the order
+    // and ran the state machine on it). Deriving it from the event log here
+    // was racy — concurrent transitions / equal createdAt could swap rows.
+    const previousStatus = from;
 
     const [itemCount, customerName] = await Promise.all([
       this.prisma.orderItem.count({ where: { orderId } }),
@@ -371,7 +389,17 @@ export class OrdersService {
     this.events.emit('order.status_changed', statusEvent);
     if (to === 'CANCELLED') this.events.emit('order.cancelled', statusEvent);
     if (to === 'PREPARING') this.events.emit('kitchen.ticket_added', statusEvent);
-    if (to === 'READY' || to === 'OUT_FOR_DELIVERY' || to === 'COMPLETED') {
+    // Pull the ticket off the KDS on any exit from the active set — including
+    // terminal/abandon states, otherwise refunded/cancelled/delivered orders
+    // leave ghost tickets on the board.
+    if (
+      to === 'READY' ||
+      to === 'OUT_FOR_DELIVERY' ||
+      to === 'COMPLETED' ||
+      to === 'DELIVERED' ||
+      to === 'CANCELLED' ||
+      to === 'REFUNDED'
+    ) {
       this.events.emit('kitchen.ticket_removed', statusEvent);
     }
     return updated;
@@ -567,21 +595,26 @@ export class OrdersService {
       },
       orderBy: { createdAt: 'asc' },
     });
-    return rows.map((r) => ({
-      orderId: r.id,
-      orderNumber: r.orderNumber,
-      status: r.status,
-      confirmedAt: r.statusEvents[0]?.createdAt.toISOString() ?? null,
-      items: r.items.map((it) => {
-        const snapshot = it.modifierSnapshot as unknown as ModifierSnapshotEntry[] | null;
-        return {
-          name: it.nameSnapshot,
-          quantity: it.quantity,
-          modifiers: snapshot ? snapshot.map((s) => `${s.groupName}: ${s.optionName}`) : [],
-          notes: it.notes,
-        };
-      }),
-    }));
+    return rows
+      .map((r) => ({
+        orderId: r.id,
+        orderNumber: r.orderNumber,
+        status: r.status,
+        confirmedAt: r.statusEvents[0]?.createdAt.toISOString() ?? null,
+        items: r.items.map((it) => {
+          const snapshot = it.modifierSnapshot as unknown as ModifierSnapshotEntry[] | null;
+          return {
+            name: it.nameSnapshot,
+            quantity: it.quantity,
+            modifiers: snapshot ? snapshot.map((s) => `${s.groupName}: ${s.optionName}`) : [],
+            notes: it.notes,
+          };
+        }),
+      }))
+      // KDS contract: oldest-confirmed first. confirmedAt is an ISO string so
+      // lexicographic compare is chronological; rows without a CONFIRMED event
+      // (shouldn't happen for CONFIRMED|PREPARING) sort last.
+      .sort((a, b) => (a.confirmedAt ?? '~').localeCompare(b.confirmedAt ?? '~'));
   }
 }
 

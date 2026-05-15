@@ -177,10 +177,11 @@ export class PaymentsService {
     const result = await provider.refund({
       providerRef: payment.providerRef,
       amount: decimalToString(requested),
+      currency: payment.currency,
       reason: dto.reason,
     });
 
-    const refund = await this.prisma.$transaction(async (tx) => {
+    const { refund, fullRefund } = await this.prisma.$transaction(async (tx) => {
       const created = await tx.refund.create({
         data: {
           paymentId: payment.id,
@@ -191,31 +192,34 @@ export class PaymentsService {
       });
 
       const totalRefunded = alreadyRefunded.plus(requested);
-      const fullRefund = totalRefunded.gte(payment.amount);
-      const newStatus: PaymentStatus = fullRefund ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
+      const isFull = totalRefunded.gte(payment.amount);
+      const newStatus: PaymentStatus = isFull ? 'REFUNDED' : 'PARTIALLY_REFUNDED';
       await tx.payment.update({
         where: { id: payment.id },
         data: { status: newStatus },
       });
 
-      // If fully refunded, transition the order to REFUNDED.
-      if (fullRefund) {
-        await tx.order.update({
-          where: { id: payment.orderId },
-          data: { status: 'REFUNDED' },
-        });
-        await tx.orderStatusEvent.create({
-          data: {
-            orderId: payment.orderId,
-            status: 'REFUNDED',
-            byUserId: actor.userId,
-            note: dto.reason,
-          },
-        });
-      }
-
-      return created;
+      return { refund: created, fullRefund: isFull };
     });
+
+    // If fully refunded, transition the order through the state machine so the
+    // transition is guarded, realtime `order.status_changed` fires, the kitchen
+    // ticket is pulled, and the notification dispatcher reacts. (Previously a
+    // raw tx.order.update bypassed all of that — no customer notification.)
+    if (fullRefund) {
+      try {
+        await this.orders.forceTransition(
+          payment.orderId,
+          'REFUNDED',
+          actor.userId,
+          dto.reason ?? 'Refunded',
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Order ${payment.orderId} REFUNDED transition skipped: ${(err as Error).message}`,
+        );
+      }
+    }
 
     // Enqueue the refund-confirmation email if we have a customer email.
     const customer = payment.order.userId
@@ -301,21 +305,24 @@ export class PaymentsService {
   }
 
   private async confirmOrderFromPayment(order: Order, paymentId: string): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.order.update({
-        where: { id: order.id },
-        data: { status: 'CONFIRMED' },
-      }),
-      this.prisma.orderStatusEvent.create({
-        data: {
-          orderId: order.id,
-          status: 'CONFIRMED',
-          note: 'Payment confirmed',
-        },
-      }),
-    ]);
+    // Idempotent + state-safe: the conditional update only matches a still
+    // PENDING order, so concurrent duplicate webhook deliveries (or a racing
+    // cancel) can't double-confirm, resurrect a terminal order, or enqueue a
+    // second receipt.
+    const { count } = await this.prisma.order.updateMany({
+      where: { id: order.id, status: 'PENDING' },
+      data: { status: 'CONFIRMED' },
+    });
+    if (count === 0) {
+      this.logger.log(
+        `Order ${order.orderNumber} not PENDING — skipping confirm (payment ${paymentId})`,
+      );
+      return;
+    }
+    await this.prisma.orderStatusEvent.create({
+      data: { orderId: order.id, status: 'CONFIRMED', note: 'Payment confirmed' },
+    });
     this.logger.log(`Order ${order.orderNumber} confirmed via payment ${paymentId}`);
-    // Fire-and-forget receipt PDF job.
     await this.receiptQueue.add(JOB_RECEIPT_GENERATE, { orderId: order.id });
   }
 

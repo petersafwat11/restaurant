@@ -20,6 +20,7 @@ export interface CreateIntentResult {
 export interface RefundInput {
   providerRef: string;
   amount: string;
+  currency: string;
   reason?: string;
 }
 

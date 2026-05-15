@@ -93,11 +93,21 @@ export class AnalyticsService {
     const granularity =
       q.granularity ?? (q.period === 'today' ? 'hour' : q.period === '7d' ? 'day' : 'day');
 
-    const trunc = granularity === 'hour' ? 'hour' : granularity === 'week' ? 'week' : 'day';
+    // Bucket unit is a hardcoded literal chosen by the validated granularity
+    // (no string interpolation of input → no injection), and bucketing is done
+    // in the restaurant timezone so buckets align with the tz-local window
+    // edges (consistent with salesByHour/salesByDayOfWeek).
+    const tz = restaurant.timezone;
+    const truncSql =
+      granularity === 'hour'
+        ? Prisma.sql`date_trunc('hour', "createdAt" AT TIME ZONE ${tz})`
+        : granularity === 'week'
+          ? Prisma.sql`date_trunc('week', "createdAt" AT TIME ZONE ${tz})`
+          : Prisma.sql`date_trunc('day', "createdAt" AT TIME ZONE ${tz})`;
     const rows = await this.prisma.$queryRaw<
       { bucket: Date; revenue: Prisma.Decimal; orders: bigint }[]
     >`
-      SELECT date_trunc(${Prisma.raw(`'${trunc}'`)}, "createdAt") AS bucket,
+      SELECT ${truncSql} AS bucket,
              SUM("grandTotal") AS revenue,
              COUNT(*)::bigint AS orders
       FROM "Order"
@@ -306,7 +316,13 @@ export class AnalyticsService {
     const orderCount = all.length;
     const aov =
       completed.length > 0 ? revenue.div(completed.length) : new Prisma.Decimal(0);
-    const completionRate = orderCount > 0 ? completed.length / orderCount : 0;
+    // Completion rate is completed / (completed + cancelled) per the KPI
+    // catalog — NOT completed / total, which would be unstable as in-flight
+    // (PENDING/PREPARING) and REFUNDED orders inflate the denominator.
+    const cancelledCount = all.filter((o) => o.status === 'CANCELLED').length;
+    const completionDenom = completed.length + cancelledCount;
+    const completionRate =
+      completionDenom > 0 ? completed.length / completionDenom : 0;
 
     // Repeat rate: distinct users with ≥2 orders in window.
     const userCounts = new Map<string, number>();
