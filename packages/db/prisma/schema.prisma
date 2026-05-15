@@ -697,3 +697,19 @@ model ReviewImage {
 
   @@index([reviewId])
 }
+
+model ContactMessage {
+  id              String    @id @default(cuid())
+  restaurantId    String?
+  name            String
+  email           String
+  subject         String?
+  message         String
+  status          String    @default("new") // new, read, archived
+  handledByUserId String?
+  handledAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([restaurantId, createdAt])
+}

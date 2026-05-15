@@ -48,6 +48,7 @@ const ALL_PERMISSIONS = [
 	"report:read",
 	"report:export",
 	"audit:read",
+	"contact:read",
 ] as const;
 
 type PermissionKey = (typeof ALL_PERMISSIONS)[number];
@@ -1200,6 +1201,34 @@ async function seedReviewImages() {
   }
 }
 
+async function seedContactMessages(restaurantId: string) {
+  const count = await prisma.contactMessage.count();
+  if (count > 0) {
+    console.log('▸ Skipping contact messages — already seeded');
+    return;
+  }
+  console.log('▸ Seeding 2 contact messages');
+  await prisma.contactMessage.createMany({
+    data: [
+      {
+        restaurantId,
+        name: 'Anna Nowak',
+        email: 'anna@example.com',
+        subject: 'Catering inquiry',
+        message: 'Do you cater office events for 30 people?',
+      },
+      {
+        restaurantId,
+        name: 'Piotr Kowalski',
+        email: 'piotr@example.com',
+        subject: null,
+        message: 'Loved the pizza, thank you!',
+        status: 'read',
+      },
+    ],
+  });
+}
+
 async function main() {
   console.log('Seeding…');
   await seedPermissions();
@@ -1217,6 +1246,7 @@ async function main() {
   await seedStaff();
   await seedLoyalty();
   await seedNotifications();
+  await seedContactMessages(restaurant.id);
   console.log('✓ Seed complete');
 }
 

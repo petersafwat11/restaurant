@@ -9,7 +9,10 @@ import { AuditInterceptor } from './audit-log/audit.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { BullmqModule } from './bullmq/bullmq.module';
 import { CartModule } from './cart/cart.module';
+import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
+import { MarketingModule } from './marketing/marketing.module';
+import { SeoModule } from './seo/seo.module';
 import { ReportsModule } from './reports/reports.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -70,6 +73,9 @@ import { UsersModule } from './users/users.module';
     AnalyticsModule,
     ReportsModule,
     LoyaltyModule,
+    ContactModule,
+    MarketingModule,
+    SeoModule,
     JobsModule,
     SchedulerModule,
   ],

@@ -92,6 +92,28 @@ import {
   UpdateNotificationPreferenceSchema,
   type UnreadCountDto,
   UnreadCountSchema,
+  type AboutDataDto,
+  AboutDataSchema,
+  type ContactMessageDto,
+  type ContactMessageListDto,
+  type ContactMessageListQuery,
+  ContactMessageListQuerySchema,
+  ContactMessageListSchema,
+  ContactMessageSchema,
+  type CreateContactMessageDto,
+  CreateContactMessageSchema,
+  type LandingDataDto,
+  LandingDataSchema,
+  type MarketingQuery,
+  MarketingQuerySchema,
+  type SeoMetaDto,
+  type SeoMetaQuery,
+  SeoMetaQuerySchema,
+  SeoMetaSchema,
+  type StructuredDataDto,
+  StructuredDataSchema,
+  type UpdateContactMessageDto,
+  UpdateContactMessageSchema,
   type PaymentConfigDto,
   PaymentConfigSchema,
   type PaymentDto,
@@ -280,6 +302,8 @@ interface RequestOptions {
   skipRefresh?: boolean;
   /** Extra headers (e.g. Idempotency-Key on POST /orders). */
   headers?: Record<string, string>;
+  /** Return the raw response body as text (sitemap.xml / robots.txt). */
+  raw?: boolean;
 }
 
 export function createApiClient(opts: ApiClientOptions) {
@@ -322,6 +346,19 @@ export function createApiClient(opts: ApiClientOptions) {
       if (opts.onUnauthorized) await opts.onUnauthorized();
     } else if (res.status === 401 && opts.onUnauthorized) {
       await opts.onUnauthorized();
+    }
+
+    if (options.raw) {
+      if (!res.ok) {
+        let body: unknown;
+        try {
+          body = await res.json();
+        } catch {
+          body = { message: await res.text().catch(() => '') };
+        }
+        throw ApiError.fromResponse(res.status, body);
+      }
+      return (await res.text()) as T;
     }
 
     return handleResponse<T>(res, options.responseSchema);
@@ -1041,6 +1078,91 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- marketing -------------------------------------------------------
+  const marketing = {
+    landing: (q?: MarketingQuery): Promise<LandingDataDto> =>
+      request('/marketing/landing', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (MarketingQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: LandingDataSchema,
+      }),
+    about: (q?: MarketingQuery): Promise<AboutDataDto> =>
+      request('/marketing/about', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (MarketingQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: AboutDataSchema,
+      }),
+  };
+
+  // ---- contact ---------------------------------------------------------
+  const contact = {
+    send: (input: CreateContactMessageDto): Promise<ContactMessageDto> =>
+      request('/contact', {
+        method: 'POST',
+        auth: false,
+        body: CreateContactMessageSchema.parse(input),
+        responseSchema: ContactMessageSchema,
+      }),
+    list: (q?: ContactMessageListQuery): Promise<ContactMessageListDto> =>
+      request('/admin/contact', {
+        method: 'GET',
+        query: q
+          ? (ContactMessageListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: ContactMessageListSchema,
+      }),
+    updateStatus: (
+      id: string,
+      input: UpdateContactMessageDto,
+    ): Promise<ContactMessageDto> =>
+      request(`/admin/contact/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: UpdateContactMessageSchema.parse(input),
+        responseSchema: ContactMessageSchema,
+      }),
+  };
+
+  // ---- seo -------------------------------------------------------------
+  const seo = {
+    structuredData: (slug: string): Promise<StructuredDataDto> =>
+      request(`/seo/structured-data/${encodeURIComponent(slug)}`, {
+        method: 'GET',
+        auth: false,
+        responseSchema: StructuredDataSchema,
+      }),
+    sitemap: (): Promise<string> =>
+      request('/seo/sitemap.xml', { method: 'GET', auth: false, raw: true }),
+    robots: (): Promise<string> =>
+      request('/seo/robots.txt', { method: 'GET', auth: false, raw: true }),
+    meta: (q?: SeoMetaQuery): Promise<SeoMetaDto> =>
+      request('/seo/meta', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (SeoMetaQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: SeoMetaSchema,
+      }),
+  };
+
   // ---- customers (admin) -----------------------------------------------
   const customers = {
     list: (q?: CustomerListQuery): Promise<CustomerListDto> =>
@@ -1277,6 +1399,9 @@ export function createApiClient(opts: ApiClientOptions) {
     reviews,
     notifications,
     loyalty,
+    marketing,
+    contact,
+    seo,
     customers,
     staff,
     settings,
