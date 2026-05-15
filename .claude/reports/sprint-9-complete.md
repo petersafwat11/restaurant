@@ -177,3 +177,25 @@ SQL is hand-authored to match the existing `prisma/migrations/*` pattern
   matching pair of preference columns + extend `NotificationPreferenceSchema`.
 - Push payloads now carry `data.url`; the UI sprint wires Expo router deep
   linking off `APP_DEEP_LINK_SCHEME`.
+
+---
+
+## Post-review correction (cross-sprint audit, 2026-05-15)
+
+A review of Sprints 9–12 found two genuine bugs in Sprint 9 code; both fixed:
+
+1. **Duplicate analytics scheduler (HIGH).** `SchedulerService` re-registered
+   `analytics-rollup-daily`/`-finalize` with `repeat:{pattern}` (no tz) while
+   `AnalyticsProcessor.onModuleInit` already registers them with
+   `{pattern, tz:'UTC'}`. BullMQ keys repeatables by name+pattern+tz, so the
+   two did **not** dedupe — the rollup ran twice/hour (doubled DB load +
+   contending `DailyMetric` writes). The earlier "BullMQ dedupes the repeat
+   key" note was incorrect for this case. **Fix:** analytics registration is
+   now owned solely by `AnalyticsProcessor`; `SchedulerService` is limited to
+   push-token + reports cleanup (jobs with no self-registration).
+2. **Push ticket/token misalignment (MEDIUM).** `sendToUser` flattened Expo
+   tickets across chunks then index-aligned them to the full token list; a
+   failed/short early chunk shifted every later token, so a live device could
+   be pruned as `DeviceNotRegistered`. **Fix:** reconcile per chunk against
+   that chunk's token slice. Only manifested with >100 tokens/user + an early
+   chunk send error.

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import type { MenuItem, MenuItemImage, Prisma } from '@repo/db';
 import type {
   FavoriteDto,
@@ -50,7 +50,11 @@ export class FavoritesService {
   /** Idempotent add — re-adding an existing favorite is a no-op. */
   async add(userId: string, menuItemId: string): Promise<FavoriteDto> {
     // Ensure the item exists so we don't store dangling favorites.
-    await this.prisma.menuItem.findUniqueOrThrow({ where: { id: menuItemId } });
+    const item = await this.prisma.menuItem.findUnique({
+      where: { id: menuItemId },
+      select: { id: true },
+    });
+    if (!item) throw new NotFoundException('Menu item not found');
     const row = await this.prisma.favorite.upsert({
       where: { userId_menuItemId: { userId, menuItemId } },
       create: { userId, menuItemId },

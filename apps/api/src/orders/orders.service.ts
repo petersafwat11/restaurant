@@ -155,13 +155,18 @@ export class OrdersService {
     // Loyalty redemption: server recomputes the discount from the points the
     // customer chose to redeem (cart-stored). Guests cannot redeem. The
     // appliable points are locked here and burned inside the order tx.
+    // Quote against the subtotal *after* the coupon so loyalty + coupon can
+    // never exceed the subtotal — otherwise pricing would clamp the combined
+    // discount while we still burned the full points (lost point value).
     let loyaltyPointsToBurn = 0;
     let loyaltyDiscount = toDecimal(0);
     if (actor.userId && cart.loyaltyPointsToRedeem > 0) {
+      const afterCoupon = subtotalPreview.minus(couponDiscount);
+      const loyaltyBasis = afterCoupon.lt(0) ? toDecimal(0) : afterCoupon;
       const quote = await this.loyalty.quoteRedemption(
         actor.userId,
         cart.loyaltyPointsToRedeem,
-        decimalToString(subtotalPreview),
+        decimalToString(loyaltyBasis),
       );
       loyaltyPointsToBurn = quote.appliablePoints;
       loyaltyDiscount = toDecimal(quote.discountAmount);
