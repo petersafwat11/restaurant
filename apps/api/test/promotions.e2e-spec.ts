@@ -89,6 +89,29 @@ describe('promotions (e2e)', () => {
     expect(res.json().reason).toBe('OUT_OF_WINDOW');
   });
 
+  it('rejects unimplemented BOGO / FREE_DELIVERY coupons (no bogus flat discount)', async () => {
+    const bogoId = await makePromotion({ name: 'BOGO', type: 'BOGO', value: '15' });
+    await makeCoupon(bogoId, 'BOGOX');
+    const bogo = await inject('POST', '/api/v1/coupons/validate', {
+      code: 'BOGOX',
+      subtotal: '80.00',
+      restaurantId,
+    });
+    expect(bogo.statusCode).toBe(200);
+    expect(bogo.json().valid).toBe(false);
+    expect(bogo.json().reason).toBe('PROMOTION_INACTIVE');
+
+    const fdId = await makePromotion({ name: 'FreeDel', type: 'FREE_DELIVERY' });
+    await makeCoupon(fdId, 'FREEDELX');
+    const fd = await inject('POST', '/api/v1/coupons/validate', {
+      code: 'FREEDELX',
+      subtotal: '80.00',
+      restaurantId,
+    });
+    expect(fd.json().valid).toBe(false);
+    expect(fd.json().reason).toBe('PROMOTION_INACTIVE');
+  });
+
   it('rejects when minSubtotal is not met', async () => {
     const promoId = await makePromotion({ minSubtotal: '100' });
     await makeCoupon(promoId, 'MIN100');

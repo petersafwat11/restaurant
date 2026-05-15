@@ -66,7 +66,7 @@ export class CustomersService {
     };
   }
 
-  async get(id: string): Promise<CustomerDetailDto> {
+  async get(id: string, restaurantId?: string): Promise<CustomerDetailDto> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -76,15 +76,19 @@ export class CustomersService {
     });
     if (!user) throw new NotFoundException('Customer not found');
 
-    const summary = await this.toSummary(user);
+    // Scope aggregates/orders/reviews to the requested restaurant when given so
+    // staff don't see a customer's activity across other (competitor) tenants.
+    const summary = await this.toSummary(user, restaurantId);
 
     const orders = await this.prisma.order.findMany({
-      where: { userId: id },
+      where: { userId: id, ...(restaurantId ? { restaurantId } : {}) },
       orderBy: { createdAt: 'desc' },
       take: 20,
     });
 
-    const reviewCount = await this.prisma.review.count({ where: { userId: id } });
+    const reviewCount = await this.prisma.review.count({
+      where: { userId: id, ...(restaurantId ? { order: { restaurantId } } : {}) },
+    });
 
     const notes = await this.prisma.customerNote.findMany({
       where: { userId: id },

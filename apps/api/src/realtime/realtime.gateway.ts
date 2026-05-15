@@ -28,6 +28,8 @@ interface SocketUser {
   email: string;
   roles: string[];
   permissions: string[];
+  /** JWT exp (seconds). Sockets are long-lived; re-checked on subscribe. */
+  exp?: number;
 }
 
 interface AuthedSocket extends Socket {
@@ -68,12 +70,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         email: claims.email,
         roles: claims.roles,
         permissions: claims.permissions,
+        exp: (claims as unknown as { exp?: number }).exp,
       };
       this.logger.log(`Socket ${client.id} connected as ${claims.email}`);
-    } catch {
-      // Per Socket.IO convention, refuse with a close code on bad auth.
-      // We can't set custom close codes from a server-disconnect, so we
-      // just disconnect; the client treats the immediate disconnect as 4401.
+    } catch (err) {
+      // Bad/expired token. We can't set a custom WS close code from a
+      // server-side disconnect; log so an auth/secret regression isn't silent
+      // (it would otherwise look like every client just dropping).
+      this.logger.debug(`Socket ${client.id} auth rejected: ${(err as Error).message}`);
       client.disconnect(true);
     }
   }
@@ -95,6 +99,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
     const user = client.data.user;
     if (!user) return { ok: false, reason: 'Unauthenticated' };
+
+    // Sockets outlive the 15-min access token. Re-check expiry here so a
+    // demoted/revoked user can't keep subscribing to sensitive feeds on a
+    // long-lived connection using stale claims.
+    if (user.exp && Date.now() >= user.exp * 1000) {
+      client.disconnect(true);
+      return { ok: false, reason: 'Token expired — reconnect' };
+    }
 
     const allowed = await this.canJoin(user, parsed.data.room);
     if (!allowed.ok) return allowed;

@@ -18,6 +18,7 @@ import {
   type UpdateOrderStatusDto,
   UpdateOrderStatusSchema,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -46,6 +47,7 @@ export class OrdersController {
   // from the (optional) authed user or the supplied sessionKey.
   @Public()
   @Post()
+  @AuditAction('order:create', 'order')
   create(
     @CurrentUserOptional() user: OptionalUser | null,
     @Headers('idempotency-key') idempotencyKey: string,
@@ -93,6 +95,7 @@ export class OrdersController {
   }
 
   @Post(':id/status')
+  @AuditAction('order:status_changed', 'order')
   updateStatus(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,

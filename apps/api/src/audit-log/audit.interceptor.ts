@@ -38,6 +38,7 @@ export class AuditInterceptor implements NestInterceptor {
         this.audit
           .record({
             actorUserId: user.id,
+            restaurantId: extractRestaurantId(result, req.params, req.body),
             action: meta.action,
             resourceType: meta.resourceType,
             resourceId,
@@ -67,5 +68,19 @@ function extractId(
   if (body && typeof body[key] === 'string') return body[key] as string;
   // Some endpoints respond with { success: true } only — fall back to params.id.
   if (params?.id) return params.id;
+  return null;
+}
+
+function extractRestaurantId(
+  result: unknown,
+  params?: Record<string, string>,
+  body?: Record<string, unknown>,
+): string | null {
+  if (result && typeof result === 'object') {
+    const v = (result as Record<string, unknown>).restaurantId;
+    if (typeof v === 'string') return v;
+  }
+  if (params?.restaurantId) return params.restaurantId;
+  if (typeof body?.restaurantId === 'string') return body.restaurantId;
   return null;
 }

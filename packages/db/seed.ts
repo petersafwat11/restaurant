@@ -870,6 +870,147 @@ async function seedReservations(restaurantId: string) {
   }
 }
 
+type SeededOrderStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'READY'
+  | 'COMPLETED'
+  | 'DELIVERED'
+  | 'CANCELLED';
+
+const STATUS_TRAIL: Record<SeededOrderStatus, SeededOrderStatus[]> = {
+  PENDING: ['PENDING'],
+  CONFIRMED: ['PENDING', 'CONFIRMED'],
+  PREPARING: ['PENDING', 'CONFIRMED', 'PREPARING'],
+  READY: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'],
+  COMPLETED: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'COMPLETED'],
+  DELIVERED: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED'],
+  CANCELLED: ['PENDING', 'CANCELLED'],
+};
+
+const money = (n: number) => n.toFixed(2);
+
+async function seedOrders(restaurantId: string) {
+  const existing = await prisma.order.count({ where: { restaurantId } });
+  if (existing > 0) {
+    console.log(`▸ Skipping orders — ${existing} already present`);
+    return;
+  }
+  const customer = await prisma.user.findUnique({
+    where: { email: 'customer@local.test' },
+  });
+  const menuItem = await prisma.menuItem.findFirst({
+    where: { category: { restaurantId } },
+  });
+  if (!customer || !menuItem) {
+    console.log('▸ Skipping orders — missing customer or menu item');
+    return;
+  }
+
+  // type · status · days-ago · qty — spread across the last ~10 days so KPI
+  // deltas, the admin list, the KDS feed, and recent-orders all have data.
+  const specs: Array<{
+    type: 'PICKUP' | 'DELIVERY' | 'DINE_IN';
+    status: SeededOrderStatus;
+    daysAgo: number;
+    qty: number;
+  }> = [
+    { type: 'PICKUP', status: 'PENDING', daysAgo: 0, qty: 1 },
+    { type: 'DELIVERY', status: 'CONFIRMED', daysAgo: 0, qty: 2 },
+    { type: 'DINE_IN', status: 'PREPARING', daysAgo: 0, qty: 3 },
+    { type: 'PICKUP', status: 'READY', daysAgo: 1, qty: 1 },
+    { type: 'DELIVERY', status: 'DELIVERED', daysAgo: 2, qty: 2 },
+    { type: 'PICKUP', status: 'COMPLETED', daysAgo: 4, qty: 1 },
+    { type: 'DINE_IN', status: 'COMPLETED', daysAgo: 7, qty: 4 },
+    { type: 'DELIVERY', status: 'CANCELLED', daysAgo: 9, qty: 2 },
+  ];
+
+  console.log(`▸ Seeding ${specs.length} orders (mixed status/type, last 10 days)`);
+  const unitPrice = Number(menuItem.basePrice);
+
+  for (let i = 0; i < specs.length; i++) {
+    const s = specs[i]!;
+    const createdAt = new Date(Date.now() - s.daysAgo * 24 * 60 * 60 * 1000);
+    createdAt.setUTCHours(12, 0, 0, 0);
+
+    const subtotal = unitPrice * s.qty;
+    const taxTotal = subtotal * 0.08;
+    const deliveryFee = s.type === 'DELIVERY' ? 8 : 0;
+    const grandTotal = subtotal + taxTotal + deliveryFee;
+
+    const trail = STATUS_TRAIL[s.status];
+    const paid =
+      s.status !== 'PENDING' && s.status !== 'CANCELLED';
+    const refunded = s.status === 'DELIVERED'; // one partial-refund example
+
+    const order = await prisma.order.create({
+      data: {
+        orderNumber: `R-2026-9${String(i).padStart(5, '0')}`,
+        userId: customer.id,
+        restaurantId,
+        type: s.type,
+        status: s.status,
+        subtotal: money(subtotal),
+        taxTotal: money(taxTotal),
+        deliveryFee: money(deliveryFee),
+        tipAmount: '0.00',
+        discountTotal: '0.00',
+        grandTotal: money(grandTotal),
+        currency: 'PLN',
+        createdAt,
+        items: {
+          create: [
+            {
+              menuItemId: menuItem.id,
+              nameSnapshot: menuItem.name,
+              quantity: s.qty,
+              unitPrice: money(unitPrice),
+              lineTotal: money(unitPrice * s.qty),
+              modifierSnapshot: [] as unknown as Prisma.InputJsonValue,
+              notes: null,
+            },
+          ],
+        },
+        statusEvents: {
+          create: trail.map((st, idx) => ({
+            status: st,
+            byUserId: idx === 0 ? customer.id : null,
+            note: idx === 0 ? 'Order placed' : null,
+            createdAt: new Date(createdAt.getTime() + idx * 5 * 60 * 1000),
+          })),
+        },
+      },
+    });
+
+    if (paid) {
+      const payment = await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          provider: s.type === 'DINE_IN' ? 'cod' : 'stripe',
+          providerRef: `pi_seed_${i}`,
+          method: s.type === 'DINE_IN' ? 'COD' : 'STRIPE_CARD',
+          amount: money(grandTotal),
+          currency: 'PLN',
+          status: refunded ? 'PARTIALLY_REFUNDED' : 'PAID',
+          createdAt,
+        },
+      });
+      if (refunded) {
+        await prisma.refund.create({
+          data: {
+            paymentId: payment.id,
+            amount: money(Math.round(grandTotal * 0.5 * 100) / 100),
+            reason: 'Partial refund — missing side',
+            providerRef: `re_seed_${i}`,
+            createdAt: new Date(createdAt.getTime() + 60 * 60 * 1000),
+          },
+        });
+      }
+    }
+  }
+}
+
 async function seedReviews() {
   const customer = await prisma.user.findUnique({ where: { email: 'customer@local.test' } });
   if (!customer) return;
@@ -983,6 +1124,7 @@ async function main() {
   await seedPromotions(restaurant.id);
   await seedTables(restaurant.id);
   await seedReservations(restaurant.id);
+  await seedOrders(restaurant.id);
   await seedReviews();
   await seedDeliveryZones(restaurant.id);
   await seedStaff();

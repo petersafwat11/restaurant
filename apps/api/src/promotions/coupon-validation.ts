@@ -52,6 +52,14 @@ export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDt
     return fail('MAX_REDEMPTIONS_REACHED');
   }
 
+  // Item-level BOGO and delivery-fee waiver are NOT implemented yet. Returning
+  // a flat `promo.value` for BOGO (or silently 0 for FREE_DELIVERY) let an
+  // unimplemented promo type discount real money off `grandTotal` at order
+  // creation regardless of cart contents. Reject until properly implemented.
+  if (promo.type === 'BOGO' || promo.type === 'FREE_DELIVERY') {
+    return fail('PROMOTION_INACTIVE');
+  }
+
   // ---- Compute discount amount --------------------------------------------
   let discount = toDecimal(0);
   switch (promo.type) {

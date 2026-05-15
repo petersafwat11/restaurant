@@ -125,6 +125,28 @@ describe('orders (e2e)', () => {
     expect(r2.json().id).toBe(orderId);
   });
 
+  it('concurrent POST /orders with the same Idempotency-Key never creates two orders', async () => {
+    const body = { restaurantId, type: 'PICKUP' as const, tipAmount: '0' };
+    const headers = { 'idempotency-key': 'idem-concurrent' };
+    const [r1, r2] = await Promise.all([
+      inject('POST', '/api/v1/orders', body, userToken, headers),
+      inject('POST', '/api/v1/orders', body, userToken, headers),
+    ]);
+
+    const created = [r1, r2].filter((r) => r.statusCode === 201);
+    expect(created.length).toBeGreaterThanOrEqual(1);
+    // Any 201s must reference the SAME order; the loser is 201-replay or 409.
+    const ids = new Set(created.map((r) => r.json().id));
+    expect(ids.size).toBe(1);
+    for (const r of [r1, r2]) {
+      expect([201, 409]).toContain(r.statusCode);
+    }
+
+    // Exactly one order row exists for this user at this restaurant.
+    const list = await inject('GET', '/api/v1/orders', undefined, userToken);
+    expect(list.json().items).toHaveLength(1);
+  });
+
   it('returns 400 when Idempotency-Key header is missing', async () => {
     const res = await inject(
       'POST',
