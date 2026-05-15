@@ -26,6 +26,7 @@ export const JOB_EMAIL_PASSWORD_RESET = 'email.password-reset';
 export const JOB_EMAIL_RECEIPT = 'email.receipt';
 export const JOB_EMAIL_REFUND = 'email.refund';
 export const JOB_EMAIL_ORDER_STATUS = 'email.order-status';
+export const JOB_EMAIL_CONTACT = 'email.contact';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
 export const JOB_PUSH_WELCOME = 'push.welcome';

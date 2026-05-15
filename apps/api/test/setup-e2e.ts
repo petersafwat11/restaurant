@@ -79,6 +79,7 @@ export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   await prisma.dailyMetric.deleteMany();
   await prisma.export.deleteMany();
   await prisma.auditLog.deleteMany();
+  await prisma.contactMessage.deleteMany();
 }
 
 const ALL_PERMISSIONS = [
@@ -114,6 +115,7 @@ const ALL_PERMISSIONS = [
   'report:read',
   'report:export',
   'audit:read',
+  'contact:read',
 ];
 
 /**

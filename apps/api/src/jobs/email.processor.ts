@@ -1,10 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
+  EmailContactPayloadSchema,
   EmailOrderStatusPayloadSchema,
   EmailReceiptPayloadSchema,
   EmailRefundPayloadSchema,
   EmailVerificationPayloadSchema,
+  JOB_EMAIL_CONTACT,
   JOB_EMAIL_ORDER_STATUS,
   JOB_EMAIL_PASSWORD_RESET,
   JOB_EMAIL_RECEIPT,
@@ -102,6 +104,25 @@ export class EmailProcessor extends WorkerHost {
           subject,
           html: `<p>${body}</p>`,
           text: body,
+        });
+        return;
+      }
+      case JOB_EMAIL_CONTACT: {
+        const payload = EmailContactPayloadSchema.parse(job.data);
+        const subjectLine = payload.subject ?? '(no subject)';
+        // 1. Notify the restaurant inbox.
+        await this.mailer.send({
+          to: payload.restaurantEmail,
+          subject: `New contact message: ${subjectLine}`,
+          html: `<p>From: ${payload.name} &lt;${payload.email}&gt;</p><p>${payload.message}</p>`,
+          text: `From: ${payload.name} <${payload.email}>\n\n${payload.message}`,
+        });
+        // 2. Auto-reply the sender.
+        await this.mailer.send({
+          to: payload.email,
+          subject: 'We received your message',
+          html: `<p>Hi ${payload.name}, thanks for reaching out — we'll get back to you shortly.</p>`,
+          text: `Hi ${payload.name}, thanks for reaching out — we'll get back to you shortly.`,
         });
         return;
       }

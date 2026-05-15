@@ -16,8 +16,6 @@ coverage
 .nyc_output
 
 # environments
-.env
-.env.local
 .env.*.local
 !.env.example
 
@@ -59,3 +57,4 @@ prisma/migrations/dev.db*
 
 # local services runtime artifacts (redis dump from native e2e bring-up)
 dump.rdb
+config.bat
