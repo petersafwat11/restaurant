@@ -770,3 +770,16 @@ model Referral {
   @@index([referrerId, createdAt])
   @@index([status])
 }
+
+// ---------------------------------------------------------------------------
+// Sprint 12 — Feature flags (soft launch)
+// ---------------------------------------------------------------------------
+
+model FeatureFlag {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  description    String?
+  enabled        Boolean  @default(false)
+  rolloutPercent Int      @default(0)
+  updatedAt      DateTime @updatedAt
+}

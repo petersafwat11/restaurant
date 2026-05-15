@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { captureException } from '@repo/observability';
 import type { ErrorDto } from '@repo/types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -45,6 +46,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       body.message = exception.message;
     } else {
       this.logger.error(`Unknown exception: ${String(exception)}`);
+    }
+
+    // Report only unexpected failures (5xx / non-HTTP) to Sentry — 4xx are
+    // client errors and would be noise. No-op when Sentry is unconfigured.
+    if (!isHttp || status >= 500) {
+      captureException(exception, {
+        path: req.url,
+        method: req.method,
+        statusCode: status,
+      });
     }
 
     res.status(status).send(body);

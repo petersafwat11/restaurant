@@ -49,6 +49,7 @@ const ALL_PERMISSIONS = [
   'report:export',
   'audit:read',
   'contact:read',
+  'flags:write',
 ] as const;
 
 type PermissionKey = (typeof ALL_PERMISSIONS)[number];
@@ -1298,6 +1299,44 @@ async function seedContactMessages(restaurantId: string) {
   });
 }
 
+// Mirror of @repo/feature-flags FLAG_CATALOG (kept inline so seed runs
+// standalone — same pattern as ALL_PERMISSIONS).
+const FEATURE_FLAGS: { key: string; description: string; default: boolean }[] = [
+  {
+    key: 'loyalty.redemption',
+    description: 'Allow redeeming loyalty points at checkout',
+    default: true,
+  },
+  {
+    key: 'referral.program',
+    description: 'Referral code capture + reward on first order',
+    default: true,
+  },
+  {
+    key: 'marketing.new_landing',
+    description: 'Serve the new marketing landing aggregation',
+    default: false,
+  },
+  { key: 'mobile.push_v2', description: 'New mobile push payload + deep links', default: false },
+  { key: 'soft_launch', description: 'Master soft-launch gate (kill switch)', default: false },
+];
+
+async function seedFeatureFlags() {
+  console.log(`▸ Seeding ${FEATURE_FLAGS.length} feature flags`);
+  for (const f of FEATURE_FLAGS) {
+    await prisma.featureFlag.upsert({
+      where: { key: f.key },
+      update: {},
+      create: {
+        key: f.key,
+        description: f.description,
+        enabled: f.default,
+        rolloutPercent: f.default ? 100 : 0,
+      },
+    });
+  }
+}
+
 async function main() {
   console.log('Seeding…');
   await seedPermissions();
@@ -1318,6 +1357,7 @@ async function main() {
   await seedReferrals();
   await seedNotifications();
   await seedContactMessages(restaurant.id);
+  await seedFeatureFlags();
   console.log('✓ Seed complete');
 }
 

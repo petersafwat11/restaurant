@@ -61,6 +61,7 @@ export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   await prisma.referral.deleteMany();
   await prisma.referralCode.deleteMany();
   await prisma.favorite.deleteMany();
+  await prisma.featureFlag.deleteMany();
   await prisma.refund.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.couponRedemption.deleteMany();
@@ -123,6 +124,7 @@ const ALL_PERMISSIONS = [
   'report:export',
   'audit:read',
   'contact:read',
+  'flags:write',
 ];
 
 /**

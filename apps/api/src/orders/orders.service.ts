@@ -24,6 +24,7 @@ import type {
   PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils';
+import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -49,6 +50,7 @@ export class OrdersService {
     private readonly idempotency: IdempotencyService,
     private readonly pricing: PricingService,
     private readonly loyalty: LoyaltyService,
+    private readonly analytics: AnalyticsProductService,
     private readonly events: EventEmitter2,
   ) {}
 
@@ -305,6 +307,15 @@ export class OrdersService {
       createdAt: created.createdAt.toISOString(),
     };
     this.events.emit('order.created', createdEvent);
+
+    if (actor.userId && loyaltyPointsToBurn > 0) {
+      this.analytics.capture('loyalty_redeemed', {
+        userId: actor.userId,
+        orderId: created.id,
+        points: loyaltyPointsToBurn,
+        discount: loyaltyDiscount.toFixed(2),
+      });
+    }
 
     return this.getById(actor, created.id);
   }

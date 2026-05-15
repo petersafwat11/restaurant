@@ -18,6 +18,7 @@ export * from './loyalty';
 export * from './favorite';
 export * from './referral';
 export * from './i18n';
+export * from './feature-flag';
 export * from './contact';
 export * from './marketing';
 export * from './seo';

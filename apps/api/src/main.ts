@@ -4,12 +4,21 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { initNodeSentry } from '@repo/observability';
 import { AppModule } from './app.module';
 import { env } from './config/env';
 
 const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
 
 async function bootstrap() {
+  // Initialize Sentry before anything else so early errors are captured.
+  // No-ops when SENTRY_DSN is empty (dev/test/CI).
+  initNodeSentry({
+    dsn: env.SENTRY_DSN,
+    environment: env.SENTRY_ENV || env.NODE_ENV,
+    tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
+  });
+
   const adapter = new FastifyAdapter({ logger: false, trustProxy: true });
 
   // Capture the raw request body for the Stripe webhook route — needed for

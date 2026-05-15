@@ -12,6 +12,7 @@ import type {
 } from '@repo/types';
 import { REFERRAL_REFEREE_POINTS, REFERRAL_REFERRER_POINTS } from '@repo/utils';
 import type { Queue } from 'bullmq';
+import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,6 +30,7 @@ export class ReferralsService {
     private readonly loyalty: LoyaltyService,
     @Inject(ENV) private readonly env: ENV_TYPE,
     @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
+    private readonly analytics: AnalyticsProductService,
   ) {}
 
   async getOrCreateCode(userId: string): Promise<string> {
@@ -190,6 +192,10 @@ export class ReferralsService {
         userId: referral.refereeId,
         points: REFERRAL_REFEREE_POINTS,
         reason: 'REFERRAL',
+      });
+      this.analytics.capture('referral_completed', {
+        referrerId: referral.referrerId,
+        refereeId: referral.refereeId,
       });
     } catch (err) {
       this.logger.error(`Referral reward grant failed: ${err}`);

@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AddressesModule } from './addresses/addresses.module';
+import { AnalyticsProductModule } from './analytics-product/analytics-product.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AuditInterceptor } from './audit-log/audit.interceptor';
 import { AuditModule } from './audit-log/audit.module';
@@ -16,6 +17,7 @@ import { ConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { I18nModule } from './i18n/i18n.module';
 import { JobsModule } from './jobs/jobs.module';
 import { KitchenModule } from './kitchen/kitchen.module';
@@ -79,6 +81,8 @@ import { UsersModule } from './users/users.module';
     FavoritesModule,
     ReferralsModule,
     I18nModule,
+    AnalyticsProductModule,
+    FeatureFlagsModule,
     ContactModule,
     MarketingModule,
     SeoModule,

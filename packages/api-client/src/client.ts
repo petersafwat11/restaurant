@@ -102,6 +102,12 @@ import {
   FavoriteListQuerySchema,
   FavoriteListSchema,
   FavoriteSchema,
+  type FeatureFlagAdminDto,
+  FeatureFlagAdminSchema,
+  type FeatureFlagListDto,
+  FeatureFlagListSchema,
+  type FeatureFlagsResolvedDto,
+  FeatureFlagsResolvedSchema,
   type ForgotPasswordDto,
   ForgotPasswordSchema,
   type HolidayDto,
@@ -265,6 +271,8 @@ import {
   UpdateCartItemSchema,
   type UpdateContactMessageDto,
   UpdateContactMessageSchema,
+  type UpdateFeatureFlagDto,
+  UpdateFeatureFlagSchema,
   type UpdateMenuCategoryDto,
   UpdateMenuCategorySchema,
   type UpdateMenuItemDto,
@@ -1204,6 +1212,27 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- feature flags ---------------------------------------------------
+  const featureFlags = {
+    resolved: (): Promise<FeatureFlagsResolvedDto> =>
+      request('/feature-flags', {
+        method: 'GET',
+        auth: false,
+        responseSchema: FeatureFlagsResolvedSchema,
+      }),
+    listAdmin: (): Promise<FeatureFlagListDto> =>
+      request('/admin/feature-flags', {
+        method: 'GET',
+        responseSchema: FeatureFlagListSchema,
+      }),
+    update: (key: string, input: UpdateFeatureFlagDto): Promise<FeatureFlagAdminDto> =>
+      request(`/admin/feature-flags/${encodeURIComponent(key)}`, {
+        method: 'PATCH',
+        body: UpdateFeatureFlagSchema.parse(input),
+        responseSchema: FeatureFlagAdminSchema,
+      }),
+  };
+
   // ---- marketing -------------------------------------------------------
   const marketing = {
     landing: (q?: MarketingQuery): Promise<LandingDataDto> =>
@@ -1525,6 +1554,7 @@ export function createApiClient(opts: ApiClientOptions) {
     favorites,
     referrals,
     i18n,
+    featureFlags,
     marketing,
     contact,
     seo,

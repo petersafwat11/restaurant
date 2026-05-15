@@ -37,6 +37,7 @@ import type {
   VerifyOtpDto,
 } from '@repo/types';
 import type { Queue } from 'bullmq';
+import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
@@ -57,6 +58,7 @@ export class AuthService {
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
     @InjectQueue(QUEUE_SMS) private readonly smsQueue: Queue,
     private readonly referrals: ReferralsService,
+    private readonly analytics: AnalyticsProductService,
   ) {
     this.jwtConfig = {
       accessSecret: env.JWT_ACCESS_SECRET,
@@ -90,6 +92,11 @@ export class AuthService {
 
     // Link a pending referral if a code was supplied (never blocks signup).
     await this.referrals.attachReferralOnSignup(user.id, dto.referralCode);
+
+    this.analytics.capture('signup', {
+      userId: user.id,
+      referred: Boolean(dto.referralCode),
+    });
 
     // Fire verification email (queued — never awaited inline)
     const token = await this.storeOneOffToken('verify-email', user.id, VERIFY_EMAIL_TTL_SECONDS);
