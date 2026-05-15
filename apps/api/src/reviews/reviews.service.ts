@@ -5,14 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@repo/db';
-import type {
-  CreateReviewDto,
-  ReviewDto,
-  ReviewListDto,
-  ReviewListQuery,
-  ReviewModerationDto,
+import {
+  type CreateReviewDto,
+  MAX_REVIEW_IMAGES,
+  type ReviewDto,
+  type ReviewListDto,
+  type ReviewListQuery,
+  type ReviewModerationDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 
 interface Actor {
   userId: string | null;
@@ -21,9 +23,18 @@ interface Actor {
 
 const URL_REGEX = /https?:\/\//gi;
 
+const REVIEW_INCLUDE = {
+  images: { orderBy: { position: 'asc' } },
+} satisfies Prisma.ReviewInclude;
+
+type ReviewRow = Prisma.ReviewGetPayload<{ include: typeof REVIEW_INCLUDE }>;
+
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploads: UploadsService,
+  ) {}
 
   async create(actor: Actor, dto: CreateReviewDto): Promise<ReviewDto> {
     if (!actor.userId) throw new ForbiddenException('Sign in to review');
@@ -42,6 +53,8 @@ export class ReviewsService {
     const urls = (dto.comment ?? '').match(URL_REGEX);
     const isVisible = !urls || urls.length < 2;
 
+    const imageKeys = (dto.imageKeys ?? []).slice(0, MAX_REVIEW_IMAGES);
+
     const created = await this.prisma.review.create({
       data: {
         orderId: order.id,
@@ -49,7 +62,14 @@ export class ReviewsService {
         rating: dto.rating,
         comment: dto.comment ?? null,
         isVisible,
+        images: {
+          create: imageKeys.map((key, position) => ({
+            url: this.uploads.publicUrlForKey(key),
+            position,
+          })),
+        },
       },
+      include: REVIEW_INCLUDE,
     });
     return toDto(created);
   }
@@ -71,7 +91,7 @@ export class ReviewsService {
       where,
       orderBy,
       take: limit + 1,
-      include: { user: { select: { firstName: true } } },
+      include: { ...REVIEW_INCLUDE, user: { select: { firstName: true } } },
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     });
 
@@ -92,6 +112,7 @@ export class ReviewsService {
       where: { userId: actor.userId },
       orderBy: { createdAt: 'desc' },
       take: 50,
+      include: REVIEW_INCLUDE,
     });
     return { items: rows.map(toDto), nextCursor: null };
   }
@@ -107,6 +128,7 @@ export class ReviewsService {
       where,
       orderBy: query.sort === 'rating' ? { rating: 'desc' } : { createdAt: 'desc' },
       take: limit + 1,
+      include: REVIEW_INCLUDE,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     });
     const hasMore = rows.length > limit;
@@ -121,20 +143,13 @@ export class ReviewsService {
     const updated = await this.prisma.review.update({
       where: { id },
       data: { isVisible: dto.isVisible },
+      include: REVIEW_INCLUDE,
     });
     return toDto(updated);
   }
 }
 
-function toDto(row: {
-  id: string;
-  orderId: string;
-  userId: string;
-  rating: number;
-  comment: string | null;
-  isVisible: boolean;
-  createdAt: Date;
-}): ReviewDto {
+function toDto(row: ReviewRow): ReviewDto {
   return {
     id: row.id,
     orderId: row.orderId,
@@ -143,5 +158,10 @@ function toDto(row: {
     comment: row.comment,
     isVisible: row.isVisible,
     createdAt: row.createdAt.toISOString(),
+    images: row.images.map((img) => ({
+      id: img.id,
+      url: img.url,
+      position: img.position,
+    })),
   };
 }

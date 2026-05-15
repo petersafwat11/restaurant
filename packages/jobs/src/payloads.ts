@@ -94,6 +94,23 @@ export const PushOrderStatusPayloadSchema = z.object({
 });
 export type PushOrderStatusPayload = z.infer<typeof PushOrderStatusPayloadSchema>;
 
+// Sprint 10 — contact-form: notify the restaurant + auto-reply the sender.
+export const EmailContactPayloadSchema = z.object({
+  contactMessageId: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  subject: z.string().nullable(),
+  message: z.string(),
+  restaurantEmail: z.string().email(),
+});
+export type EmailContactPayload = z.infer<typeof EmailContactPayloadSchema>;
+
+// Sprint 9 — prune push tokens unused for `staleDays` (default 60).
+export const PushTokenCleanupPayloadSchema = z.object({
+  staleDays: z.number().int().positive().optional(),
+});
+export type PushTokenCleanupPayload = z.infer<typeof PushTokenCleanupPayloadSchema>;
+
 // Sprint 8 — reports + analytics + audit.
 export const ReportsGeneratePayloadSchema = z.object({
   exportId: z.string(),

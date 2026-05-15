@@ -72,6 +72,48 @@ import {
   OrderListQuerySchema,
   OrderListSchema,
   OrderSchema,
+  type OrderTrackingDto,
+  OrderTrackingSchema,
+  type LoyaltyAccountDto,
+  LoyaltyAccountSchema,
+  type LoyaltyHistoryDto,
+  type LoyaltyHistoryQuery,
+  LoyaltyHistoryQuerySchema,
+  LoyaltyHistorySchema,
+  type NotificationListDto,
+  type NotificationListQuery,
+  NotificationListQuerySchema,
+  NotificationListSchema,
+  type NotificationPreferenceDto,
+  NotificationPreferenceSchema,
+  type RegisterPushTokenDto,
+  RegisterPushTokenSchema,
+  type UpdateNotificationPreferenceDto,
+  UpdateNotificationPreferenceSchema,
+  type UnreadCountDto,
+  UnreadCountSchema,
+  type AboutDataDto,
+  AboutDataSchema,
+  type ContactMessageDto,
+  type ContactMessageListDto,
+  type ContactMessageListQuery,
+  ContactMessageListQuerySchema,
+  ContactMessageListSchema,
+  ContactMessageSchema,
+  type CreateContactMessageDto,
+  CreateContactMessageSchema,
+  type LandingDataDto,
+  LandingDataSchema,
+  type MarketingQuery,
+  MarketingQuerySchema,
+  type SeoMetaDto,
+  type SeoMetaQuery,
+  SeoMetaQuerySchema,
+  SeoMetaSchema,
+  type StructuredDataDto,
+  StructuredDataSchema,
+  type UpdateContactMessageDto,
+  UpdateContactMessageSchema,
   type PaymentConfigDto,
   PaymentConfigSchema,
   type PaymentDto,
@@ -260,6 +302,8 @@ interface RequestOptions {
   skipRefresh?: boolean;
   /** Extra headers (e.g. Idempotency-Key on POST /orders). */
   headers?: Record<string, string>;
+  /** Return the raw response body as text (sitemap.xml / robots.txt). */
+  raw?: boolean;
 }
 
 export function createApiClient(opts: ApiClientOptions) {
@@ -302,6 +346,19 @@ export function createApiClient(opts: ApiClientOptions) {
       if (opts.onUnauthorized) await opts.onUnauthorized();
     } else if (res.status === 401 && opts.onUnauthorized) {
       await opts.onUnauthorized();
+    }
+
+    if (options.raw) {
+      if (!res.ok) {
+        let body: unknown;
+        try {
+          body = await res.json();
+        } catch {
+          body = { message: await res.text().catch(() => '') };
+        }
+        throw ApiError.fromResponse(res.status, body);
+      }
+      return (await res.text()) as T;
     }
 
     return handleResponse<T>(res, options.responseSchema);
@@ -705,6 +762,11 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: OrderSchema,
       }),
+    getTracking: (id: string): Promise<OrderTrackingDto> =>
+      request(`/orders/${encodeURIComponent(id)}/tracking`, {
+        method: 'GET',
+        responseSchema: OrderTrackingSchema,
+      }),
     updateStatus: (id: string, input: UpdateOrderStatusDto): Promise<OrderDto> =>
       request(`/orders/${encodeURIComponent(id)}/status`, {
         method: 'POST',
@@ -948,6 +1010,159 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- notifications ---------------------------------------------------
+  const notifications = {
+    list: (q?: NotificationListQuery): Promise<NotificationListDto> =>
+      request('/notifications', {
+        method: 'GET',
+        query: q
+          ? (NotificationListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: NotificationListSchema,
+      }),
+    unreadCount: (): Promise<UnreadCountDto> =>
+      request('/notifications/unread-count', {
+        method: 'GET',
+        responseSchema: UnreadCountSchema,
+      }),
+    markRead: (id: string): Promise<{ success: true }> =>
+      request(`/notifications/${encodeURIComponent(id)}/read`, {
+        method: 'POST',
+      }),
+    markAllRead: (): Promise<{ success: true; count: number }> =>
+      request('/notifications/read-all', { method: 'POST' }),
+    registerPushToken: (input: RegisterPushTokenDto): Promise<{ success: true }> =>
+      request('/notifications/push-tokens', {
+        method: 'POST',
+        body: RegisterPushTokenSchema.parse(input),
+      }),
+    unregisterPushToken: (token: string): Promise<{ success: true }> =>
+      request(`/notifications/push-tokens/${encodeURIComponent(token)}`, {
+        method: 'DELETE',
+      }),
+    getPreferences: (): Promise<NotificationPreferenceDto> =>
+      request('/notifications/preferences', {
+        method: 'GET',
+        responseSchema: NotificationPreferenceSchema,
+      }),
+    updatePreferences: (
+      input: UpdateNotificationPreferenceDto,
+    ): Promise<NotificationPreferenceDto> =>
+      request('/notifications/preferences', {
+        method: 'PATCH',
+        body: UpdateNotificationPreferenceSchema.parse(input),
+        responseSchema: NotificationPreferenceSchema,
+      }),
+  };
+
+  // ---- loyalty ---------------------------------------------------------
+  const loyalty = {
+    me: (): Promise<LoyaltyAccountDto> =>
+      request('/loyalty/me', {
+        method: 'GET',
+        responseSchema: LoyaltyAccountSchema,
+      }),
+    history: (q?: LoyaltyHistoryQuery): Promise<LoyaltyHistoryDto> =>
+      request('/loyalty/me/history', {
+        method: 'GET',
+        query: q
+          ? (LoyaltyHistoryQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: LoyaltyHistorySchema,
+      }),
+  };
+
+  // ---- marketing -------------------------------------------------------
+  const marketing = {
+    landing: (q?: MarketingQuery): Promise<LandingDataDto> =>
+      request('/marketing/landing', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (MarketingQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: LandingDataSchema,
+      }),
+    about: (q?: MarketingQuery): Promise<AboutDataDto> =>
+      request('/marketing/about', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (MarketingQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: AboutDataSchema,
+      }),
+  };
+
+  // ---- contact ---------------------------------------------------------
+  const contact = {
+    send: (input: CreateContactMessageDto): Promise<ContactMessageDto> =>
+      request('/contact', {
+        method: 'POST',
+        auth: false,
+        body: CreateContactMessageSchema.parse(input),
+        responseSchema: ContactMessageSchema,
+      }),
+    list: (q?: ContactMessageListQuery): Promise<ContactMessageListDto> =>
+      request('/admin/contact', {
+        method: 'GET',
+        query: q
+          ? (ContactMessageListQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: ContactMessageListSchema,
+      }),
+    updateStatus: (
+      id: string,
+      input: UpdateContactMessageDto,
+    ): Promise<ContactMessageDto> =>
+      request(`/admin/contact/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: UpdateContactMessageSchema.parse(input),
+        responseSchema: ContactMessageSchema,
+      }),
+  };
+
+  // ---- seo -------------------------------------------------------------
+  const seo = {
+    structuredData: (slug: string): Promise<StructuredDataDto> =>
+      request(`/seo/structured-data/${encodeURIComponent(slug)}`, {
+        method: 'GET',
+        auth: false,
+        responseSchema: StructuredDataSchema,
+      }),
+    sitemap: (): Promise<string> =>
+      request('/seo/sitemap.xml', { method: 'GET', auth: false, raw: true }),
+    robots: (): Promise<string> =>
+      request('/seo/robots.txt', { method: 'GET', auth: false, raw: true }),
+    meta: (q?: SeoMetaQuery): Promise<SeoMetaDto> =>
+      request('/seo/meta', {
+        method: 'GET',
+        auth: false,
+        query: q
+          ? (SeoMetaQuerySchema.parse(q) as Record<
+              string,
+              string | number | boolean | undefined
+            >)
+          : undefined,
+        responseSchema: SeoMetaSchema,
+      }),
+  };
+
   // ---- customers (admin) -----------------------------------------------
   const customers = {
     list: (q?: CustomerListQuery): Promise<CustomerListDto> =>
@@ -1182,6 +1397,11 @@ export function createApiClient(opts: ApiClientOptions) {
     payments,
     reservations,
     reviews,
+    notifications,
+    loyalty,
+    marketing,
+    contact,
+    seo,
     customers,
     staff,
     settings,

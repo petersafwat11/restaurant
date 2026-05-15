@@ -9,7 +9,10 @@ import { AuditInterceptor } from './audit-log/audit.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { BullmqModule } from './bullmq/bullmq.module';
 import { CartModule } from './cart/cart.module';
+import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
+import { MarketingModule } from './marketing/marketing.module';
+import { SeoModule } from './seo/seo.module';
 import { ReportsModule } from './reports/reports.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -21,6 +24,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
 import { ConfigModule } from './config/config.module';
 import { JobsModule } from './jobs/jobs.module';
 import { KitchenModule } from './kitchen/kitchen.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 import { MailerModule } from './mailer/mailer.module';
 import { MenuModule } from './menu/menu.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -32,6 +36,7 @@ import { PromotionsModule } from './promotions/promotions.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RedisModule } from './redis/redis.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 import { SmsModule } from './sms/sms.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
@@ -67,7 +72,12 @@ import { UsersModule } from './users/users.module';
     AuditModule,
     AnalyticsModule,
     ReportsModule,
+    LoyaltyModule,
+    ContactModule,
+    MarketingModule,
+    SeoModule,
     JobsModule,
+    SchedulerModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

@@ -1,4 +1,5 @@
 export { useCart } from './use-cart';
+export { useCartSync } from './use-cart-sync';
 export { useAddToCart } from './use-add-to-cart';
 export { useUpdateCartItem } from './use-update-cart-item';
 export { useRemoveCartItem } from './use-remove-cart-item';
