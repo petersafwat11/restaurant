@@ -14,6 +14,7 @@ import {
   type CreateRefundDto,
   CreateRefundSchema,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -66,6 +67,7 @@ export class PaymentsController {
 
   @Post(':paymentId/refunds')
   @Permissions('payment:refund')
+  @AuditAction('order:refund', 'payment')
   refund(
     @CurrentUserOptional() user: OptionalUser | null,
     @Param('paymentId') paymentId: string,

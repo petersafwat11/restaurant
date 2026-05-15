@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PaymentSchema, RefundSchema } from './payment';
 
 const MoneyStringSchema = z
   .string()
@@ -72,6 +73,21 @@ export const OrderStatusEventSchema = z.object({
 });
 export type OrderStatusEventDto = z.infer<typeof OrderStatusEventSchema>;
 
+// ---- Admin-only enrichment (populated only for callers with order:read) ----
+
+export const OrderCustomerSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string(),
+  phone: z.string().nullable(),
+});
+export type OrderCustomerDto = z.infer<typeof OrderCustomerSchema>;
+
+export const OrderPaymentSchema = PaymentSchema.extend({
+  refunds: z.array(RefundSchema),
+});
+export type OrderPaymentDto = z.infer<typeof OrderPaymentSchema>;
+
 // ---- Order detail ----------------------------------------------------------
 
 export const OrderSchema = z.object({
@@ -103,6 +119,10 @@ export const OrderSchema = z.object({
   couponCode: z.string().nullable(),
   items: z.array(OrderItemSchema),
   statusEvents: z.array(OrderStatusEventSchema),
+  // Admin-only: present when the caller has `order:read` (staff view).
+  // Self/customer view leaves these null — the user already has their data.
+  customer: OrderCustomerSchema.nullable().optional(),
+  payment: OrderPaymentSchema.nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -134,6 +154,13 @@ export type OrderListDto = z.infer<typeof OrderListSchema>;
 
 export const OrderListQuerySchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),
+  // Admin-list filters — only honored when the caller has `order:read`
+  // and supplies `restaurantId`. Customer callers ignore these.
+  restaurantId: z.string().min(1).optional(),
+  type: z.enum(ORDER_TYPES).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  search: z.string().max(100).optional(),
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(50).optional(),
 });

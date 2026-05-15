@@ -11,10 +11,14 @@ import type {
   CreateOrderDto,
   ModifierSnapshotEntry,
   OrderCreatedEvent,
+  OrderCustomerDto,
   OrderDto,
   OrderListDto,
+  OrderListItemDto,
   OrderListQuery,
+  OrderPaymentDto,
   OrderStatusChangedEvent,
+  PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils';
 import { PricingService } from '../pricing/pricing.service';
@@ -386,15 +390,51 @@ export class OrdersService {
 
   // ---- Read --------------------------------------------------------------
 
+  /**
+   * Dual-mode list:
+   * - Staff (caller has `order:read`) supplying `restaurantId` → restaurant-wide
+   *   admin list with server-side filtering (status, type, date range, search).
+   * - Everyone else → the caller's own orders (account history), unchanged.
+   */
   async list(actor: OrderActor, query: OrderListQuery): Promise<OrderListDto> {
-    if (!actor.userId) {
-      throw new ForbiddenException('Sign in to view your orders');
+    const isStaff = actor.permissions.includes('order:read');
+
+    let where: Prisma.OrderWhereInput;
+    if (isStaff && query.restaurantId) {
+      where = {
+        restaurantId: query.restaurantId,
+        ...(query.status ? { status: query.status } : {}),
+        ...(query.type ? { type: query.type } : {}),
+        ...(query.from || query.to
+          ? {
+              createdAt: {
+                ...(query.from ? { gte: new Date(query.from) } : {}),
+                ...(query.to ? { lte: new Date(query.to) } : {}),
+              },
+            }
+          : {}),
+        ...(query.search
+          ? {
+              OR: [
+                { orderNumber: { contains: query.search, mode: 'insensitive' } },
+                { user: { firstName: { contains: query.search, mode: 'insensitive' } } },
+                { user: { lastName: { contains: query.search, mode: 'insensitive' } } },
+                { user: { email: { contains: query.search, mode: 'insensitive' } } },
+              ],
+            }
+          : {}),
+      };
+    } else {
+      if (!actor.userId) {
+        throw new ForbiddenException('Sign in to view your orders');
+      }
+      where = {
+        userId: actor.userId,
+        ...(query.status ? { status: query.status } : {}),
+      };
     }
+
     const limit = query.limit ?? 20;
-    const where: Prisma.OrderWhereInput = {
-      userId: actor.userId,
-      ...(query.status ? { status: query.status } : {}),
-    };
     const rows = await this.prisma.order.findMany({
       where,
       include: {
@@ -409,22 +449,7 @@ export class OrdersService {
     const hasMore = rows.length > limit;
     const slice = hasMore ? rows.slice(0, limit) : rows;
     return {
-      items: slice.map((r) => ({
-        id: r.id,
-        orderNumber: r.orderNumber,
-        restaurantId: r.restaurantId,
-        status: r.status,
-        type: r.type,
-        grandTotal: r.grandTotal.toFixed(2),
-        currency: r.currency,
-        itemCount: r.items.length,
-        customerName: r.user
-          ? ([r.user.firstName, r.user.lastName].filter(Boolean).join(' ').trim() ||
-              r.user.email) ??
-            null
-          : null,
-        createdAt: r.createdAt.toISOString(),
-      })),
+      items: slice.map((r) => toListItem(r)),
       nextCursor: hasMore ? (slice[slice.length - 1]?.id ?? null) : null,
     };
   }
@@ -445,7 +470,59 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    return toOrderDto(order);
+    const dto = toOrderDto(order);
+    if (canReadAny) {
+      const [customer, payment] = await Promise.all([
+        this.loadOrderCustomer(order.userId),
+        this.loadOrderPayment(order.id),
+      ]);
+      dto.customer = customer;
+      dto.payment = payment;
+    }
+    return dto;
+  }
+
+  private async loadOrderCustomer(userId: string | null): Promise<OrderCustomerDto | null> {
+    if (!userId) return null;
+    const u = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+    });
+    if (!u) return null;
+    return {
+      id: u.id,
+      name: [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || null,
+      email: u.email,
+      phone: u.phone,
+    };
+  }
+
+  private async loadOrderPayment(orderId: string): Promise<OrderPaymentDto | null> {
+    const p = await this.prisma.payment.findUnique({
+      where: { orderId },
+      include: { refunds: { orderBy: { createdAt: 'asc' } } },
+    });
+    if (!p) return null;
+    return {
+      id: p.id,
+      orderId: p.orderId,
+      provider: p.provider,
+      providerRef: p.providerRef,
+      method: p.method as PaymentMethodKind,
+      amount: p.amount.toFixed(2),
+      currency: p.currency,
+      status: p.status,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      refunds: p.refunds.map((r) => ({
+        id: r.id,
+        paymentId: r.paymentId,
+        amount: r.amount.toFixed(2),
+        reason: r.reason,
+        providerRef: r.providerRef,
+        createdAt: r.createdAt.toISOString(),
+      })),
+    };
   }
 
   /** Internal: load + map by id without ownership scoping. */
@@ -514,6 +591,28 @@ type OrderWithRelations = Order & {
   items: OrderItem[];
   statusEvents: OrderStatusEvent[];
 };
+
+type OrderListRow = Order & {
+  items: { id: string }[];
+  user: { firstName: string | null; lastName: string | null; email: string } | null;
+};
+
+function toListItem(r: OrderListRow): OrderListItemDto {
+  return {
+    id: r.id,
+    orderNumber: r.orderNumber,
+    restaurantId: r.restaurantId,
+    status: r.status,
+    type: r.type,
+    grandTotal: r.grandTotal.toFixed(2),
+    currency: r.currency,
+    itemCount: r.items.length,
+    customerName: r.user
+      ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ').trim() || r.user.email
+      : null,
+    createdAt: r.createdAt.toISOString(),
+  };
+}
 
 function toOrderDto(row: OrderWithRelations): OrderDto {
   return {
