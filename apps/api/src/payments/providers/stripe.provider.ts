@@ -77,7 +77,7 @@ export class StripeProvider implements PaymentProvider {
 
     const refund = await this.stripe.refunds.create({
       payment_intent: input.providerRef,
-      amount: toMinorUnits(input.amount, 'usd'),
+      amount: toMinorUnits(input.amount, input.currency),
       reason: input.reason ? 'requested_by_customer' : undefined,
     });
 

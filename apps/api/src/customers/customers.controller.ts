@@ -20,8 +20,8 @@ export class CustomersController {
 
   @Permissions('customer:read')
   @Get(':id')
-  get(@Param('id') id: string) {
-    return this.customers.get(id);
+  get(@Param('id') id: string, @Query('restaurantId') restaurantId?: string) {
+    return this.customers.get(id, restaurantId);
   }
 
   @Permissions('customer:notes')

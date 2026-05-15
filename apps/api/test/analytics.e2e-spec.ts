@@ -76,6 +76,36 @@ describe('analytics (e2e)', () => {
     expect(body.completionRate.value).toBe(1);
   });
 
+  it('completion rate = completed/(completed+cancelled), ignoring in-flight/refunded', async () => {
+    const prisma = app.get(PrismaService);
+    // On top of the 3 COMPLETED from beforeEach: +1 CANCELLED, +1 PENDING.
+    // Old (buggy) formula completed/total = 3/5 = 0.6.
+    // Correct formula completed/(completed+cancelled) = 3/4 = 0.75.
+    for (const [i, status] of (['CANCELLED', 'PENDING'] as const).entries()) {
+      await prisma.order.create({
+        data: {
+          orderNumber: `R-AE-CR-${i}`,
+          userId,
+          restaurantId,
+          type: 'DINE_IN',
+          status,
+          subtotal: new Prisma.Decimal('10.00'),
+          taxTotal: new Prisma.Decimal('0.80'),
+          grandTotal: new Prisma.Decimal('10.80'),
+          currency: 'PLN',
+        },
+      });
+    }
+    const res = await inject(
+      'GET',
+      `/api/v1/analytics/overview?restaurantId=${restaurantId}&period=today`,
+      undefined,
+      ownerToken,
+    );
+    expect(res.statusCode).toBe(200);
+    expect(res.json().completionRate.value).toBe(0.75);
+  });
+
   it('forbids non-admin', async () => {
     // Register a regular customer and try the endpoint.
     await inject('POST', '/api/v1/auth/register', {

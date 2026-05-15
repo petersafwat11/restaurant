@@ -22,7 +22,9 @@ export class OrderNumberService {
     if (seq === undefined) {
       throw new Error('Failed to fetch next order number from sequence');
     }
-    const year = new Date().getFullYear();
+    // UTC year so the human-readable prefix matches the row's createdAt
+    // (DB now() is UTC); avoids a year mismatch around the New-Year boundary.
+    const year = new Date().getUTCFullYear();
     return `R-${year}-${seq.toString().padStart(6, '0')}`;
   }
 }

@@ -10,9 +10,13 @@ export class DeliveryZoneService {
    */
   findZone(zones: DeliveryZoneDto[], lat: number, lng: number): DeliveryZoneDto | null {
     for (const zone of zones) {
-      for (const ring of zone.polygon.coordinates) {
-        if (pointInRing(lng, lat, ring)) return zone;
-      }
+      const rings = zone.polygon.coordinates;
+      const outer = rings[0];
+      if (!outer || !pointInRing(lng, lat, outer)) continue;
+      // GeoJSON: ring[0] is the exterior, ring[1..] are holes. A point inside
+      // a hole is OUTSIDE the polygon.
+      const inHole = rings.slice(1).some((hole) => pointInRing(lng, lat, hole));
+      if (!inHole) return zone;
     }
     return null;
   }
