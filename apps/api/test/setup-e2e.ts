@@ -54,6 +54,13 @@ export async function resetDb(app: NestFastifyApplication): Promise<void> {
 export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   const prisma = app.get(PrismaService);
   await prisma.webhookEvent.deleteMany();
+  // Sprint 11 — loyalty / favorites / referral (user-scoped; explicit so a
+  // menu-only reset between tests doesn't leak ledger/favorite rows).
+  await prisma.loyaltyTransaction.deleteMany();
+  await prisma.loyaltyAccount.deleteMany();
+  await prisma.referral.deleteMany();
+  await prisma.referralCode.deleteMany();
+  await prisma.favorite.deleteMany();
   await prisma.refund.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.couponRedemption.deleteMany();

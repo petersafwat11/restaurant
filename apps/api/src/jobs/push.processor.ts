@@ -1,9 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import {
+  JOB_PUSH_LOYALTY,
   JOB_PUSH_ORDER_STATUS,
   JOB_PUSH_TOKEN_CLEANUP,
   JOB_PUSH_WELCOME,
+  PushLoyaltyPayloadSchema,
   PushOrderStatusPayloadSchema,
   PushTokenCleanupPayloadSchema,
   PushWelcomePayloadSchema,
@@ -55,6 +57,18 @@ export class PushProcessor extends WorkerHost {
           toStatus: payload.toStatus,
           url: orderDeepLink(payload.orderId, this.env.APP_DEEP_LINK_SCHEME),
         },
+      });
+      return;
+    }
+
+    if (job.name === JOB_PUSH_LOYALTY) {
+      const payload = PushLoyaltyPayloadSchema.parse(job.data);
+      const title =
+        payload.reason === 'REFERRAL' ? 'Referral reward' : 'Points earned';
+      await this.sendToUser(payload.userId, {
+        title,
+        body: `You earned ${payload.points} loyalty points.`,
+        data: { type: 'loyalty', points: payload.points },
       });
       return;
     }

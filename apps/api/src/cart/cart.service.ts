@@ -171,6 +171,20 @@ export class CartService {
     return this.toDto(cart.id);
   }
 
+  /**
+   * Store the points the (authenticated) customer wants to redeem. This is
+   * intent only — `OrdersService` re-validates against the live balance and
+   * subtotal cap at checkout, so a stale value here can never over-redeem.
+   */
+  async setLoyaltyPoints(userId: string, restaurantId: string, points: number): Promise<CartDto> {
+    const cart = await this.findOrCreateCart({ userId, sessionKey: null }, restaurantId);
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { loyaltyPointsToRedeem: Math.max(0, Math.floor(points)) },
+    });
+    return this.toDto(cart.id);
+  }
+
   async mergeOnLogin(userId: string, dto: MergeCartDto): Promise<CartDto> {
     const guestCart = await this.prisma.cart.findUnique({
       where: { sessionKey: dto.sessionKey },
@@ -357,6 +371,7 @@ export class CartService {
       currency: restaurant.currency,
       items: itemDtos,
       appliedCoupon: appliedCouponDto,
+      loyaltyPointsToRedeem: cart.loyaltyPointsToRedeem,
       totals,
       updatedAt: cart.updatedAt.toISOString(),
     };

@@ -24,13 +24,14 @@ import type {
   PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils';
-import { computeEta, isTerminalStatus } from './order-tracking';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
 import { IdempotencyService } from './idempotency.service';
 import { OrderNumberService } from './order-number';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
+import { computeEta, isTerminalStatus } from './order-tracking';
 
 interface OrderActor {
   userId: string | null;
@@ -47,6 +48,7 @@ export class OrdersService {
     private readonly orderNumber: OrderNumberService,
     private readonly idempotency: IdempotencyService,
     private readonly pricing: PricingService,
+    private readonly loyalty: LoyaltyService,
     private readonly events: EventEmitter2,
   ) {}
 
@@ -148,14 +150,30 @@ export class OrdersService {
       couponRedemption = { couponId: cart.appliedCoupon.id };
     }
 
+    // Loyalty redemption: server recomputes the discount from the points the
+    // customer chose to redeem (cart-stored). Guests cannot redeem. The
+    // appliable points are locked here and burned inside the order tx.
+    let loyaltyPointsToBurn = 0;
+    let loyaltyDiscount = toDecimal(0);
+    if (actor.userId && cart.loyaltyPointsToRedeem > 0) {
+      const quote = await this.loyalty.quoteRedemption(
+        actor.userId,
+        cart.loyaltyPointsToRedeem,
+        decimalToString(subtotalPreview),
+      );
+      loyaltyPointsToBurn = quote.appliablePoints;
+      loyaltyDiscount = toDecimal(quote.discountAmount);
+    }
+
     // Delegate totals math to the shared pricing service (tax + delivery fee
     // pulled from restaurant config). Tip validation lives there too.
+    // Coupon + loyalty are both pre-tax discounts.
     let totals;
     try {
       totals = await this.pricing.calculateTotals({
         restaurantId: dto.restaurantId,
         lines: lineSnapshots.map((l) => ({ unitPrice: l.unitPrice, quantity: l.quantity })),
-        couponDiscount,
+        couponDiscount: couponDiscount.plus(loyaltyDiscount),
         tipAmount: dto.tipAmount ?? '0',
       });
     } catch (err) {
@@ -191,9 +209,7 @@ export class OrdersService {
       return this.getById(actor, reservation.orderId);
     }
     if (reservation.status === 'pending') {
-      throw new ConflictException(
-        'A request with this Idempotency-Key is already being processed',
-      );
+      throw new ConflictException('A request with this Idempotency-Key is already being processed');
     }
 
     let created!: Order;
@@ -201,63 +217,69 @@ export class OrdersService {
       const orderNumber = await this.orderNumber.next();
 
       created = await this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.create({
-        data: {
-          orderNumber,
-          userId: actor.userId,
-          restaurantId: dto.restaurantId,
-          type: dto.type,
-          status: 'PENDING',
-          subtotal,
-          taxTotal,
-          deliveryFee,
-          tipAmount,
-          discountTotal,
-          grandTotal,
-          currency: restaurant.currency,
-          deliveryAddress: deliveryAddress ?? Prisma.JsonNull,
-          pickupAt: dto.pickupAt ? new Date(dto.pickupAt) : null,
-          notes: dto.notes ?? null,
-          couponCode,
-          items: {
-            create: lineSnapshots.map((l) => ({
-              menuItemId: l.menuItemId,
-              nameSnapshot: l.nameSnapshot,
-              quantity: l.quantity,
-              unitPrice: l.unitPrice,
-              lineTotal: l.lineTotal,
-              modifierSnapshot: l.modifierSnapshot as unknown as Prisma.InputJsonValue,
-              notes: l.notes,
-            })),
-          },
-          statusEvents: {
-            create: {
-              status: 'PENDING',
-              byUserId: actor.userId,
-              note: 'Order placed',
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
+            userId: actor.userId,
+            restaurantId: dto.restaurantId,
+            type: dto.type,
+            status: 'PENDING',
+            subtotal,
+            taxTotal,
+            deliveryFee,
+            tipAmount,
+            discountTotal,
+            grandTotal,
+            currency: restaurant.currency,
+            deliveryAddress: deliveryAddress ?? Prisma.JsonNull,
+            pickupAt: dto.pickupAt ? new Date(dto.pickupAt) : null,
+            notes: dto.notes ?? null,
+            couponCode,
+            items: {
+              create: lineSnapshots.map((l) => ({
+                menuItemId: l.menuItemId,
+                nameSnapshot: l.nameSnapshot,
+                quantity: l.quantity,
+                unitPrice: l.unitPrice,
+                lineTotal: l.lineTotal,
+                modifierSnapshot: l.modifierSnapshot as unknown as Prisma.InputJsonValue,
+                notes: l.notes,
+              })),
+            },
+            statusEvents: {
+              create: {
+                status: 'PENDING',
+                byUserId: actor.userId,
+                note: 'Order placed',
+              },
             },
           },
-        },
-      });
-
-      if (couponRedemption) {
-        await tx.couponRedemption.create({
-          data: {
-            couponId: couponRedemption.couponId,
-            userId: actor.userId,
-            orderId: order.id,
-          },
         });
-      }
 
-      // Clear the cart so the user doesn't re-submit the same items.
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
-      await tx.cart.update({
-        where: { id: cart.id },
-        data: { appliedCouponId: null },
-      });
+        if (couponRedemption) {
+          await tx.couponRedemption.create({
+            data: {
+              couponId: couponRedemption.couponId,
+              userId: actor.userId,
+              orderId: order.id,
+            },
+          });
+        }
 
-      return order;
+        // Burn redeemed loyalty points inside the same tx. Throws (rolls the
+        // order back) if the balance changed since the quote.
+        if (actor.userId && loyaltyPointsToBurn > 0) {
+          await this.loyalty.burnForOrderTx(tx, actor.userId, order.id, loyaltyPointsToBurn);
+        }
+
+        // Clear the cart so the user doesn't re-submit the same items.
+        await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+        await tx.cart.update({
+          where: { id: cart.id },
+          data: { appliedCouponId: null, loyaltyPointsToRedeem: 0 },
+        });
+
+        return order;
       });
 
       await this.idempotency.store(scope, idempotencyKey, created.id);
@@ -645,26 +667,28 @@ export class OrdersService {
       },
       orderBy: { createdAt: 'asc' },
     });
-    return rows
-      .map((r) => ({
-        orderId: r.id,
-        orderNumber: r.orderNumber,
-        status: r.status,
-        confirmedAt: r.statusEvents[0]?.createdAt.toISOString() ?? null,
-        items: r.items.map((it) => {
-          const snapshot = it.modifierSnapshot as unknown as ModifierSnapshotEntry[] | null;
-          return {
-            name: it.nameSnapshot,
-            quantity: it.quantity,
-            modifiers: snapshot ? snapshot.map((s) => `${s.groupName}: ${s.optionName}`) : [],
-            notes: it.notes,
-          };
-        }),
-      }))
-      // KDS contract: oldest-confirmed first. confirmedAt is an ISO string so
-      // lexicographic compare is chronological; rows without a CONFIRMED event
-      // (shouldn't happen for CONFIRMED|PREPARING) sort last.
-      .sort((a, b) => (a.confirmedAt ?? '~').localeCompare(b.confirmedAt ?? '~'));
+    return (
+      rows
+        .map((r) => ({
+          orderId: r.id,
+          orderNumber: r.orderNumber,
+          status: r.status,
+          confirmedAt: r.statusEvents[0]?.createdAt.toISOString() ?? null,
+          items: r.items.map((it) => {
+            const snapshot = it.modifierSnapshot as unknown as ModifierSnapshotEntry[] | null;
+            return {
+              name: it.nameSnapshot,
+              quantity: it.quantity,
+              modifiers: snapshot ? snapshot.map((s) => `${s.groupName}: ${s.optionName}`) : [],
+              notes: it.notes,
+            };
+          }),
+        }))
+        // KDS contract: oldest-confirmed first. confirmedAt is an ISO string so
+        // lexicographic compare is chronological; rows without a CONFIRMED event
+        // (shouldn't happen for CONFIRMED|PREPARING) sort last.
+        .sort((a, b) => (a.confirmedAt ?? '~').localeCompare(b.confirmedAt ?? '~'))
+    );
   }
 }
 
@@ -720,6 +744,8 @@ function toOrderDto(row: OrderWithRelations): OrderDto {
     tipAmount: row.tipAmount.toFixed(2),
     discountTotal: row.discountTotal.toFixed(2),
     grandTotal: row.grandTotal.toFixed(2),
+    loyaltyPointsUsed: row.loyaltyPointsUsed,
+    loyaltyPointsEarned: row.loyaltyPointsEarned,
     currency: row.currency,
     deliveryAddress: row.deliveryAddress as OrderDto['deliveryAddress'],
     pickupAt: row.pickupAt?.toISOString() ?? null,

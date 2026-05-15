@@ -22,6 +22,8 @@ function orderStub(status: OrderDto['status']): OrderDto {
     tipAmount: '0.00',
     discountTotal: '0.00',
     grandTotal: '10.80',
+    loyaltyPointsUsed: 0,
+    loyaltyPointsEarned: 0,
     currency: 'PLN',
     deliveryAddress: null,
     pickupAt: null,

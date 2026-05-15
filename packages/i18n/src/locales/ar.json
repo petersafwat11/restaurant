@@ -1,1 +1,185 @@
-{}
+{
+  "common": {
+    "appName": "المطعم",
+    "ok": "حسناً",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "next": "التالي",
+    "search": "بحث",
+    "loading": "جارٍ التحميل…",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق",
+    "yes": "نعم",
+    "no": "لا",
+    "currency": "العملة",
+    "language": "اللغة"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "verifyEmail": "تأكيد بريدك الإلكتروني",
+    "otpSent": "أرسلنا رمزاً إلى {target}",
+    "welcomeBack": "مرحباً بعودتك، {name}",
+    "referralCodeLabel": "رمز الإحالة (اختياري)"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "أدخل بريداً إلكترونياً صحيحاً",
+    "passwordTooShort": "يجب ألا تقل كلمة المرور عن {min} أحرف",
+    "passwordWeak": "يجب أن تحتوي كلمة المرور على حرف كبير وصغير ورقم",
+    "invalidPhone": "أدخل رقم هاتف صحيحاً",
+    "tooLong": "يجب ألا يزيد عن {max} حرفاً"
+  },
+  "menu": {
+    "title": "القائمة",
+    "categories": "الأقسام",
+    "featured": "المميزة",
+    "allItems": "كل الأصناف",
+    "addToCart": "أضف إلى السلة",
+    "outOfStock": "غير متوفر",
+    "calories": "{count} سعرة",
+    "vegetarian": "نباتي",
+    "vegan": "نباتي صرف",
+    "glutenFree": "خالٍ من الغلوتين",
+    "noResults": "لا توجد أصناف مطابقة"
+  },
+  "cart": {
+    "title": "سلتك",
+    "empty": "سلتك فارغة",
+    "subtotal": "المجموع الفرعي",
+    "discount": "الخصم",
+    "estimatedTotal": "الإجمالي التقديري",
+    "applyCoupon": "تطبيق القسيمة",
+    "couponApplied": "تم تطبيق القسيمة {code}",
+    "remove": "إزالة",
+    "itemCount": "{count, plural, zero {لا أصناف} one {صنف واحد} two {صنفان} few {# أصناف} many {# صنفاً} other {# صنف}}",
+    "checkout": "إتمام الطلب"
+  },
+  "checkout": {
+    "title": "إتمام الطلب",
+    "orderType": "نوع الطلب",
+    "delivery": "توصيل",
+    "pickup": "استلام",
+    "dineIn": "تناول في المطعم",
+    "deliveryAddress": "عنوان التوصيل",
+    "pickupTime": "وقت الاستلام",
+    "payment": "الدفع",
+    "tip": "البقشيش",
+    "reviewOrder": "مراجعة الطلب",
+    "placeOrder": "تأكيد الطلب",
+    "tax": "الضريبة",
+    "deliveryFee": "رسوم التوصيل",
+    "grandTotal": "الإجمالي"
+  },
+  "order": {
+    "title": "الطلب {number}",
+    "history": "سجل الطلبات",
+    "trackOrder": "تتبع الطلب",
+    "reorder": "إعادة الطلب",
+    "estimatedArrival": "وقت الوصول المتوقع",
+    "placedOn": "تم الطلب في {date}",
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "CONFIRMED": "مؤكد",
+      "PREPARING": "قيد التحضير",
+      "READY": "جاهز",
+      "OUT_FOR_DELIVERY": "في الطريق للتوصيل",
+      "DELIVERED": "تم التوصيل",
+      "COMPLETED": "مكتمل",
+      "CANCELLED": "ملغى",
+      "REFUNDED": "تم الاسترداد"
+    },
+    "notify": {
+      "placed": "تم استلام الطلب {number} — سنخبرك عند تأكيده.",
+      "confirmed": "تم تأكيد الطلب {number} ويجري تحضيره.",
+      "ready": "الطلب {number} جاهز.",
+      "outForDelivery": "الطلب {number} في الطريق إليك.",
+      "delivered": "تم توصيل الطلب {number}. بالهناء!",
+      "cancelled": "تم إلغاء الطلب {number}.",
+      "refunded": "تم استرداد الطلب {number}."
+    }
+  },
+  "account": {
+    "title": "الحساب",
+    "profile": "الملف الشخصي",
+    "addresses": "العناوين",
+    "paymentMethods": "طرق الدفع",
+    "loyalty": "الولاء",
+    "favorites": "المفضلة",
+    "referrals": "الإحالات",
+    "notifications": "الإشعارات",
+    "preferences": "التفضيلات"
+  },
+  "loyalty": {
+    "title": "الولاء",
+    "balance": "{points, plural, zero {لا نقاط} one {نقطة واحدة} two {نقطتان} few {# نقاط} many {# نقطة} other {# نقطة}}",
+    "tier": "فئة {tier}",
+    "tierProgress": "{points} نقطة للوصول إلى {tier}",
+    "redeem": "استبدال النقاط",
+    "redeemDiscount": "استبدل {points} نقطة بمبلغ {amount}",
+    "earned": "حصلت على {points} نقطة",
+    "history": "سجل النقاط",
+    "tiers": {
+      "bronze": "برونزي",
+      "silver": "فضي",
+      "gold": "ذهبي",
+      "platinum": "بلاتيني"
+    }
+  },
+  "reviews": {
+    "title": "التقييمات",
+    "writeReview": "اكتب تقييماً",
+    "rating": "التقييم",
+    "comment": "التعليق",
+    "submit": "إرسال التقييم",
+    "ownerReply": "رد المالك",
+    "averageRating": "{average} من 5 ({count, plural, zero {لا تقييمات} one {تقييم واحد} two {تقييمان} few {# تقييمات} many {# تقييماً} other {# تقييم}})",
+    "thanks": "شكراً لتقييمك"
+  },
+  "favorites": {
+    "title": "المفضلة",
+    "empty": "ليس لديك مفضلات بعد",
+    "add": "أضف إلى المفضلة",
+    "remove": "إزالة من المفضلة"
+  },
+  "referral": {
+    "title": "ادعُ أصدقاءك",
+    "yourCode": "رمز الإحالة الخاص بك",
+    "share": "شارك هذا الرابط",
+    "howItWorks": "امنح أصدقاءك خصماً واكسب {points} نقطة عند طلبهم.",
+    "invited": "{count, plural, zero {لم تدعُ أحداً} one {دعوت صديقاً واحداً} two {دعوت صديقين} few {دعوت # أصدقاء} many {دعوت # صديقاً} other {دعوت # صديق}}",
+    "completed": "{count} مكتملة"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تعليم الكل كمقروء",
+    "unreadCount": "{count, plural, zero {لا غير مقروء} one {غير مقروء واحد} two {غير مقروءان} few {# غير مقروءة} many {# غير مقروء} other {# غير مقروء}}"
+  },
+  "errors": {
+    "generic": "حدث خطأ ما. حاول مرة أخرى.",
+    "network": "خطأ في الشبكة. تحقق من اتصالك.",
+    "unauthorized": "يرجى تسجيل الدخول للمتابعة.",
+    "forbidden": "ليس لديك صلاحية للقيام بذلك.",
+    "notFound": "غير موجود.",
+    "rateLimited": "طلبات كثيرة جداً. يرجى التمهل.",
+    "couponInvalid": "هذه القسيمة غير صالحة.",
+    "outOfStock": "بعض الأصناف لم تعد متوفرة."
+  },
+  "marketing": {
+    "heroCta": "اطلب الآن",
+    "specials": "عروض اليوم",
+    "ourStory": "قصتنا",
+    "locations": "الفروع",
+    "contactUs": "اتصل بنا",
+    "reserveTable": "احجز طاولة"
+  }
+}

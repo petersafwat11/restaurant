@@ -19,6 +19,8 @@ import {
   ApplyCouponSchema,
   type MergeCartDto,
   MergeCartSchema,
+  type SetCartLoyaltyDto,
+  SetCartLoyaltySchema,
   type UpdateCartItemDto,
   UpdateCartItemSchema,
 } from '@repo/types';
@@ -126,6 +128,17 @@ export class CartController {
     @Body(new ZodValidationPipe(MergeCartSchema)) dto: MergeCartDto,
   ) {
     return this.cart.mergeOnLogin(user.id, dto);
+  }
+
+  // Auth-only: loyalty redemption requires a known account. The stored value
+  // is intent — checkout re-validates against the live balance.
+  @Patch('loyalty')
+  setLoyalty(
+    @CurrentUser() user: RequestUser,
+    @Query('restaurantId') restaurantId: string,
+    @Body(new ZodValidationPipe(SetCartLoyaltySchema)) dto: SetCartLoyaltyDto,
+  ) {
+    return this.cart.setLoyaltyPoints(user.id, restaurantId, dto.points);
   }
 
   @Public()

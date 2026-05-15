@@ -40,6 +40,7 @@ import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { ReferralsService } from '../referrals/referrals.service';
 
 const OTP_TTL_SECONDS = 5 * 60;
 const VERIFY_EMAIL_TTL_SECONDS = 24 * 60 * 60;
@@ -55,6 +56,7 @@ export class AuthService {
     private readonly redis: RedisService,
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
     @InjectQueue(QUEUE_SMS) private readonly smsQueue: Queue,
+    private readonly referrals: ReferralsService,
   ) {
     this.jwtConfig = {
       accessSecret: env.JWT_ACCESS_SECRET,
@@ -85,6 +87,9 @@ export class AuthService {
       },
       include: this.userInclude(),
     });
+
+    // Link a pending referral if a code was supplied (never blocks signup).
+    await this.referrals.attachReferralOnSignup(user.id, dto.referralCode);
 
     // Fire verification email (queued — never awaited inline)
     const token = await this.storeOneOffToken('verify-email', user.id, VERIFY_EMAIL_TTL_SECONDS);

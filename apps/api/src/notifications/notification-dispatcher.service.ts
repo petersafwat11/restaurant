@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { resolveUserLocale } from '@repo/i18n';
 import {
   JOB_EMAIL_ORDER_STATUS,
   JOB_PUSH_ORDER_STATUS,
@@ -72,7 +73,7 @@ export class NotificationDispatcherService {
     const user = input.userId
       ? await this.prisma.user.findUnique({
           where: { id: input.userId },
-          select: { id: true, email: true, phone: true },
+          select: { id: true, email: true, phone: true, locale: true },
         })
       : null;
 
@@ -87,7 +88,8 @@ export class NotificationDispatcherService {
     const allowSms = prefs ? prefs.orderUpdatesSms : true;
     const allowPush = prefs ? prefs.orderUpdatesPush : true;
 
-    const copy = notificationCopyFor(input.to, input.orderNumber);
+    const locale = resolveUserLocale(user?.locale ?? null);
+    const copy = notificationCopyFor(input.to, input.orderNumber, locale);
 
     // In-app notification — persist directly, no queue.
     if (channels.inApp && user) {

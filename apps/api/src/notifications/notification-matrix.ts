@@ -1,3 +1,4 @@
+import { type Locale, createTranslator } from '@repo/i18n';
 import type { OrderStatus } from '@repo/types';
 
 /**
@@ -28,57 +29,33 @@ export function channelsForStatus(status: OrderStatus): ChannelSet {
   return ORDER_STATUS_CHANNELS[status] ?? NONE;
 }
 
+// Statuses whose body has a localized catalog entry under `order.notify.*`.
+const NOTIFY_KEY: Partial<Record<OrderStatus, string>> = {
+  PENDING: 'order.notify.placed',
+  CONFIRMED: 'order.notify.confirmed',
+  READY: 'order.notify.ready',
+  OUT_FOR_DELIVERY: 'order.notify.outForDelivery',
+  DELIVERED: 'order.notify.delivered',
+  CANCELLED: 'order.notify.cancelled',
+  REFUNDED: 'order.notify.refunded',
+};
+
+/**
+ * Localized copy for the in-app feed (and any transport that reuses it).
+ * Title = "Order {n}" + status label; body = the per-status catalog line,
+ * falling back to the status label for statuses without a notify line
+ * (e.g. PREPARING / COMPLETED). Locale comes from the recipient's
+ * `User.locale`; defaults to English so existing behaviour is unchanged.
+ */
 export function notificationCopyFor(
   status: OrderStatus,
   orderNumber: string,
+  locale: Locale = 'en',
 ): { title: string; body: string } {
-  switch (status) {
-    case 'PENDING':
-      return {
-        title: `Order ${orderNumber} placed`,
-        body: 'We have your order — payment coming up.',
-      };
-    case 'CONFIRMED':
-      return {
-        title: `Order ${orderNumber} confirmed`,
-        body: 'Payment received. We are getting your order ready.',
-      };
-    case 'PREPARING':
-      return {
-        title: `Order ${orderNumber} preparing`,
-        body: 'The kitchen has started on your order.',
-      };
-    case 'READY':
-      return {
-        title: `Order ${orderNumber} ready`,
-        body: 'Your order is ready for pickup.',
-      };
-    case 'OUT_FOR_DELIVERY':
-      return {
-        title: `Order ${orderNumber} on the way`,
-        body: 'Your order is out for delivery.',
-      };
-    case 'DELIVERED':
-      return {
-        title: `Order ${orderNumber} delivered`,
-        body: 'Enjoy your meal!',
-      };
-    case 'COMPLETED':
-      return {
-        title: `Order ${orderNumber} completed`,
-        body: 'Thanks for ordering with us.',
-      };
-    case 'CANCELLED':
-      return {
-        title: `Order ${orderNumber} cancelled`,
-        body: 'Your order has been cancelled.',
-      };
-    case 'REFUNDED':
-      return {
-        title: `Order ${orderNumber} refunded`,
-        body: 'A refund has been issued for your order.',
-      };
-    default:
-      return { title: `Order ${orderNumber}`, body: '' };
-  }
+  const t = createTranslator(locale);
+  const statusLabel = t(`order.status.${status}` as never);
+  const title = `${t('order.title', { number: orderNumber })} — ${statusLabel}`;
+  const key = NOTIFY_KEY[status];
+  const body = key ? t(key as never, { number: orderNumber }) : statusLabel;
+  return { title, body };
 }

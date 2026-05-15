@@ -105,6 +105,22 @@ export const EmailContactPayloadSchema = z.object({
 });
 export type EmailContactPayload = z.infer<typeof EmailContactPayloadSchema>;
 
+// Sprint 11 — loyalty / referral reward push + referral invite email.
+export const PushLoyaltyPayloadSchema = z.object({
+  userId: z.string(),
+  points: z.number().int(),
+  reason: z.enum(['EARN', 'REFERRAL']),
+});
+export type PushLoyaltyPayload = z.infer<typeof PushLoyaltyPayloadSchema>;
+
+export const EmailReferralInvitePayloadSchema = z.object({
+  toEmail: z.string().email(),
+  inviterName: z.string().nullable(),
+  code: z.string(),
+  link: z.string().url(),
+});
+export type EmailReferralInvitePayload = z.infer<typeof EmailReferralInvitePayloadSchema>;
+
 // Sprint 9 — prune push tokens unused for `staleDays` (default 60).
 export const PushTokenCleanupPayloadSchema = z.object({
   staleDays: z.number().int().positive().optional(),

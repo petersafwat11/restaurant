@@ -1,1 +1,185 @@
-{}
+{
+  "common": {
+    "appName": "Restaurant",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "currency": "Currency",
+    "language": "Language"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Create account",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "verifyEmail": "Verify your email",
+    "otpSent": "We sent a code to {target}",
+    "welcomeBack": "Welcome back, {name}",
+    "referralCodeLabel": "Referral code (optional)"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Enter a valid email address",
+    "passwordTooShort": "Password must be at least {min} characters",
+    "passwordWeak": "Password must include upper, lower and a digit",
+    "invalidPhone": "Enter a valid phone number",
+    "tooLong": "Must be at most {max} characters"
+  },
+  "menu": {
+    "title": "Menu",
+    "categories": "Categories",
+    "featured": "Featured",
+    "allItems": "All items",
+    "addToCart": "Add to cart",
+    "outOfStock": "Out of stock",
+    "calories": "{count} cal",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "glutenFree": "Gluten free",
+    "noResults": "No items match your filters"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "estimatedTotal": "Estimated total",
+    "applyCoupon": "Apply coupon",
+    "couponApplied": "Coupon {code} applied",
+    "remove": "Remove",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "checkout": "Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderType": "Order type",
+    "delivery": "Delivery",
+    "pickup": "Pickup",
+    "dineIn": "Dine in",
+    "deliveryAddress": "Delivery address",
+    "pickupTime": "Pickup time",
+    "payment": "Payment",
+    "tip": "Tip",
+    "reviewOrder": "Review order",
+    "placeOrder": "Place order",
+    "tax": "Tax",
+    "deliveryFee": "Delivery fee",
+    "grandTotal": "Total"
+  },
+  "order": {
+    "title": "Order {number}",
+    "history": "Order history",
+    "trackOrder": "Track order",
+    "reorder": "Reorder",
+    "estimatedArrival": "Estimated arrival",
+    "placedOn": "Placed on {date}",
+    "status": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "PREPARING": "Preparing",
+      "READY": "Ready",
+      "OUT_FOR_DELIVERY": "Out for delivery",
+      "DELIVERED": "Delivered",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "REFUNDED": "Refunded"
+    },
+    "notify": {
+      "placed": "Order {number} placed — we'll let you know when it's confirmed.",
+      "confirmed": "Order {number} confirmed and is being prepared.",
+      "ready": "Order {number} is ready.",
+      "outForDelivery": "Order {number} is out for delivery.",
+      "delivered": "Order {number} delivered. Enjoy!",
+      "cancelled": "Order {number} was cancelled.",
+      "refunded": "Order {number} was refunded."
+    }
+  },
+  "account": {
+    "title": "Account",
+    "profile": "Profile",
+    "addresses": "Addresses",
+    "paymentMethods": "Payment methods",
+    "loyalty": "Loyalty",
+    "favorites": "Favorites",
+    "referrals": "Referrals",
+    "notifications": "Notifications",
+    "preferences": "Preferences"
+  },
+  "loyalty": {
+    "title": "Loyalty",
+    "balance": "{points, plural, one {# point} other {# points}}",
+    "tier": "{tier} tier",
+    "tierProgress": "{points} points to {tier}",
+    "redeem": "Redeem points",
+    "redeemDiscount": "Redeem {points} points for {amount}",
+    "earned": "You earned {points} points",
+    "history": "Points history",
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum"
+    }
+  },
+  "reviews": {
+    "title": "Reviews",
+    "writeReview": "Write a review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "submit": "Submit review",
+    "ownerReply": "Response from the owner",
+    "averageRating": "{average} out of 5 ({count, plural, one {# review} other {# reviews}})",
+    "thanks": "Thanks for your review"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "You have no favorites yet",
+    "add": "Add to favorites",
+    "remove": "Remove from favorites"
+  },
+  "referral": {
+    "title": "Invite friends",
+    "yourCode": "Your referral code",
+    "share": "Share this link",
+    "howItWorks": "Give friends a discount and earn {points} points when they order.",
+    "invited": "You've invited {count, plural, one {# friend} other {# friends}}",
+    "completed": "{count} completed"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all as read",
+    "unreadCount": "{count, plural, one {# unread} other {# unread}}"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection.",
+    "unauthorized": "Please sign in to continue.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "Not found.",
+    "rateLimited": "Too many requests. Please slow down.",
+    "couponInvalid": "This coupon is not valid.",
+    "outOfStock": "Some items are no longer available."
+  },
+  "marketing": {
+    "heroCta": "Order now",
+    "specials": "Today's specials",
+    "ourStory": "Our story",
+    "locations": "Locations",
+    "contactUs": "Contact us",
+    "reserveTable": "Reserve a table"
+  }
+}
