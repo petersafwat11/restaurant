@@ -1,5 +1,7 @@
+import fastifyMultipart from '@fastify/multipart';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
+import { MAX_UPLOAD_BYTES } from '@repo/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 
@@ -28,6 +30,12 @@ export async function createTestApp(): Promise<NestFastifyApplication> {
 
   const app = moduleRef.createNestApplication<NestFastifyApplication>(adapter, {
     bodyParser: false,
+  });
+  // Mirror main.ts: register multipart so POST /uploads (multipart/form-data)
+  // works the same in e2e tests as in prod. Without this, fastify rejects
+  // multipart bodies as "Unsupported Media Type" and the upload endpoint 500s.
+  await app.register(fastifyMultipart as Parameters<typeof app.register>[0], {
+    limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
   });
   app.setGlobalPrefix('api/v1');
   await app.init();

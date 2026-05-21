@@ -7,18 +7,19 @@ import type {
   RealtimeEventName,
   SubscribeAck,
 } from '@repo/types';
+import type { Socket as SocketType } from 'socket.io-client';
 
-// Pull `Socket` through the same dynamic import the runtime uses, with an
-// explicit `resolution-mode: 'import'` hint. Under NodeNext, the package's
-// "require" and "import" conditions point at separate .d.ts files whose
-// `Socket` interfaces are nominally distinct (socket.io-client@4.x ships
-// both CJS and ESM builds). Without the hint, `typeof import(...)` from
-// this CJS package resolves via "require", while the runtime `await import`
-// resolves via "import" — leading to a cross-condition assignability error
-// when assigning the runtime `io()` return to a Socket-typed variable.
-type Socket = ReturnType<
-  (typeof import('socket.io-client', { with: { 'resolution-mode': 'import' } }))['io']
->;
+// We use `Socket` to type the lazily-created socket.io-client instance, but
+// the runtime instance comes from a dynamic `await import('socket.io-client')`
+// — which on NodeNext resolves to the package's "import" condition (ESM
+// .d.ts), while the static `import type` above resolves to "require" (CJS
+// .d.ts). socket.io-client@4 ships nominally-distinct `Socket` interfaces
+// per condition, so direct assignment errors with a cross-condition mismatch.
+// Casting through `unknown` at the runtime assignment site keeps the public
+// surface typed (consumers see `Socket`) without forcing a TS-only import
+// attribute (`with: { 'resolution-mode': 'import' }`) that SWC doesn't yet
+// parse.
+type Socket = SocketType;
 
 export type RealtimeEventMap = {
   'order.created': OrderCreatedEvent;
@@ -81,7 +82,7 @@ export function createRealtimeClient(opts: CreateRealtimeClientOptions): Realtim
       autoConnect: false,
       reconnection: true,
       transports: ['websocket'],
-    });
+    }) as unknown as Socket;
     socket.on('connect', () => setStatus('connected'));
     socket.on('disconnect', () => setStatus('disconnected'));
     socket.connect();

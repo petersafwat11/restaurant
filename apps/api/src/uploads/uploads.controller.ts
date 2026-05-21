@@ -52,9 +52,26 @@ export class UploadsController {
 			throw new BadRequestException('Unsupported mime type');
 		}
 
-		// @fastify/multipart streams the body; if `file.truncated` is true the
-		// underlying file exceeded our limit and was cut short.
-		const bytes = await file.toBuffer();
+		// @fastify/multipart enforces `limits.fileSize` while streaming. On
+		// overflow it either marks `truncated=true` or throws
+		// `FST_REQ_FILE_TOO_LARGE` from `toBuffer()` depending on version —
+		// translate both cases into a 413 instead of letting the error bubble
+		// up as a 500.
+		let bytes: Buffer;
+		try {
+			bytes = await file.toBuffer();
+		} catch (err) {
+			if (
+				err instanceof Error &&
+				((err as { code?: string }).code === 'FST_REQ_FILE_TOO_LARGE' ||
+					err.message.includes('file too large'))
+			) {
+				throw new PayloadTooLargeException(
+					`File must be ≤ ${MAX_UPLOAD_BYTES} bytes (5MB)`,
+				);
+			}
+			throw err;
+		}
 		if (file.truncated || bytes.byteLength > MAX_UPLOAD_BYTES) {
 			throw new PayloadTooLargeException(`File must be ≤ ${MAX_UPLOAD_BYTES} bytes (5MB)`);
 		}
