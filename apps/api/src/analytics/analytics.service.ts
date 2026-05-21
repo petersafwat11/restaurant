@@ -298,8 +298,17 @@ export class AnalyticsService {
   private async aggregateForRange(from: Date, to: Date) {
     const all = await this.prisma.order.findMany({
       where: { createdAt: { gte: from, lt: to } },
-      select: { id: true, status: true, grandTotal: true, userId: true },
+      select: { id: true, status: true, grandTotal: true, userId: true, createdAt: true },
     });
+    if (process.env.NODE_ENV === 'test') {
+      const total = await this.prisma.order.count();
+      // biome-ignore lint/suspicious/noConsole: temporary CI diagnostic
+      console.log(
+        `[analytics-debug] from=${from.toISOString()} to=${to.toISOString()} matched=${all.length} totalInDb=${total} sample=${JSON.stringify(
+          all.slice(0, 3).map((o) => ({ id: o.id.slice(0, 6), status: o.status, createdAt: o.createdAt.toISOString() })),
+        )}`,
+      );
+    }
     const completed = all.filter((o) => COMPLETED_STATUSES.includes(o.status));
     const revenue = completed.reduce(
       (sum, o) => sum.add(o.grandTotal),

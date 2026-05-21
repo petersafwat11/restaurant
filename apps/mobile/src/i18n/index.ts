@@ -1,9 +1,9 @@
+import { type Locale, loadMessages } from '@repo/i18n';
 import * as Localization from 'expo-localization';
 import * as SecureStore from 'expo-secure-store';
 import i18n from 'i18next';
 import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
-import { type Locale, loadMessages } from '@repo/i18n';
 
 const LOCALE_STORAGE_KEY = 'app.locale';
 
