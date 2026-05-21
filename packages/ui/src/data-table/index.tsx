@@ -59,6 +59,19 @@ export interface DataTableProps<T, TKey extends string = string> {
   onFocusChange?: (key: TKey) => void;
   stickyHeader?: boolean;
   className?: string;
+  /** Localizable labels. All optional with sensible English defaults. */
+  labels?: {
+    /** Title shown in the error block. Defaults to "Couldn't load". */
+    errorTitle?: React.ReactNode;
+    /** Label for the retry button. Defaults to "Retry". */
+    retry?: React.ReactNode;
+    /** Fallback content when there is no data. Defaults to "No results.". */
+    noResults?: React.ReactNode;
+    /** Aria-label for the header-row "select all" checkbox. Defaults to "Select all". */
+    selectAll?: string;
+    /** Aria-label for individual row checkboxes. Defaults to "Select row". */
+    selectRow?: string;
+  };
 }
 
 /**
@@ -87,7 +100,15 @@ export function DataTable<T, TKey extends string = string>({
   onFocusChange,
   stickyHeader = true,
   className,
+  labels,
 }: DataTableProps<T, TKey>) {
+  const {
+    errorTitle = "Couldn't load",
+    retry = 'Retry',
+    noResults = 'No results.',
+    selectAll = 'Select all',
+    selectRow = 'Select row',
+  } = labels ?? {};
   const sortingState: SortingState = React.useMemo(
     () => (sort?.state ? [{ id: sort.state.id, desc: sort.state.dir === 'desc' }] : []),
     [sort?.state],
@@ -136,7 +157,7 @@ export function DataTable<T, TKey extends string = string>({
   if (errorState) {
     return (
       <div className={cn('rounded-md border-hairline bg-surface p-8 text-center', className)}>
-        <div className="text-h2-admin text-fg">{errorState.title ?? "Couldn't load"}</div>
+        <div className="text-h2-admin text-fg">{errorState.title ?? errorTitle}</div>
         <div className="mt-1 text-sm text-fg-muted">{errorState.message}</div>
         {errorState.onRetry && (
           <button
@@ -144,7 +165,7 @@ export function DataTable<T, TKey extends string = string>({
             onClick={errorState.onRetry}
             className="mt-4 inline-flex h-9 items-center rounded-md bg-surface-2 px-4 text-sm text-fg transition-colors hover:bg-surface"
           >
-            Retry
+            {retry}
           </button>
         )}
       </div>
@@ -174,7 +195,7 @@ export function DataTable<T, TKey extends string = string>({
                       checked={allSelected}
                       indeterminate={someSelected}
                       onCheckedChange={toggleAll}
-                      aria-label="Select all"
+                      aria-label={selectAll}
                     />
                   </th>
                 )}
@@ -263,7 +284,7 @@ export function DataTable<T, TKey extends string = string>({
                             <Checkbox
                               checked={isSelected}
                               onCheckedChange={() => toggleRow(k)}
-                              aria-label="Select row"
+                              aria-label={selectRow}
                             />
                           </td>
                         )}
@@ -290,7 +311,7 @@ export function DataTable<T, TKey extends string = string>({
         </table>
         {!loading && data.length === 0 && (
           <div className="px-3 py-10 text-center text-sm text-fg-subtle">
-            {emptyState ?? 'No results.'}
+            {emptyState ?? noResults}
           </div>
         )}
       </div>

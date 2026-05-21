@@ -1,0 +1,11 @@
+{
+  "PENDING": "Oczekujące",
+  "CONFIRMED": "Potwierdzone",
+  "PREPARING": "Przygotowywane",
+  "READY": "Gotowe",
+  "OUT_FOR_DELIVERY": "W dostawie",
+  "DELIVERED": "Dostarczone",
+  "COMPLETED": "Zakończone",
+  "CANCELLED": "Anulowane",
+  "REFUNDED": "Zwrócone"
+}

@@ -1,0 +1,47 @@
+{
+  "topbar": {
+    "searchPlaceholder": "Search orders, customers, items…",
+    "searchAriaLabel": "Search (Cmd+K)",
+    "accountAriaLabel": "Account",
+    "notificationsAriaLabel": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "realtime": {
+      "connected": "Realtime connected",
+      "connecting": "Connecting to realtime…",
+      "idle": "Realtime idle",
+      "disconnected": "Realtime disconnected",
+      "unknown": "Realtime status unknown"
+    }
+  },
+  "sidebar": {
+    "ariaLabel": "Primary",
+    "brandName": "Test Kitchen",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "overview": "Overview",
+    "groups": {
+      "operate": "Operate",
+      "catalog": "Catalog",
+      "people": "People",
+      "insights": "Insights",
+      "configure": "Configure"
+    },
+    "items": {
+      "orders": "Orders",
+      "kitchen": "Kitchen Display",
+      "reservations": "Reservations",
+      "menu": "Menu",
+      "promotions": "Promotions",
+      "customers": "Customers",
+      "reviews": "Reviews",
+      "staff": "Staff",
+      "reports": "Reports",
+      "audit": "Audit log",
+      "restaurant": "Restaurant",
+      "contact": "Contact messages",
+      "settings": "Settings"
+    }
+  }
+}

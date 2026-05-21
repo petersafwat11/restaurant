@@ -2,6 +2,7 @@
 
 import { AUDIT_ACTIONS, type AuditAction } from '@repo/types';
 import { Input } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 export interface AuditFiltersState {
@@ -30,13 +31,14 @@ interface Props {
 }
 
 export function AuditFilters({ value, onChange }: Props) {
+  const t = useTranslations('admin.auditLog');
   function update<K extends keyof AuditFiltersState>(key: K, v: AuditFiltersState[K]) {
     onChange({ ...value, [key]: v });
   }
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Input
-        placeholder="Actor user id…"
+        placeholder={t('filters.actorPlaceholder')}
         value={value.actorUserId}
         onChange={(e) => update('actorUserId', e.target.value)}
         className="h-8 w-56 text-sm"
@@ -46,7 +48,7 @@ export function AuditFilters({ value, onChange }: Props) {
         onChange={(e) => update('action', e.target.value as AuditAction | '')}
         className="h-8 rounded-md border-hairline bg-surface px-2 text-xs text-fg-muted"
       >
-        <option value="">All actions</option>
+        <option value="">{t('filters.actionAll')}</option>
         {AUDIT_ACTIONS.map((a) => (
           <option key={a} value={a}>
             {a}
@@ -58,15 +60,15 @@ export function AuditFilters({ value, onChange }: Props) {
         onChange={(e) => update('resourceType', e.target.value)}
         className="h-8 rounded-md border-hairline bg-surface px-2 text-xs text-fg-muted"
       >
-        <option value="">All resources</option>
+        <option value="">{t('filters.resourceAll')}</option>
         {RESOURCE_TYPES.map((r) => (
           <option key={r} value={r}>
-            {r}
+            {t(`filters.resources.${r}`)}
           </option>
         ))}
       </select>
       <label className="flex items-center gap-1 text-xs text-fg-subtle">
-        From
+        {t('filters.fromLabel')}
         <input
           type="datetime-local"
           value={value.from}
@@ -75,7 +77,7 @@ export function AuditFilters({ value, onChange }: Props) {
         />
       </label>
       <label className="flex items-center gap-1 text-xs text-fg-subtle">
-        To
+        {t('filters.toLabel')}
         <input
           type="datetime-local"
           value={value.to}

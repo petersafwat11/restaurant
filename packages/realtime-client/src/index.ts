@@ -7,7 +7,7 @@ import type {
   RealtimeEventName,
   SubscribeAck,
 } from '@repo/types';
-import { type Socket, io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 export type RealtimeEventMap = {
   'order.created': OrderCreatedEvent;
@@ -59,6 +59,10 @@ export function createRealtimeClient(opts: CreateRealtimeClientOptions): Realtim
     setStatus('connecting');
     const isCookieAudience = opts.audience === 'web' || opts.audience === 'admin';
     const token = isCookieAudience ? null : (await opts.getAccessToken?.()) ?? null;
+    // Lazy-load socket.io-client — it references `window` at module init time
+    // which breaks Next.js static prerender. Importing here defers evaluation
+    // to client-side runtime.
+    const { io } = await import('socket.io-client');
     socket = io(opts.url, {
       auth: token ? { token } : {},
       query: opts.audience ? { audience: opts.audience } : undefined,

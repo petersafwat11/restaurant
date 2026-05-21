@@ -32,6 +32,7 @@ import {
   cn,
 } from '@repo/ui';
 import { Flame, ImageIcon, ListChecks, Sparkles, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { ModifierGroupsEditor } from './modifier-groups-editor';
 
@@ -106,6 +107,7 @@ export function ItemEditorDrawer({
   allCategories,
   currency = 'USD',
 }: ItemEditorDrawerProps) {
+  const t = useTranslations('admin.menu.itemEditor');
   const open = item !== null || mode === 'create';
   const [draft, setDraft] = React.useState<Draft>(EMPTY_DRAFT);
 
@@ -166,7 +168,7 @@ export function ItemEditorDrawer({
 
   function destroy() {
     if (!item) return;
-    if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
+    if (!confirm(t('confirmDelete', { name: item.name }))) return;
     remove.mutate({ id: item.id }, { onSuccess: () => onOpenChange(false) });
   }
 
@@ -175,15 +177,15 @@ export function ItemEditorDrawer({
       open={open}
       onOpenChange={onOpenChange}
       width={620}
-      ariaLabel={mode === 'create' ? 'New item' : 'Edit item'}
+      ariaLabel={mode === 'create' ? t('newItemTitle') : t('editItemTitle')}
       flushBody
       header={
         <div className="px-6 py-4">
           <div className="text-caption-admin text-fg-subtle">
-            {mode === 'create' ? 'New item' : 'Edit item'}
+            {mode === 'create' ? t('newItemTitle') : t('editItemTitle')}
           </div>
           <div className="mt-1 text-h2-admin text-fg">
-            {draft.name || (mode === 'create' ? 'Untitled item' : '')}
+            {draft.name || (mode === 'create' ? t('untitled') : '')}
           </div>
         </div>
       }
@@ -191,11 +193,11 @@ export function ItemEditorDrawer({
         <div className="flex w-full items-center gap-2">
           {mode === 'edit' && item && canWrite && (
             <Button variant="ghost" onClick={destroy} className="text-negative hover:text-negative">
-              <Trash2 size={13} /> Delete
+              <Trash2 size={13} /> {t('delete')}
             </Button>
           )}
           <Button variant="ghost" className="ml-auto" onClick={() => onOpenChange(false)}>
-            {canWrite ? 'Cancel' : 'Close'}
+            {canWrite ? t('cancel') : t('close')}
           </Button>
           {canWrite && (
             <Button
@@ -203,7 +205,7 @@ export function ItemEditorDrawer({
               onClick={save}
               disabled={!draft.name || !draft.categoryId || create.isPending || update.isPending}
             >
-              {mode === 'create' ? 'Create item' : 'Save changes'}
+              {mode === 'create' ? t('create') : t('save')}
             </Button>
           )}
         </div>
@@ -213,7 +215,7 @@ export function ItemEditorDrawer({
         sections={[
           {
             id: 'details',
-            label: 'Details',
+            label: t('sections.details'),
             icon: Sparkles,
             children: (
               <DetailsSection
@@ -226,26 +228,26 @@ export function ItemEditorDrawer({
           },
           {
             id: 'dietary',
-            label: 'Dietary',
+            label: t('sections.dietary'),
             icon: Flame,
             children: <DietarySection draft={draft} set={set} />,
           },
           {
             id: 'images',
-            label: 'Images',
+            label: t('sections.images'),
             icon: ImageIcon,
             children:
               mode === 'edit' && item ? (
                 <ImagesSection itemId={item.id} images={item.images} />
               ) : (
                 <div className="rounded-md border-hairline bg-surface p-4 text-sm text-fg-subtle">
-                  Save the item first to add images.
+                  {t('images.saveFirst')}
                 </div>
               ),
           },
           {
             id: 'modifiers',
-            label: 'Modifiers',
+            label: t('sections.modifiers'),
             icon: ListChecks,
             children:
               mode === 'edit' && item ? (
@@ -257,13 +259,13 @@ export function ItemEditorDrawer({
                   />
                 ) : detailQuery.isError ? (
                   <div className="rounded-md border-hairline bg-surface p-4 text-sm text-negative">
-                    Couldn't load modifier groups. {detailQuery.error?.message ?? ''}
+                    {t('modifiers.loadError', { message: detailQuery.error?.message ?? '' })}
                     <button
                       type="button"
                       onClick={() => detailQuery.refetch()}
                       className="ml-2 underline"
                     >
-                      Retry
+                      {t('modifiers.retry')}
                     </button>
                   </div>
                 ) : (
@@ -273,7 +275,7 @@ export function ItemEditorDrawer({
                 )
               ) : (
                 <div className="rounded-md border-hairline bg-surface p-4 text-sm text-fg-subtle">
-                  Save the item first to add modifier groups.
+                  {t('modifiers.saveFirst')}
                 </div>
               ),
           },
@@ -291,9 +293,10 @@ interface DetailsSectionProps {
 }
 
 function DetailsSection({ draft, set, categories, currency }: DetailsSectionProps) {
+  const t = useTranslations('admin.menu.itemEditor.details');
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <FormField label="Name" required className="sm:col-span-2">
+      <FormField label={t('nameLabel')} required className="sm:col-span-2">
         <Input
           value={draft.name}
           maxLength={160}
@@ -304,13 +307,13 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           }}
         />
       </FormField>
-      <FormField label="Slug" required helper="URL-friendly, a-z0-9 + hyphens">
+      <FormField label={t('slugLabel')} required helper={t('slugHelper')}>
         <Input value={draft.slug} maxLength={120} onChange={(e) => set('slug', e.target.value)} />
       </FormField>
-      <FormField label="Category" required>
+      <FormField label={t('categoryLabel')} required>
         <Select value={draft.categoryId} onValueChange={(v) => set('categoryId', v)}>
           <SelectTrigger>
-            <SelectValue placeholder="Pick a category" />
+            <SelectValue placeholder={t('categoryPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((c) => (
@@ -321,7 +324,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           </SelectContent>
         </Select>
       </FormField>
-      <FormField label="Description" className="sm:col-span-2">
+      <FormField label={t('descriptionLabel')} className="sm:col-span-2">
         <Textarea
           value={draft.description ?? ''}
           rows={3}
@@ -329,7 +332,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           onChange={(e) => set('description', e.target.value || null)}
         />
       </FormField>
-      <FormField label="Base price" required>
+      <FormField label={t('basePriceLabel')} required>
         <CurrencyInput
           value={draft.basePrice}
           onChange={(v) => set('basePrice', v ?? '0.00')}
@@ -337,7 +340,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           min={0}
         />
       </FormField>
-      <FormField label="Compare at" helper="Original price — shown struck-through next to base.">
+      <FormField label={t('compareAtLabel')} helper={t('compareAtHelper')}>
         <CurrencyInput
           value={draft.compareAt ?? ''}
           onChange={(v) => set('compareAt', v ? v : null)}
@@ -345,7 +348,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           min={0}
         />
       </FormField>
-      <FormField label="Calories">
+      <FormField label={t('caloriesLabel')}>
         <Input
           type="number"
           min={0}
@@ -354,7 +357,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           className="tabular-nums"
         />
       </FormField>
-      <FormField label="Prep time (min)">
+      <FormField label={t('prepMinutesLabel')}>
         <Input
           type="number"
           min={0}
@@ -363,7 +366,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           className="tabular-nums"
         />
       </FormField>
-      <FormField label="Spice level">
+      <FormField label={t('spiceLevelLabel')}>
         <div className="flex h-9 items-center gap-1.5">
           {[0, 1, 2, 3].map((n) => (
             <button
@@ -378,7 +381,7 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
                   : 'border-border/[var(--border-strong-alpha)] bg-surface text-fg-muted hover:text-fg',
               )}
             >
-              {n === 0 ? 'None' : '🌶'.repeat(n)}
+              {n === 0 ? t('spiceNone') : '🌶'.repeat(n)}
             </button>
           ))}
         </div>

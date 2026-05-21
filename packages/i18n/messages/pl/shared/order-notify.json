@@ -1,0 +1,9 @@
+{
+  "placed": "Zamówienie {number} złożone — damy znać, gdy zostanie potwierdzone.",
+  "confirmed": "Zamówienie {number} potwierdzone i przygotowywane.",
+  "ready": "Zamówienie {number} gotowe.",
+  "outForDelivery": "Zamówienie {number} jest w drodze.",
+  "delivered": "Zamówienie {number} dostarczone. Smacznego!",
+  "cancelled": "Zamówienie {number} zostało anulowane.",
+  "refunded": "Zamówienie {number} zostało zwrócone."
+}

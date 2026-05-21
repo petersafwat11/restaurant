@@ -1,25 +1,40 @@
 'use client';
 
-import type { LocaleCode } from '@repo/types';
+import { useLocale } from 'next-intl';
+import * as React from 'react';
+import { useTransition } from 'react';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 
-interface LanguageSwitcherProps {
-  value: LocaleCode;
-  onChange: (next: LocaleCode) => void;
-  className?: string;
-}
+type LocaleCode = (typeof routing.locales)[number];
 
 const PILLS: Array<{ label: string; code: LocaleCode }> = [
   { label: 'PL', code: 'pl' },
   { label: 'EN', code: 'en' },
 ];
 
+interface LanguageSwitcherProps {
+  className?: string;
+}
+
 /**
- * Compact PL|EN pill toggle. Emits the real `LocaleCode` value so the parent
- * can persist it to the locale cookie and refresh translations. Polish copy
- * lives in `@repo/i18n/locales/pl.json`; missing keys fall back to en at
- * translate-time.
+ * Compact PL|EN pill toggle. Switches the URL locale via next-intl's
+ * navigation helpers — the `NEXT_LOCALE` cookie is updated by the middleware
+ * on the resulting request so the preference persists across pages.
  */
-export function LanguageSwitcher({ value, onChange, className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
+  const locale = useLocale() as LocaleCode;
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  function switchTo(next: LocaleCode) {
+    if (next === locale || isPending) return;
+    startTransition(() => {
+      router.replace(pathname, { locale: next });
+    });
+  }
+
   return (
     <div
       role="group"
@@ -27,14 +42,15 @@ export function LanguageSwitcher({ value, onChange, className }: LanguageSwitche
       className={`inline-flex items-center rounded-full border border-border/[var(--border-strong-alpha)] bg-surface/60 p-0.5 text-xs ${className ?? ''}`}
     >
       {PILLS.map(({ label, code }) => {
-        const isActive = value === code;
+        const isActive = locale === code;
         return (
           <button
             key={label}
             type="button"
             aria-pressed={isActive}
-            onClick={() => onChange(code)}
-            className={`inline-flex h-6 items-center justify-center rounded-full px-2.5 font-medium tracking-wide transition-colors duration-web-color ${
+            onClick={() => switchTo(code)}
+            disabled={isPending}
+            className={`inline-flex h-6 items-center justify-center rounded-full px-2.5 font-medium tracking-wide transition-colors duration-web-color disabled:opacity-60 ${
               isActive ? 'bg-fg text-surface' : 'text-fg-muted hover:text-fg'
             }`}
           >

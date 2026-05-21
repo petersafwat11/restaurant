@@ -1,12 +1,7 @@
-export type Locale = 'en' | 'ar' | 'pl';
-export type Direction = 'rtl' | 'ltr';
+export type Locale = 'pl' | 'en';
 
-export const LOCALES: readonly Locale[] = ['en', 'ar', 'pl'] as const;
-export const DEFAULT_LOCALE: Locale = 'en';
-
-export function getDir(locale: Locale): Direction {
-  return locale === 'ar' ? 'rtl' : 'ltr';
-}
+export const LOCALES: readonly Locale[] = ['pl', 'en'] as const;
+export const DEFAULT_LOCALE: Locale = 'pl';
 
 export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);

@@ -1,0 +1,54 @@
+{
+  "title": "Ustawienia",
+  "loading": "Ładowanie ustawień…",
+  "error": {
+    "title": "Nie udało się załadować ustawień",
+    "description": "Spróbuj ponownie za chwilę.",
+    "retry": "Spróbuj ponownie"
+  },
+  "hub": {
+    "manage": "Zarządzaj →",
+    "hours": {
+      "title": "Godziny otwarcia",
+      "preview": "Tygodniowe godziny otwarcia dla strony publicznej oraz okien zamówień i rezerwacji."
+    },
+    "holidays": {
+      "title": "Dni wolne",
+      "preview": "{count, plural, one {# dzień wolny} few {# dni wolne} many {# dni wolnych} other {# dni wolnych}} nadchodzących",
+      "next": " · następny: {label}",
+      "trailing": "."
+    },
+    "deliveryZones": {
+      "title": "Strefy dostawy",
+      "preview": "{count, plural, one {# strefa skonfigurowana.} few {# strefy skonfigurowane.} many {# stref skonfigurowanych.} other {# stref skonfigurowanych.}}"
+    }
+  },
+  "financials": {
+    "title": "Finanse",
+    "description": "Domyślne podatki i opłaty za dostawę stosowane do każdego zamówienia.",
+    "taxRate": "Stawka podatku",
+    "defaultDeliveryFee": "Domyślna opłata za dostawę ({currency})",
+    "minOrder": "Minimalna wartość zamówienia ({currency})",
+    "effectiveMinimum": "Efektywne minimum"
+  },
+  "reservations": {
+    "title": "Polityka rezerwacji",
+    "description": "Jak długo rezerwacja trzyma stolik i jakie są odstępy między rezerwacjami.",
+    "slotLength": "Długość slotu",
+    "slotLengthHelp": "Jak długo pojedyncza rezerwacja blokuje stolik",
+    "slotLengthAria": "Długość slotu rezerwacji w minutach",
+    "buffer": "Czas buforowy",
+    "bufferHelp": "Przerwa porządkowa między rezerwacjami",
+    "bufferAria": "Bufor rezerwacji w minutach",
+    "minSuffix": "min",
+    "increase": "Zwiększ {field}",
+    "decrease": "Zmniejsz {field}"
+  },
+  "locale": {
+    "title": "Język i format",
+    "description": "Strefa czasowa i formatowanie waluty w panelu admina i u klientów.",
+    "timezone": "Strefa czasowa",
+    "currency": "Waluta",
+    "editLink": "Edytuj strefę czasową lub walutę w <link>Profil restauracji</link>."
+  }
+}

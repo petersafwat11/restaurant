@@ -1,0 +1,8 @@
+{
+  "title": "My reservations",
+  "subtitle": "Tables you've booked.",
+  "empty": {
+    "title": "Reservations are coming soon",
+    "description": "Booking opens in a future release. For now, call us at {phone}."
+  }
+}

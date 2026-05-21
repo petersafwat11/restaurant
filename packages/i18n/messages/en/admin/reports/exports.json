@@ -1,0 +1,56 @@
+{
+  "title": "Exports",
+  "newExport": "New export",
+  "empty": "No exports yet. Queue one to get started.",
+  "columns": {
+    "report": "Report",
+    "status": "Status",
+    "size": "Size",
+    "created": "Created",
+    "expires": "Expires"
+  },
+  "rowStatus": {
+    "queued": "Queued",
+    "processing": "Processing",
+    "ready": "Ready",
+    "failed": "Failed"
+  },
+  "actions": {
+    "download": "Download",
+    "error": "error",
+    "dash": "—"
+  },
+  "kinds": {
+    "sales-by-item": "Sales by item",
+    "sales-by-category": "Sales by category",
+    "sales-by-hour": "Sales by hour",
+    "sales-by-day-of-week": "Sales by day of week",
+    "tax-summary": "Tax summary",
+    "payment-methods": "Payment methods",
+    "customer-retention": "Customer retention",
+    "orders-detail": "Orders (detailed)",
+    "customers": "Customers"
+  },
+  "format": {
+    "csv": "CSV",
+    "pdf": "PDF"
+  },
+  "modal": {
+    "title": "Create export",
+    "description": "The job runs in the background. Refresh the list once it's ready.",
+    "queue": "Queue export",
+    "queueing": "Queueing…",
+    "cancel": "Cancel",
+    "report": "Report",
+    "format": "Format",
+    "from": "From",
+    "to": "To"
+  },
+  "dataTable": {
+    "errorTitle": "Couldn't load",
+    "retry": "Retry",
+    "noResults": "No results.",
+    "selectAll": "Select all",
+    "selectRow": "Select row"
+  }
+}

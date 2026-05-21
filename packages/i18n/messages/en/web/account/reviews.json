@@ -1,0 +1,17 @@
+{
+  "title": "My reviews",
+  "subtitle": "Feedback you've left on past orders.",
+  "empty": {
+    "title": "No reviews yet",
+    "description": "After your next order, you can leave a review."
+  },
+  "ownerName": "From Szef Donald",
+  "writeReview": "Write a review",
+  "rating": "Rating",
+  "comment": "Comment",
+  "submit": "Submit review",
+  "ownerReply": "Response from the owner",
+  "averageRating": "{average} out of 5 ({count, plural, one {# review} other {# reviews}})",
+  "reviewsCount": "{count, plural, one {# review} other {# reviews}}",
+  "thanks": "Thanks for your review"
+}

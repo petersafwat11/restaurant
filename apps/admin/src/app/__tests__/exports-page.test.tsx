@@ -1,4 +1,4 @@
-import ExportsPage from '@/app/(dashboard)/reports/exports/page';
+import ExportsPage from '@/app/[locale]/(dashboard)/reports/exports/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';
@@ -41,13 +41,14 @@ describe('ExportsPage', () => {
     const { container } = renderPage(<ExportsPage />);
 
     await waitFor(() => {
-      expect((container.textContent ?? '').includes('sales-by-item')).toBe(true);
+      expect((container.textContent ?? '').includes('Sales by item')).toBe(true);
     });
     const text = container.textContent ?? '';
-    expect(text).toContain('sales-by-item');
-    expect(text).toContain('tax-summary');
-    expect(text).toContain('ready');
-    expect(text).toContain('failed');
+    // Report kind + status now render translated labels instead of raw slugs.
+    expect(text).toContain('Sales by item');
+    expect(text).toContain('Tax summary');
+    expect(text).toContain('Ready');
+    expect(text).toContain('Failed');
     // 12345 bytes -> 12.1 KB via fmtSize helper
     expect(text).toMatch(/12\.[0-9]\s?KB/);
   });

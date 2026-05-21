@@ -24,6 +24,7 @@ import {
   Textarea,
 } from '@repo/ui';
 import { CalendarRange, Settings, Tag, Ticket } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { PromotionCoupons } from './promotion-coupons';
 
@@ -69,6 +70,8 @@ function draftFromPromotion(p: PromotionDto): Draft {
 }
 
 export function PromotionDrawer({ promotion, onOpenChange }: Props) {
+  const t = useTranslations('admin.promotions.detail');
+  const tList = useTranslations('admin.promotions.list');
   const { has } = usePermissions();
   const canWrite = has('promotion:write');
   const update = useUpdatePromotion(promotion?.id ?? '');
@@ -116,7 +119,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
         open={open}
         onOpenChange={onOpenChange}
         width={620}
-        ariaLabel="Promotion editor"
+        ariaLabel={t('ariaLabel')}
         flushBody
         header={
           promotion &&
@@ -131,10 +134,10 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                       : 'bg-fg-subtle/[0.12] text-fg-muted'
                   }`}
                 >
-                  {draft.isActive ? 'Active' : 'Paused'}
+                  {draft.isActive ? t('active') : t('paused')}
                 </span>
               </div>
-              <div className="mt-1 text-xs text-fg-muted">{promotion.type}</div>
+              <div className="mt-1 text-xs text-fg-muted">{tList(`types.${promotion.type}`)}</div>
             </div>
           )
         }
@@ -148,7 +151,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                   className="text-negative hover:text-negative"
                   onClick={() => setConfirmDelete(true)}
                 >
-                  Delete
+                  {t('actions.delete')}
                 </Button>
               )}
               {canArchive && (
@@ -159,7 +162,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                     archive.mutate({ id: promotion.id, archive: !promotion.isArchived })
                   }
                 >
-                  {promotion.isArchived ? 'Restore' : 'Archive'}
+                  {promotion.isArchived ? t('actions.restore') : t('actions.archive')}
                 </Button>
               )}
               <Button
@@ -168,7 +171,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                 disabled={!canWrite || update.isPending}
                 onClick={save}
               >
-                {update.isPending ? 'Saving…' : 'Save changes'}
+                {update.isPending ? t('actions.saving') : t('actions.save')}
               </Button>
             </div>
           )
@@ -179,12 +182,12 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
             sections={[
               {
                 id: 'overview',
-                label: 'Overview',
+                label: t('sections.overview'),
                 icon: Tag,
                 children: (
                   <div className="space-y-3">
                     <div className="space-y-1">
-                      <Label htmlFor="promo-name">Name</Label>
+                      <Label htmlFor="promo-name">{t('fields.name')}</Label>
                       <Input
                         id="promo-name"
                         value={draft.name}
@@ -193,7 +196,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="promo-desc">Description</Label>
+                      <Label htmlFor="promo-desc">{t('fields.description')}</Label>
                       <Textarea
                         id="promo-desc"
                         value={draft.description}
@@ -203,7 +206,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                       />
                     </div>
                     <div className="flex items-center justify-between rounded-md border-hairline bg-surface-2 px-3 py-2">
-                      <span className="text-sm text-fg">Active</span>
+                      <span className="text-sm text-fg">{t('fields.active')}</span>
                       <Switch
                         checked={draft.isActive}
                         onCheckedChange={(v) => updateField('isActive', v)}
@@ -215,12 +218,12 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
               },
               {
                 id: 'type',
-                label: 'Type & value',
+                label: t('sections.typeValue'),
                 icon: Settings,
                 children: (
                   <div className="space-y-3">
                     <div className="space-y-1">
-                      <Label htmlFor="promo-type">Type</Label>
+                      <Label htmlFor="promo-type">{t('fields.type')}</Label>
                       <select
                         id="promo-type"
                         value={draft.type}
@@ -228,9 +231,9 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                         disabled={!canWrite}
                         className="h-9 w-full rounded-md border-hairline-strong bg-surface px-2 text-sm text-fg"
                       >
-                        {PROMOTION_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                        {PROMOTION_TYPES.map((tp) => (
+                          <option key={tp} value={tp}>
+                            {tList(`types.${tp}`)}
                           </option>
                         ))}
                       </select>
@@ -238,7 +241,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
 
                     {draft.type === 'PERCENT' && (
                       <div className="space-y-1">
-                        <Label htmlFor="promo-value-pct">Percent off (0–100)</Label>
+                        <Label htmlFor="promo-value-pct">{t('fields.percentValue')}</Label>
                         <Input
                           id="promo-value-pct"
                           type="number"
@@ -253,7 +256,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                     )}
                     {draft.type === 'FIXED' && (
                       <div className="space-y-1">
-                        <Label htmlFor="promo-value-fixed">Amount off</Label>
+                        <Label htmlFor="promo-value-fixed">{t('fields.amountValue')}</Label>
                         <CurrencyInput
                           id="promo-value-fixed"
                           value={draft.value || null}
@@ -264,18 +267,17 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                     )}
                     {draft.type === 'BOGO' && (
                       <div className="rounded-md border-hairline bg-surface-2 p-3 text-xs text-fg-muted">
-                        BOGO promotions don't take a value here. Eligibility is configured per
-                        coupon (v1).
+                        {t('hints.bogo')}
                       </div>
                     )}
                     {draft.type === 'FREE_DELIVERY' && (
                       <div className="rounded-md border-hairline bg-surface-2 p-3 text-xs text-fg-muted">
-                        Free delivery has no extra inputs.
+                        {t('hints.freeDelivery')}
                       </div>
                     )}
 
                     <div className="space-y-1">
-                      <Label htmlFor="promo-min">Minimum cart subtotal</Label>
+                      <Label htmlFor="promo-min">{t('fields.minSubtotal')}</Label>
                       <CurrencyInput
                         id="promo-min"
                         value={draft.minSubtotal || null}
@@ -288,12 +290,12 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
               },
               {
                 id: 'window',
-                label: 'Schedule',
+                label: t('sections.schedule'),
                 icon: CalendarRange,
                 children: (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label htmlFor="promo-starts">Starts</Label>
+                      <Label htmlFor="promo-starts">{t('fields.startsAt')}</Label>
                       <input
                         id="promo-starts"
                         type="datetime-local"
@@ -304,7 +306,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="promo-ends">Ends</Label>
+                      <Label htmlFor="promo-ends">{t('fields.endsAt')}</Label>
                       <input
                         id="promo-ends"
                         type="datetime-local"
@@ -319,7 +321,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
               },
               {
                 id: 'coupons',
-                label: 'Coupons',
+                label: t('sections.coupons'),
                 icon: Ticket,
                 children: <PromotionCoupons promotionId={promotion.id} />,
               },
@@ -331,11 +333,11 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
       <ActionModal
         open={confirmDelete && !!promotion}
         onOpenChange={setConfirmDelete}
-        title="Delete promotion?"
-        description="This removes the promotion and all its coupons. Active redemptions are preserved in order history."
+        title={t('confirmDelete.title')}
+        description={t('confirmDelete.description')}
         variant="destructive"
         primary={{
-          label: remove.isPending ? 'Deleting…' : 'Delete',
+          label: remove.isPending ? t('confirmDelete.deleting') : t('confirmDelete.delete'),
           onClick: () => {
             if (!promotion) return;
             remove.mutate(
@@ -350,7 +352,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
           },
           loading: remove.isPending,
         }}
-        secondary={{ label: 'Cancel', onClick: () => setConfirmDelete(false) }}
+        secondary={{ label: t('confirmDelete.cancel'), onClick: () => setConfirmDelete(false) }}
       />
     </>
   );

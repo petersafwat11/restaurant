@@ -13,40 +13,75 @@ import {
 } from '@repo/ui';
 import * as React from 'react';
 
+export interface CancelModalLabels {
+  title: (orderNumber: string) => string;
+  titleFallback: string;
+  description: string;
+  primary: string;
+  secondary: string;
+  reasonLabel: string;
+  notesLabel: string;
+  notesHelper: string;
+  pickReason: string;
+  notesPlaceholderOther: string;
+  notesPlaceholder: string;
+  reasons: string[];
+  otherKey: string;
+}
+
+const DEFAULT_CANCEL_LABELS: CancelModalLabels = {
+  title: (n) => `Cancel order ${n}?`,
+  titleFallback: 'Cancel order',
+  description:
+    'The customer will be refunded (if pre-paid) and notified. This action cannot be undone.',
+  primary: 'Cancel order',
+  secondary: 'Keep order',
+  reasonLabel: 'Reason',
+  notesLabel: 'Notes',
+  notesHelper: "Visible in audit log and on the customer's order page.",
+  pickReason: 'Pick a reason',
+  notesPlaceholderOther: 'Describe the reason…',
+  notesPlaceholder: 'Optional extra context…',
+  reasons: [
+    'Customer requested',
+    'Restaurant out of stock',
+    'Address out of delivery range',
+    'Restaurant closed',
+    'Payment failed',
+    'Other',
+  ],
+  otherKey: 'Other',
+};
+
 interface CancelModalProps {
   orderId: string | null;
   onOpenChange: (open: boolean) => void;
+  labels?: Partial<CancelModalLabels>;
 }
 
-const REASONS = [
-  'Customer requested',
-  'Restaurant out of stock',
-  'Address out of delivery range',
-  'Restaurant closed',
-  'Payment failed',
-  'Other',
-];
-
-export function CancelModal({ orderId, onOpenChange }: CancelModalProps) {
+export function CancelModal({ orderId, onOpenChange, labels }: CancelModalProps) {
+  const L = { ...DEFAULT_CANCEL_LABELS, ...labels } as CancelModalLabels;
+  const REASONS = L.reasons;
+  const defaultReason = REASONS[0] ?? L.otherKey;
   const open = orderId !== null;
   const q = useOrder(orderId ?? '');
   const cancel = useCancelOrder();
-  const [reason, setReason] = React.useState('Customer requested');
+  const [reason, setReason] = React.useState(defaultReason);
   const [note, setNote] = React.useState('');
 
   React.useEffect(() => {
     if (open) {
-      setReason('Customer requested');
+      setReason(defaultReason);
       setNote('');
     }
-  }, [open]);
+  }, [open, defaultReason]);
 
   const order = q.data;
-  const valid = reason !== 'Other' || note.trim().length > 0;
+  const valid = reason !== L.otherKey || note.trim().length > 0;
 
   function submit() {
     if (!order) return;
-    const fullReason = reason === 'Other' ? note.trim() : reason;
+    const fullReason = reason === L.otherKey ? note.trim() : reason;
     cancel.mutate(
       {
         orderId: order.id,
@@ -64,21 +99,21 @@ export function CancelModal({ orderId, onOpenChange }: CancelModalProps) {
       open={open}
       onOpenChange={onOpenChange}
       variant="destructive"
-      title={order ? `Cancel order ${order.orderNumber}?` : 'Cancel order'}
-      description="The customer will be refunded (if pre-paid) and notified. This action cannot be undone."
+      title={order ? L.title(order.orderNumber) : L.titleFallback}
+      description={L.description}
       primary={{
-        label: 'Cancel order',
+        label: L.primary,
         onClick: submit,
         disabled: !valid,
         loading: cancel.isPending,
       }}
-      secondary={{ label: 'Keep order', onClick: () => onOpenChange(false) }}
+      secondary={{ label: L.secondary, onClick: () => onOpenChange(false) }}
     >
       <div className="flex flex-col gap-4">
-        <FormField label="Reason" required>
+        <FormField label={L.reasonLabel} required>
           <Select value={reason} onValueChange={setReason}>
             <SelectTrigger>
-              <SelectValue placeholder="Pick a reason" />
+              <SelectValue placeholder={L.pickReason} />
             </SelectTrigger>
             <SelectContent>
               {REASONS.map((r) => (
@@ -91,15 +126,15 @@ export function CancelModal({ orderId, onOpenChange }: CancelModalProps) {
         </FormField>
 
         <FormField
-          label="Notes"
-          required={reason === 'Other'}
-          helper="Visible in audit log and on the customer's order page."
+          label={L.notesLabel}
+          required={reason === L.otherKey}
+          helper={L.notesHelper}
         >
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={500}
-            placeholder={reason === 'Other' ? 'Describe the reason…' : 'Optional extra context…'}
+            placeholder={reason === L.otherKey ? L.notesPlaceholderOther : L.notesPlaceholder}
           />
         </FormField>
       </div>

@@ -1,0 +1,126 @@
+{
+  "title": "Menu",
+  "categories": {
+    "heading": "Categories",
+    "addAriaLabel": "Add category",
+    "empty": "No categories yet. Add one to get started.",
+    "dragAriaLabel": "Drag to reorder",
+    "deleteAriaLabel": "Delete category",
+    "nameAriaLabel": "Category name",
+    "nameRequired": "Name is required"
+  },
+  "categoryCreate": {
+    "title": "New category",
+    "description": "Categories group menu items together (e.g. Starters, Mains, Desserts).",
+    "submit": "Create category",
+    "submitting": "Creating…",
+    "cancel": "Cancel",
+    "nameLabel": "Name",
+    "namePlaceholder": "Starters",
+    "slugLabel": "Slug",
+    "slugHelper": "URL-friendly identifier — auto-generated from the name"
+  },
+  "categoryDelete": {
+    "titleNamed": "Delete \"{name}\"?",
+    "titleFallback": "Delete category",
+    "descriptionWithItems": "This category has {count, plural, one {# item} other {# items}}. Pick a category to move them to — they won't be deleted.",
+    "descriptionEmpty": "This action cannot be undone.",
+    "submit": "Delete category",
+    "cancel": "Cancel",
+    "moveToLabel": "Move items to",
+    "moveToPlaceholder": "Pick a category",
+    "moveError": "Couldn't move items: {message}"
+  },
+  "items": {
+    "selectCategoryPrompt": "Select a category on the left to view its items.",
+    "filterAriaLabel": "Item filter",
+    "filters": {
+      "all": "All",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "featured": "Featured"
+    },
+    "newItem": "New item",
+    "columns": {
+      "item": "Item",
+      "price": "Price",
+      "dietary": "Dietary",
+      "available": "Available"
+    },
+    "dietaryTags": {
+      "vegan": "V",
+      "vegetarian": "Vg",
+      "glutenFree": "GF"
+    },
+    "toggleAvailabilityAriaLabel": "Toggle availability",
+    "emptyAll": "No items in \"{name}\" yet.",
+    "emptyFiltered": "No items match the \"{filter}\" filter."
+  },
+  "itemEditor": {
+    "newItemTitle": "New item",
+    "editItemTitle": "Edit item",
+    "untitled": "Untitled item",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "close": "Close",
+    "create": "Create item",
+    "save": "Save changes",
+    "confirmDelete": "Delete \"{name}\"? This cannot be undone.",
+    "sections": {
+      "details": "Details",
+      "dietary": "Dietary",
+      "images": "Images",
+      "modifiers": "Modifiers"
+    },
+    "details": {
+      "nameLabel": "Name",
+      "slugLabel": "Slug",
+      "slugHelper": "URL-friendly, a-z0-9 + hyphens",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "Pick a category",
+      "descriptionLabel": "Description",
+      "basePriceLabel": "Base price",
+      "compareAtLabel": "Compare at",
+      "compareAtHelper": "Original price — shown struck-through next to base.",
+      "caloriesLabel": "Calories",
+      "prepMinutesLabel": "Prep time (min)",
+      "spiceLevelLabel": "Spice level",
+      "spiceNone": "None"
+    },
+    "dietary": {
+      "vegetarian": "Vegetarian",
+      "vegetarianHint": "No meat or fish.",
+      "vegan": "Vegan",
+      "veganHint": "No animal products.",
+      "glutenFree": "Gluten-free",
+      "glutenFreeHint": "Made without gluten.",
+      "featured": "Featured",
+      "featuredHint": "Promote on the menu."
+    },
+    "images": {
+      "saveFirst": "Save the item first to add images."
+    },
+    "modifiers": {
+      "saveFirst": "Save the item first to add modifier groups.",
+      "loadError": "Couldn't load modifier groups. {message}",
+      "retry": "Retry"
+    }
+  },
+  "modifierGroups": {
+    "empty": "No modifier groups yet. Add one to start letting customers customize this item.",
+    "addGroup": "Add modifier group",
+    "newGroupName": "New group",
+    "groupNameAriaLabel": "Group name",
+    "groupNameRequired": "Required",
+    "required": "Required",
+    "min": "Min",
+    "max": "Max",
+    "minAriaLabel": "Minimum selectable options",
+    "maxAriaLabel": "Maximum selectable options",
+    "deleteGroupAriaLabel": "Delete group",
+    "addOption": "Add option",
+    "newOptionName": "New option",
+    "optionNameAriaLabel": "Option name",
+    "deleteOptionAriaLabel": "Delete option"
+  }
+}

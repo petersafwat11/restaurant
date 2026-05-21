@@ -1,0 +1,24 @@
+{
+  "requireLink": {
+    "title": "Tracking link required",
+    "description": "This page needs a valid tracking link. Check the link in your confirmation email.",
+    "action": "Back to menu"
+  },
+  "loading": "Loading order…",
+  "invalidLink": {
+    "title": "Tracking link expired or invalid",
+    "description": "This tracking link is no longer valid. If you have an account, sign in to see your order.",
+    "action": "Sign in"
+  },
+  "mismatch": {
+    "title": "Order not found",
+    "description": "This tracking link doesn't match the order in the URL.",
+    "action": "Back to menu"
+  },
+  "hero": {
+    "orderNumber": "Order #{number}",
+    "title": "Tracking your order",
+    "eta": "Estimated time: <strong>{minutes} min</strong>"
+  },
+  "terminal": "This order is complete. Thanks for ordering with us."
+}

@@ -15,6 +15,13 @@ export interface FloatingCartButtonProps {
   /** Explicit hide override — the consumer (cart-container) computes this from usePathname(). */
   hidden?: boolean;
   className?: string;
+  /** Visible button label. Defaults to "View cart". */
+  label?: React.ReactNode;
+  /**
+   * Build the aria-label. Receives the formatted total. Defaults to
+   * `View cart, ${itemCount} items, ${total}`.
+   */
+  formatAriaLabel?: (args: { itemCount: number; total: string }) => string;
 }
 
 /**
@@ -31,14 +38,21 @@ export function FloatingCartButton({
   position = 'br',
   hidden,
   className,
+  label = 'View cart',
+  formatAriaLabel,
 }: FloatingCartButtonProps) {
   if (hidden || itemCount === 0) return null;
+
+  const formattedTotal = formatMoney(total, currency);
+  const ariaLabel = formatAriaLabel
+    ? formatAriaLabel({ itemCount, total: formattedTotal })
+    : `View cart, ${itemCount} items, ${formattedTotal}`;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={`View cart, ${itemCount} items, ${formatMoney(total, currency)}`}
+      aria-label={ariaLabel}
       className={cn(
         'fixed z-30 inline-flex h-14 items-center gap-3 rounded-button bg-accent px-5 text-[15px] font-medium text-text-on-accent shadow-md transition-transform duration-web-motion hover:bg-accent-hover',
         position === 'br'
@@ -49,12 +63,12 @@ export function FloatingCartButton({
       )}
     >
       <ShoppingBag size={20} strokeWidth={1.75} />
-      <span>View cart</span>
+      <span>{label}</span>
       <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white/15 px-2 text-[12px] tabular-nums">
         {itemCount}
       </span>
       <span aria-hidden className="h-1 w-1 rounded-full bg-white/40" />
-      <span className="tabular-nums">{formatMoney(total, currency)}</span>
+      <span className="tabular-nums">{formattedTotal}</span>
     </button>
   );
 }

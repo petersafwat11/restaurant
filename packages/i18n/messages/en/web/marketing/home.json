@@ -1,0 +1,136 @@
+{
+  "heroCta": "Order now",
+  "specials": "Today's specials",
+  "ourStory": "Our story",
+  "locations": "Locations",
+  "contactUs": "Contact us",
+  "reserveTable": "Reserve a table",
+  "hero": {
+    "eyebrow": "Kebab · Falafel · Tacos · Since 2014",
+    "titleLine1": "Real kebab.",
+    "titleEmphasis": "Made daily",
+    "titleLine3": "from scratch.",
+    "description": "Hand-rolled falafel, marinated overnight. Bread baked through the day. Take-away or eat in — every order is built to order.",
+    "primaryCta": "View the menu",
+    "secondaryCta": "Order now",
+    "imageAlt": "Overhead shot of a freshly wrapped kebab on warm cream paper, lit from above",
+    "openNow": "Open now",
+    "closesAt": "Closes at {time}",
+    "chefName": "Szef Donald",
+    "chefLocation": "Warszawa Centrum"
+  },
+  "categories": {
+    "eyebrow": "Explore",
+    "title": "What we serve",
+    "viewFullMenu": "View full menu",
+    "categoryAlt": "{label} category",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "labels": {
+      "kebab": "Kebab",
+      "falafel": "Falafel",
+      "tacos": "Tacos",
+      "box": "Box & Plates",
+      "drinks": "Drinks"
+    }
+  },
+  "featured": {
+    "eyebrow": "Most loved",
+    "title": "Our customers' favourites",
+    "description": "The dishes people order over and over.",
+    "seeFullMenu": "See full menu",
+    "viewFullMenuCta": "View the full menu",
+    "addedToCart": "Added to cart",
+    "addedToCartDescription": "1 × {name}",
+    "dishes": {
+      "kebab-tortilla-srodni": {
+        "name": "Kebab Tortilla Średni",
+        "description": "Beef + lamb mix, fresh salad, tahini sauce in a warm tortilla. Our most-ordered.",
+        "imageAlt": "Kebab tortilla wrap on cream paper"
+      },
+      "falafel-pita-duzy": {
+        "name": "Falafel Pita Duży",
+        "description": "Eight hand-rolled falafel, hummus, pickled turnips, parsley.",
+        "imageAlt": "Falafel pita with hummus"
+      },
+      "kapsalon-duzy": {
+        "name": "Kapsalon Duży",
+        "description": "The Rotterdam classic. Fries, kebab, melted cheese, salad, sauce. Built for two.",
+        "imageAlt": "Kapsalon with kebab and melted cheese"
+      },
+      "tacos-x3": {
+        "name": "Tacos x3",
+        "description": "Three soft tacos, your choice of kebab or falafel, salsa.",
+        "imageAlt": "Three soft tacos"
+      },
+      "box-strips-mega": {
+        "name": "Box Strips Mega",
+        "description": "Crispy chicken strips, fries, slaw, two sauces.",
+        "imageAlt": "Box of crispy chicken strips and fries"
+      },
+      "salatka-kebab-duzy": {
+        "name": "Sałatka Kebab Duży",
+        "description": "No bread — just greens, kebab meat, tahini, pomegranate.",
+        "imageAlt": "Kebab salad bowl with greens and pomegranate"
+      }
+    }
+  },
+  "story": {
+    "eyebrow": "Our story",
+    "titleLine1": "Kebab the way",
+    "titleLine2": "it should be.",
+    "lead": "We opened Szef Donald in 2014 with one rule: nothing comes out of a freezer. Bread is baked through the day. Falafel is rolled by hand every morning. Meat is marinated for eighteen hours before it touches the grill.",
+    "body": "We're a small team — three cooks and a counter — and we keep it that way on purpose. Every wrap is made by someone who's been here long enough to care.",
+    "readMore": "Read our full story",
+    "imageAlt": "Cook turning meat on the grill, warm light",
+    "yearsValue": "{years} years",
+    "yearsLabel": "Open since {since}",
+    "wrapsValue": "~{count} /wk",
+    "wrapsLabel": "Wraps in high season"
+  },
+  "hoursLocation": {
+    "eyebrow": "Find us",
+    "title": "Open seven days.",
+    "mapAriaLabel": "Map showing Szef Donald on Marszałkowska 102, Warsaw",
+    "addressLine1": "Marszałkowska 102",
+    "addressLine2": "00-026 Warszawa, Poland",
+    "phone": "+48 22 555 01 23",
+    "getDirections": "Get directions",
+    "callUs": "Call us",
+    "shareLocation": "Share location",
+    "viewLargerMap": "View larger map"
+  },
+  "testimonials": {
+    "eyebrow": "Reviews",
+    "title": "Trusted by thousands.",
+    "description": "4.8 average rating across 1,247 reviews on Google.",
+    "readAllReviews": "Read all reviews",
+    "anonymous": "Anonymous",
+    "items": {
+      "0": {
+        "quote": "Best kebab in Warsaw, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
+        "name": "Kasia W.",
+        "meta": "Local guide · 42 reviews"
+      },
+      "1": {
+        "quote": "Falafel pita that actually tastes like it should — crispy outside, soft inside, properly spiced. My go-to vegetarian lunch.",
+        "name": "Tomasz K.",
+        "meta": "12 reviews"
+      },
+      "2": {
+        "quote": "The kapsalon is dangerous. In a good way.",
+        "name": "Anna M.",
+        "meta": "5 reviews"
+      },
+      "3": {
+        "quote": "Real quality and fair prices. Sometimes a wait on Fridays but worth it.",
+        "name": "Michał R.",
+        "meta": "Top reviewer"
+      }
+    }
+  },
+  "newsletter": {
+    "eyebrow": "Stay in touch",
+    "title": "Get a free baklava on your first order.",
+    "description": "Join the list — occasional emails, never spam. Unsubscribe whenever."
+  }
+}

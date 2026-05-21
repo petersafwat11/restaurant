@@ -1,0 +1,44 @@
+{
+  "ariaLabel": "Customer detail",
+  "anonymous": "(no name)",
+  "segment": {
+    "vip": "VIP",
+    "frequent": "FREQUENT",
+    "dormant": "DORMANT",
+    "new": "NEW",
+    "active": "ACTIVE"
+  },
+  "sections": {
+    "overview": "Overview",
+    "orders": "Recent orders",
+    "addresses": "Addresses",
+    "payment": "Payment methods",
+    "notes": "Internal notes"
+  },
+  "stats": {
+    "lifetimeOrders": "Lifetime orders",
+    "lifetimeSpend": "Lifetime spend",
+    "firstOrder": "First order",
+    "lastOrder": "Last order",
+    "reviews": "Reviews",
+    "joined": "Joined",
+    "empty": "—"
+  },
+  "orders": {
+    "empty": "No orders yet."
+  },
+  "addresses": {
+    "empty": "No saved addresses."
+  },
+  "payment": {
+    "empty": "No saved payment methods.",
+    "cardFallback": "Card",
+    "last4Fallback": "????"
+  },
+  "notes": {
+    "empty": "No notes yet.",
+    "placeholder": "Add an internal note…",
+    "add": "Add note",
+    "saving": "Saving…"
+  }
+}

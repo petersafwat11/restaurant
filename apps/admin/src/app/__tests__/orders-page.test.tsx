@@ -1,4 +1,4 @@
-import OrdersPage from '@/app/(dashboard)/orders/page';
+import OrdersPage from '@/app/[locale]/(dashboard)/orders/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { waitFor } from '@testing-library/react';

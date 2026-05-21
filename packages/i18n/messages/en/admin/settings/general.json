@@ -1,0 +1,54 @@
+{
+  "title": "Settings",
+  "loading": "Loading settings…",
+  "error": {
+    "title": "Couldn't load settings",
+    "description": "Try again in a moment.",
+    "retry": "Retry"
+  },
+  "hub": {
+    "manage": "Manage →",
+    "hours": {
+      "title": "Operating hours",
+      "preview": "Weekly opening hours for the public site and the order / reservation gates."
+    },
+    "holidays": {
+      "title": "Holidays",
+      "preview": "{count, plural, one {# holiday} other {# holidays}} upcoming",
+      "next": " · next: {label}",
+      "trailing": "."
+    },
+    "deliveryZones": {
+      "title": "Delivery zones",
+      "preview": "{count, plural, one {# zone configured.} other {# zones configured.}}"
+    }
+  },
+  "financials": {
+    "title": "Financials",
+    "description": "Tax and delivery defaults applied to every order.",
+    "taxRate": "Tax rate",
+    "defaultDeliveryFee": "Default delivery fee ({currency})",
+    "minOrder": "Minimum order ({currency})",
+    "effectiveMinimum": "Effective minimum"
+  },
+  "reservations": {
+    "title": "Reservation policy",
+    "description": "How long each booking holds a table and how reservations are spaced.",
+    "slotLength": "Slot length",
+    "slotLengthHelp": "How long a single seating holds the table",
+    "slotLengthAria": "Reservation slot length in minutes",
+    "buffer": "Buffer time",
+    "bufferHelp": "Cleanup gap between sittings",
+    "bufferAria": "Reservation buffer minutes",
+    "minSuffix": "min",
+    "increase": "Increase {field}",
+    "decrease": "Decrease {field}"
+  },
+  "locale": {
+    "title": "Locale",
+    "description": "Timezone and currency formatting across the admin and customer surfaces.",
+    "timezone": "Timezone",
+    "currency": "Currency",
+    "editLink": "Edit timezone or currency in <link>Restaurant profile</link>."
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "title": "Zamówienie {number}",
+  "titleFallback": "Zamówienie",
+  "loading": "Ładowanie zamówienia…",
+  "notFound": {
+    "title": "Nie znaleziono zamówienia",
+    "description": "Mogło zostać usunięte.",
+    "back": "← Wróć do zamówień"
+  },
+  "back": "Zamówienia",
+  "advanceTo": "Przesuń do: {status}",
+  "noNextState": "Brak następnego statusu",
+  "orderComplete": "Zamówienie zakończone",
+  "refund": "Zwrot",
+  "cancel": "Anuluj",
+  "print": "Drukuj",
+  "noPermissionAdvance": "Brak uprawnień do zmiany statusu",
+  "noPermissionAdvanceLong": "Nie masz uprawnień do zmiany statusu zamówienia",
+  "addNote": {
+    "heading": "Dodaj notatkę",
+    "placeholder": "Notatka dla kuchni, kuriera lub na przyszłość…",
+    "focusHint": "aby ustawić fokus",
+    "submit": "Dodaj notatkę",
+    "submitting": "Dodawanie…"
+  },
+  "keyboard": {
+    "heading": "Klawiatura",
+    "back": "powrót do listy",
+    "addNote": "dodaj notatkę",
+    "refund": "zwrot",
+    "cancel": "anuluj"
+  },
+  "drawer": {
+    "ariaLabel": "Szczegóły zamówienia",
+    "loadError": "Nie udało się wczytać zamówienia",
+    "unknownError": "Nieznany błąd",
+    "retry": "Spróbuj ponownie"
+  },
+  "body": {
+    "itemsHeading": "Pozycje",
+    "pricingHeading": "Wycena",
+    "paymentHeading": "Płatność",
+    "customerHeading": "Klient",
+    "timelineHeading": "Oś czasu",
+    "noteFallback": "Notatka",
+    "subtotal": "Razem",
+    "tax": "VAT",
+    "deliveryFee": "Opłata za dostawę",
+    "tip": "Napiwek",
+    "discount": "Zniżka",
+    "grandTotal": "Do zapłaty",
+    "refund": "Zwrot",
+    "guest": "Gość",
+    "typeLabel": "Typ",
+    "types": {
+      "DELIVERY": "Dostawa",
+      "PICKUP": "Odbiór",
+      "DINE_IN": "Na miejscu"
+    },
+    "paymentMethods": {
+      "STRIPE_CARD": "Karta",
+      "APPLE_PAY": "Apple Pay",
+      "GOOGLE_PAY": "Google Pay",
+      "COD": "Płatność przy odbiorze",
+      "WALLET": "Portfel",
+      "P24": "Przelewy24",
+      "BLIK": "BLIK"
+    }
+  },
+  "types": {
+    "DELIVERY": "Dostawa",
+    "PICKUP": "Odbiór",
+    "DINE_IN": "Na miejscu"
+  },
+  "refundModal": {
+    "title": "Zwrot zamówienia {number}",
+    "titleFallback": "Zwrot zamówienia",
+    "description": "Do zwrotu dostępne: maks. {amount}.",
+    "footerHelper": "Klient otrzyma e-mail.",
+    "primary": "Wykonaj zwrot · {amount}",
+    "primaryFallback": "Wykonaj zwrot",
+    "secondary": "Anuluj",
+    "amountAria": "Kwota zwrotu",
+    "fullRefund": "Pełny zwrot",
+    "partialRefund": "Zwrot częściowy",
+    "amountLabel": "Kwota",
+    "reasonLabel": "Powód",
+    "notesLabel": "Uwagi",
+    "pickReason": "Wybierz powód",
+    "notesPlaceholder": "Co się wydarzyło?",
+    "reasons": {
+      "customerRequested": "Prośba klienta",
+      "itemOutOfStock": "Brak pozycji w magazynie",
+      "wrongItem": "Dostarczono niewłaściwą pozycję",
+      "qualityIssue": "Problem z jakością jedzenia",
+      "duplicateOrder": "Zduplikowane zamówienie",
+      "other": "Inne"
+    }
+  },
+  "cancelModal": {
+    "title": "Anulować zamówienie {number}?",
+    "titleFallback": "Anuluj zamówienie",
+    "description": "Klient otrzyma zwrot (jeśli zapłacił z góry) i powiadomienie. Tej operacji nie można cofnąć.",
+    "primary": "Anuluj zamówienie",
+    "secondary": "Zachowaj zamówienie",
+    "reasonLabel": "Powód",
+    "notesLabel": "Uwagi",
+    "notesHelper": "Widoczne w logu audytowym i na stronie zamówienia klienta.",
+    "pickReason": "Wybierz powód",
+    "notesPlaceholderOther": "Opisz powód…",
+    "notesPlaceholder": "Dodatkowy kontekst (opcjonalnie)…",
+    "reasons": {
+      "customerRequested": "Prośba klienta",
+      "outOfStock": "Brak w magazynie",
+      "outOfRange": "Adres poza strefą dostawy",
+      "restaurantClosed": "Restauracja zamknięta",
+      "paymentFailed": "Nieudana płatność",
+      "other": "Inne"
+    }
+  }
+}

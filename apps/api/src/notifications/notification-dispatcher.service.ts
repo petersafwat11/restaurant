@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { resolveUserLocale } from '@repo/i18n';
+import { I18nService } from 'nestjs-i18n';
 import {
   JOB_EMAIL_ORDER_STATUS,
   JOB_PUSH_ORDER_STATUS,
@@ -13,7 +13,11 @@ import {
 import type { OrderCreatedEvent, OrderStatusChangedEvent } from '@repo/types';
 import type { Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
-import { channelsForStatus, notificationCopyFor } from './notification-matrix';
+import { channelsForStatus, type Locale, notificationCopyFor } from './notification-matrix';
+
+function pickLocale(stored: string | null | undefined): Locale {
+  return stored === 'en' ? 'en' : 'pl';
+}
 
 @Injectable()
 export class NotificationDispatcherService {
@@ -21,12 +25,11 @@ export class NotificationDispatcherService {
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly i18n: I18nService,
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
     @InjectQueue(QUEUE_SMS) private readonly smsQueue: Queue,
     @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
   ) {}
-
-  // ---- Event subscribers --------------------------------------------------
 
   @OnEvent('order.created')
   async onOrderCreated(event: OrderCreatedEvent): Promise<void> {
@@ -34,7 +37,7 @@ export class NotificationDispatcherService {
       orderId: event.orderId,
       orderNumber: event.orderNumber,
       userId: event.userId,
-      from: 'PENDING', // first state
+      from: 'PENDING',
       to: 'PENDING',
     });
   }
@@ -49,8 +52,6 @@ export class NotificationDispatcherService {
       to: event.to,
     });
   }
-
-  // ---- Dispatch -----------------------------------------------------------
 
   private async dispatch(input: {
     orderId: string;
@@ -69,7 +70,6 @@ export class NotificationDispatcherService {
       return;
     }
 
-    // Look up the customer so we have email/phone/userId to address by.
     const user = input.userId
       ? await this.prisma.user.findUnique({
           where: { id: input.userId },
@@ -77,8 +77,6 @@ export class NotificationDispatcherService {
         })
       : null;
 
-    // Per-user channel opt-outs (Sprint 9). In-app is never gated; the feed is
-    // the user's source of truth. Missing row → defaults (order updates on).
     const prefs = user
       ? await this.prisma.notificationPreference.findUnique({
           where: { userId: user.id },
@@ -88,10 +86,9 @@ export class NotificationDispatcherService {
     const allowSms = prefs ? prefs.orderUpdatesSms : true;
     const allowPush = prefs ? prefs.orderUpdatesPush : true;
 
-    const locale = resolveUserLocale(user?.locale ?? null);
-    const copy = notificationCopyFor(input.to, input.orderNumber, locale);
+    const locale = pickLocale(user?.locale);
+    const copy = notificationCopyFor(this.i18n, input.to, input.orderNumber, locale);
 
-    // In-app notification — persist directly, no queue.
     if (channels.inApp && user) {
       await this.prisma.notification.create({
         data: {

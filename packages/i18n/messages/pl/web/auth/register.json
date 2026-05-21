@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Zacznij teraz",
+  "title": "Załóż swoje konto",
+  "subtitle": "Szybsza realizacja zamówień, zapisane adresy, punkty lojalnościowe.",
+  "fields": {
+    "firstName": "Imię",
+    "firstNamePlaceholder": "Jan",
+    "lastName": "Nazwisko",
+    "lastNamePlaceholder": "Kowalski",
+    "email": "E-mail",
+    "emailPlaceholder": "jan@example.com",
+    "password": "Hasło",
+    "passwordHelper": "Co najmniej 10 znaków, w tym cyfra."
+  },
+  "actions": {
+    "submit": "Załóż konto",
+    "submitting": "Tworzenie konta…"
+  },
+  "links": {
+    "hasAccount": "Masz już konto?",
+    "signIn": "Zaloguj się"
+  }
+}

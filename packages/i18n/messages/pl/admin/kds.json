@@ -1,0 +1,36 @@
+{
+  "title": "Ekran kuchni",
+  "backToAdmin": "← Admin",
+  "backAria": "Wróć do panelu zamówień",
+  "tickets": "{count, plural, one {# zlecenie} few {# zlecenia} many {# zleceń} other {# zleceń}}",
+  "late": "{count, plural, one {# spóźnione} few {# spóźnione} many {# spóźnionych} other {# spóźnionych}}",
+  "filters": {
+    "ALL": "Wszystkie",
+    "DELIVERY": "Dostawa",
+    "PICKUP": "Odbiór",
+    "DINE_IN": "Na miejscu"
+  },
+  "muteAria": "Wycisz alerty",
+  "unmuteAria": "Włącz alerty",
+  "fullscreenAria": "Przełącz pełny ekran",
+  "empty": "Brak zleceń",
+  "loadError": {
+    "title": "Nie udało się wczytać zleceń",
+    "fallback": "Sprawdź połączenie.",
+    "retry": "Spróbuj ponownie"
+  },
+  "ticket": {
+    "back": "Wstecz",
+    "advance": {
+      "CONFIRMED": "Rozpocznij",
+      "PREPARING": "Gotowe",
+      "READY": "Odebrane"
+    },
+    "waiting": "Oczekiwanie: {minutes, plural, one {# minuta} few {# minuty} many {# minut} other {# minut}}",
+    "types": {
+      "DELIVERY": "Dostawa",
+      "PICKUP": "Odbiór",
+      "DINE_IN": "Na miejscu"
+    }
+  }
+}

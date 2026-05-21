@@ -1,0 +1,47 @@
+{
+  "title": "Wiadomości kontaktowe",
+  "filters": {
+    "all": "Wszystkie",
+    "status": {
+      "new": "Nowe",
+      "read": "Przeczytane",
+      "archived": "Zarchiwizowane"
+    }
+  },
+  "columns": {
+    "subject": "Temat",
+    "from": "Od",
+    "status": "Status",
+    "createdAt": "Otrzymano"
+  },
+  "row": {
+    "noSubject": "(bez tematu)"
+  },
+  "empty": "Brak wiadomości kontaktowych.",
+  "drawer": {
+    "ariaLabel": "Wiadomość kontaktowa",
+    "noSubject": "(bez tematu)",
+    "messageLabel": "Treść",
+    "handledBy": "Obsłużone przez {id}",
+    "activityLabel": "Aktywność",
+    "activityEmpty": "Brak notatek i odpowiedzi.",
+    "kind": {
+      "reply": "Wysłano odpowiedź",
+      "note": "Notatka wewnętrzna"
+    },
+    "replyLabel": "Odpowiedz klientowi",
+    "replyPlaceholder": "Wpisz odpowiedź…",
+    "replySend": "Wyślij odpowiedź",
+    "replySending": "Wysyłanie…",
+    "noteLabel": "Notatka wewnętrzna",
+    "notePlaceholder": "Widoczne tylko dla personelu…",
+    "noteAdd": "Dodaj notatkę",
+    "markStatus": "Oznacz: {status}",
+    "openInClient": "Otwórz w kliencie pocztowym",
+    "status": {
+      "new": "Nowe",
+      "read": "Przeczytane",
+      "archived": "Zarchiwizowane"
+    }
+  }
+}

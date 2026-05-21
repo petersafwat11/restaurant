@@ -27,6 +27,30 @@ export interface OrderSummaryPanelProps {
   /** 'sticky-rail' = right column on desktop checkout; 'inline' = full-width on confirmation. */
   variant?: 'sticky-rail' | 'inline';
   className?: string;
+  /** Localizable labels. */
+  labels?: {
+    /** Title shown at the top. Defaults to "Order summary". */
+    title?: React.ReactNode;
+    /** Aria-label for the <aside>. Defaults to "Order summary". */
+    regionLabel?: string;
+    /** Label for the "edit cart" link. Defaults to "Edit cart". */
+    editCart?: React.ReactNode;
+    /** Subtotal row label. Defaults to "Subtotal". */
+    subtotal?: React.ReactNode;
+    /** Delivery row label. Defaults to "Delivery". */
+    delivery?: React.ReactNode;
+    /** Tip row label. Defaults to "Tip". */
+    tip?: React.ReactNode;
+    /** Total row label. Defaults to "Total". */
+    total?: React.ReactNode;
+    /** Prefix in front of a line note (e.g. "Note: "). Defaults to "Note: ". */
+    notePrefix?: React.ReactNode;
+    /**
+     * Render the discount-row label. Receives the discount label (e.g. "FIRST15").
+     * Defaults to `Discount · ${label}`.
+     */
+    formatDiscount?: (label: string) => React.ReactNode;
+  };
 }
 
 export function OrderSummaryPanel({
@@ -43,10 +67,22 @@ export function OrderSummaryPanel({
   ctaSlot,
   variant = 'sticky-rail',
   className,
+  labels,
 }: OrderSummaryPanelProps) {
+  const {
+    title = 'Order summary',
+    regionLabel = 'Order summary',
+    editCart = 'Edit cart',
+    subtotal: subtotalLabel = 'Subtotal',
+    delivery: deliveryLabel = 'Delivery',
+    tip: tipLabel = 'Tip',
+    total: totalLabel = 'Total',
+    notePrefix = 'Note: ',
+    formatDiscount,
+  } = labels ?? {};
   return (
     <aside
-      aria-label="Order summary"
+      aria-label={regionLabel}
       className={cn(
         'rounded-card border border-border/[var(--border-alpha)] bg-surface-2 p-6',
         variant === 'sticky-rail' && 'sticky top-[calc(theme(spacing.site-nav)+1.5rem)]',
@@ -54,14 +90,14 @@ export function OrderSummaryPanel({
       )}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-h3 font-semibold text-fg">Order summary</h3>
+        <h3 className="text-h3 font-semibold text-fg">{title}</h3>
         {showEditCart && onEditCart && (
           <button
             type="button"
             onClick={onEditCart}
             className="text-small text-accent hover:underline"
           >
-            Edit cart
+            {editCart}
           </button>
         )}
       </div>
@@ -85,7 +121,10 @@ export function OrderSummaryPanel({
                   <span className="text-[12px] text-fg-muted">{line.modifierSummary}</span>
                 )}
                 {line.notes && (
-                  <span className="text-[12px] italic text-fg-subtle">Note: {line.notes}</span>
+                  <span className="text-[12px] italic text-fg-subtle">
+                    {notePrefix}
+                    {line.notes}
+                  </span>
                 )}
               </div>
               <div className="flex shrink-0 flex-col items-end leading-tight">
@@ -110,17 +149,17 @@ export function OrderSummaryPanel({
 
       <div className="flex flex-col gap-2 text-small">
         <div className="flex items-baseline justify-between text-fg">
-          <span className="text-fg-muted">Subtotal</span>
+          <span className="text-fg-muted">{subtotalLabel}</span>
           <span className="tabular-nums">{formatMoney(subtotal, currency)}</span>
         </div>
         {discount && (
           <div className="flex items-baseline justify-between text-positive">
-            <span>Discount · {discount.label}</span>
+            <span>{formatDiscount ? formatDiscount(discount.label) : `Discount · ${discount.label}`}</span>
             <span className="tabular-nums">−{formatMoney(discount.amount, currency)}</span>
           </div>
         )}
         <div className="flex items-baseline justify-between text-fg">
-          <span className="text-fg-muted">Delivery</span>
+          <span className="text-fg-muted">{deliveryLabel}</span>
           <span
             className={cn(
               'tabular-nums',
@@ -132,13 +171,13 @@ export function OrderSummaryPanel({
         </div>
         {tip && parseFloat(tip) > 0 && (
           <div className="flex items-baseline justify-between text-fg">
-            <span className="text-fg-muted">Tip</span>
+            <span className="text-fg-muted">{tipLabel}</span>
             <span className="tabular-nums">{formatMoney(tip, currency)}</span>
           </div>
         )}
         <div className="my-2 border-t border-border/[var(--border-alpha)]" />
         <div className="flex items-baseline justify-between">
-          <span className="font-display text-h3 font-medium text-fg">Total</span>
+          <span className="font-display text-h3 font-medium text-fg">{totalLabel}</span>
           <span className="font-display text-h3 font-medium tabular-nums text-fg">
             {formatMoney(total, currency)}
           </span>

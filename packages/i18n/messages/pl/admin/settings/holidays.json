@@ -1,0 +1,44 @@
+{
+  "title": "Dni wolne",
+  "backToSettings": "Ustawienia",
+  "add": {
+    "title": "Dodaj dzień wolny",
+    "description": "Zamknij konkretny dzień lub zmień jego godziny.",
+    "date": "Data",
+    "label": "Etykieta",
+    "labelPlaceholder": "Boże Narodzenie",
+    "dateUsed": "Dla tej daty już istnieje dzień wolny",
+    "mode": "Tryb",
+    "closedAllDay": "Zamknięte cały dzień",
+    "modifiedHours": "Zmienione godziny",
+    "openOverrideAria": "Godzina otwarcia (nadpisanie)",
+    "closeOverrideAria": "Godzina zamknięcia (nadpisanie)",
+    "submit": "Dodaj dzień wolny",
+    "submitting": "Dodawanie…"
+  },
+  "upcoming": {
+    "title": "Nadchodzące dni wolne",
+    "description": "{count, plural, one {# nadchodzący.} few {# nadchodzące.} many {# nadchodzących.} other {# nadchodzących.}}",
+    "empty": {
+      "title": "Brak nadchodzących dni wolnych",
+      "description": "Dodaj powyżej, aby nadpisać wybraną datę."
+    },
+    "error": {
+      "title": "Nie udało się załadować dni wolnych",
+      "retry": "Spróbuj ponownie"
+    },
+    "closedLabel": "Zamknięte",
+    "hoursRange": "{open}–{close}",
+    "inDays": "{count, plural, one {za # dzień} few {za # dni} many {za # dni} other {za # dni}}",
+    "removeAria": "Usuń {label}"
+  },
+  "past": {
+    "title": "{count, plural, one {Minione dni wolne (#)} few {Minione dni wolne (#)} many {Minione dni wolne (#)} other {Minione dni wolne (#)}}"
+  },
+  "confirmRemove": {
+    "title": "Usuń dzień wolny",
+    "description": "Usunąć „{label}” ({date})?",
+    "remove": "Usuń",
+    "cancel": "Anuluj"
+  }
+}

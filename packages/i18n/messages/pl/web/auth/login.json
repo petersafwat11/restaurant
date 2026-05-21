@@ -1,0 +1,17 @@
+{
+  "eyebrow": "Witaj ponownie",
+  "title": "Zaloguj się do swojego konta",
+  "fields": {
+    "email": "E-mail",
+    "emailPlaceholder": "jan@example.com",
+    "password": "Hasło"
+  },
+  "actions": {
+    "submit": "Zaloguj się",
+    "submitting": "Logowanie…"
+  },
+  "links": {
+    "forgotPassword": "Nie pamiętasz hasła?",
+    "createAccount": "Załóż konto"
+  }
+}

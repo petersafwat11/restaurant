@@ -4,6 +4,7 @@ import { useAnalyticsOverview, useRevenueTimeseries } from '@/features/analytics
 import type { AnalyticsPeriod } from '@repo/types';
 import { Spinner } from '@repo/ui';
 import { fmtInt, fmtPct, formatMoney } from '@repo/utils';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { KpiCard } from './kpi-card';
 
@@ -18,6 +19,7 @@ interface KpiRowProps {
  * to the same underlying series (README §6 carry-over #2).
  */
 export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
+  const t = useTranslations('admin.dashboard.kpi');
   const overview = useAnalyticsOverview({ period });
   const series = useRevenueTimeseries({
     period,
@@ -46,28 +48,28 @@ export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
       <KpiCard
-        label="Revenue"
+        label={t('revenue')}
         value={formatMoney(o.revenue.value, currency)}
         deltaPercent={o.revenue.deltaPercent}
         sparkData={sparkRevenue}
         sparkColor="rgb(var(--chart-1))"
       />
       <KpiCard
-        label="Orders"
+        label={t('orders')}
         value={fmtInt(o.orders.value)}
         deltaPercent={o.orders.deltaPercent}
         sparkData={sparkOrders}
         sparkColor="rgb(var(--chart-2))"
       />
       <KpiCard
-        label="Avg order value"
+        label={t('aov')}
         value={formatMoney(o.aov.value, currency)}
         deltaPercent={o.aov.deltaPercent}
         sparkData={sparkRevenue.map((rev, i) => rev / Math.max(1, sparkOrders[i] ?? 1))}
         sparkColor="rgb(var(--chart-3))"
       />
       <KpiCard
-        label="Completion rate"
+        label={t('completionRate')}
         value={fmtPct(completionRate, { digits: 1 })}
         valueClassName={completionClass}
         deltaPercent={o.completionRate.delta}
@@ -75,7 +77,7 @@ export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
         sparkColor="rgb(var(--chart-4))"
       />
       <KpiCard
-        label="New customers"
+        label={t('newCustomers')}
         value={fmtInt(o.newCustomers.value)}
         deltaPercent={o.newCustomers.delta}
         sparkData={sparkOrders}

@@ -7,11 +7,14 @@ import type { PromotionDto } from '@repo/types';
 import { Button, type ColumnDef, DataTable } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { CreatePromotionModal } from './create-promotion-modal';
 import { PromotionDrawer } from './promotion-drawer';
 
-function promotionStatus(p: PromotionDto): 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'EXPIRED' | 'PAUSED' {
+type PromotionStatusKey = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'EXPIRED' | 'PAUSED';
+
+function promotionStatus(p: PromotionDto): PromotionStatusKey {
   if (!p.isActive) return p.startsAt ? 'PAUSED' : 'DRAFT';
   const now = Date.now();
   if (p.startsAt && new Date(p.startsAt).getTime() > now) return 'SCHEDULED';
@@ -19,7 +22,7 @@ function promotionStatus(p: PromotionDto): 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'E
   return 'ACTIVE';
 }
 
-const STATUS_CLS: Record<ReturnType<typeof promotionStatus>, string> = {
+const STATUS_CLS: Record<PromotionStatusKey, string> = {
   DRAFT: 'bg-fg-subtle/[0.12] text-fg-muted',
   SCHEDULED: 'bg-info/[0.12] text-info',
   ACTIVE: 'bg-positive/[0.12] text-positive',
@@ -27,26 +30,8 @@ const STATUS_CLS: Record<ReturnType<typeof promotionStatus>, string> = {
   PAUSED: 'bg-warning/[0.12] text-warning',
 };
 
-function fmtValue(p: PromotionDto): string {
-  switch (p.type) {
-    case 'PERCENT':
-      return p.value ? `${p.value}% off` : '—';
-    case 'FIXED':
-      return p.value ? `${formatMoney(p.value, 'USD')} off` : '—';
-    case 'BOGO':
-      return 'Buy-one-get-one';
-    case 'FREE_DELIVERY':
-      return 'Free delivery';
-  }
-}
-
-function fmtWindow(p: PromotionDto): string {
-  const s = p.startsAt ? new Date(p.startsAt).toLocaleDateString() : '—';
-  const e = p.endsAt ? new Date(p.endsAt).toLocaleDateString() : '—';
-  return `${s} → ${e}`;
-}
-
 export function PromotionsList({ initialPromotionId }: { initialPromotionId?: string }) {
+  const t = useTranslations('admin.promotions.list');
   const { has } = usePermissions();
   const canWrite = has('promotion:write');
   const [createOpen, setCreateOpen] = React.useState(false);
@@ -60,19 +45,40 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
   const selected = fromList ?? directFetch.data ?? null;
 
   usePageHeader({
-    title: 'Promotions',
+    title: t('title'),
     rightExtras: canWrite ? (
       <Button variant="primary" onClick={() => setCreateOpen(true)}>
-        <Plus size={14} /> New promotion
+        <Plus size={14} /> {t('newPromotion')}
       </Button>
     ) : null,
   });
+
+  function fmtValue(p: PromotionDto): string {
+    switch (p.type) {
+      case 'PERCENT':
+        return p.value ? t('value.percentOff', { value: p.value }) : t('value.none');
+      case 'FIXED':
+        return p.value
+          ? t('value.fixedOff', { amount: formatMoney(p.value, 'USD') })
+          : t('value.none');
+      case 'BOGO':
+        return t('value.bogo');
+      case 'FREE_DELIVERY':
+        return t('value.freeDelivery');
+    }
+  }
+
+  function fmtWindow(p: PromotionDto): string {
+    const s = p.startsAt ? new Date(p.startsAt).toLocaleDateString() : t('window.none');
+    const e = p.endsAt ? new Date(p.endsAt).toLocaleDateString() : t('window.none');
+    return t('window.range', { start: s, end: e });
+  }
 
   const columns = React.useMemo<ColumnDef<PromotionDto>[]>(
     () => [
       {
         id: 'name',
-        header: 'Name',
+        header: t('columns.name'),
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-fg">{row.original.name}</span>
@@ -86,28 +92,28 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
       },
       {
         id: 'type',
-        header: 'Type',
+        header: t('columns.type'),
         cell: ({ row }) => (
           <span className="inline-flex h-5 items-center rounded-full bg-accent/[0.10] px-2 text-[11px] text-accent">
-            {row.original.type}
+            {t(`types.${row.original.type}`)}
           </span>
         ),
       },
       {
         id: 'value',
-        header: 'Value',
+        header: t('columns.value'),
         cell: ({ row }) => <span className="text-fg-muted">{fmtValue(row.original)}</span>,
       },
       {
         id: 'window',
-        header: 'Window',
+        header: t('columns.window'),
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{fmtWindow(row.original)}</span>
         ),
       },
       {
         id: 'min',
-        header: 'Min',
+        header: t('columns.min'),
         meta: { align: 'right' },
         cell: ({ row }) =>
           row.original.minSubtotal ? (
@@ -115,31 +121,32 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
               {formatMoney(row.original.minSubtotal, 'USD')}
             </span>
           ) : (
-            <span className="text-fg-subtle">—</span>
+            <span className="text-fg-subtle">{t('value.none')}</span>
           ),
       },
       {
         id: 'status',
-        header: 'Status',
+        header: t('columns.status'),
         cell: ({ row }) => {
           const s = promotionStatus(row.original);
           return (
             <span
               className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] ${STATUS_CLS[s]}`}
             >
-              {s}
+              {t(`status.${s}`)}
             </span>
           );
         },
       },
     ],
-    [],
+    // biome-ignore lint/correctness/useExhaustiveDependencies: fmtValue/fmtWindow are stable per render and use t which is captured via dep
+    [t],
   );
 
   if (!has('promotion:read') && !canWrite) {
     return (
       <div className="grid place-items-center rounded-card border-hairline bg-surface p-12 text-sm text-fg-muted">
-        You don't have permission to view promotions.
+        {t('noPermission')}
       </div>
     );
   }
@@ -152,11 +159,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         rowKey={(r) => r.id}
         loading={q.isLoading}
         onRowClick={(r) => setSelectedId(r.id)}
-        emptyState={
-          <div className="text-sm text-fg-muted">
-            No promotions yet. Create one to start offering discounts.
-          </div>
-        }
+        emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
       />
       <PromotionDrawer promotion={selected} onOpenChange={(o) => !o && setSelectedId(null)} />
       <CreatePromotionModal open={createOpen} onOpenChange={setCreateOpen} />

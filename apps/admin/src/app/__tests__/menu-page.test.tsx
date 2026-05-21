@@ -1,4 +1,4 @@
-import MenuPage from '@/app/(dashboard)/menu/page';
+import MenuPage from '@/app/[locale]/(dashboard)/menu/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';

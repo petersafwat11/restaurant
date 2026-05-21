@@ -1,0 +1,5 @@
+{
+  "title": "Kategoria",
+  "backToMenu": "Powrót do menu",
+  "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}"
+}

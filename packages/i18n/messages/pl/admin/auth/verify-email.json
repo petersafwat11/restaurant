@@ -1,0 +1,28 @@
+{
+  "title": "Potwierdź swój e-mail",
+  "helperWithEmail": "Wysłaliśmy link weryfikacyjny na {email}.",
+  "helperGeneric": "Wysłaliśmy link weryfikacyjny na Twój e-mail.",
+  "instruction": "Kliknij link w wiadomości, aby aktywować konto.",
+  "resend": "Wyślij ponownie",
+  "resendComingSoon": "Ponowne wysyłanie wkrótce",
+  "backToLogin": "Wróć do logowania",
+  "otpSent": "Wysłaliśmy kod na {target}",
+  "codeLabel": "Kod weryfikacyjny",
+  "submit": "Potwierdź",
+  "verifying": {
+    "title": "Weryfikujemy Twój e-mail",
+    "helper": "Chwila cierpliwości — to potrwa tylko moment.",
+    "working": "Pracujemy nad tym…"
+  },
+  "failed": {
+    "title": "Weryfikacja nie powiodła się",
+    "helper": "Ten link jest nieprawidłowy lub wygasł.",
+    "backToLogin": "Wróć do logowania"
+  },
+  "verified": {
+    "title": "E-mail potwierdzony",
+    "helper": "Twoje konto jest gotowe.",
+    "allSet": "Wszystko gotowe.",
+    "continue": "Przejdź do panelu"
+  }
+}

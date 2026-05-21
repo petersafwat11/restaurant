@@ -1,4 +1,4 @@
-import AuditLogPage from '@/app/(dashboard)/audit-log/page';
+import AuditLogPage from '@/app/[locale]/(dashboard)/audit-log/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';

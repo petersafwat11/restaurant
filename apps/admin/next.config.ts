@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const prismaStub = path.resolve(__dirname, "src/lib/prisma-client-stub.ts");
 
@@ -17,18 +18,12 @@ const config: NextConfig = {
 	experimental: {
 		turbo: {
 			resolveAlias: {
-				// `@repo/utils` barrel re-exports money.ts which imports Prisma's
-				// Decimal class. Browser never calls Decimal arithmetic — stub
-				// Prisma out for the browser condition so its node-only deps
-				// (`fs`, `async_hooks`, …) don't enter the client bundle.
 				"@prisma/client": { browser: prismaStub },
 				"@prisma/client/runtime/library": { browser: prismaStub },
 			},
 		},
 	},
 	webpack: (config, { isServer }) => {
-		// Same stubbing as the Turbopack block above, for the production
-		// `next build` path (which still uses Webpack).
 		if (!isServer) {
 			config.resolve.alias = {
 				...(config.resolve.alias as Record<string, unknown>),
@@ -52,4 +47,6 @@ const config: NextConfig = {
 	},
 };
 
-export default config;
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(config);

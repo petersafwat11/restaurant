@@ -6,7 +6,7 @@ export const UpdateProfileSchema = z.object({
   lastName: z.string().min(1).max(80).optional(),
   phone: PhoneSchema.nullish(),
   avatarUrl: z.string().url().nullish(),
-  locale: z.enum(['en', 'ar']).optional(),
+  locale: z.enum(['pl', 'en']).optional(),
 });
 export type UpdateProfileDto = z.infer<typeof UpdateProfileSchema>;
 

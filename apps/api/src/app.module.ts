@@ -18,7 +18,15 @@ import { ConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
-import { I18nModule } from './i18n/i18n.module';
+import path from 'node:path';
+import {
+  AcceptLanguageResolver,
+  CookieResolver,
+  HeaderResolver,
+  I18nJsonLoader,
+  I18nModule,
+  QueryResolver,
+} from 'nestjs-i18n';
 import { JobsModule } from './jobs/jobs.module';
 import { KitchenModule } from './kitchen/kitchen.module';
 import { LoyaltyModule } from './loyalty/loyalty.module';
@@ -79,7 +87,25 @@ import { UsersModule } from './users/users.module';
     ReportsModule,
     LoyaltyModule,
     ReferralsModule,
-    I18nModule,
+    I18nModule.forRoot({
+      fallbackLanguage: 'pl',
+      loaders: [
+        new I18nJsonLoader({
+          path: path.join(
+            path.dirname(require.resolve('@repo/i18n/package.json')),
+            'messages',
+          ),
+          watch: process.env.NODE_ENV !== 'production',
+        }),
+      ],
+      resolvers: [
+        new QueryResolver(['lang']),
+        new HeaderResolver(['x-locale']),
+        new CookieResolver(['NEXT_LOCALE']),
+        AcceptLanguageResolver,
+      ],
+      typesOutputPath: path.join(__dirname, '../../src/generated/i18n.generated.ts'),
+    }),
     AnalyticsProductModule,
     FeatureFlagsModule,
     ContactModule,

@@ -15,6 +15,13 @@ export interface KdsItem {
   notes?: string;
 }
 
+export interface KdsTicketCardLabels {
+  typeLabels: Record<KdsOrderType, string>;
+  advanceLabels: Record<KdsStatus, string>;
+  back: string;
+  waitingAria: (minutes: number) => string;
+}
+
 export interface KdsTicketCardProps {
   orderNumber: string;
   status: KdsStatus;
@@ -32,24 +39,29 @@ export interface KdsTicketCardProps {
   onRevert?: () => void;
   pending?: boolean;
   className?: string;
+  /** Optional translation labels. English defaults are used when omitted. */
+  labels?: Partial<KdsTicketCardLabels>;
 }
+
+const DEFAULT_KDS_LABELS: KdsTicketCardLabels = {
+  typeLabels: {
+    DELIVERY: 'Delivery',
+    PICKUP: 'Pickup',
+    DINE_IN: 'Dine-in',
+  },
+  advanceLabels: {
+    CONFIRMED: 'Start',
+    PREPARING: 'Ready',
+    READY: 'Picked up',
+  },
+  back: 'Back',
+  waitingAria: (m) => `Waiting ${m} minutes`,
+};
 
 const STATUS_BG: Record<KdsStatus, string> = {
   CONFIRMED: 'bg-info/15 text-info',
   PREPARING: 'bg-warning/15 text-warning',
   READY: 'bg-accent/15 text-accent',
-};
-
-const TYPE_LABEL: Record<KdsOrderType, string> = {
-  DELIVERY: 'Delivery',
-  PICKUP: 'Pickup',
-  DINE_IN: 'Dine-in',
-};
-
-const ADVANCE_LABEL: Record<KdsStatus, string> = {
-  CONFIRMED: 'Start',
-  PREPARING: 'Ready',
-  READY: 'Picked up',
 };
 
 function elapsedMinutes(iso: string): number {
@@ -81,7 +93,16 @@ export function KdsTicketCard({
   onRevert,
   pending,
   className,
+  labels,
 }: KdsTicketCardProps) {
+  const L: KdsTicketCardLabels = {
+    ...DEFAULT_KDS_LABELS,
+    ...labels,
+    typeLabels: { ...DEFAULT_KDS_LABELS.typeLabels, ...labels?.typeLabels },
+    advanceLabels: { ...DEFAULT_KDS_LABELS.advanceLabels, ...labels?.advanceLabels },
+  };
+  const TYPE_LABEL = L.typeLabels;
+  const ADVANCE_LABEL = L.advanceLabels;
   // Re-render every second so the elapsed clock stays live.
   const [, force] = React.useReducer((x: number) => x + 1, 0);
   React.useEffect(() => {
@@ -125,7 +146,7 @@ export function KdsTicketCard({
                 ? 'text-warning'
                 : 'text-fg-muted',
           )}
-          aria-label={`Waiting ${minutes} minutes`}
+          aria-label={L.waitingAria(minutes)}
         >
           {elapsedDisplay(confirmedAt)}
         </span>
@@ -171,7 +192,7 @@ export function KdsTicketCard({
             disabled={pending}
             className="flex items-center justify-center gap-1 border-r border-border/[var(--border-alpha)] px-3 py-3 text-small text-fg-muted transition-colors hover:bg-surface-warm/30 hover:text-fg disabled:opacity-50"
           >
-            <ArrowLeft className="h-4 w-4" /> Back
+            <ArrowLeft className="h-4 w-4" /> {L.back}
           </button>
         ) : (
           <div />

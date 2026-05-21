@@ -1,0 +1,17 @@
+{
+  "eyebrow": "Nasza historia",
+  "title": "Kebab taki, jaki być powinien.",
+  "description": "Szefa Donalda otworzyliśmy w 2014 roku z jedną zasadą: nic nie wychodzi z zamrażarki.",
+  "imageAlt": "Kucharz obracający mięso na grillu",
+  "paragraph1": "Chleb pieczemy przez cały dzień. Falafel formujemy ręcznie każdego ranka. Mięso marynujemy przez osiemnaście godzin, zanim trafi na grill.",
+  "paragraph2": "Jesteśmy małym zespołem — trzech kucharzy i kontuar — i specjalnie tak to zostawiamy. Każdy zawijaniec robi ktoś, kto pracuje tu wystarczająco długo, by mu zależało.",
+  "paragraph3": "Jedenaście lat później wciąż jesteśmy w tym samym miejscu na Marszałkowskiej, wciąż kroimy tak samo, wciąż kłócimy się o sos.",
+  "stats": {
+    "yearsValue": "11 lat",
+    "yearsLabel": "Otwarte od 2014",
+    "wrapsValue": "~1200 / tydz.",
+    "wrapsLabel": "Zawijańców w sezonie",
+    "ratingValue": "4,8",
+    "ratingLabel": "Średnia z 1247 opinii"
+  }
+}

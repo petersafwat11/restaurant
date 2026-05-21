@@ -1,0 +1,44 @@
+{
+  "title": "Adresy",
+  "subtitle": "Adresy dostawy zapisane na Twoim koncie.",
+  "loading": "Ładowanie…",
+  "badges": {
+    "default": "Domyślny"
+  },
+  "actions": {
+    "add": "Dodaj adres",
+    "save": "Zapisz adres",
+    "saving": "Zapisywanie…",
+    "cancel": "Anuluj",
+    "setDefault": "Ustaw jako domyślny",
+    "deleteAria": "Usuń adres"
+  },
+  "fields": {
+    "label": {
+      "label": "Etykieta",
+      "helper": "np. Dom, Praca",
+      "placeholder": "Dom"
+    },
+    "line1": {
+      "label": "Ulica i numer",
+      "placeholder": "ul. Marszałkowska 102"
+    },
+    "line2": {
+      "label": "Mieszkanie / piętro",
+      "helper": "Opcjonalnie",
+      "placeholder": "Mieszk. 5B / 3 piętro"
+    },
+    "city": {
+      "label": "Miasto"
+    }
+  },
+  "picker": {
+    "deliveryAreaFallback": "Obszar dostawy",
+    "checkError": "Nie udało się sprawdzić tego adresu.",
+    "outOfZoneError": "Pinezka musi znajdować się w naszym obszarze dostawy."
+  },
+  "empty": {
+    "title": "Brak zapisanych adresów",
+    "description": "Zapisz adres, aby szybciej dokonać zamówienia z dostawą."
+  }
+}

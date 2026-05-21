@@ -1,11 +1,12 @@
 'use client';
 
 import { useAddToCart } from '@/features/cart/hooks';
+import { Link } from '@/i18n/navigation';
 import { useMenuTree } from '@/features/menu/hooks';
 import { mockFeaturedDishes } from '@/lib/mock/szef-donald';
 import { Container, DishCard, SectionHeader } from '@repo/ui';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -25,8 +26,21 @@ type FeaturedItem = {
  * landing has to look complete even before a restaurant tags any dish.
  */
 export function LandingFeaturedDishes() {
+  const t = useTranslations('web.marketing.home.featured');
+  const tChips = useTranslations('web.shop.menu.chips');
   const treeQuery = useMenuTree();
   const addMutation = useAddToCart();
+
+  const flagLabels = React.useMemo(
+    () => ({
+      vegetarian: tChips('vegetarian'),
+      vegan: tChips('vegan'),
+      'gluten-free': tChips('glutenFree'),
+      spicy: tChips('spicy'),
+      featured: tChips('featured'),
+    }),
+    [tChips],
+  );
 
   const realFeatured = React.useMemo<FeaturedItem[]>(() => {
     if (!treeQuery.data) return [];
@@ -64,19 +78,28 @@ export function LandingFeaturedDishes() {
   const items: FeaturedItem[] =
     realFeatured.length > 0
       ? realFeatured
-      : mockFeaturedDishes.map((d) => ({
-          href: `/menu#${d.slug}`,
-          image: d.image,
-          name: d.name,
-          description: d.description,
-          price: d.price,
-          flags: d.flags,
-          onAdd: () => {
-            toast.success('Added to cart', {
-              description: `1 × ${d.name}`,
-            });
-          },
-        }));
+      : mockFeaturedDishes.map((d) => {
+          const name = t(`dishes.${d.slug}.name` as 'dishes.kebab-tortilla-srodni.name');
+          const description = t(
+            `dishes.${d.slug}.description` as 'dishes.kebab-tortilla-srodni.description',
+          );
+          const imageAlt = t(
+            `dishes.${d.slug}.imageAlt` as 'dishes.kebab-tortilla-srodni.imageAlt',
+          );
+          return {
+            href: `/menu#${d.slug}`,
+            image: { src: d.image.src, alt: imageAlt },
+            name,
+            description,
+            price: d.price,
+            flags: d.flags,
+            onAdd: () => {
+              toast.success(t('addedToCart'), {
+                description: t('addedToCartDescription', { name }),
+              });
+            },
+          };
+        });
 
   return (
     <section
@@ -86,10 +109,10 @@ export function LandingFeaturedDishes() {
       <Container>
         <SectionHeader
           id="featured-h"
-          eyebrow="Most loved"
-          title="Our customers' favourites"
-          description="The dishes people order over and over."
-          action={{ label: 'See full menu', href: '/menu' }}
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
+          action={{ label: t('seeFullMenu'), href: '/menu' }}
         />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {items.map((d, i) => (
@@ -101,6 +124,7 @@ export function LandingFeaturedDishes() {
               description={d.description}
               price={d.price}
               flags={d.flags as never}
+              flagLabels={flagLabels}
               onAdd={d.onAdd}
             />
           ))}
@@ -110,7 +134,7 @@ export function LandingFeaturedDishes() {
             href="/menu"
             className="inline-flex h-12 items-center gap-2 rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-6 text-[15px] font-medium text-fg transition-colors hover:bg-surface-warm/40"
           >
-            View the full menu
+            {t('viewFullMenuCta')}
             <ArrowRight size={18} />
           </Link>
         </div>

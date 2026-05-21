@@ -1,0 +1,28 @@
+{
+  "title": "Verify your email",
+  "helperWithEmail": "We sent a verification link to {email}.",
+  "helperGeneric": "We sent a verification link to your email.",
+  "instruction": "Click the link in the email to activate your account.",
+  "resend": "Resend email",
+  "resendComingSoon": "Resend coming soon",
+  "backToLogin": "Back to sign in",
+  "otpSent": "We sent a code to {target}",
+  "codeLabel": "Verification code",
+  "submit": "Verify",
+  "verifying": {
+    "title": "Verifying your email",
+    "helper": "Hang tight — this should only take a moment.",
+    "working": "Working on it…"
+  },
+  "failed": {
+    "title": "Verification failed",
+    "helper": "This link is invalid or has expired.",
+    "backToLogin": "Back to sign in"
+  },
+  "verified": {
+    "title": "Email verified",
+    "helper": "Your account is ready to go.",
+    "allSet": "You're all set.",
+    "continue": "Continue to dashboard"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Moje recenzje",
+  "subtitle": "Opinie pozostawione przy wcześniejszych zamówieniach.",
+  "empty": {
+    "title": "Brak recenzji",
+    "description": "Po kolejnym zamówieniu będziesz mógł zostawić recenzję."
+  },
+  "ownerName": "Od Szefa Donalda",
+  "writeReview": "Napisz recenzję",
+  "rating": "Ocena",
+  "comment": "Komentarz",
+  "submit": "Wyślij recenzję",
+  "ownerReply": "Odpowiedź od właściciela",
+  "averageRating": "{average} z 5 ({count, plural, one {# recenzja} few {# recenzje} many {# recenzji} other {# recenzji}})",
+  "reviewsCount": "{count, plural, one {# recenzja} few {# recenzje} many {# recenzji} other {# recenzji}}",
+  "thanks": "Dziękujemy za recenzję"
+}

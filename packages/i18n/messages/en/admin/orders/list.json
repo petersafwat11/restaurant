@@ -1,0 +1,24 @@
+{
+  "title": "Orders",
+  "exportButton": "Export",
+  "exportAriaLabel": "Export orders",
+  "exportCsv": "Download CSV",
+  "exportPdf": "Download PDF",
+  "empty": {
+    "all": "No orders yet. New ones will appear here in real time.",
+    "filtered": "No orders match these filters.",
+    "clearFilters": "Clear filters"
+  },
+  "bulk": {
+    "advance": "Advance",
+    "cancel": "Cancel",
+    "cancelOneTooltip": "Cancel one order at a time",
+    "selectedMoney": "{amount} selected"
+  },
+  "confirmBulkAdvance": {
+    "title": "Advance {count, plural, one {# order} other {# orders}}?",
+    "description": "Each selected order will be moved to its next status. This cannot be undone in bulk.",
+    "primary": "Advance {count}",
+    "secondary": "Cancel"
+  }
+}

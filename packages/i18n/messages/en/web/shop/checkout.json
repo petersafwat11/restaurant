@@ -1,0 +1,173 @@
+{
+  "title": "Checkout",
+  "orderType": "Order type",
+  "delivery": "Delivery",
+  "pickup": "Pickup",
+  "dineIn": "Dine in",
+  "deliveryAddress": "Delivery address",
+  "pickupTime": "Pickup time",
+  "payment": "Payment",
+  "tip": "Tip",
+  "reviewOrder": "Review order",
+  "placeOrder": "Place order",
+  "tax": "Tax",
+  "deliveryFee": "Delivery fee",
+  "grandTotal": "Total",
+  "backToMenu": "Back to menu",
+  "heading": "Almost there.",
+  "continue": "Continue",
+  "skip": "Skip",
+  "noFee": "No fee",
+  "free": "Free",
+  "currencySymbol": {
+    "PLN": "zł"
+  },
+  "empty": {
+    "title": "Your cart is empty",
+    "description": "Add something tasty before checking out.",
+    "action": "Browse menu"
+  },
+  "sections": {
+    "orderType": {
+      "title": "How do you want it?",
+      "summary": {
+        "DELIVERY": "Delivery",
+        "PICKUP": "Pickup",
+        "DINE_IN": "Eat in"
+      },
+      "options": {
+        "DELIVERY": {
+          "label": "Delivery",
+          "description": "20–40 min"
+        },
+        "PICKUP": {
+          "label": "Pickup",
+          "description": "Ready in 10–15 min",
+          "badge": "No fee"
+        },
+        "DINE_IN": {
+          "label": "Eat in",
+          "description": "Order from your table"
+        }
+      },
+      "ariaLabel": "Order type"
+    },
+    "contact": {
+      "title": "Contact",
+      "alreadyCustomer": "Already a customer? Sign in →",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "Jan Kowalski",
+        "phone": "Phone",
+        "phonePlaceholder": "512 345 678",
+        "phoneHelper": "We'll text you when your order is on the way.",
+        "email": "Email",
+        "emailPlaceholder": "jan@example.com",
+        "emailHelper": "For the receipt and order confirmation."
+      }
+    },
+    "whereWhen": {
+      "delivery": "Where + When",
+      "pickup": "When to pick up",
+      "dineIn": "Your table",
+      "when": "When",
+      "address": {
+        "line1": "Street + number",
+        "line1Placeholder": "ul. Marszałkowska 102",
+        "apartment": "Apt / Floor",
+        "apartmentHelper": "Optional",
+        "apartmentPlaceholder": "Apt 5B / Floor 3",
+        "city": "City",
+        "cityPlaceholder": "Warszawa"
+      },
+      "outOfZone": "Sorry — we don't deliver to this spot yet. Pickup is still available.",
+      "switchToPickup": "Switch to pickup",
+      "table": {
+        "label": "Table number",
+        "helper": "Look for the number on your table, or scan the QR.",
+        "placeholder": "12"
+      },
+      "pickerStatus": {
+        "errorMessage": "Could not check the address. Try again.",
+        "defaultZoneName": "Delivery area"
+      },
+      "errors": {
+        "needPinInZone": "Drop a pin inside our delivery area to continue."
+      }
+    },
+    "notes": {
+      "title": "Anything else? (optional)",
+      "helper": "For the kitchen — 500 chars max.",
+      "placeholder": "Special instructions for the kitchen…"
+    },
+    "payment": {
+      "title": "Payment",
+      "ariaLabel": "Payment method",
+      "options": {
+        "card": {
+          "label": "Card",
+          "description": "Visa, Mastercard, Amex."
+        },
+        "blik": {
+          "label": "BLIK",
+          "description": "Enter the 6-digit code from your bank app."
+        },
+        "cod": {
+          "label": "Cash on delivery",
+          "description": "Pay the driver in cash when it arrives."
+        }
+      }
+    },
+    "tip": {
+      "title": "Add a tip for the team? (optional)",
+      "noTip": "No tip",
+      "other": "Other",
+      "disclaimer": "100% of tips go to the team.",
+      "groupLabel": "Tip"
+    }
+  },
+  "summary": {
+    "title": "Order summary",
+    "regionLabel": "Order summary",
+    "subtotal": "Subtotal",
+    "delivery": "Delivery",
+    "tip": "Tip",
+    "total": "Total",
+    "notePrefix": "Note: ",
+    "discount": "Discount · {label}",
+    "editCart": "Edit cart"
+  },
+  "promo": {
+    "trigger": "Have a code?",
+    "placeholder": "Enter code",
+    "apply": "Apply",
+    "applying": "…",
+    "inputAriaLabel": "Promo code",
+    "removeAriaLabel": "Remove promo",
+    "notValid": "Code not valid.",
+    "mock": {
+      "baklava": "15% off — first order",
+      "student": "5,00 zł off"
+    }
+  },
+  "cta": {
+    "placing": "Placing order…",
+    "placeOrderTotal": "Place order · {total}",
+    "terms": "By placing this order, you agree to our <termsLink>Terms</termsLink> and <privacyLink>Privacy Policy</privacyLink>."
+  },
+  "errors": {
+    "minOrderInline": "Minimum order for delivery is {amount}. Add a little more to your cart.",
+    "minOrderToast": "Minimum order for delivery is {amount} — add a bit more.",
+    "confirmAddress": "Please confirm your delivery address on the map.",
+    "stripeNotInit": "Card form did not initialise. Please retry.",
+    "createOrderFallback": "Could not place your order."
+  },
+  "stripe": {
+    "notConfigured": "Card payments are not configured.",
+    "willAppear": "Card details will appear after you click Place order.",
+    "preparing": "Preparing secure card form…",
+    "notReady": "Card form not ready.",
+    "declined": "Card was declined.",
+    "initFailed": "Could not initialise card payment."
+  }
+}

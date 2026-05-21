@@ -3,6 +3,7 @@
 import { useCreateMenuCategory } from '@/features/menu/hooks';
 import { ActionModal, FormField, Input } from '@repo/ui';
 import { slugify } from '@repo/utils';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface CategoryCreateModalProps {
@@ -11,6 +12,7 @@ interface CategoryCreateModalProps {
 }
 
 export function CategoryCreateModal({ open, onOpenChange }: CategoryCreateModalProps) {
+  const t = useTranslations('admin.menu.categoryCreate');
   const [name, setName] = React.useState('');
   const [slug, setSlug] = React.useState('');
   const [slugTouched, setSlugTouched] = React.useState(false);
@@ -39,30 +41,30 @@ export function CategoryCreateModal({ open, onOpenChange }: CategoryCreateModalP
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title="New category"
-      description="Categories group menu items together (e.g. Starters, Mains, Desserts)."
+      title={t('title')}
+      description={t('description')}
       primary={{
-        label: create.isPending ? 'Creating…' : 'Create category',
+        label: create.isPending ? t('submitting') : t('submit'),
         onClick: submit,
         disabled: !valid || create.isPending,
         loading: create.isPending,
       }}
-      secondary={{ label: 'Cancel', onClick: () => onOpenChange(false) }}
+      secondary={{ label: t('cancel'), onClick: () => onOpenChange(false) }}
     >
       <div className="space-y-3">
-        <FormField label="Name" required>
+        <FormField label={t('nameLabel')} required>
           <Input
             value={name}
             maxLength={60}
             autoFocus
             onChange={(e) => setName(e.target.value)}
-            placeholder="Starters"
+            placeholder={t('namePlaceholder')}
           />
         </FormField>
         <FormField
-          label="Slug"
+          label={t('slugLabel')}
           required
-          helper="URL-friendly identifier — auto-generated from the name"
+          helper={t('slugHelper')}
         >
           <Input
             value={computedSlug}

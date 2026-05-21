@@ -1,4 +1,4 @@
-import DashboardPage from '@/app/(dashboard)/page';
+import DashboardPage from '@/app/[locale]/(dashboard)/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { waitFor } from '@testing-library/react';

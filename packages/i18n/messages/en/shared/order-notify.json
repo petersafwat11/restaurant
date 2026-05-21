@@ -1,0 +1,9 @@
+{
+  "placed": "Order {number} placed — we'll let you know when it's confirmed.",
+  "confirmed": "Order {number} confirmed and is being prepared.",
+  "ready": "Order {number} is ready.",
+  "outForDelivery": "Order {number} is out for delivery.",
+  "delivered": "Order {number} delivered. Enjoy!",
+  "cancelled": "Order {number} was cancelled.",
+  "refunded": "Order {number} was refunded."
+}

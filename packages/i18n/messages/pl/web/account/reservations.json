@@ -1,0 +1,8 @@
+{
+  "title": "Moje rezerwacje",
+  "subtitle": "Zarezerwowane przez Ciebie stoliki.",
+  "empty": {
+    "title": "Rezerwacje wkrótce",
+    "description": "Możliwość rezerwacji pojawi się w przyszłej aktualizacji. Tymczasem zadzwoń: {phone}."
+  }
+}

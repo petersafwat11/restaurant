@@ -1,0 +1,13 @@
+{
+  "title": "Profile",
+  "fields": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "phonePlaceholder": "512 345 678"
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving…"
+  }
+}

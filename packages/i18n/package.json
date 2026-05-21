@@ -6,12 +6,15 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./en": "./src/locales/en.json",
-    "./ar": "./src/locales/ar.json"
+    "./messages": "./src/messages.ts",
+    "./messages/*": "./messages/*",
+    "./package.json": "./package.json"
   },
+  "files": ["src", "messages"],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:messages": "node scripts/generate-messages.mjs"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",

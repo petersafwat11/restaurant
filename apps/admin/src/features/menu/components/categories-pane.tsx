@@ -5,6 +5,7 @@ import { useReorderCategories, useUpdateMenuCategory } from '@/features/menu/hoo
 import type { MenuCategoryDto } from '@repo/types';
 import { DragReorderList, InlineEdit, cn } from '@repo/ui';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface CategoriesPaneProps {
@@ -31,6 +32,7 @@ export function CategoriesPane({
   onAdd,
   onDeleteRequest,
 }: CategoriesPaneProps) {
+  const t = useTranslations('admin.menu.categories');
   const reorder = useReorderCategories();
   const { has } = usePermissions();
   const canWrite = has('menu:write');
@@ -43,12 +45,12 @@ export function CategoriesPane({
   return (
     <div className="flex h-full flex-col">
       <div className="mb-3 flex items-center justify-between px-2">
-        <div className="text-caption-admin text-fg-subtle">Categories</div>
+        <div className="text-caption-admin text-fg-subtle">{t('heading')}</div>
         {canWrite && (
           <button
             type="button"
             onClick={onAdd}
-            aria-label="Add category"
+            aria-label={t('addAriaLabel')}
             className="grid h-6 w-6 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
           >
             <Plus size={14} />
@@ -64,7 +66,7 @@ export function CategoriesPane({
           disabled={!canWrite}
           emptyState={
             <div className="rounded-md border-hairline bg-surface px-3 py-6 text-center text-xs text-fg-subtle">
-              No categories yet. Add one to get started.
+              {t('empty')}
             </div>
           }
           renderItem={(c, { handle }) => (
@@ -75,6 +77,10 @@ export function CategoriesPane({
               onDeleteRequest={() => onDeleteRequest(c)}
               handle={handle}
               canWrite={canWrite}
+              dragLabel={t('dragAriaLabel')}
+              deleteLabel={t('deleteAriaLabel')}
+              nameLabel={t('nameAriaLabel')}
+              nameRequiredMessage={t('nameRequired')}
             />
           )}
         />
@@ -94,6 +100,10 @@ interface CategoryRowProps {
     className: string;
   };
   canWrite: boolean;
+  dragLabel: string;
+  deleteLabel: string;
+  nameLabel: string;
+  nameRequiredMessage: string;
 }
 
 function CategoryRow({
@@ -103,6 +113,10 @@ function CategoryRow({
   onDeleteRequest,
   handle,
   canWrite,
+  dragLabel,
+  deleteLabel,
+  nameLabel,
+  nameRequiredMessage,
 }: CategoryRowProps) {
   const update = useUpdateMenuCategory(category.id);
   return (
@@ -118,7 +132,7 @@ function CategoryRow({
           {...handle.attributes}
           {...handle.listeners}
           className={cn(handle.className, 'opacity-0 group-hover:opacity-100')}
-          aria-label="Drag to reorder"
+          aria-label={dragLabel}
         >
           <GripVertical size={14} />
         </button>
@@ -142,8 +156,8 @@ function CategoryRow({
           <InlineEdit
             value={category.name}
             onCommit={(v) => update.mutate({ name: v })}
-            ariaLabel="Category name"
-            validate={(v) => (v.length === 0 ? 'Name is required' : null)}
+            ariaLabel={nameLabel}
+            validate={(v) => (v.length === 0 ? nameRequiredMessage : null)}
           />
           <span className="ml-auto text-[11px] tabular-nums text-fg-subtle">
             {category.items.length}
@@ -165,7 +179,7 @@ function CategoryRow({
         <button
           type="button"
           onClick={onDeleteRequest}
-          aria-label="Delete category"
+          aria-label={deleteLabel}
           className="grid h-6 w-6 place-items-center rounded-md text-fg-subtle opacity-0 transition-opacity hover:bg-negative/15 hover:text-negative group-hover:opacity-100"
         >
           <Trash2 size={13} />

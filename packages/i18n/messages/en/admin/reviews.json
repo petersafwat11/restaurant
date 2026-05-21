@@ -1,0 +1,56 @@
+{
+  "title": "Reviews",
+  "filters": {
+    "status": {
+      "all": "All",
+      "PUBLISHED": "Published",
+      "HIDDEN": "Hidden",
+      "FLAGGED": "Flagged"
+    },
+    "ratingLabel": "Rating:",
+    "ratingAll": "All",
+    "ratingStars": "{value}★"
+  },
+  "columns": {
+    "rating": "Rating",
+    "author": "Customer",
+    "comment": "Comment",
+    "status": "Status",
+    "reply": "Reply",
+    "createdAt": "Posted"
+  },
+  "moderation": {
+    "PUBLISHED": "Published",
+    "HIDDEN": "Hidden",
+    "FLAGGED": "Flagged",
+    "PENDING": "Pending"
+  },
+  "row": {
+    "anonymous": "Anonymous",
+    "noComment": "—",
+    "replied": "replied",
+    "noReply": "—"
+  },
+  "empty": "No reviews match these filters.",
+  "drawer": {
+    "ariaLabel": "Review",
+    "anonymous": "Anonymous",
+    "order": "order {id}",
+    "commentLabel": "Comment",
+    "noComment": "(no comment)",
+    "photosLabel": "Photos",
+    "flagReasonLabel": "Flag reason (optional)",
+    "flagReasonPlaceholder": "Spam, abusive language, off-topic, etc.",
+    "currentFlag": "Current flag: {reason}",
+    "ownerReplyLabel": "Owner reply",
+    "ownerReplyPlaceholder": "Thank the customer or address their concern…",
+    "lastReplied": "Last replied",
+    "actions": {
+      "publish": "Publish",
+      "hide": "Hide",
+      "flag": "Flag",
+      "sendReply": "Send reply",
+      "updateReply": "Update reply"
+    }
+  }
+}

@@ -16,6 +16,8 @@ export interface InlineEditProps {
   multiline?: boolean;
   ariaLabel?: string;
   className?: string;
+  /** Fallback text shown when both `value` and `placeholder` are empty. Defaults to "Untitled". */
+  untitledFallback?: string;
 }
 
 const VARIANT_CLS: Record<NonNullable<InlineEditProps['variant']>, string> = {
@@ -39,6 +41,7 @@ export function InlineEdit({
   multiline,
   ariaLabel,
   className,
+  untitledFallback = 'Untitled',
 }: InlineEditProps) {
   const [editing, setEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(value);
@@ -117,7 +120,7 @@ export function InlineEdit({
         className,
       )}
     >
-      <span className="truncate">{value || placeholder || 'Untitled'}</span>
+      <span className="truncate">{value || placeholder || untitledFallback}</span>
       <Pencil
         size={12}
         className="opacity-0 transition-opacity group-hover:opacity-60"

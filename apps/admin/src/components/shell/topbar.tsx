@@ -1,6 +1,9 @@
 'use client';
 
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLogout } from '@/features/auth/hooks';
 import { useRealtimeStatus } from '@/features/orders/hooks';
+import { useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import {
   DropdownMenu,
@@ -14,7 +17,7 @@ import {
   cn,
 } from '@repo/ui';
 import { Bell, Cog, LogOut, Search, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { type DateRange, DateRangeSegmented } from './date-range-segmented';
 
@@ -23,17 +26,10 @@ export interface TopbarProps {
   showDateRange?: boolean;
   range?: DateRange;
   onRangeChange?: (r: DateRange) => void;
-  /** Extra controls injected on the left side, after the date range. */
   leftExtras?: React.ReactNode;
-  /** Replaces the default right cluster (search/bell/cog/avatar). */
   rightExtras?: React.ReactNode;
 }
 
-/**
- * Sticky 56px topbar. Slots: title · restaurant switcher · date range ·
- * left-extras · spacer · right-extras (default = search/bell/cog/avatar).
- * The search button opens the ⌘K command palette — wired in Phase 1.
- */
 export function Topbar({
   title,
   showDateRange = false,
@@ -42,12 +38,13 @@ export function Topbar({
   leftExtras,
   rightExtras,
 }: TopbarProps) {
+  const t = useTranslations('admin.layout.topbar');
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const clearSession = useAuthStore((s) => s.clearSession);
+  const logout = useLogout();
 
   async function onLogout() {
-    await clearSession();
+    await logout.mutateAsync();
     router.push('/login');
   }
 
@@ -77,12 +74,11 @@ export function Topbar({
         <>
           <button
             type="button"
-            aria-label="Search (Cmd+K)"
-            // TODO(Phase 1): open command palette
+            aria-label={t('searchAriaLabel')}
             className="flex h-8 items-center gap-2 rounded-md border-hairline-strong bg-surface px-3 text-xs text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
           >
             <Search size={13} />
-            <span className="hidden xl:inline">Search orders, customers, items…</span>
+            <span className="hidden xl:inline">{t('searchPlaceholder')}</span>
             <kbd className="ml-2 hidden rounded border-hairline-strong bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle xl:inline">
               ⌘K
             </kbd>
@@ -90,11 +86,13 @@ export function Topbar({
 
           <RealtimeStatusBellButton />
 
+          <LanguageSwitcher />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                aria-label="Account"
+                aria-label={t('accountAriaLabel')}
                 className="grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-[11px] font-semibold text-fg transition-colors hover:bg-surface"
               >
                 {initials}
@@ -110,16 +108,16 @@ export function Topbar({
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => router.push('/settings/hours')}>
                 <User size={14} className="text-fg-subtle" />
-                Profile
+                {t('profile')}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => router.push('/settings')}>
                 <Cog size={14} className="text-fg-subtle" />
-                Settings
+                {t('settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={onLogout} className="text-negative focus:text-negative">
                 <LogOut size={14} />
-                Sign out
+                {t('logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -129,30 +127,32 @@ export function Topbar({
   );
 }
 
-const STATUS_DOT_CLS: Record<string, string> = {
-  connected: 'bg-positive',
-  connecting: 'bg-warning',
-  idle: 'bg-warning',
-  disconnected: 'bg-negative',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  connected: 'Realtime connected',
-  connecting: 'Connecting to realtime…',
-  idle: 'Realtime idle',
-  disconnected: 'Realtime disconnected',
-};
-
 function RealtimeStatusBellButton() {
+  const t = useTranslations('admin.layout.topbar.realtime');
+  const tNotifications = useTranslations('admin.layout.topbar');
   const status = useRealtimeStatus();
-  const dotCls = STATUS_DOT_CLS[status] ?? 'bg-fg-subtle';
-  const label = STATUS_LABEL[status] ?? 'Realtime status unknown';
+  const dotCls =
+    status === 'connected'
+      ? 'bg-positive'
+      : status === 'connecting' || status === 'idle'
+        ? 'bg-warning'
+        : status === 'disconnected'
+          ? 'bg-negative'
+          : 'bg-fg-subtle';
+  const labelKey =
+    status === 'connected' ||
+    status === 'connecting' ||
+    status === 'idle' ||
+    status === 'disconnected'
+      ? status
+      : 'unknown';
+  const label = t(labelKey);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={`Notifications · ${label}`}
+          aria-label={`${tNotifications('notificationsAriaLabel')} · ${label}`}
           className={cn(
             'relative grid h-8 w-8 place-items-center rounded-md text-fg-muted transition-colors',
             'hover:bg-surface-2 hover:text-fg',

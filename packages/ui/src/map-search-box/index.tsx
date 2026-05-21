@@ -17,6 +17,14 @@ export interface MapSearchBoxProps {
   countryCode?: string;
   placeholder?: string;
   className?: string;
+  /** Message shown when the geocoder request fails. Defaults to "Couldn't search — try again.". */
+  errorMessage?: string;
+  /** Message shown in the dropdown when there are zero matches. Defaults to "No matches.". */
+  noResultsLabel?: React.ReactNode;
+  /** Aria-label for the input. Defaults to "Search address". */
+  inputAriaLabel?: string;
+  /** Aria-label for the clear button. Defaults to "Clear search". */
+  clearAriaLabel?: string;
 }
 
 interface NominatimResult {
@@ -41,6 +49,10 @@ export function MapSearchBox({
   countryCode = 'PL',
   placeholder = 'Search address or place…',
   className,
+  errorMessage = "Couldn't search — try again.",
+  noResultsLabel = 'No matches.',
+  inputAriaLabel = 'Search address',
+  clearAriaLabel = 'Clear search',
 }: MapSearchBoxProps) {
   const [query, setQuery] = React.useState('');
   const [results, setResults] = React.useState<MapSearchResult[]>([]);
@@ -84,7 +96,7 @@ export function MapSearchBox({
         setActiveIdx(-1);
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
-        setError("Couldn't search — try again.");
+        setError(errorMessage);
         setResults([]);
         setOpen(true);
       } finally {
@@ -92,7 +104,7 @@ export function MapSearchBox({
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [query, countryCode]);
+  }, [query, countryCode, errorMessage]);
 
   // Close on outside click.
   React.useEffect(() => {
@@ -145,7 +157,7 @@ export function MapSearchBox({
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={handleKey}
           placeholder={placeholder}
-          aria-label="Search address"
+          aria-label={inputAriaLabel}
           autoComplete="off"
           spellCheck={false}
           className="h-9 w-full rounded-button border border-border/[var(--border-strong-alpha)] bg-surface/95 pl-8 pr-9 text-small text-fg shadow-sm outline-none backdrop-blur placeholder:text-fg-subtle focus:border-accent focus:ring-2 focus:ring-accent/30"
@@ -160,7 +172,7 @@ export function MapSearchBox({
               setResults([]);
               setOpen(false);
             }}
-            aria-label="Clear search"
+            aria-label={clearAriaLabel}
             className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-fg-subtle hover:bg-surface-warm/40 hover:text-fg"
           >
             <X className="h-3.5 w-3.5" />
@@ -176,7 +188,7 @@ export function MapSearchBox({
           {error ? (
             <li className="px-3 py-2 text-small text-negative">{error}</li>
           ) : results.length === 0 ? (
-            <li className="px-3 py-2 text-small text-fg-muted">No matches.</li>
+            <li className="px-3 py-2 text-small text-fg-muted">{noResultsLabel}</li>
           ) : (
             results.map((r, i) => (
               <li key={`${r.lat},${r.lng},${i}`}>

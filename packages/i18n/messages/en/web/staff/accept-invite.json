@@ -1,0 +1,27 @@
+{
+  "eyebrow": "Staff invitation",
+  "title": "Accept your invitation",
+  "subtitle": "Set your password and complete your account to join the team.",
+  "missingToken": {
+    "title": "Invitation link required",
+    "description": "This page needs a valid invitation link. Check the email we sent you.",
+    "action": "Go to sign in"
+  },
+  "fields": {
+    "firstName": "First name",
+    "firstNamePlaceholder": "Jan",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Kowalski",
+    "password": "Password",
+    "passwordHelper": "At least 8 characters."
+  },
+  "actions": {
+    "submit": "Accept invitation",
+    "submitting": "Accepting…"
+  },
+  "success": {
+    "title": "Invitation accepted",
+    "description": "Your account is ready. Sign in to get started.",
+    "signIn": "Sign in"
+  }
+}

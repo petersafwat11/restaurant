@@ -1,0 +1,17 @@
+{
+  "eyebrow": "Welcome back",
+  "title": "Sign in to your account",
+  "fields": {
+    "email": "Email",
+    "emailPlaceholder": "jan@example.com",
+    "password": "Password"
+  },
+  "actions": {
+    "submit": "Sign in",
+    "submitting": "Signing in…"
+  },
+  "links": {
+    "forgotPassword": "Forgot password?",
+    "createAccount": "Create account"
+  }
+}

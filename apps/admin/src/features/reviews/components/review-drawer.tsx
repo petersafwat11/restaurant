@@ -4,6 +4,7 @@ import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { useModerateReview, useReplyToReview } from '@/features/reviews/hooks';
 import type { ReviewDto } from '@repo/types';
 import { Button, DetailDrawer, RelativeTime, Textarea } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { ReviewStars } from './review-stars';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function ReviewDrawer({ review, onOpenChange }: Props) {
+  const t = useTranslations('admin.reviews');
   const { has } = usePermissions();
   const moderate = useModerateReview();
   const replyMut = useReplyToReview();
@@ -32,7 +34,7 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       width={560}
-      ariaLabel="Review"
+      ariaLabel={t('drawer.ariaLabel')}
       header={
         review && (
           <div className="px-6 py-4">
@@ -47,15 +49,17 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
                       : 'bg-fg-subtle/[0.12] text-fg-muted'
                 }`}
               >
-                {review.moderationStatus}
+                {t(`moderation.${review.moderationStatus}`)}
               </span>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">
-              <span>{review.authorName ?? 'Anonymous'}</span>
+              <span>{review.authorName ?? t('drawer.anonymous')}</span>
               <span className="text-fg-subtle">·</span>
               <RelativeTime value={review.createdAt} />
               <span className="text-fg-subtle">·</span>
-              <span className="font-mono text-fg-subtle">order {review.orderId.slice(0, 8)}</span>
+              <span className="font-mono text-fg-subtle">
+                {t('drawer.order', { id: review.orderId.slice(0, 8) })}
+              </span>
             </div>
           </div>
         )
@@ -70,14 +74,14 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
               }
               onClick={() => moderate.mutate({ id: review.id, status: 'PUBLISHED' })}
             >
-              Publish
+              {t('drawer.actions.publish')}
             </Button>
             <Button
               variant="ghost"
               disabled={!canModerate || moderate.isPending || review.moderationStatus === 'HIDDEN'}
               onClick={() => moderate.mutate({ id: review.id, status: 'HIDDEN' })}
             >
-              Hide
+              {t('drawer.actions.hide')}
             </Button>
             <Button
               variant="ghost"
@@ -91,7 +95,7 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
                 })
               }
             >
-              Flag
+              {t('drawer.actions.flag')}
             </Button>
             <Button
               variant="primary"
@@ -99,7 +103,7 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
               disabled={!canModerate || replyMut.isPending || reply.trim().length === 0}
               onClick={() => replyMut.mutate({ id: review.id, reply: { reply: reply.trim() } })}
             >
-              {review.ownerReply ? 'Update reply' : 'Send reply'}
+              {review.ownerReply ? t('drawer.actions.updateReply') : t('drawer.actions.sendReply')}
             </Button>
           </div>
         )
@@ -108,15 +112,17 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
       {review && (
         <div className="space-y-4">
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">Comment</div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">{t('drawer.commentLabel')}</div>
             <div className="whitespace-pre-wrap rounded-md border-hairline bg-surface-2 p-3 text-sm text-fg">
-              {review.comment ?? <span className="text-fg-subtle">(no comment)</span>}
+              {review.comment ?? <span className="text-fg-subtle">{t('drawer.noComment')}</span>}
             </div>
           </section>
 
           {review.images.length > 0 && (
             <section>
-              <div className="mb-1 text-caption-admin text-fg-subtle">Photos</div>
+              <div className="mb-1 text-caption-admin text-fg-subtle">
+                {t('drawer.photosLabel')}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {review.images.map((img) => (
                   <img
@@ -131,31 +137,37 @@ export function ReviewDrawer({ review, onOpenChange }: Props) {
           )}
 
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">Flag reason (optional)</div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">
+              {t('drawer.flagReasonLabel')}
+            </div>
             <Textarea
               value={flagReason}
               onChange={(e) => setFlagReason(e.target.value)}
-              placeholder="Spam, abusive language, off-topic, etc."
+              placeholder={t('drawer.flagReasonPlaceholder')}
               rows={2}
               disabled={!canModerate}
             />
             {review.flagReason && (
-              <div className="mt-1 text-xs text-warning">Current flag: {review.flagReason}</div>
+              <div className="mt-1 text-xs text-warning">
+                {t('drawer.currentFlag', { reason: review.flagReason })}
+              </div>
             )}
           </section>
 
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">Owner reply</div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">
+              {t('drawer.ownerReplyLabel')}
+            </div>
             <Textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
-              placeholder="Thank the customer or address their concern…"
+              placeholder={t('drawer.ownerReplyPlaceholder')}
               rows={4}
               disabled={!canModerate}
             />
             {review.ownerReplyAt && (
               <div className="mt-1 text-xs text-fg-subtle">
-                Last replied <RelativeTime value={review.ownerReplyAt} />
+                {t('drawer.lastReplied')} <RelativeTime value={review.ownerReplyAt} />
               </div>
             )}
           </section>

@@ -1,0 +1,30 @@
+{
+  "eyebrow": "Contact",
+  "title": "Get in touch.",
+  "description": "Questions about an order, an event, or a delivery zone — we read everything.",
+  "findUs": "Find us",
+  "addressLabel": "Address",
+  "phoneLabel": "Phone",
+  "directionsLabel": "Directions",
+  "openInGoogleMaps": "Open in Google Maps",
+  "address1": "Marszałkowska 102",
+  "address2": "00-026 Warszawa, Poland",
+  "phone": "+48 22 555 01 23",
+  "form": {
+    "nameLabel": "Name",
+    "namePlaceholder": "Jan Kowalski",
+    "emailLabel": "Email",
+    "emailPlaceholder": "jan@example.com",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "What's it about?",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Tell us what's on your mind…",
+    "submit": "Send message",
+    "submitting": "Sending…"
+  },
+  "success": {
+    "title": "Message sent",
+    "description": "Thanks — we'll reply within a day or two.",
+    "sendAnother": "Send another message"
+  }
+}

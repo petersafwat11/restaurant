@@ -21,6 +21,21 @@ export interface PromoCodeInputProps {
   /** Show as a "Have a code?" link until clicked. Default true. */
   collapsed?: boolean;
   className?: string;
+  /** Localizable labels. */
+  labels?: {
+    /** Label for the collapsed trigger button. Defaults to "Have a code?". */
+    trigger?: React.ReactNode;
+    /** Placeholder for the code input. Defaults to "Enter code". */
+    placeholder?: string;
+    /** Label for the apply button. Defaults to "Apply". */
+    apply?: React.ReactNode;
+    /** Loading label shown on the apply button. Defaults to "…". */
+    applying?: React.ReactNode;
+    /** Aria-label for the code input. Defaults to "Promo code". */
+    inputAriaLabel?: string;
+    /** Aria-label for the remove-applied-promo button. Defaults to "Remove promo". */
+    removeAriaLabel?: string;
+  };
 }
 
 export function PromoCodeInput({
@@ -29,7 +44,16 @@ export function PromoCodeInput({
   onRemove,
   collapsed = true,
   className,
+  labels,
 }: PromoCodeInputProps) {
+  const {
+    trigger = 'Have a code?',
+    placeholder = 'Enter code',
+    apply = 'Apply',
+    applying = '…',
+    inputAriaLabel = 'Promo code',
+    removeAriaLabel = 'Remove promo',
+  } = labels ?? {};
   const [open, setOpen] = React.useState(!collapsed || !!applied);
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState('');
@@ -44,7 +68,7 @@ export function PromoCodeInput({
         <button
           type="button"
           onClick={onRemove}
-          aria-label="Remove promo"
+          aria-label={removeAriaLabel}
           className="ml-auto grid h-5 w-5 place-items-center rounded-full text-fg-subtle transition-colors hover:bg-surface-warm/60 hover:text-fg"
         >
           <X size={11} strokeWidth={2.4} />
@@ -60,7 +84,7 @@ export function PromoCodeInput({
         onClick={() => setOpen(true)}
         className={cn('text-small text-accent hover:underline', className)}
       >
-        Have a code?
+        {trigger}
       </button>
     );
   }
@@ -80,8 +104,8 @@ export function PromoCodeInput({
     <form onSubmit={submit} className={cn('flex flex-col gap-1.5', className)}>
       <div className="flex items-center gap-2">
         <input
-          aria-label="Promo code"
-          placeholder="Enter code"
+          aria-label={inputAriaLabel}
+          placeholder={placeholder}
           value={code}
           onChange={(e) => {
             setCode(e.target.value);
@@ -94,7 +118,7 @@ export function PromoCodeInput({
           disabled={loading || !code.trim()}
           className="h-10 rounded-button bg-accent px-4 text-small font-medium text-text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-60"
         >
-          {loading ? '…' : 'Apply'}
+          {loading ? applying : apply}
         </button>
       </div>
       {error && <p className="text-[12px] text-negative">{error}</p>}

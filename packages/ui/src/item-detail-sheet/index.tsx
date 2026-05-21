@@ -64,11 +64,55 @@ export interface ItemDetailSheetProps {
   onOpenChange: (open: boolean) => void;
   item: DishDetail | null;
   onAddToCart: (line: NewCartLine) => void;
+  /** Localizable labels. */
+  labels?: {
+    /** Aria-label for the close (X) button. Defaults to "Close". */
+    closeAriaLabel?: string;
+    /** Header above the allergen chips. Defaults to "Allergens". */
+    allergensLabel?: React.ReactNode;
+    /** Label above the special-instructions textarea. Defaults to "Special instructions". */
+    specialInstructionsLabel?: React.ReactNode;
+    /**
+     * Placeholder for the special-instructions textarea. Defaults to
+     * "Anything we should know? (no onions, extra sauce…)".
+     */
+    specialInstructionsPlaceholder?: string;
+    /** Label above the quantity stepper. Defaults to "Quantity". */
+    quantityLabel?: React.ReactNode;
+    /** Header above the total/CTA row. Defaults to "Total". */
+    totalLabel?: React.ReactNode;
+    /** Title shown when the item is sold out. Defaults to "Sold out today — back tomorrow.". */
+    soldOut?: string;
+    /** Label for the add-to-cart CTA. Defaults to "Add to cart". */
+    addToCart?: React.ReactNode;
+    /**
+     * Build the "Please choose at least X." validation message. Receives `min`.
+     * Default mirrors English wording with "one" when min===1.
+     */
+    formatMinChoice?: (min: number) => string;
+    /**
+     * Build the title-attribute hint when required groups are unfilled.
+     * Receives the names of the unfilled groups. Default: `Choose: ${names.join(', ')}`.
+     */
+    formatChoose?: (groupNames: string[]) => string;
+  };
+  /**
+   * Optional translated chip labels per flag. Falls back to the hardcoded
+   * English label from `DISH_FLAG_TOKENS` when a flag isn't provided.
+   */
+  flagLabels?: Partial<Record<DishFlag, string>>;
 }
 
-function FlagChip({ flag }: { flag: DishFlag }) {
+function FlagChip({
+  flag,
+  label,
+}: {
+  flag: DishFlag;
+  label?: string;
+}) {
   const meta = DISH_FLAG_TOKENS[flag];
   const Icon = FLAG_ICONS[meta.icon];
+  const text = label ?? meta.label;
   return (
     <span
       className={cn(
@@ -77,7 +121,7 @@ function FlagChip({ flag }: { flag: DishFlag }) {
       )}
     >
       <Icon size={11} strokeWidth={2} />
-      {meta.label}
+      {text}
     </span>
   );
 }
@@ -107,7 +151,21 @@ export function ItemDetailSheet({
   onOpenChange,
   item,
   onAddToCart,
+  labels,
+  flagLabels,
 }: ItemDetailSheetProps) {
+  const {
+    closeAriaLabel = 'Close',
+    allergensLabel = 'Allergens',
+    specialInstructionsLabel = 'Special instructions',
+    specialInstructionsPlaceholder = 'Anything we should know? (no onions, extra sauce…)',
+    quantityLabel = 'Quantity',
+    totalLabel = 'Total',
+    soldOut = 'Sold out today — back tomorrow.',
+    addToCart = 'Add to cart',
+    formatMinChoice,
+    formatChoose,
+  } = labels ?? {};
   const [modState, setModState] = React.useState<Record<string, string[]>>(() =>
     defaultModifierState(item),
   );
@@ -177,7 +235,7 @@ export function ItemDetailSheet({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              aria-label="Close"
+              aria-label={closeAriaLabel}
               className="grid h-9 w-9 place-items-center rounded-full text-fg transition-colors hover:bg-surface-warm/40"
             >
               <X size={20} strokeWidth={1.75} />
@@ -197,7 +255,7 @@ export function ItemDetailSheet({
                 {item.flags && item.flags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {item.flags.map((f) => (
-                      <FlagChip key={f} flag={f} />
+                      <FlagChip key={f} flag={f} label={flagLabels?.[f]} />
                     ))}
                   </div>
                 )}
@@ -230,7 +288,7 @@ export function ItemDetailSheet({
               {item.allergens && item.allergens.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <span className="text-caption uppercase tracking-wide text-fg-subtle">
-                    Allergens
+                    {allergensLabel}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {item.allergens.map((a) => (
@@ -255,7 +313,11 @@ export function ItemDetailSheet({
                     value={v}
                     onChange={(next) => setModState((s) => ({ ...s, [g.id]: next }))}
                     error={
-                      showErr ? `Please choose at least ${g.min === 1 ? 'one' : g.min}.` : undefined
+                      showErr
+                        ? formatMinChoice
+                          ? formatMinChoice(g.min)
+                          : `Please choose at least ${g.min === 1 ? 'one' : g.min}.`
+                        : undefined
                     }
                     currency={item.currency}
                   />
@@ -267,13 +329,13 @@ export function ItemDetailSheet({
                   htmlFor="ids-notes"
                   className="text-caption uppercase tracking-wide text-fg-subtle"
                 >
-                  Special instructions
+                  {specialInstructionsLabel}
                 </label>
                 <textarea
                   id="ids-notes"
                   rows={3}
                   maxLength={200}
-                  placeholder="Anything we should know? (no onions, extra sauce…)"
+                  placeholder={specialInstructionsPlaceholder}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="resize-none rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 p-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
@@ -283,7 +345,7 @@ export function ItemDetailSheet({
 
               <div className="flex flex-col items-start gap-2">
                 <label className="text-caption uppercase tracking-wide text-fg-subtle">
-                  Quantity
+                  {quantityLabel}
                 </label>
                 <QuantityStepper value={qty} onChange={setQty} size="lg" />
               </div>
@@ -293,7 +355,7 @@ export function ItemDetailSheet({
           <div className="shrink-0 border-t border-border/[var(--border-alpha)] bg-surface-2 px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col">
-                <span className="text-caption uppercase tracking-wide text-fg-subtle">Total</span>
+                <span className="text-caption uppercase tracking-wide text-fg-subtle">{totalLabel}</span>
                 <span className="font-display text-h3 font-medium tabular-nums text-fg">
                   {formatMoney(total, item.currency)}
                 </span>
@@ -304,9 +366,11 @@ export function ItemDetailSheet({
                 disabled={item.unavailable}
                 title={
                   item.unavailable
-                    ? 'Sold out today — back tomorrow.'
+                    ? soldOut
                     : unfilled.length
-                      ? `Choose: ${unfilled.map((g) => g.name).join(', ')}`
+                      ? formatChoose
+                        ? formatChoose(unfilled.map((g) => g.name))
+                        : `Choose: ${unfilled.map((g) => g.name).join(', ')}`
                       : undefined
                 }
                 className={cn(
@@ -316,7 +380,7 @@ export function ItemDetailSheet({
                     : 'cursor-not-allowed bg-accent/40',
                 )}
               >
-                Add to cart
+                {addToCart}
                 <ShoppingBag size={18} />
               </button>
             </div>

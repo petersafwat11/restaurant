@@ -1,4 +1,4 @@
-import PromotionsPage from '@/app/(dashboard)/promotions/page';
+import PromotionsPage from '@/app/[locale]/(dashboard)/promotions/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';
@@ -48,10 +48,10 @@ describe('PromotionsPage', () => {
     const text = container.textContent ?? '';
     expect(text).toContain('Spring 20% off');
     expect(text).toContain('Free delivery weekend');
-    expect(text).toContain('PERCENT');
-    expect(text).toContain('FREE_DELIVERY');
+    // Type column shows translated labels (i18n) instead of raw enum values.
+    expect(text).toMatch(/Percent off/i);
+    expect(text).toMatch(/Free delivery/i);
     expect(text).toMatch(/20\s?% off/);
-    expect(text).toContain('Free delivery');
   });
 
   it('hides when promotion:read is missing', () => {

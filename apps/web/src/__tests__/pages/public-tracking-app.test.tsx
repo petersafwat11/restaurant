@@ -1,21 +1,31 @@
 import { PublicTrackingApp } from '@/features/checkout/components/public-tracking-app';
 import { server } from '@/test/setup';
+import { loadMessages } from '@repo/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
+import { NextIntlClientProvider } from 'next-intl';
 import * as React from 'react';
 import { describe, expect, it } from 'vitest';
 
-function withQuery(ui: React.ReactNode) {
+const messages = loadMessages('en');
+
+function withProviders(ui: React.ReactNode) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return <QueryClientProvider client={client}>{ui}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={client}>
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="Europe/Warsaw">
+        {ui}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
+  );
 }
 
 describe('PublicTrackingApp', () => {
   it('renders "Tracking link required" when token is missing', () => {
-    render(withQuery(<PublicTrackingApp orderId="order_abc" token={null} />));
+    render(withProviders(<PublicTrackingApp orderId="order_abc" token={null} />));
     expect(screen.getByText(/Tracking link required/i)).toBeTruthy();
   });
 
@@ -36,7 +46,7 @@ describe('PublicTrackingApp', () => {
         }),
       ),
     );
-    render(withQuery(<PublicTrackingApp orderId="order_abc" token="t.s" />));
+    render(withProviders(<PublicTrackingApp orderId="order_abc" token="t.s" />));
     await waitFor(() => {
       expect(screen.getByText(/R-2026-000001/i)).toBeTruthy();
     });
@@ -50,7 +60,7 @@ describe('PublicTrackingApp', () => {
         HttpResponse.json({ message: 'forbidden' }, { status: 403 }),
       ),
     );
-    render(withQuery(<PublicTrackingApp orderId="order_abc" token="t.s" />));
+    render(withProviders(<PublicTrackingApp orderId="order_abc" token="t.s" />));
     await waitFor(() => {
       expect(screen.getByText(/Tracking link expired or invalid/i)).toBeTruthy();
     });
@@ -73,7 +83,7 @@ describe('PublicTrackingApp', () => {
         }),
       ),
     );
-    render(withQuery(<PublicTrackingApp orderId="order_abc" token="t.s" />));
+    render(withProviders(<PublicTrackingApp orderId="order_abc" token="t.s" />));
     await waitFor(() => {
       expect(screen.getByText(/tracking link doesn't match the order/i)).toBeTruthy();
     });

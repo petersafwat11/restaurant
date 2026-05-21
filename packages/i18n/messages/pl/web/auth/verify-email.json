@@ -1,0 +1,15 @@
+{
+  "pending": {
+    "title": "Weryfikujemy Twój e-mail…"
+  },
+  "success": {
+    "title": "E-mail zweryfikowany",
+    "description": "Wszystko gotowe. Zaloguj się i zamów.",
+    "signIn": "Zaloguj się"
+  },
+  "error": {
+    "title": "Weryfikacja nieudana",
+    "description": "Ten link jest nieprawidłowy lub wygasł. Poproś o nowy w ustawieniach konta.",
+    "backToLogin": "Wróć do logowania"
+  }
+}

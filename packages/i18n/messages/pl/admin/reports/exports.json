@@ -1,0 +1,56 @@
+{
+  "title": "Eksporty",
+  "newExport": "Nowy eksport",
+  "empty": "Brak eksportów. Zakolejkuj jeden, aby zacząć.",
+  "columns": {
+    "report": "Raport",
+    "status": "Status",
+    "size": "Rozmiar",
+    "created": "Utworzono",
+    "expires": "Wygasa"
+  },
+  "rowStatus": {
+    "queued": "W kolejce",
+    "processing": "Przetwarzanie",
+    "ready": "Gotowe",
+    "failed": "Błąd"
+  },
+  "actions": {
+    "download": "Pobierz",
+    "error": "błąd",
+    "dash": "—"
+  },
+  "kinds": {
+    "sales-by-item": "Sprzedaż wg pozycji",
+    "sales-by-category": "Sprzedaż wg kategorii",
+    "sales-by-hour": "Sprzedaż wg godziny",
+    "sales-by-day-of-week": "Sprzedaż wg dnia tygodnia",
+    "tax-summary": "Podsumowanie podatkowe",
+    "payment-methods": "Metody płatności",
+    "customer-retention": "Retencja klientów",
+    "orders-detail": "Zamówienia (szczegółowe)",
+    "customers": "Klienci"
+  },
+  "format": {
+    "csv": "CSV",
+    "pdf": "PDF"
+  },
+  "modal": {
+    "title": "Utwórz eksport",
+    "description": "Zadanie wykonuje się w tle. Odśwież listę, gdy będzie gotowe.",
+    "queue": "Zakolejkuj eksport",
+    "queueing": "Kolejkowanie…",
+    "cancel": "Anuluj",
+    "report": "Raport",
+    "format": "Format",
+    "from": "Od",
+    "to": "Do"
+  },
+  "dataTable": {
+    "errorTitle": "Nie udało się załadować",
+    "retry": "Spróbuj ponownie",
+    "noResults": "Brak wyników.",
+    "selectAll": "Zaznacz wszystko",
+    "selectRow": "Zaznacz wiersz"
+  }
+}

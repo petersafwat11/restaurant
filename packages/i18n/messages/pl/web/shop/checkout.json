@@ -1,0 +1,173 @@
+{
+  "title": "Zamówienie",
+  "orderType": "Typ zamówienia",
+  "delivery": "Dostawa",
+  "pickup": "Odbiór",
+  "dineIn": "Na miejscu",
+  "deliveryAddress": "Adres dostawy",
+  "pickupTime": "Czas odbioru",
+  "payment": "Płatność",
+  "tip": "Napiwek",
+  "reviewOrder": "Sprawdź zamówienie",
+  "placeOrder": "Złóż zamówienie",
+  "tax": "Podatek",
+  "deliveryFee": "Koszt dostawy",
+  "grandTotal": "Razem",
+  "backToMenu": "Wróć do menu",
+  "heading": "Prawie gotowe.",
+  "continue": "Dalej",
+  "skip": "Pomiń",
+  "noFee": "Bez opłat",
+  "free": "Bezpłatnie",
+  "currencySymbol": {
+    "PLN": "zł"
+  },
+  "empty": {
+    "title": "Twój koszyk jest pusty",
+    "description": "Dodaj coś pysznego przed przejściem do kasy.",
+    "action": "Przeglądaj menu"
+  },
+  "sections": {
+    "orderType": {
+      "title": "Jak chcesz to odebrać?",
+      "summary": {
+        "DELIVERY": "Dostawa",
+        "PICKUP": "Odbiór",
+        "DINE_IN": "Na miejscu"
+      },
+      "options": {
+        "DELIVERY": {
+          "label": "Dostawa",
+          "description": "20–40 min"
+        },
+        "PICKUP": {
+          "label": "Odbiór",
+          "description": "Gotowe za 10–15 min",
+          "badge": "Bez opłat"
+        },
+        "DINE_IN": {
+          "label": "Na miejscu",
+          "description": "Zamów ze swojego stolika"
+        }
+      },
+      "ariaLabel": "Typ zamówienia"
+    },
+    "contact": {
+      "title": "Kontakt",
+      "alreadyCustomer": "Masz już konto? Zaloguj się →",
+      "fields": {
+        "name": "Imię i nazwisko",
+        "namePlaceholder": "Jan Kowalski",
+        "phone": "Telefon",
+        "phonePlaceholder": "512 345 678",
+        "phoneHelper": "Wyślemy SMS, gdy zamówienie będzie w drodze.",
+        "email": "E-mail",
+        "emailPlaceholder": "jan@example.com",
+        "emailHelper": "Na paragon i potwierdzenie zamówienia."
+      }
+    },
+    "whereWhen": {
+      "delivery": "Gdzie + Kiedy",
+      "pickup": "Kiedy odebrać",
+      "dineIn": "Twój stolik",
+      "when": "Kiedy",
+      "address": {
+        "line1": "Ulica i numer",
+        "line1Placeholder": "ul. Marszałkowska 102",
+        "apartment": "Mieszkanie / Piętro",
+        "apartmentHelper": "Opcjonalne",
+        "apartmentPlaceholder": "m. 5B / 3 piętro",
+        "city": "Miasto",
+        "cityPlaceholder": "Warszawa"
+      },
+      "outOfZone": "Przepraszamy — nie dowozimy jeszcze pod ten adres. Odbiór osobisty jest dostępny.",
+      "switchToPickup": "Zmień na odbiór",
+      "table": {
+        "label": "Numer stolika",
+        "helper": "Sprawdź numer na stoliku lub zeskanuj kod QR.",
+        "placeholder": "12"
+      },
+      "pickerStatus": {
+        "errorMessage": "Nie udało się sprawdzić adresu. Spróbuj ponownie.",
+        "defaultZoneName": "Strefa dostawy"
+      },
+      "errors": {
+        "needPinInZone": "Umieść pinezkę w naszej strefie dostawy, aby kontynuować."
+      }
+    },
+    "notes": {
+      "title": "Coś jeszcze? (opcjonalne)",
+      "helper": "Dla kuchni — maks. 500 znaków.",
+      "placeholder": "Specjalne instrukcje dla kuchni…"
+    },
+    "payment": {
+      "title": "Płatność",
+      "ariaLabel": "Sposób płatności",
+      "options": {
+        "card": {
+          "label": "Karta",
+          "description": "Visa, Mastercard, Amex."
+        },
+        "blik": {
+          "label": "BLIK",
+          "description": "Wpisz 6-cyfrowy kod z aplikacji banku."
+        },
+        "cod": {
+          "label": "Płatność przy odbiorze",
+          "description": "Zapłać kurierowi gotówką przy dostawie."
+        }
+      }
+    },
+    "tip": {
+      "title": "Dodać napiwek dla zespołu? (opcjonalne)",
+      "noTip": "Bez napiwku",
+      "other": "Inna",
+      "disclaimer": "100% napiwków trafia do zespołu.",
+      "groupLabel": "Napiwek"
+    }
+  },
+  "summary": {
+    "title": "Podsumowanie zamówienia",
+    "regionLabel": "Podsumowanie zamówienia",
+    "subtotal": "Suma częściowa",
+    "delivery": "Dostawa",
+    "tip": "Napiwek",
+    "total": "Razem",
+    "notePrefix": "Uwaga: ",
+    "discount": "Rabat · {label}",
+    "editCart": "Edytuj koszyk"
+  },
+  "promo": {
+    "trigger": "Masz kod?",
+    "placeholder": "Wpisz kod",
+    "apply": "Zastosuj",
+    "applying": "…",
+    "inputAriaLabel": "Kod promocyjny",
+    "removeAriaLabel": "Usuń kod",
+    "notValid": "Kod jest nieprawidłowy.",
+    "mock": {
+      "baklava": "15% rabatu — pierwsze zamówienie",
+      "student": "5,00 zł rabatu"
+    }
+  },
+  "cta": {
+    "placing": "Składanie zamówienia…",
+    "placeOrderTotal": "Złóż zamówienie · {total}",
+    "terms": "Składając zamówienie, akceptujesz nasz <termsLink>Regulamin</termsLink> oraz <privacyLink>Politykę prywatności</privacyLink>."
+  },
+  "errors": {
+    "minOrderInline": "Minimalna wartość zamówienia z dostawą to {amount}. Dodaj coś jeszcze do koszyka.",
+    "minOrderToast": "Minimalna wartość zamówienia z dostawą to {amount} — dodaj jeszcze coś.",
+    "confirmAddress": "Potwierdź adres dostawy na mapie.",
+    "stripeNotInit": "Formularz karty nie został zainicjalizowany. Spróbuj ponownie.",
+    "createOrderFallback": "Nie udało się złożyć zamówienia."
+  },
+  "stripe": {
+    "notConfigured": "Płatności kartą nie są skonfigurowane.",
+    "willAppear": "Pola karty pojawią się po kliknięciu „Złóż zamówienie\".",
+    "preparing": "Przygotowujemy bezpieczny formularz karty…",
+    "notReady": "Formularz karty nie jest gotowy.",
+    "declined": "Karta została odrzucona.",
+    "initFailed": "Nie udało się zainicjalizować płatności kartą."
+  }
+}

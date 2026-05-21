@@ -1,0 +1,60 @@
+{
+  "title": "Menu",
+  "eyebrow": "Menu",
+  "heroTitle": "Świeże składniki, przygotowane na zamówienie.",
+  "heroSummary": "{dishCount, plural, one {# danie} few {# dania} many {# dań} other {# dań}} w {categoryCount, plural, one {# kategorii} few {# kategoriach} many {# kategoriach} other {# kategoriach}}. Filtruj lub wyszukaj swoje ulubione.",
+  "categories": "Kategorie",
+  "featured": "Polecane",
+  "allItems": "Wszystkie pozycje",
+  "addToCart": "Dodaj do koszyka",
+  "outOfStock": "Brak w magazynie",
+  "calories": "{count} kcal",
+  "vegetarian": "Wegetariańskie",
+  "vegan": "Wegańskie",
+  "glutenFree": "Bezglutenowe",
+  "spicy": "Ostre",
+  "chips": {
+    "vegetarian": "Weg",
+    "vegan": "Wegan",
+    "glutenFree": "BG",
+    "spicy": "Ostre",
+    "featured": "Polecane"
+  },
+  "soldOutToday": "Wyprzedane",
+  "all": "Wszystkie",
+  "noResults": "Brak pozycji pasujących do filtrów",
+  "searchPlaceholder": "Szukaj w menu…",
+  "dietaryFiltersAria": "Filtry dietetyczne",
+  "loadingMenu": "Ładowanie menu…",
+  "error": {
+    "title": "Nie udało się załadować menu",
+    "description": "Coś poszło nie tak. Spróbuj odświeżyć stronę.",
+    "reload": "Odśwież"
+  },
+  "emptySearch": {
+    "title": "Nic nie pasuje do „{query}\"",
+    "description": "Spróbuj innego słowa lub wyczyść filtry.",
+    "clear": "Wyczyść wyszukiwanie"
+  },
+  "emptyFilter": {
+    "title": "Żadne danie nie pasuje do filtrów",
+    "description": "Połącz mniej filtrów, aby zobaczyć więcej opcji.",
+    "clear": "Wyczyść filtry"
+  },
+  "categoryItemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+  "toastAdded": {
+    "title": "Dodano do koszyka",
+    "description": "{quantity} × {name}"
+  },
+  "sheet": {
+    "close": "Zamknij",
+    "allergens": "Alergeny",
+    "specialInstructions": "Uwagi specjalne",
+    "specialInstructionsPlaceholder": "Coś powinniśmy wiedzieć? (bez cebuli, więcej sosu…)",
+    "quantity": "Ilość",
+    "total": "Razem",
+    "soldOut": "Wyprzedane na dziś — wracamy jutro.",
+    "minChoice": "Wybierz co najmniej {min, plural, one {jeden} few {#} many {#} other {#}}.",
+    "chooseGroups": "Wybierz: {names}"
+  }
+}

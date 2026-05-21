@@ -52,6 +52,7 @@ export { InlineEdit, type InlineEditProps } from './inline-edit';
 export {
   KdsTicketCard,
   type KdsTicketCardProps,
+  type KdsTicketCardLabels,
   type KdsStatus,
   type KdsOrderType,
   type KdsItem,

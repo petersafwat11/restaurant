@@ -1,0 +1,11 @@
+{
+  "title": "Notifications",
+  "subtitle": "Order updates, loyalty milestones, and promotions.",
+  "empty": {
+    "title": "No notifications",
+    "description": "You're all caught up."
+  },
+  "markAllRead": "Mark all as read",
+  "markRead": "Mark read",
+  "unreadCount": "{count, plural, one {# unread} other {# unread}}"
+}

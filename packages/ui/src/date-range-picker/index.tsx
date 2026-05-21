@@ -20,6 +20,13 @@ export interface DateRangePickerProps {
   align?: 'start' | 'center' | 'end';
   className?: string;
   disabled?: boolean;
+  /** Localizable footer-action labels. */
+  labels?: {
+    /** Label for the clear button. Defaults to "Clear". */
+    clear?: React.ReactNode;
+    /** Label for the apply button. Defaults to "Apply". */
+    apply?: React.ReactNode;
+  };
 }
 
 function fmt(d: Date | undefined): string {
@@ -39,8 +46,10 @@ export function DateRangePicker({
   align = 'start',
   className,
   disabled,
+  labels,
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
+  const { clear: clearLabel = 'Clear', apply: applyLabel = 'Apply' } = labels ?? {};
 
   const display = (() => {
     if (!value?.from) return placeholder;
@@ -107,14 +116,14 @@ export function DateRangePicker({
             }}
             className="text-small text-fg-muted hover:text-fg"
           >
-            Clear
+            {clearLabel}
           </button>
           <button
             type="button"
             onClick={() => setOpen(false)}
             className="rounded-button bg-accent px-3 py-1 text-small font-medium text-bg hover:bg-accent-hover"
           >
-            Apply
+            {applyLabel}
           </button>
         </div>
       </PopoverContent>

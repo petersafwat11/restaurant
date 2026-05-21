@@ -1,0 +1,68 @@
+{
+  "title": "Pracownicy",
+  "invite": "Zaproś",
+  "empty": "Brak pracowników.",
+  "columns": {
+    "name": "Imię i nazwisko",
+    "phone": "Telefon",
+    "role": "Rola",
+    "status": "Status",
+    "added": "Dodano",
+    "actions": ""
+  },
+  "missing": "—",
+  "status": {
+    "invited": "Zaproszony",
+    "active": "Aktywny",
+    "disabled": "Wyłączony"
+  },
+  "actions": {
+    "disable": "Wyłącz",
+    "enable": "Włącz"
+  },
+  "roles": {
+    "owner": "Właściciel",
+    "manager": "Menedżer",
+    "kitchen": "Kuchnia",
+    "cashier": "Kasjer"
+  },
+  "permissions": {
+    "order:read": "Podgląd zamówień",
+    "order:write": "Zarządzanie zamówieniami",
+    "order:status_update": "Zmiana statusu zamówień",
+    "order:cancel": "Anulowanie zamówień",
+    "order:refund": "Zwroty zamówień",
+    "menu:read": "Podgląd menu",
+    "menu:write": "Zarządzanie menu",
+    "promotion:read": "Podgląd promocji",
+    "promotion:write": "Zarządzanie promocjami",
+    "promotion:archive": "Archiwizacja promocji",
+    "staff:read": "Podgląd pracowników",
+    "staff:write": "Zarządzanie pracownikami",
+    "settings:read": "Podgląd ustawień",
+    "settings:write": "Zarządzanie ustawieniami",
+    "reports:read": "Podgląd raportów",
+    "customers:read": "Podgląd klientów",
+    "customers:write": "Zarządzanie klientami",
+    "reservations:read": "Podgląd rezerwacji",
+    "reservations:write": "Zarządzanie rezerwacjami",
+    "reviews:read": "Podgląd recenzji",
+    "reviews:write": "Odpowiadanie na recenzje",
+    "audit:read": "Podgląd dziennika audytu"
+  },
+  "inviteModal": {
+    "titleSent": "Zaproszenie wysłane",
+    "titleDefault": "Zaproś pracownika",
+    "descriptionSent": "Udostępnij ten jednorazowy token zapraszanej osobie. Użyje go na stronie /accept-invite.",
+    "descriptionDefault": "Otrzyma e-mail z jednorazowym linkiem.",
+    "done": "Gotowe",
+    "submit": "Wyślij zaproszenie",
+    "submitting": "Wysyłanie…",
+    "cancel": "Anuluj",
+    "token": "Token",
+    "copy": "Kopiuj",
+    "email": "E-mail",
+    "emailPlaceholder": "osoba@example.com",
+    "role": "Rola"
+  }
+}

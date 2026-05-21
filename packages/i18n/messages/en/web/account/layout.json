@@ -1,0 +1,17 @@
+{
+  "title": "Account",
+  "navAriaLabel": "Account navigation",
+  "nav": {
+    "profile": "Profile",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "loyalty": "Loyalty",
+    "referrals": "Referrals",
+    "reservations": "Reservations",
+    "reviews": "Reviews",
+    "notifications": "Notifications"
+  },
+  "logout": "Sign out",
+  "preferences": "Preferences",
+  "paymentMethods": "Payment methods"
+}

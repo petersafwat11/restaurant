@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface DeleteCategoryModalProps {
@@ -29,6 +30,7 @@ export function DeleteCategoryModal({
   siblings,
   onOpenChange,
 }: DeleteCategoryModalProps) {
+  const t = useTranslations('admin.menu.categoryDelete');
   const open = category !== null;
   const others = React.useMemo(
     () => siblings.filter((c) => c.id !== category?.id),
@@ -61,7 +63,7 @@ export function DeleteCategoryModal({
           await getApiClient().menu.items.update(item.id, { categoryId: moveTo });
         }
       } catch (err) {
-        notify('error', `Couldn't move items: ${(err as Error).message}`);
+        notify('error', t('moveError', { message: (err as Error).message }));
         qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
         setMoving(false);
         return;
@@ -77,27 +79,25 @@ export function DeleteCategoryModal({
       open={open}
       onOpenChange={onOpenChange}
       variant="destructive"
-      title={category ? `Delete "${category.name}"?` : 'Delete category'}
+      title={category ? t('titleNamed', { name: category.name }) : t('titleFallback')}
       description={
         hasItems
-          ? `This category has ${category?.items.length} item${
-              (category?.items.length ?? 0) === 1 ? '' : 's'
-            }. Pick a category to move them to — they won't be deleted.`
-          : 'This action cannot be undone.'
+          ? t('descriptionWithItems', { count: category?.items.length ?? 0 })
+          : t('descriptionEmpty')
       }
       primary={{
-        label: 'Delete category',
+        label: t('submit'),
         onClick: submit,
         disabled: !valid || busy,
         loading: busy,
       }}
-      secondary={{ label: 'Cancel', onClick: () => onOpenChange(false) }}
+      secondary={{ label: t('cancel'), onClick: () => onOpenChange(false) }}
     >
       {hasItems && (
-        <FormField label="Move items to" required>
+        <FormField label={t('moveToLabel')} required>
           <Select value={moveTo} onValueChange={setMoveTo}>
             <SelectTrigger>
-              <SelectValue placeholder="Pick a category" />
+              <SelectValue placeholder={t('moveToPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               {others.map((c) => (

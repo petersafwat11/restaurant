@@ -1,0 +1,136 @@
+{
+  "heroCta": "Zamów teraz",
+  "specials": "Dzisiejsze polecane",
+  "ourStory": "Nasza historia",
+  "locations": "Lokalizacje",
+  "contactUs": "Skontaktuj się z nami",
+  "reserveTable": "Zarezerwuj stolik",
+  "hero": {
+    "eyebrow": "Kebab · Falafel · Tacos · Od 2014",
+    "titleLine1": "Prawdziwy kebab.",
+    "titleEmphasis": "Robiony codziennie",
+    "titleLine3": "od podstaw.",
+    "description": "Falafel ręcznie formowany i marynowany przez noc. Chleb wypiekany przez cały dzień. Na wynos lub na miejscu — każde zamówienie przygotowujemy na świeżo.",
+    "primaryCta": "Zobacz menu",
+    "secondaryCta": "Zamów teraz",
+    "imageAlt": "Zdjęcie z góry świeżo zawiniętego kebaba na ciepłym kremowym papierze, oświetlonego od góry",
+    "openNow": "Otwarte",
+    "closesAt": "Zamykamy o {time}",
+    "chefName": "Szef Donald",
+    "chefLocation": "Warszawa Centrum"
+  },
+  "categories": {
+    "eyebrow": "Odkryj",
+    "title": "Co serwujemy",
+    "viewFullMenu": "Zobacz pełne menu",
+    "categoryAlt": "Kategoria {label}",
+    "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+    "labels": {
+      "kebab": "Kebab",
+      "falafel": "Falafel",
+      "tacos": "Tacos",
+      "box": "Boxy i talerze",
+      "drinks": "Napoje"
+    }
+  },
+  "featured": {
+    "eyebrow": "Najbardziej lubiane",
+    "title": "Ulubione dania naszych gości",
+    "description": "Dania, które klienci zamawiają w kółko.",
+    "seeFullMenu": "Zobacz pełne menu",
+    "viewFullMenuCta": "Zobacz całe menu",
+    "addedToCart": "Dodano do koszyka",
+    "addedToCartDescription": "1 × {name}",
+    "dishes": {
+      "kebab-tortilla-srodni": {
+        "name": "Kebab Tortilla Średni",
+        "description": "Mieszanka wołowiny i jagnięciny, świeża sałatka, sos tahini w ciepłej tortilli. Nasz numer jeden.",
+        "imageAlt": "Kebab w tortilli na kremowym papierze"
+      },
+      "falafel-pita-duzy": {
+        "name": "Falafel Pita Duży",
+        "description": "Osiem ręcznie formowanych falafeli, hummus, kiszona rzepa, pietruszka.",
+        "imageAlt": "Falafel w picie z hummusem"
+      },
+      "kapsalon-duzy": {
+        "name": "Kapsalon Duży",
+        "description": "Klasyk z Rotterdamu. Frytki, kebab, roztopiony ser, sałatka, sos. Porcja dla dwojga.",
+        "imageAlt": "Kapsalon z kebabem i roztopionym serem"
+      },
+      "tacos-x3": {
+        "name": "Tacos x3",
+        "description": "Trzy miękkie tacos, do wyboru z kebabem lub falafelem, salsa.",
+        "imageAlt": "Trzy miękkie tacos"
+      },
+      "box-strips-mega": {
+        "name": "Box Strips Mega",
+        "description": "Chrupiące paski z kurczaka, frytki, surówka, dwa sosy.",
+        "imageAlt": "Box z chrupiącymi paskami z kurczaka i frytkami"
+      },
+      "salatka-kebab-duzy": {
+        "name": "Sałatka Kebab Duży",
+        "description": "Bez chleba — sama zieleninka, mięso z kebaba, tahini, granat.",
+        "imageAlt": "Sałatka z kebabem, zieleniną i granatem"
+      }
+    }
+  },
+  "story": {
+    "eyebrow": "Nasza historia",
+    "titleLine1": "Kebab taki,",
+    "titleLine2": "jaki być powinien.",
+    "lead": "Szefa Donalda otworzyliśmy w 2014 roku z jedną zasadą: nic nie wychodzi z zamrażarki. Chleb pieczemy przez cały dzień. Falafel formujemy ręcznie każdego ranka. Mięso marynujemy przez osiemnaście godzin, zanim trafi na grill.",
+    "body": "Jesteśmy małym zespołem — trzech kucharzy i kontuar — i specjalnie tak to zostawiamy. Każdy zawijaniec robi ktoś, kto pracuje tu wystarczająco długo, by mu zależało.",
+    "readMore": "Przeczytaj całą historię",
+    "imageAlt": "Kucharz obracający mięso na grillu, ciepłe światło",
+    "yearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# lat}}",
+    "yearsLabel": "Otwarte od {since}",
+    "wrapsValue": "~{count} /tyg.",
+    "wrapsLabel": "Zawijańców w sezonie"
+  },
+  "hoursLocation": {
+    "eyebrow": "Znajdź nas",
+    "title": "Otwarte siedem dni w tygodniu.",
+    "mapAriaLabel": "Mapa pokazująca Szefa Donalda przy Marszałkowskiej 102 w Warszawie",
+    "addressLine1": "Marszałkowska 102",
+    "addressLine2": "00-026 Warszawa, Polska",
+    "phone": "+48 22 555 01 23",
+    "getDirections": "Wyznacz trasę",
+    "callUs": "Zadzwoń",
+    "shareLocation": "Udostępnij lokalizację",
+    "viewLargerMap": "Zobacz większą mapę"
+  },
+  "testimonials": {
+    "eyebrow": "Opinie",
+    "title": "Zaufały nam tysiące osób.",
+    "description": "Średnia ocena 4,8 z 1247 opinii w Google.",
+    "readAllReviews": "Przeczytaj wszystkie opinie",
+    "anonymous": "Anonimowy",
+    "items": {
+      "0": {
+        "quote": "Najlepszy kebab w Warszawie, bez dwóch zdań. Sos tahini to inny poziom, a chleb jest wyraźnie świeży. Byłam trzy razy w tym miesiącu.",
+        "name": "Kasia W.",
+        "meta": "Lokalny przewodnik · 42 opinie"
+      },
+      "1": {
+        "quote": "Falafel w picie, który naprawdę smakuje jak powinien — chrupiący na zewnątrz, miękki w środku, dobrze przyprawiony. Mój ulubiony wegetariański obiad.",
+        "name": "Tomasz K.",
+        "meta": "12 opinii"
+      },
+      "2": {
+        "quote": "Kapsalon jest niebezpieczny. W dobrym znaczeniu.",
+        "name": "Anna M.",
+        "meta": "5 opinii"
+      },
+      "3": {
+        "quote": "Prawdziwa jakość w uczciwej cenie. Czasem trzeba poczekać w piątek, ale warto.",
+        "name": "Michał R.",
+        "meta": "Top recenzent"
+      }
+    }
+  },
+  "newsletter": {
+    "eyebrow": "Bądźmy w kontakcie",
+    "title": "Darmowa baklava do pierwszego zamówienia.",
+    "description": "Zapisz się — sporadyczne maile, zero spamu. Wypisanie w każdej chwili."
+  }
+}

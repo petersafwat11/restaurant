@@ -1,4 +1,4 @@
-import StaffPage from '@/app/(dashboard)/staff/page';
+import StaffPage from '@/app/[locale]/(dashboard)/staff/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';

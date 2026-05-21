@@ -15,20 +15,51 @@ import {
 } from '@repo/ui';
 import { AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import * as React from 'react';
-import { OrderDrawerBody } from './order-drawer-body';
+import { type OrderDrawerBodyLabels, OrderDrawerBody } from './order-drawer-body';
+
+export interface OrderDetailDrawerLabels {
+  ariaLabel: string;
+  advanceTo: (statusLabel: string) => string;
+  noNextState: string;
+  orderComplete: string;
+  refund: string;
+  cancel: string;
+  print: string;
+  noPermissionAdvance: string;
+  retry: string;
+  loadError: string;
+  unknownError: string;
+  body?: Partial<OrderDrawerBodyLabels>;
+  typeLabels: Record<string, string>;
+  statusLabel?: (status: string) => string;
+}
+
+const DEFAULT_DRAWER_LABELS: OrderDetailDrawerLabels = {
+  ariaLabel: 'Order detail',
+  advanceTo: (s) => `Advance to ${s}`,
+  noNextState: 'No next state',
+  orderComplete: 'Order complete',
+  refund: 'Refund',
+  cancel: 'Cancel',
+  print: 'Print',
+  noPermissionAdvance: 'You don’t have permission to update order status',
+  retry: 'Retry',
+  loadError: 'Couldn’t load this order',
+  unknownError: 'Unknown error',
+  typeLabels: {
+    DELIVERY: 'Delivery',
+    PICKUP: 'Pickup',
+    DINE_IN: 'Dine-in',
+  },
+};
 
 interface OrderDetailDrawerProps {
   orderId: string | null;
   onOpenChange: (open: boolean) => void;
   onCancel: (orderId: string) => void;
   onRefund: (orderId: string) => void;
+  labels?: Partial<OrderDetailDrawerLabels>;
 }
-
-const TYPE_LABEL: Record<string, string> = {
-  DELIVERY: 'Delivery',
-  PICKUP: 'Pickup',
-  DINE_IN: 'Dine-in',
-};
 
 /**
  * The order detail drawer — opens whenever `orderId` is non-null. Fetches
@@ -40,7 +71,10 @@ export function OrderDetailDrawer({
   onOpenChange,
   onCancel,
   onRefund,
+  labels,
 }: OrderDetailDrawerProps) {
+  const L = { ...DEFAULT_DRAWER_LABELS, ...labels } as OrderDetailDrawerLabels;
+  const TYPE_LABEL = L.typeLabels;
   const q = useOrder(orderId ?? '');
   const advance = useAdvanceOrder();
   const { has } = usePermissions();
@@ -62,7 +96,7 @@ export function OrderDetailDrawer({
       open={open}
       onOpenChange={onOpenChange}
       width={540}
-      ariaLabel="Order detail"
+      ariaLabel={L.ariaLabel}
       flushBody
       header={
         order ? (
@@ -103,7 +137,7 @@ export function OrderDetailDrawer({
               variant="primary"
               className="flex-1 min-w-[10rem]"
               disabled={!nextStatus || !canAdvance || advance.isPending}
-              title={!canAdvance ? 'You don’t have permission to update order status' : undefined}
+              title={!canAdvance ? L.noPermissionAdvance : undefined}
               onClick={() =>
                 nextStatus &&
                 advance.mutate({ orderId: order.id, currentStatus: order.status, to: nextStatus })
@@ -111,18 +145,18 @@ export function OrderDetailDrawer({
             >
               {nextStatus ? (
                 <>
-                  Advance to {STATUS_TOKENS[nextStatus].label}
+                  {L.advanceTo(L.statusLabel?.(nextStatus) ?? STATUS_TOKENS[nextStatus].label)}
                   <ArrowRight size={14} />
                 </>
               ) : isTerminal ? (
-                'Order complete'
+                L.orderComplete
               ) : (
-                'No next state'
+                L.noNextState
               )}
             </Button>
             {!isTerminal && canRefund && (
               <Button variant="ghost" onClick={() => onRefund(order.id)}>
-                Refund
+                {L.refund}
               </Button>
             )}
             {!isTerminal && canCancel && (
@@ -131,10 +165,10 @@ export function OrderDetailDrawer({
                 onClick={() => onCancel(order.id)}
                 className="text-negative hover:text-negative"
               >
-                Cancel
+                {L.cancel}
               </Button>
             )}
-            <Button variant="ghost" size="icon" aria-label="Print">
+            <Button variant="ghost" size="icon" aria-label={L.print}>
               <Printer size={14} />
             </Button>
           </div>
@@ -151,22 +185,22 @@ export function OrderDetailDrawer({
           <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 px-3 py-3 text-small-admin text-negative">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="min-w-0">
-              <div className="font-medium">Couldn’t load this order</div>
+              <div className="font-medium">{L.loadError}</div>
               <div className="mt-1 break-words text-xs opacity-90">
-                {(q.error as Error | null)?.message ?? 'Unknown error'}
+                {(q.error as Error | null)?.message ?? L.unknownError}
               </div>
               <button
                 type="button"
                 onClick={() => q.refetch()}
                 className="mt-2 inline-flex items-center rounded-md bg-surface-2 px-2.5 py-1 text-xs text-fg-muted hover:text-fg"
               >
-                Retry
+                {L.retry}
               </button>
             </div>
           </div>
         </div>
       )}
-      {order && <OrderDrawerBody order={order} />}
+      {order && <OrderDrawerBody order={order} labels={L.body} />}
     </DetailDrawer>
   );
 }

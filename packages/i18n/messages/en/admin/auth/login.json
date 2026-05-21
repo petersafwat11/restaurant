@@ -1,0 +1,13 @@
+{
+  "title": "Sign in",
+  "helper": "Use your staff credentials to access the admin console.",
+  "submit": "Sign in",
+  "email": "Email",
+  "emailPlaceholder": "you@restaurant.com",
+  "password": "Password",
+  "rememberMe": "Remember me",
+  "forgotPassword": "Forgot password?",
+  "needAccount": "Need an account?",
+  "requestAccess": "Request access",
+  "welcomeBack": "Welcome back, {name}"
+}

@@ -24,6 +24,17 @@ export interface ImageUploaderProps {
   layout?: 'grid' | 'row';
   /** Override the default helper text. */
   helper?: string;
+  /**
+   * Render the drop-zone help text. Receives `max` so callers can interpolate
+   * the limit. Overrides `helper` when provided.
+   */
+  renderHelp?: (args: { max: number }) => React.ReactNode;
+  /** Label shown while files are being uploaded. Defaults to "Uploading…". */
+  uploadingLabel?: React.ReactNode;
+  /** Badge shown on the primary (first) image tile. Defaults to "Primary". */
+  primaryBadgeLabel?: React.ReactNode;
+  /** Aria-label for the per-tile remove button. Defaults to "Remove image". */
+  removeImageLabel?: string;
   disabled?: boolean;
   className?: string;
 }
@@ -46,6 +57,10 @@ export function ImageUploader({
   aspect = 4 / 3,
   layout = 'grid',
   helper,
+  renderHelp,
+  uploadingLabel = 'Uploading…',
+  primaryBadgeLabel = 'Primary',
+  removeImageLabel = 'Remove image',
   disabled,
   className,
 }: ImageUploaderProps) {
@@ -54,8 +69,9 @@ export function ImageUploader({
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const canAddMore = !disabled && images.length < max;
-  const helperText =
-    helper ?? `Drop images here or click to upload — up to ${max}, JPG/PNG/WebP, max 5 MB`;
+  const helperText: React.ReactNode = renderHelp
+    ? renderHelp({ max })
+    : (helper ?? `Drop images here or click to upload — up to ${max}, JPG/PNG/WebP, max 5 MB`);
 
   async function handleFiles(filesList: FileList | null) {
     if (!filesList) return;
@@ -109,7 +125,7 @@ export function ImageUploader({
             onChange={(e) => void handleFiles(e.target.files)}
           />
           <ImageIcon size={18} className="text-fg-subtle" />
-          <div className="text-xs">{uploading ? 'Uploading…' : helperText}</div>
+          <div className="text-xs">{uploading ? uploadingLabel : helperText}</div>
         </div>
       )}
 
@@ -139,7 +155,7 @@ export function ImageUploader({
               />
               {images.indexOf(img) === 0 && (
                 <span className="absolute left-1.5 top-1.5 rounded-sm bg-accent/90 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-bg">
-                  Primary
+                  {primaryBadgeLabel}
                 </span>
               )}
               <span className="absolute right-1.5 top-1.5 hidden rounded-sm bg-bg/60 p-1 text-fg-muted group-hover:flex">
@@ -151,7 +167,7 @@ export function ImageUploader({
                   e.stopPropagation();
                   onRemove(img.id);
                 }}
-                aria-label="Remove image"
+                aria-label={removeImageLabel}
                 className="absolute bottom-1.5 right-1.5 hidden rounded-md bg-bg/80 p-1 text-fg-muted hover:bg-negative/30 hover:text-negative group-hover:flex"
               >
                 <X size={12} />

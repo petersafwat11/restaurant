@@ -1,0 +1,19 @@
+{
+  "title": "Create your account",
+  "helper": "First-time owner setup. Your team will be invited separately.",
+  "submit": "Create account",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "email": "Email",
+  "emailPlaceholder": "you@restaurant.com",
+  "phone": "Phone",
+  "phonePlaceholder": "+1 555 010 0000",
+  "optional": "Optional",
+  "password": "Password",
+  "passwordHelper": "8+ chars, mix of upper, lower, and a digit",
+  "haveReferralCode": "Have a referral code?",
+  "referralCode": "Referral code",
+  "referralPlaceholder": "e.g. RESTOA1B2",
+  "hasAccount": "Already have an account?",
+  "login": "Sign in"
+}

@@ -1,13 +1,14 @@
-import { mockHours, mockLocation } from '@/lib/mock/szef-donald';
+import { Link } from '@/i18n/navigation';
+import { mockHours } from '@/lib/mock/szef-donald';
 import { Container, HoursTable, SectionHeader } from '@repo/ui';
 import { ArrowUpRight, MapPin, Phone, Share2 } from 'lucide-react';
-import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-function MapPlaceholder() {
+function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addressBadge: string }) {
   return (
     <div
       role="img"
-      aria-label="Map showing Szef Donald on Marszałkowska 102, Warsaw"
+      aria-label={ariaLabel}
       className="relative aspect-[4/3] w-full overflow-hidden rounded-image-lg bg-surface-warm"
     >
       <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="h-full w-full" aria-hidden>
@@ -48,14 +49,16 @@ function MapPlaceholder() {
         </svg>
       </div>
       <div className="absolute left-4 top-4 rounded-md bg-surface-elevated px-3 py-1.5 text-[12px] font-medium text-fg shadow-sm">
-        Marszałkowska 102
+        {addressBadge}
       </div>
     </div>
   );
 }
 
-export function LandingHoursLocation() {
-  const tel = mockLocation.phone.replace(/\s/g, '');
+export async function LandingHoursLocation() {
+  const t = await getTranslations('web.marketing.home.hoursLocation');
+  const phone = t('phone');
+  const tel = phone.replace(/\s/g, '');
   return (
     <section
       id="locations"
@@ -65,44 +68,44 @@ export function LandingHoursLocation() {
       <Container>
         <div className="grid items-start gap-12 lg:grid-cols-[2fr_3fr] lg:gap-16">
           <div className="flex flex-col gap-6">
-            <SectionHeader id="findus-h" eyebrow="Find us" title="Open seven days." />
+            <SectionHeader id="findus-h" eyebrow={t('eyebrow')} title={t('title')} />
             <div className="flex flex-col gap-1 leading-relaxed">
-              <div className="text-body-l font-semibold text-fg">{mockLocation.address1}</div>
-              <div className="text-body text-fg-muted">{mockLocation.address2}</div>
-              <Link href={`tel:${tel}`} className="text-body text-fg hover:text-accent">
-                {mockLocation.phone}
-              </Link>
+              <div className="text-body-l font-semibold text-fg">{t('addressLine1')}</div>
+              <div className="text-body text-fg-muted">{t('addressLine2')}</div>
+              <a href={`tel:${tel}`} className="text-body text-fg hover:text-accent">
+                {phone}
+              </a>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
                 href="#"
                 className="inline-flex h-9 items-center gap-2 rounded-full border border-border/[var(--border-strong-alpha)] bg-surface-2 px-3 text-small text-fg hover:border-accent/40"
               >
-                <MapPin size={14} /> Get directions
+                <MapPin size={14} /> {t('getDirections')}
               </Link>
-              <Link
+              <a
                 href={`tel:${tel}`}
                 className="inline-flex h-9 items-center gap-2 rounded-full border border-border/[var(--border-strong-alpha)] bg-surface-2 px-3 text-small text-fg hover:border-accent/40"
               >
-                <Phone size={14} /> Call us
-              </Link>
+                <Phone size={14} /> {t('callUs')}
+              </a>
               <button
                 type="button"
                 className="inline-flex h-9 items-center gap-2 rounded-full border border-border/[var(--border-strong-alpha)] bg-surface-2 px-3 text-small text-fg hover:border-accent/40"
               >
-                <Share2 size={14} /> Share location
+                <Share2 size={14} /> {t('shareLocation')}
               </button>
             </div>
             <HoursTable hours={mockHours} highlightToday layout="list" />
           </div>
           <div className="flex flex-col gap-3">
-            <MapPlaceholder />
+            <MapPlaceholder ariaLabel={t('mapAriaLabel')} addressBadge={t('addressLine1')} />
             <div className="flex justify-end">
               <Link
                 href="#"
                 className="inline-flex items-center gap-1 text-small text-fg hover:text-accent"
               >
-                View larger map
+                {t('viewLargerMap')}
                 <ArrowUpRight size={14} />
               </Link>
             </div>

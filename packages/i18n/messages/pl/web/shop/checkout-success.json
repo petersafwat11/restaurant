@@ -1,0 +1,80 @@
+{
+  "loading": "Wczytywanie zamówienia…",
+  "notFound": {
+    "title": "Nie znaleziono zamówienia",
+    "description": "Nie znaleźliśmy tego zamówienia. Mogło zostać złożone z innego konta.",
+    "action": "Wróć do menu"
+  },
+  "hero": {
+    "title": "Zamówienie potwierdzone",
+    "description": "Dzięki — odebraliśmy zamówienie. Potwierdzenie zostało wysłane na e-mail.",
+    "orderNumber": "Numer zamówienia",
+    "live": "Aktualizacje na żywo",
+    "reconnecting": "Łączenie ponowne…"
+  },
+  "copy": {
+    "ariaLabel": "Skopiuj numer zamówienia",
+    "toast": "Skopiowano numer zamówienia."
+  },
+  "status": {
+    "PENDING": "Oczekuje na potwierdzenie",
+    "CONFIRMED": "Zamówienie potwierdzone",
+    "PREPARING": "Kuchnia przygotowuje Twoje danie",
+    "READY": "Gotowe do odbioru",
+    "OUT_FOR_DELIVERY": "W drodze",
+    "DELIVERED": "Dostarczone",
+    "COMPLETED": "Zrealizowane",
+    "CANCELLED": "Zamówienie anulowane",
+    "REFUNDED": "Zamówienie zwrócone"
+  },
+  "eta": {
+    "DELIVERY": {
+      "caption": "Przewidywany czas dostawy",
+      "sub": "Wyślemy SMS, gdy zamówienie wyruszy w drogę."
+    },
+    "PICKUP": {
+      "caption": "Gotowe do odbioru za",
+      "sub": "Wyślemy SMS, gdy zamówienie będzie gotowe."
+    },
+    "DINE_IN": {
+      "caption": "Czas obsługi",
+      "sub": "Wyślemy SMS, gdy kuchnia ruszy z przygotowaniem."
+    },
+    "deliveryDefault": "~25 min",
+    "pickupDefault": "~12 min",
+    "dineInDefault": "~10 min"
+  },
+  "now": {
+    "regionLabel": "Aktualny status zamówienia",
+    "label": "Aktualnie"
+  },
+  "address": {
+    "regionLabel": "Dokąd trafia",
+    "deliveryCaption": "Dostawa na",
+    "pickupCaption": "Odbiór z",
+    "dineInCaption": "Twój stolik",
+    "tableRecorded": "Numer stolika zapisany"
+  },
+  "activity": {
+    "regionLabel": "Aktywność zamówienia",
+    "heading": "Aktywność zamówienia",
+    "live": "Na żywo"
+  },
+  "help": {
+    "regionLabel": "Potrzebujesz pomocy",
+    "title": "Potrzebujesz pomocy?",
+    "description": "Alergie, brakująca pozycja, zmiana adresu? Zadzwoń — jesteśmy pod ręką.",
+    "messageUs": "Napisz do nas"
+  },
+  "summary": {
+    "regionLabel": "Podsumowanie zamówienia",
+    "title": "Podsumowanie zamówienia",
+    "subtotal": "Suma częściowa",
+    "delivery": "Dostawa",
+    "tip": "Napiwek",
+    "total": "Razem",
+    "notePrefix": "Uwaga: ",
+    "free": "Bezpłatnie"
+  },
+  "backToMenu": "Wróć do menu"
+}

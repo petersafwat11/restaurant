@@ -1,0 +1,44 @@
+{
+  "title": "Holidays",
+  "backToSettings": "Settings",
+  "add": {
+    "title": "Add a holiday",
+    "description": "Close a specific day or override its hours.",
+    "date": "Date",
+    "label": "Label",
+    "labelPlaceholder": "Christmas Day",
+    "dateUsed": "A holiday already exists for that date",
+    "mode": "Mode",
+    "closedAllDay": "Closed all day",
+    "modifiedHours": "Modified hours",
+    "openOverrideAria": "Open override",
+    "closeOverrideAria": "Close override",
+    "submit": "Add holiday",
+    "submitting": "Adding…"
+  },
+  "upcoming": {
+    "title": "Upcoming holidays",
+    "description": "{count} upcoming.",
+    "empty": {
+      "title": "No upcoming holidays",
+      "description": "Add one above to override a specific date."
+    },
+    "error": {
+      "title": "Couldn't load holidays",
+      "retry": "Retry"
+    },
+    "closedLabel": "Closed",
+    "hoursRange": "{open}–{close}",
+    "inDays": "{count, plural, one {in # day} other {in # days}}",
+    "removeAria": "Remove {label}"
+  },
+  "past": {
+    "title": "{count, plural, one {Past holidays (#)} other {Past holidays (#)}}"
+  },
+  "confirmRemove": {
+    "title": "Remove holiday",
+    "description": "Remove \"{label}\" on {date}?",
+    "remove": "Remove",
+    "cancel": "Cancel"
+  }
+}

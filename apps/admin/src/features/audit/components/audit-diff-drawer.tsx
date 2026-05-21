@@ -2,6 +2,7 @@
 
 import type { AuditLogEntryDto } from '@repo/types';
 import { DetailDrawer, RelativeTime } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -10,13 +11,14 @@ interface Props {
 }
 
 export function AuditDiffDrawer({ entry, onOpenChange }: Props) {
+  const t = useTranslations('admin.auditLog');
   const open = entry !== null;
   return (
     <DetailDrawer
       open={open}
       onOpenChange={onOpenChange}
       width={640}
-      ariaLabel="Audit entry"
+      ariaLabel={t('drawer.ariaLabel')}
       header={
         entry && (
           <div className="px-6 py-4">
@@ -29,8 +31,8 @@ export function AuditDiffDrawer({ entry, onOpenChange }: Props) {
               <RelativeTime value={entry.createdAt} />
             </div>
             <div className="mt-2 text-xs text-fg-subtle">
-              actor {entry.actorUserId}
-              {entry.ip && <> · ip {entry.ip}</>}
+              {t('drawer.actor', { id: entry.actorUserId })}
+              {entry.ip && <> · {t('drawer.ip', { ip: entry.ip })}</>}
             </div>
           </div>
         )
@@ -38,16 +40,16 @@ export function AuditDiffDrawer({ entry, onOpenChange }: Props) {
     >
       {entry && (
         <div className="space-y-4">
-          <DiffPanel label="Before" json={entry.beforeJson} />
-          <DiffPanel label="After" json={entry.afterJson} />
+          <DiffPanel label={t('drawer.before')} json={entry.beforeJson} empty={t('drawer.empty')} />
+          <DiffPanel label={t('drawer.after')} json={entry.afterJson} empty={t('drawer.empty')} />
         </div>
       )}
     </DetailDrawer>
   );
 }
 
-function DiffPanel({ label, json }: { label: string; json: unknown }) {
-  const body = json == null ? '—' : JSON.stringify(json, null, 2);
+function DiffPanel({ label, json, empty }: { label: string; json: unknown; empty: string }) {
+  const body = json == null ? empty : JSON.stringify(json, null, 2);
   return (
     <section>
       <div className="mb-1 text-caption-admin text-fg-subtle">{label}</div>

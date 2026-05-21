@@ -1,0 +1,13 @@
+{
+  "title": "Profil",
+  "fields": {
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "phone": "Telefon",
+    "phonePlaceholder": "512 345 678"
+  },
+  "actions": {
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie…"
+  }
+}

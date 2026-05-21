@@ -6,6 +6,7 @@ import type { MenuCategoryDto, MenuItemDto } from '@repo/types';
 import { ColumnDef, DataTable, FilterPillGroup, Switch, cn } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 import { Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 export type ItemFilter = 'all' | 'available' | 'unavailable' | 'featured';
@@ -31,6 +32,7 @@ export function ItemsList({
   onCreateItem,
   currency = 'USD',
 }: ItemsListProps) {
+  const t = useTranslations('admin.menu.items');
   const toggleAvailability = useToggleItemAvailability();
   const { has } = usePermissions();
   const canWrite = has('menu:write');
@@ -86,7 +88,7 @@ export function ItemsList({
       },
       {
         id: 'name',
-        header: 'Item',
+        header: t('columns.item'),
         accessorKey: 'name',
         cell: (info) => {
           const it = info.row.original;
@@ -102,7 +104,7 @@ export function ItemsList({
       },
       {
         id: 'price',
-        header: 'Price',
+        header: t('columns.price'),
         accessorKey: 'basePrice',
         cell: (info) => (
           <span className="tabular-nums text-fg">
@@ -114,13 +116,13 @@ export function ItemsList({
       },
       {
         id: 'dietary',
-        header: 'Dietary',
+        header: t('columns.dietary'),
         cell: (info) => {
           const it = info.row.original;
           const tags: string[] = [];
-          if (it.isVegan) tags.push('V');
-          else if (it.isVegetarian) tags.push('Vg');
-          if (it.isGlutenFree) tags.push('GF');
+          if (it.isVegan) tags.push(t('dietaryTags.vegan'));
+          else if (it.isVegetarian) tags.push(t('dietaryTags.vegetarian'));
+          if (it.isGlutenFree) tags.push(t('dietaryTags.glutenFree'));
           if (it.spiceLevel > 0) tags.push('🌶'.repeat(Math.min(3, it.spiceLevel)));
           return (
             <span className="flex items-center gap-1 text-xs text-fg-muted">
@@ -140,7 +142,7 @@ export function ItemsList({
       },
       {
         id: 'available',
-        header: 'Available',
+        header: t('columns.available'),
         cell: (info) => {
           const it = info.row.original;
           return (
@@ -151,7 +153,7 @@ export function ItemsList({
                 onCheckedChange={(checked) =>
                   toggleAvailability.mutate({ id: it.id, isAvailable: checked })
                 }
-                aria-label="Toggle availability"
+                aria-label={t('toggleAvailabilityAriaLabel')}
               />
             </span>
           );
@@ -159,13 +161,13 @@ export function ItemsList({
         size: 90,
       },
     ],
-    [currency, toggleAvailability, canWrite],
+    [currency, toggleAvailability, canWrite, t],
   );
 
   if (!category) {
     return (
       <div className="grid h-full place-items-center rounded-card border-hairline bg-surface p-12 text-sm text-fg-muted">
-        Select a category on the left to view its items.
+        {t('selectCategoryPrompt')}
       </div>
     );
   }
@@ -177,12 +179,12 @@ export function ItemsList({
           value={filter}
           onChange={onFilterChange}
           options={[
-            { id: 'all', label: 'All', count: counts.all },
-            { id: 'available', label: 'Available', count: counts.available },
-            { id: 'unavailable', label: 'Unavailable', count: counts.unavailable },
-            { id: 'featured', label: 'Featured', count: counts.featured },
+            { id: 'all', label: t('filters.all'), count: counts.all },
+            { id: 'available', label: t('filters.available'), count: counts.available },
+            { id: 'unavailable', label: t('filters.unavailable'), count: counts.unavailable },
+            { id: 'featured', label: t('filters.featured'), count: counts.featured },
           ]}
-          ariaLabel="Item filter"
+          ariaLabel={t('filterAriaLabel')}
         />
         {canWrite && (
           <div className="ml-auto">
@@ -191,7 +193,7 @@ export function ItemsList({
               onClick={onCreateItem}
               className="inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-3 text-xs font-medium text-bg transition-colors hover:bg-accent-hover"
             >
-              <Plus size={13} /> New item
+              <Plus size={13} /> {t('newItem')}
             </button>
           </div>
         )}
@@ -205,8 +207,8 @@ export function ItemsList({
           emptyState={
             <div className="text-sm text-fg-muted">
               {filter === 'all'
-                ? `No items in "${category.name}" yet.`
-                : `No items match the "${filter}" filter.`}
+                ? t('emptyAll', { name: category.name })
+                : t('emptyFiltered', { filter: t(`filters.${filter}`) })}
             </div>
           }
         />

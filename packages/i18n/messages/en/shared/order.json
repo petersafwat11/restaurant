@@ -1,0 +1,8 @@
+{
+  "title": "Order {number}",
+  "history": "Order history",
+  "trackOrder": "Track order",
+  "reorder": "Reorder",
+  "estimatedArrival": "Estimated arrival",
+  "placedOn": "Placed on {date}"
+}

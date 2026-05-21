@@ -1,0 +1,41 @@
+{
+  "title": "Dziennik audytu",
+  "filters": {
+    "actorPlaceholder": "ID użytkownika…",
+    "actionAll": "Wszystkie akcje",
+    "resourceAll": "Wszystkie zasoby",
+    "fromLabel": "Od",
+    "toLabel": "Do",
+    "clear": "Wyczyść filtry",
+    "resources": {
+      "order": "zamówienie",
+      "payment": "płatność",
+      "menu_item": "pozycja menu",
+      "menu_category": "kategoria menu",
+      "promotion": "promocja",
+      "staff": "personel",
+      "review": "recenzja",
+      "reservation": "rezerwacja",
+      "settings": "ustawienia"
+    }
+  },
+  "columns": {
+    "when": "Kiedy",
+    "actor": "Wykonawca",
+    "action": "Akcja",
+    "resource": "Zasób",
+    "ip": "IP"
+  },
+  "row": {
+    "noIp": "—"
+  },
+  "empty": "Żaden wpis dziennika nie pasuje do filtrów.",
+  "drawer": {
+    "ariaLabel": "Wpis audytu",
+    "actor": "wykonawca {id}",
+    "ip": "ip {ip}",
+    "before": "Przed",
+    "after": "Po",
+    "empty": "—"
+  }
+}

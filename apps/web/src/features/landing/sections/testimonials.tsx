@@ -1,10 +1,11 @@
 'use client';
 
 import { useReviews } from '@/features/reviews/hooks';
+import { Link } from '@/i18n/navigation';
 import { mockTestimonials } from '@/lib/mock/szef-donald';
 import { Container, SectionHeader, TestimonialCard } from '@repo/ui';
 import { ArrowUpRight } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 /**
@@ -13,6 +14,7 @@ import * as React from 'react';
  * complete before reviews are collected.
  */
 export function LandingTestimonials() {
+  const t = useTranslations('web.marketing.home.testimonials');
   const reviewsQuery = useReviews();
 
   const realCards = React.useMemo(() => {
@@ -24,27 +26,38 @@ export function LandingTestimonials() {
         rating: r.rating,
         quote: r.comment ?? '',
         author: {
-          name: r.authorName ?? 'Anonymous',
+          name: r.authorName ?? t('anonymous'),
         },
         source: 'internal' as const,
       }));
-  }, [reviewsQuery.data]);
+  }, [reviewsQuery.data, t]);
 
-  const cards = realCards.length >= 3 ? realCards : mockTestimonials.slice(0, 3);
+  const cards =
+    realCards.length >= 3
+      ? realCards
+      : mockTestimonials.slice(0, 3).map((card, i) => ({
+          ...card,
+          quote: t(`items.${i}.quote` as 'items.0.quote'),
+          author: {
+            ...card.author,
+            name: t(`items.${i}.name` as 'items.0.name'),
+            meta: t(`items.${i}.meta` as 'items.0.meta'),
+          },
+        }));
 
   return (
     <section aria-labelledby="reviews-h" className="bg-bg py-section-y-mobile sm:py-section-y">
       <Container>
         <SectionHeader
           id="reviews-h"
-          eyebrow="Reviews"
-          title="Trusted by thousands."
-          description="4.8 average rating across 1,247 reviews on Google."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
           align="center"
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {cards.map((t, i) => (
-            <TestimonialCard key={i} {...t} />
+          {cards.map((tc, i) => (
+            <TestimonialCard key={i} {...tc} />
           ))}
         </div>
         <div className="mt-10 flex justify-center">
@@ -52,7 +65,7 @@ export function LandingTestimonials() {
             href="#"
             className="inline-flex items-center gap-1 text-[15px] font-medium text-fg hover:text-accent"
           >
-            Read all reviews
+            {t('readAllReviews')}
             <ArrowUpRight size={14} />
           </Link>
         </div>

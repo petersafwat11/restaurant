@@ -1,0 +1,11 @@
+{
+  "title": "Powiadomienia",
+  "subtitle": "Aktualizacje zamówień, kamienie milowe lojalnościowe i promocje.",
+  "empty": {
+    "title": "Brak powiadomień",
+    "description": "Masz wszystko na bieżąco."
+  },
+  "markAllRead": "Oznacz wszystkie jako przeczytane",
+  "markRead": "Oznacz jako przeczytane",
+  "unreadCount": "{count, plural, one {# nieprzeczytane} few {# nieprzeczytane} many {# nieprzeczytanych} other {# nieprzeczytanych}}"
+}

@@ -132,8 +132,6 @@ import {
   ForgotPasswordSchema,
   type HolidayDto,
   HolidaySchema,
-  type I18nMessagesDto,
-  I18nMessagesSchema,
   type InviteStaffDto,
   InviteStaffSchema,
   type KitchenTicketDto,
@@ -1331,17 +1329,6 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
-  // ---- i18n ------------------------------------------------------------
-  const i18n = {
-    messages: (locale?: 'en' | 'ar' | 'pl'): Promise<I18nMessagesDto> =>
-      request('/i18n/messages', {
-        method: 'GET',
-        auth: false,
-        query: locale ? { locale } : undefined,
-        responseSchema: I18nMessagesSchema,
-      }),
-  };
-
   // ---- feature flags ---------------------------------------------------
   const featureFlags = {
     resolved: (): Promise<FeatureFlagsResolvedDto> =>
@@ -1740,7 +1727,6 @@ export function createApiClient(opts: ApiClientOptions) {
     notifications,
     loyalty,
     referrals,
-    i18n,
     featureFlags,
     marketing,
     contact,

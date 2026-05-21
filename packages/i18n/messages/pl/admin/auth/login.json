@@ -1,0 +1,13 @@
+{
+  "title": "Zaloguj się",
+  "helper": "Użyj danych pracownika, aby uzyskać dostęp do panelu administracyjnego.",
+  "submit": "Zaloguj się",
+  "email": "E-mail",
+  "emailPlaceholder": "ty@restauracja.com",
+  "password": "Hasło",
+  "rememberMe": "Zapamiętaj mnie",
+  "forgotPassword": "Nie pamiętasz hasła?",
+  "needAccount": "Nie masz konta?",
+  "requestAccess": "Poproś o dostęp",
+  "welcomeBack": "Witaj ponownie, {name}"
+}

@@ -5,6 +5,7 @@ import { Spinner } from '@repo/ui';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { type Stripe, loadStripe } from '@stripe/stripe-js';
 import { AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 /**
@@ -41,6 +42,7 @@ export function StripePaymentForm({
   submitRef,
   onReady,
 }: StripePaymentFormProps) {
+  const t = useTranslations('web.shop.checkout.stripe');
   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
   const [intentError, setIntentError] = React.useState<string | null>(null);
 
@@ -56,20 +58,20 @@ export function StripePaymentForm({
         });
         if (!mounted) return;
         if (!res.clientSecret) {
-          setIntentError('Card payments are not configured.');
+          setIntentError(t('notConfigured'));
           return;
         }
         setClientSecret(res.clientSecret);
         onReady?.();
       } catch (err) {
         if (!mounted) return;
-        setIntentError((err as Error).message || 'Could not initialise card payment.');
+        setIntentError((err as Error).message || t('initFailed'));
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [orderId, onReady]);
+  }, [orderId, onReady, t]);
 
   if (intentError) {
     return (
@@ -80,17 +82,13 @@ export function StripePaymentForm({
   }
 
   if (!orderId) {
-    return (
-      <p className="text-small text-fg-muted">
-        Card details will appear after you click Place order.
-      </p>
-    );
+    return <p className="text-small text-fg-muted">{t('willAppear')}</p>;
   }
 
   if (!clientSecret) {
     return (
       <div className="flex items-center gap-2 text-small text-fg-muted">
-        <Spinner size="xs" tone="muted" /> Preparing secure card form…
+        <Spinner size="xs" tone="muted" /> {t('preparing')}
       </div>
     );
   }
@@ -110,12 +108,13 @@ function StripeInner({
 }: {
   submitRef: React.MutableRefObject<(() => Promise<string | null>) | null>;
 }) {
+  const t = useTranslations('web.shop.checkout.stripe');
   const stripe = useStripe();
   const elements = useElements();
 
   React.useEffect(() => {
     submitRef.current = async () => {
-      if (!stripe || !elements) return 'Card form not ready.';
+      if (!stripe || !elements) return t('notReady');
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -123,13 +122,13 @@ function StripeInner({
         },
         redirect: 'if_required',
       });
-      if (error) return error.message ?? 'Card was declined.';
+      if (error) return error.message ?? t('declined');
       return null;
     };
     return () => {
       submitRef.current = null;
     };
-  }, [stripe, elements, submitRef]);
+  }, [stripe, elements, submitRef, t]);
 
   return (
     <div className="rounded-card border border-border/[var(--border-strong-alpha)] bg-surface-2 p-4">

@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "menu": "Menu",
+    "about": "About",
+    "locations": "Locations",
+    "contact": "Contact"
+  },
+  "cta": {
+    "orderNow": "Order now"
+  },
+  "languageSwitcherLabel": "Language"
+}

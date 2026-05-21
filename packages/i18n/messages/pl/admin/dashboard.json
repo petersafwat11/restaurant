@@ -1,0 +1,74 @@
+{
+  "title": "Przegląd",
+  "period": {
+    "today": "Dziś",
+    "7d": "7 dni",
+    "30d": "30 dni",
+    "custom": "Zakres niestandardowy"
+  },
+  "kpi": {
+    "revenue": "Przychód",
+    "orders": "Zamówienia",
+    "aov": "Średnia wartość zamówienia",
+    "completionRate": "Wskaźnik realizacji",
+    "newCustomers": "Nowi klienci",
+    "vsPrevPeriod": "vs. poprzedni okres"
+  },
+  "revenue": {
+    "title": "Przychód",
+    "seriesAriaLabel": "Serie",
+    "seriesRevenue": "Przychód",
+    "seriesOrders": "Zamówienia",
+    "tableAriaLabel": "Dane przychodu",
+    "tableTime": "Czas",
+    "tableRevenue": "Przychód",
+    "tableOrders": "Zamówienia"
+  },
+  "statusDonut": {
+    "title": "Zamówienia wg statusu",
+    "centerLabel": "Zamówienia · {period}",
+    "tableAriaLabel": "Zamówienia wg statusu",
+    "tableStatus": "Status",
+    "tableCount": "Liczba",
+    "tablePercent": "Procent"
+  },
+  "topItems": {
+    "title": "Najlepsze pozycje",
+    "byRevenue": "Wg przychodu",
+    "byQuantity": "Wg ilości",
+    "colItem": "Pozycja",
+    "colQty": "Ilość",
+    "colRevenue": "Przychód",
+    "viewFullReport": "Zobacz pełny raport"
+  },
+  "livePanel": {
+    "title": "Na żywo",
+    "subtitle": "Czas rzeczywisty",
+    "activeOrders": "Aktywne zamówienia",
+    "activeOrdersSub": "Potwierdzone → W dostawie",
+    "avgPrepTime": "Średni czas przygotowania",
+    "avgPrepTimeSub": "Potwierdzone → Gotowe",
+    "repeatRate": "Wskaźnik powrotów",
+    "repeatRateSub": "{period} · powracający klienci",
+    "openOrders": "Otwórz zamówienia",
+    "kitchenView": "Widok kuchni"
+  },
+  "recentOrders": {
+    "title": "Ostatnie zamówienia",
+    "viewAll": "Zobacz wszystkie",
+    "colOrderNumber": "Nr zamówienia",
+    "colCustomer": "Klient",
+    "colItems": "Pozycje",
+    "colType": "Typ",
+    "colStatus": "Status",
+    "colTotal": "Razem",
+    "colPlaced": "Złożono",
+    "empty": "Brak zamówień.",
+    "items": "{count, plural, one {pozycja} few {pozycje} many {pozycji} other {pozycji}}"
+  },
+  "orderType": {
+    "DELIVERY": "Dostawa",
+    "PICKUP": "Odbiór",
+    "DINE_IN": "Na miejscu"
+  }
+}

@@ -35,12 +35,14 @@ import {
 } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 import { ChevronDown, Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { CustomerDrawer } from './customer-drawer';
 
 type SegmentFilter = 'all' | CustomerSegment;
 
 export function CustomersList({ initialCustomerId }: { initialCustomerId?: string }) {
+  const t = useTranslations('admin.customers.list');
   const { has } = usePermissions();
   const [segment, setSegment] = React.useState<SegmentFilter>('all');
   const [search, setSearch] = React.useState('');
@@ -60,7 +62,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
   const canTag = has('customer:tag');
   const canEmail = has('customer:email');
 
-  usePageHeader({ title: 'Customers' });
+  usePageHeader({ title: t('title') });
 
   const onExport = React.useCallback(
     (format: 'csv' | 'pdf') => {
@@ -89,7 +91,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
     () => [
       {
         id: 'name',
-        header: 'Customer',
+        header: t('columns.name'),
         cell: ({ row }) => {
           const r = row.original;
           const name = [r.firstName, r.lastName].filter(Boolean).join(' ') || r.email;
@@ -108,14 +110,14 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       },
       {
         id: 'phone',
-        header: 'Phone',
+        header: t('columns.phone'),
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{row.original.phone ?? '—'}</span>
         ),
       },
       {
         id: 'orders',
-        header: 'Orders',
+        header: t('columns.orders'),
         meta: { align: 'right' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg">{row.original.lifetimeOrders}</span>
@@ -123,7 +125,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       },
       {
         id: 'spend',
-        header: 'Lifetime spend',
+        header: t('columns.spend'),
         meta: { align: 'right' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg">
@@ -133,7 +135,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       },
       {
         id: 'last',
-        header: 'Last order',
+        header: t('columns.last'),
         cell: ({ row }) =>
           row.original.lastOrderAt ? (
             <RelativeTime value={row.original.lastOrderAt} />
@@ -143,24 +145,24 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       },
       {
         id: 'segment',
-        header: 'Segment',
+        header: t('columns.segment'),
         cell: ({ row }) =>
           row.original.segment ? (
             <span className="inline-flex h-5 items-center rounded-full bg-accent/[0.10] px-2 text-[11px] text-accent">
-              {row.original.segment}
+              {t(`segment.${row.original.segment}`)}
             </span>
           ) : (
             <span className="text-fg-subtle">—</span>
           ),
       },
     ],
-    [],
+    [t],
   );
 
   if (!has('customer:read')) {
     return (
       <div className="grid place-items-center rounded-card border-hairline bg-surface p-12 text-sm text-fg-muted">
-        You don't have permission to view customers.
+        {t('permissionDenied')}
       </div>
     );
   }
@@ -174,13 +176,16 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
               value={segment}
               onChange={setSegment}
               options={[
-                { id: 'all', label: 'All' },
-                ...CUSTOMER_SEGMENTS.map((s) => ({ id: s as SegmentFilter, label: s })),
+                { id: 'all', label: t('segment.all') },
+                ...CUSTOMER_SEGMENTS.map((s) => ({
+                  id: s as SegmentFilter,
+                  label: t(`segment.${s}`),
+                })),
               ]}
             />
             <Input
               type="search"
-              placeholder="Search name, email, phone…"
+              placeholder={t('search.placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="ml-auto h-8 w-72 text-sm"
@@ -191,23 +196,23 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
                   variant="outline"
                   size="sm"
                   disabled={exportCustomers.isPending || rows.length === 0}
-                  aria-label="Export customers"
+                  aria-label={t('export.ariaLabel')}
                 >
                   {exportCustomers.isPending ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
                     <Download size={14} />
                   )}
-                  Export
+                  {t('export.button')}
                   <ChevronDown size={12} className="opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onExport('csv')}>
-                  <FileSpreadsheet size={14} /> Download CSV
+                  <FileSpreadsheet size={14} /> {t('export.csv')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onExport('pdf')}>
-                  <FileText size={14} /> Download PDF
+                  <FileText size={14} /> {t('export.pdf')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -221,19 +226,21 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
         loading={q.isLoading}
         onRowClick={(r) => setSelectedId(r.id)}
         selection={canTag || canEmail ? { selected, onChange: setSelected } : undefined}
-        emptyState={<div className="text-sm text-fg-muted">No customers match these filters.</div>}
+        emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
       />
 
       {selected.size > 0 && (
         <BulkActionBar
           count={selected.size}
           onClear={() => setSelected(new Set())}
+          clearLabel={t('bulk.clear')}
+          formatSelected={(c) => t('bulk.selected', { count: c })}
           actions={[
             ...(canTag
               ? [
                   {
                     id: 'tag',
-                    label: 'Tag…',
+                    label: t('bulk.tag'),
                     onClick: () => setTagModalOpen(true),
                   },
                 ]
@@ -242,7 +249,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
               ? [
                   {
                     id: 'email',
-                    label: 'Send email…',
+                    label: t('bulk.email'),
                     onClick: () => setEmailModalOpen(true),
                   },
                 ]
@@ -254,10 +261,10 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       <ActionModal
         open={tagModalOpen}
         onOpenChange={setTagModalOpen}
-        title="Apply tag to selected customers"
-        description={`Applies one tag to ${selected.size} customer${selected.size === 1 ? '' : 's'}.`}
+        title={t('tagModal.title')}
+        description={t('tagModal.description', { count: selected.size })}
         primary={{
-          label: bulkTag.isPending ? 'Tagging…' : 'Apply tag',
+          label: bulkTag.isPending ? t('tagModal.primaryLoading') : t('tagModal.primary'),
           loading: bulkTag.isPending,
           onClick: () => {
             if (!tagId) return;
@@ -267,27 +274,25 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
             );
           },
         }}
-        secondary={{ label: 'Cancel', onClick: () => setTagModalOpen(false) }}
+        secondary={{ label: t('tagModal.secondary'), onClick: () => setTagModalOpen(false) }}
       >
         <div className="space-y-2">
-          <Label htmlFor="tag-select">Tag</Label>
+          <Label htmlFor="tag-select">{t('tagModal.tagLabel')}</Label>
           <select
             id="tag-select"
             value={tagId}
             onChange={(e) => setTagId(e.target.value)}
             className="h-9 w-full rounded-md border-hairline-strong bg-surface px-2 text-sm text-fg"
           >
-            <option value="">Select a tag…</option>
-            {(tagsQuery.data ?? []).map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
+            <option value="">{t('tagModal.tagPlaceholder')}</option>
+            {(tagsQuery.data ?? []).map((tag) => (
+              <option key={tag.id} value={tag.id}>
+                {tag.label}
               </option>
             ))}
           </select>
           {tagsQuery.data && tagsQuery.data.length === 0 && (
-            <p className="text-xs text-fg-subtle">
-              No tags yet. Create one in customer settings first.
-            </p>
+            <p className="text-xs text-fg-subtle">{t('tagModal.noTags')}</p>
           )}
         </div>
       </ActionModal>
@@ -295,10 +300,10 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       <ActionModal
         open={emailModalOpen}
         onOpenChange={setEmailModalOpen}
-        title="Send promotional email"
-        description={`Queues an email to ${selected.size} customer${selected.size === 1 ? '' : 's'} via the email worker.`}
+        title={t('emailModal.title')}
+        description={t('emailModal.description', { count: selected.size })}
         primary={{
-          label: broadcast.isPending ? 'Queuing…' : 'Send',
+          label: broadcast.isPending ? t('emailModal.primaryLoading') : t('emailModal.primary'),
           loading: broadcast.isPending,
           onClick: () => {
             if (!emailSubject.trim() || !emailBody.trim()) return;
@@ -318,11 +323,11 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
             );
           },
         }}
-        secondary={{ label: 'Cancel', onClick: () => setEmailModalOpen(false) }}
+        secondary={{ label: t('emailModal.secondary'), onClick: () => setEmailModalOpen(false) }}
       >
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="bcast-subj">Subject</Label>
+            <Label htmlFor="bcast-subj">{t('emailModal.subjectLabel')}</Label>
             <Input
               id="bcast-subj"
               value={emailSubject}
@@ -330,7 +335,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bcast-body">Body</Label>
+            <Label htmlFor="bcast-body">{t('emailModal.bodyLabel')}</Label>
             <Textarea
               id="bcast-body"
               value={emailBody}
@@ -338,9 +343,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
               rows={6}
             />
           </div>
-          <p className="text-xs text-fg-subtle">
-            Plain text. The worker prepends a personalised greeting for each recipient.
-          </p>
+          <p className="text-xs text-fg-subtle">{t('emailModal.footnote')}</p>
         </div>
       </ActionModal>
 

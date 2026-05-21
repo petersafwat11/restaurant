@@ -1,0 +1,30 @@
+{
+  "title": "Operating hours",
+  "backToSettings": "Settings",
+  "card": {
+    "title": "Weekly hours",
+    "description": "Open/close times that gate ordering and reservations. Closed days return as 'Closed' on the customer site."
+  },
+  "open": "Open",
+  "closed": "Closed",
+  "openTimeAria": "{day} open time",
+  "closeTimeAria": "{day} close time",
+  "errors": {
+    "invalidTime": "Invalid time",
+    "closeAfterOpen": "Close must be after open"
+  },
+  "error": {
+    "title": "Couldn't load hours",
+    "fallback": "Try again.",
+    "retry": "Retry"
+  },
+  "toasts": {
+    "saved": "Hours updated"
+  },
+  "unsaved": {
+    "message": "You have unsaved changes.",
+    "discard": "Discard",
+    "save": "Save changes",
+    "saving": "Saving…"
+  }
+}

@@ -1,4 +1,4 @@
-import CustomersPage from '@/app/(dashboard)/customers/page';
+import CustomersPage from '@/app/[locale]/(dashboard)/customers/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';

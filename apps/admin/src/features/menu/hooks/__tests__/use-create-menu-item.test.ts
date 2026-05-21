@@ -39,7 +39,7 @@ describe('useCreateMenuItem', () => {
   it('returns the created item on success', async () => {
     server.use(http.post(`${API}/menu/items`, () => HttpResponse.json(sampleItem)));
 
-    const { result } = renderHookWithProviders(() => useCreateMenuItem(RESTAURANT_ID));
+    const { result } = renderHookWithProviders(() => useCreateMenuItem());
     result.current.mutate(sampleInput);
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -62,7 +62,7 @@ describe('useCreateMenuItem', () => {
       ),
     );
 
-    const { result } = renderHookWithProviders(() => useCreateMenuItem(RESTAURANT_ID));
+    const { result } = renderHookWithProviders(() => useCreateMenuItem());
     result.current.mutate(sampleInput);
 
     await waitFor(() => expect(result.current.isError).toBe(true));

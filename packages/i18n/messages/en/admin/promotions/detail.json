@@ -1,0 +1,68 @@
+{
+  "ariaLabel": "Promotion editor",
+  "active": "Active",
+  "paused": "Paused",
+  "actions": {
+    "delete": "Delete",
+    "archive": "Archive",
+    "restore": "Restore",
+    "save": "Save changes",
+    "saving": "Saving…"
+  },
+  "sections": {
+    "overview": "Overview",
+    "typeValue": "Type & value",
+    "schedule": "Schedule",
+    "coupons": "Coupons"
+  },
+  "fields": {
+    "name": "Name",
+    "description": "Description",
+    "active": "Active",
+    "type": "Type",
+    "percentValue": "Percent off (0–100)",
+    "amountValue": "Amount off",
+    "minSubtotal": "Minimum cart subtotal",
+    "startsAt": "Starts",
+    "endsAt": "Ends"
+  },
+  "hints": {
+    "bogo": "BOGO promotions don't take a value here. Eligibility is configured per coupon (v1).",
+    "freeDelivery": "Free delivery has no extra inputs."
+  },
+  "confirmDelete": {
+    "title": "Delete promotion?",
+    "description": "This removes the promotion and all its coupons. Active redemptions are preserved in order history.",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "cancel": "Cancel"
+  },
+  "coupons": {
+    "empty": "No coupons yet.",
+    "columns": {
+      "code": "Code",
+      "used": "Used",
+      "max": "Max",
+      "perUser": "Per user"
+    },
+    "unlimited": "∞",
+    "deleteAriaLabel": "Delete coupon",
+    "add": {
+      "code": "Code",
+      "codePlaceholder": "SUMMER10",
+      "max": "Max",
+      "perUser": "Per user",
+      "submit": "Add coupon",
+      "bulk": "Bulk generate"
+    },
+    "bulk": {
+      "quantity": "Quantity",
+      "prefix": "Prefix (optional)",
+      "prefixPlaceholder": "SUMMER",
+      "codeLength": "Code length",
+      "maxUses": "Max uses",
+      "perUser": "Per user",
+      "generate": "Generate"
+    }
+  }
+}

@@ -3,6 +3,7 @@
 import { useInviteStaff } from '@/features/staff/hooks';
 import { STAFF_ROLE_KEYS, type StaffRoleKey } from '@repo/types';
 import { ActionModal, Input, Label } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function InviteStaffModal({ open, onOpenChange }: Props) {
+  const t = useTranslations('admin.staff');
   const invite = useInviteStaff();
   const { reset: resetInvite } = invite;
   const [email, setEmail] = React.useState('');
@@ -41,27 +43,25 @@ export function InviteStaffModal({ open, onOpenChange }: Props) {
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title={token ? 'Invite sent' : 'Invite staff member'}
-      description={
-        token
-          ? 'Share this single-use token with the invitee. They use it on /accept-invite.'
-          : 'They will receive an email with a one-time link.'
-      }
+      title={token ? t('inviteModal.titleSent') : t('inviteModal.titleDefault')}
+      description={token ? t('inviteModal.descriptionSent') : t('inviteModal.descriptionDefault')}
       primary={
         token
-          ? { label: 'Done', onClick: () => onOpenChange(false) }
+          ? { label: t('inviteModal.done'), onClick: () => onOpenChange(false) }
           : {
-              label: invite.isPending ? 'Sending…' : 'Send invite',
+              label: invite.isPending ? t('inviteModal.submitting') : t('inviteModal.submit'),
               onClick: submit,
               disabled: !canSubmit,
               loading: invite.isPending,
             }
       }
-      secondary={token ? undefined : { label: 'Cancel', onClick: () => onOpenChange(false) }}
+      secondary={
+        token ? undefined : { label: t('inviteModal.cancel'), onClick: () => onOpenChange(false) }
+      }
     >
       {token ? (
         <div className="space-y-2">
-          <Label>Token</Label>
+          <Label>{t('inviteModal.token')}</Label>
           <div className="flex gap-2">
             <Input value={token} readOnly className="font-mono text-xs" />
             <button
@@ -69,25 +69,25 @@ export function InviteStaffModal({ open, onOpenChange }: Props) {
               onClick={() => navigator.clipboard?.writeText(token)}
               className="inline-flex h-9 items-center rounded-md bg-surface-2 px-3 text-xs text-fg-muted hover:text-fg"
             >
-              Copy
+              {t('inviteModal.copy')}
             </button>
           </div>
         </div>
       ) : (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="invite-email">Email</Label>
+            <Label htmlFor="invite-email">{t('inviteModal.email')}</Label>
             <Input
               id="invite-email"
               type="email"
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="person@example.com"
+              placeholder={t('inviteModal.emailPlaceholder')}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="invite-role">Role</Label>
+            <Label htmlFor="invite-role">{t('inviteModal.role')}</Label>
             <select
               id="invite-role"
               value={roleKey}
@@ -96,7 +96,7 @@ export function InviteStaffModal({ open, onOpenChange }: Props) {
             >
               {STAFF_ROLE_KEYS.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {t(`roles.${r}`)}
                 </option>
               ))}
             </select>

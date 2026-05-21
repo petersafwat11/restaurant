@@ -1,0 +1,30 @@
+{
+  "title": "Godziny otwarcia",
+  "backToSettings": "Ustawienia",
+  "card": {
+    "title": "Godziny tygodniowe",
+    "description": "Godziny otwarcia/zamknięcia kontrolujące zamówienia i rezerwacje. Dni zamknięte są wyświetlane jako „Zamknięte” na stronie klienta."
+  },
+  "open": "Otwarte",
+  "closed": "Zamknięte",
+  "openTimeAria": "Godzina otwarcia: {day}",
+  "closeTimeAria": "Godzina zamknięcia: {day}",
+  "errors": {
+    "invalidTime": "Nieprawidłowa godzina",
+    "closeAfterOpen": "Zamknięcie musi być po otwarciu"
+  },
+  "error": {
+    "title": "Nie udało się załadować godzin",
+    "fallback": "Spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
+  },
+  "toasts": {
+    "saved": "Godziny zaktualizowane"
+  },
+  "unsaved": {
+    "message": "Masz niezapisane zmiany.",
+    "discard": "Odrzuć",
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie…"
+  }
+}

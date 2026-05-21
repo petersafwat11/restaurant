@@ -1,0 +1,126 @@
+{
+  "title": "Menu",
+  "categories": {
+    "heading": "Kategorie",
+    "addAriaLabel": "Dodaj kategorię",
+    "empty": "Brak kategorii. Dodaj pierwszą, aby zacząć.",
+    "dragAriaLabel": "Przeciągnij, aby zmienić kolejność",
+    "deleteAriaLabel": "Usuń kategorię",
+    "nameAriaLabel": "Nazwa kategorii",
+    "nameRequired": "Nazwa jest wymagana"
+  },
+  "categoryCreate": {
+    "title": "Nowa kategoria",
+    "description": "Kategorie grupują pozycje menu (np. Przystawki, Dania główne, Desery).",
+    "submit": "Utwórz kategorię",
+    "submitting": "Tworzenie…",
+    "cancel": "Anuluj",
+    "nameLabel": "Nazwa",
+    "namePlaceholder": "Przystawki",
+    "slugLabel": "Slug",
+    "slugHelper": "Identyfikator do URL — generowany automatycznie z nazwy"
+  },
+  "categoryDelete": {
+    "titleNamed": "Usunąć \"{name}\"?",
+    "titleFallback": "Usuń kategorię",
+    "descriptionWithItems": "Ta kategoria zawiera {count, plural, one {# pozycję} few {# pozycje} many {# pozycji} other {# pozycji}}. Wybierz kategorię, do której je przenieść — nie zostaną usunięte.",
+    "descriptionEmpty": "Tej operacji nie można cofnąć.",
+    "submit": "Usuń kategorię",
+    "cancel": "Anuluj",
+    "moveToLabel": "Przenieś pozycje do",
+    "moveToPlaceholder": "Wybierz kategorię",
+    "moveError": "Nie udało się przenieść pozycji: {message}"
+  },
+  "items": {
+    "selectCategoryPrompt": "Wybierz kategorię po lewej, aby zobaczyć jej pozycje.",
+    "filterAriaLabel": "Filtr pozycji",
+    "filters": {
+      "all": "Wszystkie",
+      "available": "Dostępne",
+      "unavailable": "Niedostępne",
+      "featured": "Wyróżnione"
+    },
+    "newItem": "Nowa pozycja",
+    "columns": {
+      "item": "Pozycja",
+      "price": "Cena",
+      "dietary": "Dieta",
+      "available": "Dostępna"
+    },
+    "dietaryTags": {
+      "vegan": "W",
+      "vegetarian": "Wg",
+      "glutenFree": "BG"
+    },
+    "toggleAvailabilityAriaLabel": "Przełącz dostępność",
+    "emptyAll": "Brak pozycji w \"{name}\".",
+    "emptyFiltered": "Żadne pozycje nie pasują do filtra \"{filter}\"."
+  },
+  "itemEditor": {
+    "newItemTitle": "Nowa pozycja",
+    "editItemTitle": "Edytuj pozycję",
+    "untitled": "Pozycja bez nazwy",
+    "delete": "Usuń",
+    "cancel": "Anuluj",
+    "close": "Zamknij",
+    "create": "Utwórz pozycję",
+    "save": "Zapisz zmiany",
+    "confirmDelete": "Usunąć \"{name}\"? Tej operacji nie można cofnąć.",
+    "sections": {
+      "details": "Szczegóły",
+      "dietary": "Dieta",
+      "images": "Zdjęcia",
+      "modifiers": "Modyfikatory"
+    },
+    "details": {
+      "nameLabel": "Nazwa",
+      "slugLabel": "Slug",
+      "slugHelper": "Przyjazne URL: a-z0-9 + myślniki",
+      "categoryLabel": "Kategoria",
+      "categoryPlaceholder": "Wybierz kategorię",
+      "descriptionLabel": "Opis",
+      "basePriceLabel": "Cena bazowa",
+      "compareAtLabel": "Cena porównawcza",
+      "compareAtHelper": "Cena pierwotna — pokazywana z przekreśleniem obok bazowej.",
+      "caloriesLabel": "Kalorie",
+      "prepMinutesLabel": "Czas przygotowania (min)",
+      "spiceLevelLabel": "Poziom ostrości",
+      "spiceNone": "Brak"
+    },
+    "dietary": {
+      "vegetarian": "Wegetariańskie",
+      "vegetarianHint": "Bez mięsa i ryb.",
+      "vegan": "Wegańskie",
+      "veganHint": "Bez produktów odzwierzęcych.",
+      "glutenFree": "Bezglutenowe",
+      "glutenFreeHint": "Przygotowane bez glutenu.",
+      "featured": "Wyróżnione",
+      "featuredHint": "Promuj w menu."
+    },
+    "images": {
+      "saveFirst": "Najpierw zapisz pozycję, aby dodać zdjęcia."
+    },
+    "modifiers": {
+      "saveFirst": "Najpierw zapisz pozycję, aby dodać grupy modyfikatorów.",
+      "loadError": "Nie udało się załadować grup modyfikatorów. {message}",
+      "retry": "Spróbuj ponownie"
+    }
+  },
+  "modifierGroups": {
+    "empty": "Brak grup modyfikatorów. Dodaj pierwszą, aby umożliwić personalizację.",
+    "addGroup": "Dodaj grupę modyfikatorów",
+    "newGroupName": "Nowa grupa",
+    "groupNameAriaLabel": "Nazwa grupy",
+    "groupNameRequired": "Wymagane",
+    "required": "Wymagane",
+    "min": "Min",
+    "max": "Maks",
+    "minAriaLabel": "Minimalna liczba wybieranych opcji",
+    "maxAriaLabel": "Maksymalna liczba wybieranych opcji",
+    "deleteGroupAriaLabel": "Usuń grupę",
+    "addOption": "Dodaj opcję",
+    "newOptionName": "Nowa opcja",
+    "optionNameAriaLabel": "Nazwa opcji",
+    "deleteOptionAriaLabel": "Usuń opcję"
+  }
+}

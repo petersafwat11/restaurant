@@ -21,18 +21,33 @@ export interface BulkActionBarProps {
   /** Right-aligned trailing label, e.g. "$1,247.32 selected". */
   meta?: React.ReactNode;
   className?: string;
+  /** Render the selection-count label. Defaults to `${count} selected`. */
+  formatSelected?: (count: number) => React.ReactNode;
+  /** Label for the clear button. Defaults to "Clear". */
+  clearLabel?: React.ReactNode;
+  /** Aria-label for the region. Defaults to "Bulk actions". */
+  regionLabel?: string;
 }
 
 /**
  * Sticky bar that appears when a selection becomes non-empty in any list
  * page. Returns null when `count === 0` so callers don't need to gate.
  */
-export function BulkActionBar({ count, onClear, actions, meta, className }: BulkActionBarProps) {
+export function BulkActionBar({
+  count,
+  onClear,
+  actions,
+  meta,
+  className,
+  formatSelected,
+  clearLabel = 'Clear',
+  regionLabel = 'Bulk actions',
+}: BulkActionBarProps) {
   if (count === 0) return null;
   return (
     <div
       role="region"
-      aria-label="Bulk actions"
+      aria-label={regionLabel}
       className={cn(
         'flex h-11 items-center gap-4 rounded-md border-hairline-strong bg-surface-2 px-3',
         'animate-row-arrive',
@@ -40,13 +55,15 @@ export function BulkActionBar({ count, onClear, actions, meta, className }: Bulk
       )}
     >
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium tabular-nums text-fg">{count} selected</span>
+        <span className="text-sm font-medium tabular-nums text-fg">
+          {formatSelected ? formatSelected(count) : `${count} selected`}
+        </span>
         <button
           type="button"
           onClick={onClear}
           className="text-xs text-accent transition-opacity hover:opacity-80"
         >
-          Clear
+          {clearLabel}
         </button>
       </div>
 

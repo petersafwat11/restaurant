@@ -17,18 +17,11 @@ import {
   SearchInput,
 } from '@repo/ui';
 import { Flame, Leaf, SearchX, WheatOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toast } from 'sonner';
 
 type DietaryFilter = 'all' | 'vegetarian' | 'vegan' | 'gluten-free' | 'spicy';
-
-const FILTER_OPTIONS: FilterPillMultiOption<DietaryFilter>[] = [
-  { id: 'all', label: 'All' },
-  { id: 'vegetarian', label: 'Vegetarian', icon: <Leaf size={14} /> },
-  { id: 'vegan', label: 'Vegan', icon: <Leaf size={14} /> },
-  { id: 'gluten-free', label: 'Gluten-free', icon: <WheatOff size={14} /> },
-  { id: 'spicy', label: 'Spicy', icon: <Flame size={14} /> },
-];
 
 function itemFlagsOf(item: MenuItemDto): string[] {
   const flags: string[] = [];
@@ -101,8 +94,47 @@ export interface MenuAppProps {
 }
 
 export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
+  const t = useTranslations('web.shop.menu');
   const treeQuery = useMenuTree();
   const addMutation = useAddToCart();
+
+  const filterOptions = React.useMemo<FilterPillMultiOption<DietaryFilter>[]>(
+    () => [
+      { id: 'all', label: t('all') },
+      { id: 'vegetarian', label: t('vegetarian'), icon: <Leaf size={14} /> },
+      { id: 'vegan', label: t('vegan'), icon: <Leaf size={14} /> },
+      { id: 'gluten-free', label: t('glutenFree'), icon: <WheatOff size={14} /> },
+      { id: 'spicy', label: t('spicy'), icon: <Flame size={14} /> },
+    ],
+    [t],
+  );
+
+  const sheetLabels = React.useMemo(
+    () => ({
+      closeAriaLabel: t('sheet.close'),
+      allergensLabel: t('sheet.allergens'),
+      specialInstructionsLabel: t('sheet.specialInstructions'),
+      specialInstructionsPlaceholder: t('sheet.specialInstructionsPlaceholder'),
+      quantityLabel: t('sheet.quantity'),
+      totalLabel: t('sheet.total'),
+      soldOut: t('sheet.soldOut'),
+      addToCart: t('addToCart'),
+      formatMinChoice: (min: number) => t('sheet.minChoice', { min }),
+      formatChoose: (names: string[]) => t('sheet.chooseGroups', { names: names.join(', ') }),
+    }),
+    [t],
+  );
+
+  const flagLabels = React.useMemo(
+    () => ({
+      vegetarian: t('chips.vegetarian'),
+      vegan: t('chips.vegan'),
+      'gluten-free': t('chips.glutenFree'),
+      spicy: t('chips.spicy'),
+      featured: t('chips.featured'),
+    }),
+    [t],
+  );
 
   const [search, setSearch] = React.useState('');
   const [filters, setFilters] = React.useState<DietaryFilter[]>(['all']);
@@ -191,17 +223,17 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         })),
         notes: line.notes,
       });
-      toast.success('Added to cart', {
-        description: `${line.quantity} × ${line.name}`,
+      toast.success(t('toastAdded.title'), {
+        description: t('toastAdded.description', { quantity: line.quantity, name: line.name }),
       });
     },
-    [addMutation],
+    [addMutation, t],
   );
 
   if (treeQuery.isLoading) {
     return (
       <Container className="py-16">
-        <p className="text-fg-muted">Loading menu…</p>
+        <p className="text-fg-muted">{t('loadingMenu')}</p>
       </Container>
     );
   }
@@ -210,9 +242,9 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     return (
       <Container className="py-16">
         <EmptyState
-          title="Couldn't load the menu"
-          description="Something went wrong. Try refreshing."
-          action={{ label: 'Reload', onClick: () => treeQuery.refetch() }}
+          title={t('error.title')}
+          description={t('error.description')}
+          action={{ label: t('error.reload'), onClick: () => treeQuery.refetch() }}
         />
       </Container>
     );
@@ -224,23 +256,25 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     filteredCategories.length === 0 && !search.trim() && !filters.includes('all');
 
   const subnavSections = [
-    { id: 'all', label: 'All', count: allItems.length },
+    { id: 'all', label: t('all'), count: allItems.length },
     ...tree.categories.map((c) => ({ id: c.slug, label: c.name, count: c.items.length })),
   ];
 
   return (
     <>
       <Container className="pb-12 pt-16">
-        <span className="text-eyebrow uppercase text-accent">Menu</span>
+        <span className="text-eyebrow uppercase text-accent">{t('eyebrow')}</span>
         <h1
           className="mt-4 font-display text-h2 text-fg sm:text-h1"
           style={{ textWrap: 'balance' as React.CSSProperties['textWrap'] }}
         >
-          Built fresh, made to order.
+          {t('heroTitle')}
         </h1>
         <p className="mt-4 max-w-[640px] text-body-l text-fg-muted">
-          {allItems.length} dishes across {tree.categories.length} categories. Filter or search to
-          find your usual.
+          {t('heroSummary', {
+            dishCount: allItems.length,
+            categoryCount: tree.categories.length,
+          })}
         </p>
       </Container>
 
@@ -250,16 +284,16 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Search the menu…"
+              placeholder={t('searchPlaceholder')}
               shortcutKey="/"
               className="sm:max-w-sm"
             />
             <FilterPillMultiGroup
-              options={FILTER_OPTIONS}
+              options={filterOptions}
               value={filters}
               onChange={setFilters}
               allOptionId="all"
-              ariaLabel="Dietary filters"
+              ariaLabel={t('dietaryFiltersAria')}
             />
           </Container>
         </div>
@@ -285,18 +319,18 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
           <EmptyState
             size="lg"
             icon={<SearchX size={48} strokeWidth={1.5} />}
-            title={`Nothing matches "${search}"`}
-            description="Try a different word, or clear filters."
-            action={{ label: 'Clear search', onClick: () => setSearch('') }}
+            title={t('emptySearch.title', { query: search })}
+            description={t('emptySearch.description')}
+            action={{ label: t('emptySearch.clear'), onClick: () => setSearch('') }}
           />
         )}
         {showFilterEmpty && (
           <EmptyState
             size="lg"
             icon={<Leaf size={48} strokeWidth={1.5} />}
-            title="No dishes match your filters"
-            description="Combine fewer filters to see more options."
-            action={{ label: 'Clear filters', onClick: () => setFilters(['all']) }}
+            title={t('emptyFilter.title')}
+            description={t('emptyFilter.description')}
+            action={{ label: t('emptyFilter.clear'), onClick: () => setFilters(['all']) }}
           />
         )}
 
@@ -312,7 +346,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                 {cat.name}
               </h2>
               <div className="text-small text-fg-subtle">
-                {cat.items.length} {cat.items.length === 1 ? 'item' : 'items'}
+                {t('categoryItemCount', { count: cat.items.length })}
                 {cat.description && <> · {cat.description}</>}
               </div>
             </div>
@@ -329,6 +363,8 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                   description={item.description ?? undefined}
                   price={{ amount: item.basePrice, currency }}
                   flags={itemFlagsOf(item) as never}
+                  flagLabels={flagLabels}
+                  soldOutLabel={t('soldOutToday')}
                   unavailable={!item.isAvailable}
                   reserveFlagSpace
                   onAdd={() => handleAdd(item)}
@@ -348,6 +384,8 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         onOpenChange={(o) => !o && setSheetItem(null)}
         item={sheetItem}
         onAddToCart={handleSheetAdd}
+        labels={sheetLabels}
+        flagLabels={flagLabels}
       />
     </>
   );

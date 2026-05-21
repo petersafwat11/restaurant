@@ -1,0 +1,12 @@
+{
+  "title": "Your cart",
+  "empty": "Your cart is empty",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "estimatedTotal": "Estimated total",
+  "applyCoupon": "Apply coupon",
+  "couponApplied": "Coupon {code} applied",
+  "remove": "Remove",
+  "itemCount": "{count, plural, one {# item} other {# items}}",
+  "checkout": "Checkout"
+}

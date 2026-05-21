@@ -15,27 +15,69 @@ import {
 import { formatMoney } from '@repo/utils';
 import * as React from 'react';
 
+export interface RefundModalLabels {
+  title: (orderNumber: string) => string;
+  titleFallback: string;
+  description: (amount: string) => string;
+  footerHelper: string;
+  primary: (amount: string) => string;
+  primaryFallback: string;
+  secondary: string;
+  refundAmountAria: string;
+  fullRefund: string;
+  partialRefund: string;
+  amountLabel: string;
+  reasonLabel: string;
+  notesLabel: string;
+  pickReason: string;
+  notesPlaceholder: string;
+  reasons: string[];
+  otherKey: string;
+}
+
+const DEFAULT_REFUND_LABELS: RefundModalLabels = {
+  title: (n) => `Refund order ${n}`,
+  titleFallback: 'Refund order',
+  description: (a) => `Up to ${a} available to refund.`,
+  footerHelper: 'This will email the customer.',
+  primary: (a) => `Issue refund · ${a}`,
+  primaryFallback: 'Issue refund',
+  secondary: 'Cancel',
+  refundAmountAria: 'Refund amount',
+  fullRefund: 'Full refund',
+  partialRefund: 'Partial refund',
+  amountLabel: 'Amount',
+  reasonLabel: 'Reason',
+  notesLabel: 'Notes',
+  pickReason: 'Pick a reason',
+  notesPlaceholder: 'What happened?',
+  reasons: [
+    'Customer requested',
+    'Item out of stock',
+    'Wrong item delivered',
+    'Food quality issue',
+    'Duplicate order',
+    'Other',
+  ],
+  otherKey: 'Other',
+};
+
 interface RefundModalProps {
   orderId: string | null;
   onOpenChange: (open: boolean) => void;
+  labels?: Partial<RefundModalLabels>;
 }
 
-const REASONS = [
-  'Customer requested',
-  'Item out of stock',
-  'Wrong item delivered',
-  'Food quality issue',
-  'Duplicate order',
-  'Other',
-];
-
-export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
+export function RefundModal({ orderId, onOpenChange, labels }: RefundModalProps) {
+  const L = { ...DEFAULT_REFUND_LABELS, ...labels } as RefundModalLabels;
+  const REASONS = L.reasons;
+  const defaultReason = REASONS[0] ?? L.otherKey;
   const open = orderId !== null;
   const q = useOrder(orderId ?? '');
   const refund = useRefundOrder();
   const [mode, setMode] = React.useState<'full' | 'partial'>('full');
   const [amount, setAmount] = React.useState<string | null>(null);
-  const [reason, setReason] = React.useState('Customer requested');
+  const [reason, setReason] = React.useState(defaultReason);
   const [note, setNote] = React.useState('');
 
   // Reset state when modal opens for a new order
@@ -43,21 +85,21 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
     if (open && q.data) {
       setMode('full');
       setAmount(q.data.grandTotal);
-      setReason('Customer requested');
+      setReason(defaultReason);
       setNote('');
     }
-  }, [open, q.data]);
+  }, [open, q.data, defaultReason]);
 
   const order = q.data;
   const valid = order
     ? (mode === 'full' ||
         (amount !== null && Number(amount) > 0 && Number(amount) <= Number(order.grandTotal))) &&
-      (reason !== 'Other' || note.trim().length > 0)
+      (reason !== L.otherKey || note.trim().length > 0)
     : false;
 
   function submit() {
     if (!order?.payment) return;
-    const refundReason = reason === 'Other' ? note.trim() : reason + (note ? ` — ${note}` : '');
+    const refundReason = reason === L.otherKey ? note.trim() : reason + (note ? ` — ${note}` : '');
     refund.mutate(
       {
         orderId: order.id,
@@ -75,23 +117,25 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title={order ? `Refund order ${order.orderNumber}` : 'Refund order'}
+      title={order ? L.title(order.orderNumber) : L.titleFallback}
       description={
-        order ? `Up to ${formatMoney(order.grandTotal, order.currency)} available to refund.` : ''
+        order ? L.description(formatMoney(order.grandTotal, order.currency)) : ''
       }
-      footerHelper="This will email the customer."
+      footerHelper={L.footerHelper}
       primary={{
         label: order
-          ? `Issue refund · ${formatMoney(mode === 'full' ? order.grandTotal : (amount ?? '0'), order.currency)}`
-          : 'Issue refund',
+          ? L.primary(
+              formatMoney(mode === 'full' ? order.grandTotal : (amount ?? '0'), order.currency),
+            )
+          : L.primaryFallback,
         onClick: submit,
         disabled: !valid,
         loading: refund.isPending,
       }}
-      secondary={{ label: 'Cancel', onClick: () => onOpenChange(false) }}
+      secondary={{ label: L.secondary, onClick: () => onOpenChange(false) }}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2" role="radiogroup" aria-label="Refund amount">
+        <div className="flex gap-2" role="radiogroup" aria-label={L.refundAmountAria}>
           {(['full', 'partial'] as const).map((m) => (
             <button
               key={m}
@@ -108,13 +152,13 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
                   : 'border-border/[var(--border-strong-alpha)] bg-surface text-fg-muted hover:text-fg'
               }`}
             >
-              {m === 'full' ? 'Full refund' : 'Partial refund'}
+              {m === 'full' ? L.fullRefund : L.partialRefund}
             </button>
           ))}
         </div>
 
         {mode === 'partial' && order && (
-          <FormField label="Amount" required>
+          <FormField label={L.amountLabel} required>
             <CurrencyInput
               value={amount}
               onChange={setAmount}
@@ -125,10 +169,10 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
           </FormField>
         )}
 
-        <FormField label="Reason" required>
+        <FormField label={L.reasonLabel} required>
           <Select value={reason} onValueChange={setReason}>
             <SelectTrigger>
-              <SelectValue placeholder="Pick a reason" />
+              <SelectValue placeholder={L.pickReason} />
             </SelectTrigger>
             <SelectContent>
               {REASONS.map((r) => (
@@ -140,13 +184,13 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
           </Select>
         </FormField>
 
-        {reason === 'Other' && (
-          <FormField label="Notes" required>
+        {reason === L.otherKey && (
+          <FormField label={L.notesLabel} required>
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               maxLength={500}
-              placeholder="What happened?"
+              placeholder={L.notesPlaceholder}
             />
           </FormField>
         )}

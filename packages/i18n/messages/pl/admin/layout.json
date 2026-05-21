@@ -1,0 +1,47 @@
+{
+  "topbar": {
+    "searchPlaceholder": "Szukaj zamówień, klientów, pozycji…",
+    "searchAriaLabel": "Szukaj (Cmd+K)",
+    "accountAriaLabel": "Konto",
+    "notificationsAriaLabel": "Powiadomienia",
+    "profile": "Profil",
+    "settings": "Ustawienia",
+    "logout": "Wyloguj",
+    "realtime": {
+      "connected": "Live podłączone",
+      "connecting": "Łączenie z live…",
+      "idle": "Live bezczynne",
+      "disconnected": "Live rozłączone",
+      "unknown": "Status live nieznany"
+    }
+  },
+  "sidebar": {
+    "ariaLabel": "Główne",
+    "brandName": "Test Kitchen",
+    "expand": "Rozwiń panel boczny",
+    "collapse": "Zwiń panel boczny",
+    "overview": "Przegląd",
+    "groups": {
+      "operate": "Obsługa",
+      "catalog": "Katalog",
+      "people": "Ludzie",
+      "insights": "Statystyki",
+      "configure": "Konfiguracja"
+    },
+    "items": {
+      "orders": "Zamówienia",
+      "kitchen": "Ekran kuchni",
+      "reservations": "Rezerwacje",
+      "menu": "Menu",
+      "promotions": "Promocje",
+      "customers": "Klienci",
+      "reviews": "Recenzje",
+      "staff": "Personel",
+      "reports": "Raporty",
+      "audit": "Dziennik audytu",
+      "restaurant": "Restauracja",
+      "contact": "Wiadomości kontaktowe",
+      "settings": "Ustawienia"
+    }
+  }
+}

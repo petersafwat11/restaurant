@@ -10,6 +10,7 @@ import {
 import type { CouponDto } from '@repo/types';
 import { Button, Input } from '@repo/ui';
 import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function PromotionCoupons({ promotionId }: Props) {
+  const t = useTranslations('admin.promotions.detail.coupons');
   const { has } = usePermissions();
   const q = useCoupons(promotionId);
   const create = useCreateCoupon(promotionId);
@@ -55,15 +57,15 @@ export function PromotionCoupons({ promotionId }: Props) {
   return (
     <div className="space-y-3">
       {coupons.length === 0 ? (
-        <div className="text-sm text-fg-subtle">No coupons yet.</div>
+        <div className="text-sm text-fg-subtle">{t('empty')}</div>
       ) : (
         <table className="w-full text-sm">
           <thead className="text-left text-caption-admin text-fg-subtle">
             <tr>
-              <th className="border-b-hairline py-2 font-medium">Code</th>
-              <th className="border-b-hairline py-2 font-medium">Used</th>
-              <th className="border-b-hairline py-2 font-medium">Max</th>
-              <th className="border-b-hairline py-2 font-medium">Per user</th>
+              <th className="border-b-hairline py-2 font-medium">{t('columns.code')}</th>
+              <th className="border-b-hairline py-2 font-medium">{t('columns.used')}</th>
+              <th className="border-b-hairline py-2 font-medium">{t('columns.max')}</th>
+              <th className="border-b-hairline py-2 font-medium">{t('columns.perUser')}</th>
               <th className="border-b-hairline py-2" />
             </tr>
           </thead>
@@ -75,10 +77,10 @@ export function PromotionCoupons({ promotionId }: Props) {
                   {c.redemptionsCount}
                 </td>
                 <td className="border-b-hairline py-2 tabular-nums text-fg-muted">
-                  {c.maxRedemptions ?? '∞'}
+                  {c.maxRedemptions ?? t('unlimited')}
                 </td>
                 <td className="border-b-hairline py-2 tabular-nums text-fg-muted">
-                  {c.perUserLimit ?? '∞'}
+                  {c.perUserLimit ?? t('unlimited')}
                 </td>
                 <td className="border-b-hairline py-2 text-right">
                   {canWrite && (
@@ -86,7 +88,7 @@ export function PromotionCoupons({ promotionId }: Props) {
                       type="button"
                       onClick={() => remove.mutate({ id: c.id })}
                       className="text-fg-subtle hover:text-negative"
-                      aria-label="Delete coupon"
+                      aria-label={t('deleteAriaLabel')}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -101,32 +103,32 @@ export function PromotionCoupons({ promotionId }: Props) {
       {canWrite && (
         <div className="flex flex-wrap items-end gap-2 rounded-md border-hairline bg-surface-2 p-3">
           <div className="flex-1 min-w-[10rem] space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Code</span>
+            <span className="text-caption-admin text-fg-subtle">{t('add.code')}</span>
             <Input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="SUMMER10"
+              placeholder={t('add.codePlaceholder')}
               className="font-mono text-sm"
             />
           </div>
           <div className="w-24 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Max</span>
+            <span className="text-caption-admin text-fg-subtle">{t('add.max')}</span>
             <Input
               type="number"
               min={0}
               value={maxRedemptions}
               onChange={(e) => setMaxRedemptions(e.target.value)}
-              placeholder="∞"
+              placeholder={t('unlimited')}
             />
           </div>
           <div className="w-24 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Per user</span>
+            <span className="text-caption-admin text-fg-subtle">{t('add.perUser')}</span>
             <Input
               type="number"
               min={0}
               value={perUserLimit}
               onChange={(e) => setPerUserLimit(e.target.value)}
-              placeholder="∞"
+              placeholder={t('unlimited')}
             />
           </div>
           <Button
@@ -134,10 +136,10 @@ export function PromotionCoupons({ promotionId }: Props) {
             disabled={create.isPending || code.trim().length < 2}
             onClick={submit}
           >
-            Add coupon
+            {t('add.submit')}
           </Button>
           <Button variant="secondary" onClick={() => setBulkOpen((v) => !v)}>
-            Bulk generate
+            {t('add.bulk')}
           </Button>
         </div>
       )}
@@ -145,7 +147,7 @@ export function PromotionCoupons({ promotionId }: Props) {
       {canWrite && bulkOpen && (
         <div className="flex flex-wrap items-end gap-2 rounded-md border-hairline bg-surface-2 p-3">
           <div className="w-24 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Quantity</span>
+            <span className="text-caption-admin text-fg-subtle">{t('bulk.quantity')}</span>
             <Input
               type="number"
               min={1}
@@ -155,18 +157,18 @@ export function PromotionCoupons({ promotionId }: Props) {
             />
           </div>
           <div className="w-32 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Prefix (optional)</span>
+            <span className="text-caption-admin text-fg-subtle">{t('bulk.prefix')}</span>
             <Input
               value={bulkPrefix}
               onChange={(e) =>
                 setBulkPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))
               }
-              placeholder="SUMMER"
+              placeholder={t('bulk.prefixPlaceholder')}
               className="font-mono text-sm"
             />
           </div>
           <div className="w-28 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Code length</span>
+            <span className="text-caption-admin text-fg-subtle">{t('bulk.codeLength')}</span>
             <Input
               type="number"
               min={4}
@@ -176,23 +178,23 @@ export function PromotionCoupons({ promotionId }: Props) {
             />
           </div>
           <div className="w-24 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Max uses</span>
+            <span className="text-caption-admin text-fg-subtle">{t('bulk.maxUses')}</span>
             <Input
               type="number"
               min={0}
               value={maxRedemptions}
               onChange={(e) => setMaxRedemptions(e.target.value)}
-              placeholder="∞"
+              placeholder={t('unlimited')}
             />
           </div>
           <div className="w-24 space-y-1">
-            <span className="text-caption-admin text-fg-subtle">Per user</span>
+            <span className="text-caption-admin text-fg-subtle">{t('bulk.perUser')}</span>
             <Input
               type="number"
               min={0}
               value={perUserLimit}
               onChange={(e) => setPerUserLimit(e.target.value)}
-              placeholder="∞"
+              placeholder={t('unlimited')}
             />
           </div>
           <Button
@@ -213,7 +215,7 @@ export function PromotionCoupons({ promotionId }: Props) {
               );
             }}
           >
-            Generate
+            {t('bulk.generate')}
           </Button>
         </div>
       )}

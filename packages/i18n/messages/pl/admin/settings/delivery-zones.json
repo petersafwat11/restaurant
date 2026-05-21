@@ -1,0 +1,30 @@
+{
+  "title": "Strefy dostawy",
+  "backToSettings": "Ustawienia",
+  "mapLoading": "Ładowanie mapy…",
+  "intro": "Narysuj wielokąty obszarów, do których dostarczasz. Stała opłata za dostawę i minimalna wartość zamówienia są ustawiane na stronie {link} i obowiązują dla wszystkich stref.",
+  "introLink": "Ustawienia",
+  "zones": {
+    "title": "Strefy",
+    "description": "Kliknij strefę, aby wyróżnić ją na mapie.",
+    "new": "Nowa",
+    "empty": {
+      "title": "Brak stref dostawy",
+      "description": "Kliknij + Nowa, a następnie klikaj na mapie, aby dodawać wierzchołki. Kliknij dwukrotnie lub naciśnij Enter, aby zamknąć wielokąt."
+    },
+    "vertices": "{count, plural, one {# wierzchołek} few {# wierzchołki} many {# wierzchołków} other {# wierzchołków}}",
+    "defaultName": "Strefa {n}",
+    "renameAria": "Zmień nazwę: {name}",
+    "removeAria": "Usuń {name}"
+  },
+  "error": {
+    "title": "Nie udało się załadować stref dostawy",
+    "retry": "Spróbuj ponownie"
+  },
+  "confirmRemove": {
+    "title": "Usuń strefę",
+    "description": "Usunąć „{name}”? Wielokąt zostanie trwale usunięty.",
+    "remove": "Usuń",
+    "cancel": "Anuluj"
+  }
+}

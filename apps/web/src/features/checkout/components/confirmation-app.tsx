@@ -3,7 +3,8 @@
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
 import { useRealtimeStatus } from '@/features/orders/hooks/use-realtime-status';
-import { type OrderDto, type OrderItemDto, type OrderStatus, type OrderType } from '@repo/types';
+import { Link } from '@/i18n/navigation';
+import { type OrderDto, type OrderItemDto } from '@repo/types';
 import {
   Container,
   type DeliveryRow,
@@ -16,7 +17,7 @@ import {
   trackingStateFor,
 } from '@repo/ui';
 import { Check, Copy, HelpCircle, MapPin, Phone, Receipt, Sparkles, Timer } from 'lucide-react';
-import Link from 'next/link';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { toast } from 'sonner';
@@ -26,15 +27,16 @@ interface ConfirmationAppProps {
 }
 
 function CopyButton({ value }: { value: string }) {
+  const t = useTranslations('web.shop.checkoutSuccess');
   const [copied, setCopied] = React.useState(false);
   return (
     <button
       type="button"
-      aria-label="Copy order number"
+      aria-label={t('copy.ariaLabel')}
       onClick={() => {
         navigator.clipboard?.writeText(value).then(() => {
           setCopied(true);
-          toast.success('Order number copied.');
+          toast.success(t('copy.toast'));
           setTimeout(() => setCopied(false), 1500);
         });
       }}
@@ -58,37 +60,6 @@ function orderItemToDisplay(item: OrderItemDto) {
   });
 }
 
-const ETA_LABELS: Record<OrderType, { caption: string; sub: string }> = {
-  DELIVERY: {
-    caption: 'Estimated delivery time',
-    sub: "We'll text you when it's out for delivery.",
-  },
-  PICKUP: {
-    caption: 'Ready for pickup in',
-    sub: "We'll text you when it's ready for pickup.",
-  },
-  DINE_IN: {
-    caption: 'Service time',
-    sub: "We'll text you when the kitchen starts.",
-  },
-};
-
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  PENDING: 'Awaiting confirmation',
-  CONFIRMED: 'Order confirmed',
-  PREPARING: 'Kitchen is preparing your meal',
-  READY: 'Ready for pickup',
-  OUT_FOR_DELIVERY: 'Out for delivery',
-  DELIVERED: 'Delivered',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Order cancelled',
-  REFUNDED: 'Order refunded',
-};
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
 function LiveDot({ connected }: { connected: boolean }) {
   return (
     <span className="relative inline-flex h-2.5 w-2.5">
@@ -107,6 +78,8 @@ function LiveDot({ connected }: { connected: boolean }) {
 }
 
 function StatusTimeline({ order }: { order: OrderDto }) {
+  const t = useTranslations('web.shop.checkoutSuccess');
+  const format = useFormatter();
   const events = [...order.statusEvents].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
@@ -138,9 +111,14 @@ function StatusTimeline({ order }: { order: OrderDto }) {
               )}
             </div>
             <div className="flex flex-1 flex-col">
-              <span className="text-small font-medium text-fg">{STATUS_LABEL[event.status]}</span>
+              <span className="text-small font-medium text-fg">
+                {t(`status.${event.status}`)}
+              </span>
               <span className="text-caption tabular-nums text-fg-subtle">
-                {formatTime(event.createdAt)}
+                {format.dateTime(new Date(event.createdAt), {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
               {event.note && <span className="mt-0.5 text-small text-fg-muted">{event.note}</span>}
             </div>
@@ -152,6 +130,8 @@ function StatusTimeline({ order }: { order: OrderDto }) {
 }
 
 export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
+  const t = useTranslations('web.shop.checkoutSuccess');
+  const format = useFormatter();
   const searchParams = useSearchParams();
   const token = searchParams.get('t');
   const orderQuery = useOrderTracking(orderId, token);
@@ -160,7 +140,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   if (orderQuery.isLoading) {
     return (
       <Container size="narrow" className="py-16">
-        <PageSpinner label="Loading your order…" />
+        <PageSpinner label={t('loading')} />
       </Container>
     );
   }
@@ -173,24 +153,25 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
       <Container size="narrow" className="py-16">
         <EmptyState
           size="lg"
-          title="Order not found"
-          description="We couldn't find this order. It may have been placed under a different account."
-          action={{ label: 'Back to menu', href: '/menu' }}
+          title={t('notFound.title')}
+          description={t('notFound.description')}
+          action={{ label: t('notFound.action'), href: '/menu' }}
         />
       </Container>
     );
   }
 
   const order = orderQuery.data;
-  const eta = ETA_LABELS[order.type];
+  const etaCaption = t(`eta.${order.type}.caption`);
+  const etaSub = t(`eta.${order.type}.sub`);
   const etaText =
     order.pickupAt != null
-      ? formatTime(order.pickupAt)
+      ? format.dateTime(new Date(order.pickupAt), { hour: '2-digit', minute: '2-digit' })
       : order.type === 'DELIVERY'
-        ? '~25 min'
+        ? t('eta.deliveryDefault')
         : order.type === 'PICKUP'
-          ? '~12 min'
-          : '~10 min';
+          ? t('eta.pickupDefault')
+          : t('eta.dineInDefault');
 
   const trackingState = trackingStateFor(order.type, order.status);
   const isTerminal =
@@ -200,11 +181,13 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
     order.status === 'REFUNDED';
   const stepLabels = ORDER_TRACKING_STEPS[order.type];
   const currentStageLabel =
-    trackingState.kind === 'step' ? stepLabels[trackingState.index] : STATUS_LABEL[order.status];
+    trackingState.kind === 'step' ? stepLabels[trackingState.index] : t(`status.${order.status}`);
 
   const lines = order.items.map(orderItemToDisplay);
   const delivery: DeliveryRow =
-    Number.parseFloat(order.deliveryFee) > 0 ? { amount: order.deliveryFee } : { label: 'Free' };
+    Number.parseFloat(order.deliveryFee) > 0
+      ? { amount: order.deliveryFee }
+      : { label: t('summary.free') };
 
   const connected = realtime === 'connected';
 
@@ -218,14 +201,14 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
 
       <Container className="pb-24 pt-16">
         <SuccessHero
-          title="Order confirmed"
-          description={<>Thanks — we got it. A receipt has been sent to your inbox.</>}
+          title={t('hero.title')}
+          description={<>{t('hero.description')}</>}
           meta={
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center gap-3 rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-3 shadow-sm">
                 <div className="flex flex-col leading-tight">
                   <span className="text-caption uppercase tracking-wide text-fg-subtle">
-                    Order number
+                    {t('hero.orderNumber')}
                   </span>
                   <span className="font-display text-h3 font-medium tabular-nums text-fg">
                     {order.orderNumber}
@@ -236,7 +219,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
               <div className="inline-flex items-center gap-2 rounded-full border border-border/[var(--border-alpha)] bg-surface-elevated px-3 py-2 text-caption text-fg-muted shadow-sm">
                 <LiveDot connected={connected} />
                 <span className="font-medium text-fg">
-                  {connected ? 'Live updates active' : 'Reconnecting…'}
+                  {connected ? t('hero.live') : t('hero.reconnecting')}
                 </span>
               </div>
             </div>
@@ -245,7 +228,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
 
         {/* Live status hero card */}
         <section
-          aria-label="Current order status"
+          aria-label={t('now.regionLabel')}
           className="mx-auto mt-10 max-w-3xl rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated px-6 py-6 shadow-sm sm:px-8"
         >
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -255,12 +238,12 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
               </span>
               <div className="flex flex-col gap-1">
                 <span className="text-caption uppercase tracking-wide text-fg-subtle">
-                  Right now
+                  {t('now.label')}
                 </span>
                 <span className="font-display text-h4 font-medium text-fg">
                   {currentStageLabel}
                 </span>
-                <span className="text-small text-fg-muted">{eta.sub}</span>
+                <span className="text-small text-fg-muted">{etaSub}</span>
               </div>
             </div>
 
@@ -269,7 +252,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                 <Timer size={18} className="text-accent" />
                 <div className="flex flex-col leading-tight">
                   <span className="text-caption uppercase tracking-wide text-fg-subtle">
-                    {eta.caption}
+                    {etaCaption}
                   </span>
                   <span className="font-display text-h4 font-medium tabular-nums text-accent">
                     {etaText}
@@ -290,7 +273,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
           <div className="flex flex-col gap-6 lg:col-span-7">
             {/* Address / pickup card */}
             <section
-              aria-label="Where it's going"
+              aria-label={t('address.regionLabel')}
               className="rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 shadow-sm"
             >
               <div className="flex items-start gap-4">
@@ -300,10 +283,10 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                 <div className="flex flex-1 flex-col">
                   <span className="text-caption uppercase tracking-wide text-fg-subtle">
                     {order.type === 'DELIVERY'
-                      ? 'Deliver to'
+                      ? t('address.deliveryCaption')
                       : order.type === 'PICKUP'
-                        ? 'Pick up from'
-                        : 'Your table'}
+                        ? t('address.pickupCaption')
+                        : t('address.dineInCaption')}
                   </span>
                   {order.deliveryAddress ? (
                     <div className="mt-1 flex flex-col text-body leading-relaxed">
@@ -320,7 +303,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                       <span className="text-fg-muted">00-026 Warszawa</span>
                     </div>
                   ) : (
-                    <div className="mt-1 text-body font-medium text-fg">Table number recorded</div>
+                    <div className="mt-1 text-body font-medium text-fg">
+                      {t('address.tableRecorded')}
+                    </div>
                   )}
                 </div>
               </div>
@@ -328,17 +313,17 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
 
             {/* Live activity timeline */}
             <section
-              aria-label="Order activity"
+              aria-label={t('activity.regionLabel')}
               className="rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 shadow-sm"
             >
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Receipt size={18} className="text-fg-subtle" />
-                  <h2 className="text-body font-semibold text-fg">Order activity</h2>
+                  <h2 className="text-body font-semibold text-fg">{t('activity.heading')}</h2>
                 </div>
                 <span className="inline-flex items-center gap-2 text-caption text-fg-subtle">
                   <LiveDot connected={connected} />
-                  Live
+                  {t('activity.live')}
                 </span>
               </div>
               <StatusTimeline order={order} />
@@ -346,7 +331,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
 
             {/* Help card */}
             <section
-              aria-label="Need help"
+              aria-label={t('help.regionLabel')}
               className="rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 shadow-sm"
             >
               <div className="flex items-start gap-4">
@@ -355,10 +340,8 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                 </span>
                 <div className="flex flex-1 flex-col gap-2">
                   <div className="flex flex-col">
-                    <span className="text-body font-semibold text-fg">Need help?</span>
-                    <span className="text-small text-fg-muted">
-                      Allergy concern, missing item, or address change? We're a quick call away.
-                    </span>
+                    <span className="text-body font-semibold text-fg">{t('help.title')}</span>
+                    <span className="text-small text-fg-muted">{t('help.description')}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap gap-3">
                     <a
@@ -372,7 +355,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                       href="/contact"
                       className="inline-flex h-10 items-center gap-2 rounded-button bg-surface-warm/60 px-4 text-small font-medium text-fg hover:bg-surface-warm"
                     >
-                      Message us
+                      {t('help.messageUs')}
                     </Link>
                   </div>
                 </div>
@@ -391,6 +374,15 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
               total={order.grandTotal}
               currency={order.currency}
               showEditCart={false}
+              labels={{
+                title: t('summary.title'),
+                regionLabel: t('summary.regionLabel'),
+                subtotal: t('summary.subtotal'),
+                delivery: t('summary.delivery'),
+                tip: t('summary.tip'),
+                total: t('summary.total'),
+                notePrefix: t('summary.notePrefix'),
+              }}
             />
 
             <div className="flex flex-col gap-3">
@@ -398,7 +390,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                 href="/menu"
                 className="inline-flex h-12 items-center justify-center rounded-button bg-accent px-6 text-[15px] font-medium text-text-on-accent hover:bg-accent-hover"
               >
-                Back to menu
+                {t('backToMenu')}
               </Link>
             </div>
           </aside>

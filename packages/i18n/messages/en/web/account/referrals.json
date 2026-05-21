@@ -1,0 +1,22 @@
+{
+  "title": "Referrals",
+  "subtitle": "Share your code — both of you earn loyalty points on their first order.",
+  "signInPrompt": "Sign in to get your referral code.",
+  "yourCode": "Your code",
+  "copyCode": "Copy code",
+  "copied": "Copied to clipboard",
+  "shareLink": "Or share your link:",
+  "stats": {
+    "invited": "Invited",
+    "completed": "Completed",
+    "earned": "Earned"
+  },
+  "pointsUnit": "pts",
+  "recent": "Recent referrals",
+  "emptyList": "No referrals yet — share your code.",
+  "anonymousFriend": "Friend",
+  "howItWorks": "Give friends a discount and earn {points} points when they order.",
+  "share": "Share this link",
+  "invitedCount": "You've invited {count, plural, one {# friend} other {# friends}}",
+  "referredCount": "{count, plural, one {# referred friend} other {# referred friends}}"
+}

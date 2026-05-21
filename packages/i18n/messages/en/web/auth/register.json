@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Get started",
+  "title": "Create your account",
+  "subtitle": "Faster checkout, saved addresses, loyalty points.",
+  "fields": {
+    "firstName": "First name",
+    "firstNamePlaceholder": "Jan",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "Kowalski",
+    "email": "Email",
+    "emailPlaceholder": "jan@example.com",
+    "password": "Password",
+    "passwordHelper": "At least 10 characters, with a number."
+  },
+  "actions": {
+    "submit": "Create account",
+    "submitting": "Creating account…"
+  },
+  "links": {
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in"
+  }
+}

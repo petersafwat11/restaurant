@@ -10,8 +10,19 @@ export default defineConfig({
 		setupFiles: ["./src/test/setup.ts"],
 		include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
 		globals: false,
+		server: {
+			deps: {
+				inline: ["next-intl"],
+			},
+		},
 	},
 	resolve: {
-		alias: { "@": resolve(__dirname, "src") },
+		alias: {
+			"@": resolve(__dirname, "src"),
+			"next/navigation": resolve(
+				__dirname,
+				"node_modules/next/navigation.js",
+			),
+		},
 	},
 });

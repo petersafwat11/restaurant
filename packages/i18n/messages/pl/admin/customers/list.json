@@ -1,0 +1,56 @@
+{
+  "title": "Klienci",
+  "search": {
+    "placeholder": "Szukaj imienia, e-maila, telefonu…"
+  },
+  "segment": {
+    "all": "Wszyscy",
+    "vip": "VIP",
+    "frequent": "Stali",
+    "dormant": "Nieaktywni",
+    "new": "Nowi",
+    "active": "Aktywni"
+  },
+  "columns": {
+    "name": "Klient",
+    "phone": "Telefon",
+    "orders": "Zamówienia",
+    "spend": "Wartość zakupów",
+    "last": "Ostatnie zamówienie",
+    "segment": "Segment"
+  },
+  "export": {
+    "button": "Eksport",
+    "ariaLabel": "Eksportuj klientów",
+    "csv": "Pobierz CSV",
+    "pdf": "Pobierz PDF"
+  },
+  "empty": "Żaden klient nie pasuje do filtrów.",
+  "permissionDenied": "Nie masz uprawnień do przeglądania klientów.",
+  "bulk": {
+    "clear": "Wyczyść",
+    "selected": "{count, plural, one {Wybrano #} few {Wybrano #} many {Wybrano #} other {Wybrano #}}",
+    "tag": "Otaguj…",
+    "email": "Wyślij e-mail…"
+  },
+  "tagModal": {
+    "title": "Dodaj tag do wybranych klientów",
+    "description": "{count, plural, one {Dodaje jeden tag do # klienta.} few {Dodaje jeden tag do # klientów.} many {Dodaje jeden tag do # klientów.} other {Dodaje jeden tag do # klientów.}}",
+    "primary": "Zastosuj tag",
+    "primaryLoading": "Tagowanie…",
+    "secondary": "Anuluj",
+    "tagLabel": "Tag",
+    "tagPlaceholder": "Wybierz tag…",
+    "noTags": "Brak tagów. Najpierw utwórz tag w ustawieniach klientów."
+  },
+  "emailModal": {
+    "title": "Wyślij e-mail promocyjny",
+    "description": "{count, plural, one {Zakolejkuje e-mail do # klienta przez worker e-mail.} few {Zakolejkuje e-mail do # klientów przez worker e-mail.} many {Zakolejkuje e-mail do # klientów przez worker e-mail.} other {Zakolejkuje e-mail do # klientów przez worker e-mail.}}",
+    "primary": "Wyślij",
+    "primaryLoading": "Kolejkowanie…",
+    "secondary": "Anuluj",
+    "subjectLabel": "Temat",
+    "bodyLabel": "Treść",
+    "footnote": "Czysty tekst. Worker dodaje spersonalizowane powitanie dla każdego odbiorcy."
+  }
+}

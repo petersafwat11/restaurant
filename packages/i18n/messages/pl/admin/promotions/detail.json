@@ -1,0 +1,68 @@
+{
+  "ariaLabel": "Edytor promocji",
+  "active": "Aktywna",
+  "paused": "Wstrzymana",
+  "actions": {
+    "delete": "Usuń",
+    "archive": "Archiwizuj",
+    "restore": "Przywróć",
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie…"
+  },
+  "sections": {
+    "overview": "Przegląd",
+    "typeValue": "Typ i wartość",
+    "schedule": "Harmonogram",
+    "coupons": "Kupony"
+  },
+  "fields": {
+    "name": "Nazwa",
+    "description": "Opis",
+    "active": "Aktywna",
+    "type": "Typ",
+    "percentValue": "Procent rabatu (0–100)",
+    "amountValue": "Kwota rabatu",
+    "minSubtotal": "Minimalna wartość koszyka",
+    "startsAt": "Start",
+    "endsAt": "Koniec"
+  },
+  "hints": {
+    "bogo": "Promocje BOGO nie przyjmują tutaj wartości. Kwalifikowalność konfigurowana jest per kupon (v1).",
+    "freeDelivery": "Darmowa dostawa nie wymaga dodatkowych pól."
+  },
+  "confirmDelete": {
+    "title": "Usunąć promocję?",
+    "description": "Spowoduje to usunięcie promocji i wszystkich jej kuponów. Aktywne wykorzystania zostaną zachowane w historii zamówień.",
+    "delete": "Usuń",
+    "deleting": "Usuwanie…",
+    "cancel": "Anuluj"
+  },
+  "coupons": {
+    "empty": "Brak kuponów.",
+    "columns": {
+      "code": "Kod",
+      "used": "Użyto",
+      "max": "Maks.",
+      "perUser": "Na użytkownika"
+    },
+    "unlimited": "∞",
+    "deleteAriaLabel": "Usuń kupon",
+    "add": {
+      "code": "Kod",
+      "codePlaceholder": "LATO10",
+      "max": "Maks.",
+      "perUser": "Na użytkownika",
+      "submit": "Dodaj kupon",
+      "bulk": "Generuj masowo"
+    },
+    "bulk": {
+      "quantity": "Ilość",
+      "prefix": "Prefiks (opcjonalnie)",
+      "prefixPlaceholder": "LATO",
+      "codeLength": "Długość kodu",
+      "maxUses": "Maks. użyć",
+      "perUser": "Na użytkownika",
+      "generate": "Generuj"
+    }
+  }
+}

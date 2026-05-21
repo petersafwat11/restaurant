@@ -1,0 +1,80 @@
+{
+  "loading": "Loading your order…",
+  "notFound": {
+    "title": "Order not found",
+    "description": "We couldn't find this order. It may have been placed under a different account.",
+    "action": "Back to menu"
+  },
+  "hero": {
+    "title": "Order confirmed",
+    "description": "Thanks — we got it. A receipt has been sent to your inbox.",
+    "orderNumber": "Order number",
+    "live": "Live updates active",
+    "reconnecting": "Reconnecting…"
+  },
+  "copy": {
+    "ariaLabel": "Copy order number",
+    "toast": "Order number copied."
+  },
+  "status": {
+    "PENDING": "Awaiting confirmation",
+    "CONFIRMED": "Order confirmed",
+    "PREPARING": "Kitchen is preparing your meal",
+    "READY": "Ready for pickup",
+    "OUT_FOR_DELIVERY": "Out for delivery",
+    "DELIVERED": "Delivered",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Order cancelled",
+    "REFUNDED": "Order refunded"
+  },
+  "eta": {
+    "DELIVERY": {
+      "caption": "Estimated delivery time",
+      "sub": "We'll text you when it's out for delivery."
+    },
+    "PICKUP": {
+      "caption": "Ready for pickup in",
+      "sub": "We'll text you when it's ready for pickup."
+    },
+    "DINE_IN": {
+      "caption": "Service time",
+      "sub": "We'll text you when the kitchen starts."
+    },
+    "deliveryDefault": "~25 min",
+    "pickupDefault": "~12 min",
+    "dineInDefault": "~10 min"
+  },
+  "now": {
+    "regionLabel": "Current order status",
+    "label": "Right now"
+  },
+  "address": {
+    "regionLabel": "Where it's going",
+    "deliveryCaption": "Deliver to",
+    "pickupCaption": "Pick up from",
+    "dineInCaption": "Your table",
+    "tableRecorded": "Table number recorded"
+  },
+  "activity": {
+    "regionLabel": "Order activity",
+    "heading": "Order activity",
+    "live": "Live"
+  },
+  "help": {
+    "regionLabel": "Need help",
+    "title": "Need help?",
+    "description": "Allergy concern, missing item, or address change? We're a quick call away.",
+    "messageUs": "Message us"
+  },
+  "summary": {
+    "regionLabel": "Order summary",
+    "title": "Order summary",
+    "subtotal": "Subtotal",
+    "delivery": "Delivery",
+    "tip": "Tip",
+    "total": "Total",
+    "notePrefix": "Note: ",
+    "free": "Free"
+  },
+  "backToMenu": "Back to menu"
+}

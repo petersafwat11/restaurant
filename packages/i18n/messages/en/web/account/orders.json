@@ -1,0 +1,16 @@
+{
+  "title": "Orders",
+  "subtitle": "Your order history.",
+  "empty": {
+    "title": "No orders yet",
+    "description": "When you place your first order, it'll show up here.",
+    "action": "Browse menu"
+  },
+  "type": {
+    "DELIVERY": "Delivery",
+    "PICKUP": "Pickup",
+    "DINE_IN": "Eat in"
+  },
+  "itemCount": "{count, plural, one {# item} other {# items}}",
+  "summaryLine": "{type} · {items} · {date}"
+}

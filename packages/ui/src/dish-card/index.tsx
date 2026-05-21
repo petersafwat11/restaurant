@@ -31,21 +31,37 @@ export interface DishCardProps {
   /** Override href click behavior — return false to skip navigation (used by menu page to open sheet). */
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
   className?: string;
+  /**
+   * Optional translated chip labels per flag. Falls back to the hardcoded
+   * English label from `DISH_FLAG_TOKENS` when a flag isn't provided.
+   */
+  flagLabels?: Partial<Record<DishFlag, string>>;
+  /** Aria-label template for the quick-add button. Receives the dish name. */
+  formatAddAriaLabel?: (name: string) => string;
+  /** Sold-out chip text. Defaults to "Sold out today". */
+  soldOutLabel?: string;
 }
 
-function FlagChip({ flag }: { flag: DishFlag }) {
+function FlagChip({
+  flag,
+  label,
+}: {
+  flag: DishFlag;
+  label?: string;
+}) {
   const meta = DISH_FLAG_TOKENS[flag];
   const Icon = FLAG_ICONS[meta.icon];
+  const text = label ?? meta.label;
   return (
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium',
         DISH_FLAG_CLASSES[meta.token],
       )}
-      title={meta.label}
+      title={text}
     >
       <Icon size={11} strokeWidth={2} />
-      {meta.label}
+      {text}
     </span>
   );
 }
@@ -62,6 +78,9 @@ export function DishCard({
   reserveFlagSpace = true,
   onClick,
   className,
+  flagLabels,
+  formatAddAriaLabel,
+  soldOutLabel = 'Sold out today',
 }: DishCardProps) {
   const sizes = image.sizes ?? '(max-width: 768px) 80vw, (max-width: 1024px) 50vw, 33vw';
 
@@ -110,10 +129,12 @@ export function DishCard({
         >
           {unavailable ? (
             <span className="inline-flex items-center rounded-md bg-surface-warm px-1.5 py-0.5 text-[11px] font-medium text-fg-subtle">
-              Sold out today
+              {soldOutLabel}
             </span>
           ) : (
-            flags?.map((f) => <FlagChip key={f} flag={f} />)
+            flags?.map((f) => (
+              <FlagChip key={f} flag={f} label={flagLabels?.[f]} />
+            ))
           )}
         </div>
         <h3 className="text-h3 font-semibold leading-snug text-fg">{name}</h3>
@@ -138,7 +159,9 @@ export function DishCard({
             <button
               type="button"
               onClick={handleAdd}
-              aria-label={`Add ${name} to cart`}
+              aria-label={
+                formatAddAriaLabel ? formatAddAriaLabel(name) : `Add ${name} to cart`
+              }
               className="grid h-10 w-10 place-items-center rounded-input bg-accent text-text-on-accent transition-colors hover:bg-accent-hover"
             >
               <Plus size={18} strokeWidth={2.4} />

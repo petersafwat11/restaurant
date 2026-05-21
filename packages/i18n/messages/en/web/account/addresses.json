@@ -1,0 +1,44 @@
+{
+  "title": "Addresses",
+  "subtitle": "Delivery addresses on your account.",
+  "loading": "Loading…",
+  "badges": {
+    "default": "Default"
+  },
+  "actions": {
+    "add": "Add address",
+    "save": "Save address",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "setDefault": "Set default",
+    "deleteAria": "Delete address"
+  },
+  "fields": {
+    "label": {
+      "label": "Label",
+      "helper": "e.g. Home, Work",
+      "placeholder": "Home"
+    },
+    "line1": {
+      "label": "Street + number",
+      "placeholder": "ul. Marszałkowska 102"
+    },
+    "line2": {
+      "label": "Apt / Floor",
+      "helper": "Optional",
+      "placeholder": "Apt 5B / Floor 3"
+    },
+    "city": {
+      "label": "City"
+    }
+  },
+  "picker": {
+    "deliveryAreaFallback": "Delivery area",
+    "checkError": "Could not check this address.",
+    "outOfZoneError": "Pin must be inside our delivery area."
+  },
+  "empty": {
+    "title": "No saved addresses",
+    "description": "Save an address for faster delivery checkout."
+  }
+}

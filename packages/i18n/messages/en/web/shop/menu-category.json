@@ -1,0 +1,5 @@
+{
+  "title": "Category",
+  "backToMenu": "Back to menu",
+  "itemCount": "{count, plural, one {# item} other {# items}}"
+}

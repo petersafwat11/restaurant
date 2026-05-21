@@ -1,0 +1,16 @@
+{
+  "title": "Zamówienia",
+  "subtitle": "Historia Twoich zamówień.",
+  "empty": {
+    "title": "Brak zamówień",
+    "description": "Gdy złożysz pierwsze zamówienie, pojawi się tutaj.",
+    "action": "Przeglądaj menu"
+  },
+  "type": {
+    "DELIVERY": "Dostawa",
+    "PICKUP": "Odbiór",
+    "DINE_IN": "Na miejscu"
+  },
+  "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+  "summaryLine": "{type} · {items} · {date}"
+}

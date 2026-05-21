@@ -1,0 +1,48 @@
+{
+  "title": "Promocje",
+  "newPromotion": "Nowa promocja",
+  "noPermission": "Nie masz uprawnień do wyświetlania promocji.",
+  "empty": "Brak promocji. Utwórz pierwszą, aby zacząć oferować rabaty.",
+  "columns": {
+    "name": "Nazwa",
+    "type": "Typ",
+    "value": "Wartość",
+    "window": "Okres",
+    "min": "Min",
+    "status": "Status"
+  },
+  "value": {
+    "percentOff": "{value}% rabatu",
+    "fixedOff": "{amount} rabatu",
+    "bogo": "Kup jeden, drugi gratis",
+    "freeDelivery": "Darmowa dostawa",
+    "none": "—"
+  },
+  "window": {
+    "range": "{start} → {end}",
+    "none": "—"
+  },
+  "status": {
+    "DRAFT": "Szkic",
+    "SCHEDULED": "Zaplanowana",
+    "ACTIVE": "Aktywna",
+    "EXPIRED": "Wygasła",
+    "PAUSED": "Wstrzymana"
+  },
+  "types": {
+    "PERCENT": "Procent rabatu",
+    "FIXED": "Kwota rabatu",
+    "BOGO": "Kup jeden, drugi gratis",
+    "FREE_DELIVERY": "Darmowa dostawa"
+  },
+  "create": {
+    "title": "Nowa promocja",
+    "description": "Po utworzeniu możesz skonfigurować wartość, harmonogram i kupony.",
+    "name": "Nazwa",
+    "namePlaceholder": "Letnia promocja -10%",
+    "type": "Typ",
+    "submit": "Utwórz",
+    "submitting": "Tworzenie…",
+    "cancel": "Anuluj"
+  }
+}

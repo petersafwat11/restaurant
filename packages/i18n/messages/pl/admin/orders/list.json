@@ -1,0 +1,24 @@
+{
+  "title": "Zamówienia",
+  "exportButton": "Eksport",
+  "exportAriaLabel": "Eksportuj zamówienia",
+  "exportCsv": "Pobierz CSV",
+  "exportPdf": "Pobierz PDF",
+  "empty": {
+    "all": "Brak zamówień. Nowe pojawią się tutaj na żywo.",
+    "filtered": "Żadne zamówienia nie pasują do filtrów.",
+    "clearFilters": "Wyczyść filtry"
+  },
+  "bulk": {
+    "advance": "Przesuń dalej",
+    "cancel": "Anuluj",
+    "cancelOneTooltip": "Anuluj jedno zamówienie naraz",
+    "selectedMoney": "Wybrano: {amount}"
+  },
+  "confirmBulkAdvance": {
+    "title": "Przesunąć {count, plural, one {# zamówienie} few {# zamówienia} many {# zamówień} other {# zamówień}}?",
+    "description": "Każde wybrane zamówienie zostanie przesunięte do następnego statusu. Tej operacji nie da się masowo cofnąć.",
+    "primary": "Przesuń {count}",
+    "secondary": "Anuluj"
+  }
+}

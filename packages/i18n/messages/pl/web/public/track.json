@@ -1,0 +1,24 @@
+{
+  "requireLink": {
+    "title": "Wymagany link do śledzenia",
+    "description": "Ta strona wymaga prawidłowego linku do śledzenia. Sprawdź link w e-mailu z potwierdzeniem.",
+    "action": "Wróć do menu"
+  },
+  "loading": "Wczytywanie zamówienia…",
+  "invalidLink": {
+    "title": "Link do śledzenia wygasł lub jest nieprawidłowy",
+    "description": "Ten link do śledzenia nie jest już ważny. Jeśli masz konto, zaloguj się, aby zobaczyć zamówienie.",
+    "action": "Zaloguj się"
+  },
+  "mismatch": {
+    "title": "Nie znaleziono zamówienia",
+    "description": "Ten link do śledzenia nie pasuje do zamówienia w adresie URL.",
+    "action": "Wróć do menu"
+  },
+  "hero": {
+    "orderNumber": "Zamówienie #{number}",
+    "title": "Śledzenie zamówienia",
+    "eta": "Szacowany czas: <strong>{minutes} min</strong>"
+  },
+  "terminal": "To zamówienie zostało zrealizowane. Dziękujemy za zakupy."
+}

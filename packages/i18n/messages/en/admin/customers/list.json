@@ -1,0 +1,56 @@
+{
+  "title": "Customers",
+  "search": {
+    "placeholder": "Search name, email, phone…"
+  },
+  "segment": {
+    "all": "All",
+    "vip": "VIP",
+    "frequent": "Frequent",
+    "dormant": "Dormant",
+    "new": "New",
+    "active": "Active"
+  },
+  "columns": {
+    "name": "Customer",
+    "phone": "Phone",
+    "orders": "Orders",
+    "spend": "Lifetime spend",
+    "last": "Last order",
+    "segment": "Segment"
+  },
+  "export": {
+    "button": "Export",
+    "ariaLabel": "Export customers",
+    "csv": "Download CSV",
+    "pdf": "Download PDF"
+  },
+  "empty": "No customers match these filters.",
+  "permissionDenied": "You don't have permission to view customers.",
+  "bulk": {
+    "clear": "Clear",
+    "selected": "{count, plural, one {# selected} other {# selected}}",
+    "tag": "Tag…",
+    "email": "Send email…"
+  },
+  "tagModal": {
+    "title": "Apply tag to selected customers",
+    "description": "{count, plural, one {Applies one tag to # customer.} other {Applies one tag to # customers.}}",
+    "primary": "Apply tag",
+    "primaryLoading": "Tagging…",
+    "secondary": "Cancel",
+    "tagLabel": "Tag",
+    "tagPlaceholder": "Select a tag…",
+    "noTags": "No tags yet. Create one in customer settings first."
+  },
+  "emailModal": {
+    "title": "Send promotional email",
+    "description": "{count, plural, one {Queues an email to # customer via the email worker.} other {Queues an email to # customers via the email worker.}}",
+    "primary": "Send",
+    "primaryLoading": "Queuing…",
+    "secondary": "Cancel",
+    "subjectLabel": "Subject",
+    "bodyLabel": "Body",
+    "footnote": "Plain text. The worker prepends a personalised greeting for each recipient."
+  }
+}

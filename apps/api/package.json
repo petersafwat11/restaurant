@@ -5,6 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "dev": "dotenv -e ../../.env -- node --watch --require @swc-node/register src/main.ts",
+    "generate:i18n-types": "node --require @swc-node/register scripts/generate-i18n-types.ts",
     "build": "nest build",
     "start": "dotenv -e ../../.env -- node dist/main.js",
     "lint": "echo 'lint skipped — Biome 1.9 lacks TS parameter-decorator support; revisit on Biome 2'",
@@ -47,6 +48,7 @@
     "expo-server-sdk": "3.10.0",
     "fastify": "5.2.1",
     "ioredis": "5.4.2",
+    "nestjs-i18n": "10.8.4",
     "nestjs-zod": "4.3.1",
     "nodemailer": "6.9.16",
     "pdfmake": "0.3.8",

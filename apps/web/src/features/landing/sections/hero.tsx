@@ -1,22 +1,24 @@
 import { Logo } from '@/components/logo';
 import { Hero, Stars } from '@repo/ui';
+import { getTranslations } from 'next-intl/server';
 
-export function LandingHero() {
+export async function LandingHero() {
+  const t = await getTranslations('web.marketing.home.hero');
   return (
     <Hero
-      eyebrow="Kebab · Falafel · Tacos · Since 2014"
+      eyebrow={t('eyebrow')}
       title={
         <>
-          Real kebab.
+          {t('titleLine1')}
           <br />
-          <em className="font-display italic text-accent">Made daily</em>
+          <em className="font-display italic text-accent">{t('titleEmphasis')}</em>
           <br />
-          from scratch.
+          {t('titleLine3')}
         </>
       }
-      description="Hand-rolled falafel, marinated overnight. Bread baked through the day. Take-away or eat in — every order is built to order."
-      primaryCta={{ label: 'View the menu', href: '/menu' }}
-      secondaryCta={{ label: 'Order now', href: '/menu' }}
+      description={t('description')}
+      primaryCta={{ label: t('primaryCta'), href: '/menu' }}
+      secondaryCta={{ label: t('secondaryCta'), href: '/menu' }}
       rating={{
         value: 4.8,
         count: 1247,
@@ -27,7 +29,7 @@ export function LandingHero() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://images.unsplash.com/photo-1633321702518-7feccafb94d5?auto=format&fit=crop&w=1400&q=85"
-            alt="Overhead shot of a freshly wrapped kebab on warm cream paper, lit from above"
+            alt={t('imageAlt')}
             className="h-full w-full object-cover"
           />
         </div>
@@ -40,15 +42,15 @@ export function LandingHero() {
               <span className="relative h-2 w-2 rounded-full bg-positive" />
             </span>
             <div className="leading-tight">
-              <div className="text-small font-semibold text-fg">Open now</div>
-              <div className="text-[12px] text-fg-subtle">Closes at 22:00</div>
+              <div className="text-small font-semibold text-fg">{t('openNow')}</div>
+              <div className="text-[12px] text-fg-subtle">{t('closesAt', { time: '22:00' })}</div>
             </div>
           </div>
           <div className="absolute -bottom-4 -right-4 flex items-center gap-2 rounded-card bg-surface-elevated px-3 py-2 shadow-md">
             <Logo variant="mark" size={32} />
             <div className="leading-tight">
-              <div className="font-display text-small font-medium text-fg">Szef Donald</div>
-              <div className="text-[12px] text-fg-subtle">Warszawa Centrum</div>
+              <div className="font-display text-small font-medium text-fg">{t('chefName')}</div>
+              <div className="text-[12px] text-fg-subtle">{t('chefLocation')}</div>
             </div>
           </div>
         </>

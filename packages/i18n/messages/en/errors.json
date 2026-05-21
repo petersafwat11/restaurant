@@ -1,0 +1,10 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "network": "Network error. Check your connection.",
+  "unauthorized": "Please sign in to continue.",
+  "forbidden": "You don't have permission to do that.",
+  "notFound": "Not found.",
+  "rateLimited": "Too many requests. Please slow down.",
+  "couponInvalid": "This coupon is not valid.",
+  "outOfStock": "Some items are no longer available."
+}

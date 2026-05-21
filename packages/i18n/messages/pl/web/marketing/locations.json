@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Odwiedź nas",
+  "heroImageAlt": "",
+  "status": {
+    "openNow": "Otwarte",
+    "closed": "Zamknięte",
+    "closingIn": "{count, plural, one {Zamykamy za # min} few {Zamykamy za # min} many {Zamykamy za # min} other {Zamykamy za # min}}",
+    "openUntil": "Otwarte do {time}",
+    "opensTodayAt": "Otwieramy dziś o {time}",
+    "opensTomorrowAt": "Otwieramy jutro o {time}",
+    "opensOnAt": "Otwieramy {day} o {time}",
+    "hoursUnavailable": "Godziny niedostępne"
+  },
+  "clock": "Jest {time}, {day}",
+  "ctas": {
+    "orderOnline": "Zamów online",
+    "getDirections": "Wyznacz trasę",
+    "callUs": "Zadzwoń",
+    "share": "Udostępnij"
+  },
+  "address": {
+    "eyebrow": "Znajdź nas",
+    "title": "W samym sercu miasta {city}.",
+    "openInMaps": "Otwórz w Mapach",
+    "mapAriaLabel": "Mapa pokazująca {name} przy {address}",
+    "tramAnnotation": "Tramwaj · 2 min pieszo",
+    "metroAnnotation": "Metro · 5 min pieszo"
+  },
+  "hours": {
+    "label": "Godziny"
+  },
+  "weekTimeline": {
+    "eyebrow": "Ten tydzień",
+    "title": "Godziny otwarcia w skrócie",
+    "subtitle": "Paski pokazują, kiedy serwujemy · dziś jest wyróżnione",
+    "closed": "Zamknięte"
+  },
+  "stickyBar": {
+    "orderOnline": "Zamów online",
+    "callAria": "Zadzwoń",
+    "directionsAria": "Dojazd"
+  },
+  "empty": {
+    "title": "Jeszcze nie jesteśmy gotowi",
+    "description": "Restauracja jest jeszcze przygotowywana. Zajrzyj wkrótce.",
+    "browseMenu": "Przeglądaj menu"
+  },
+  "days": {
+    "short": {
+      "0": "Nd",
+      "1": "Pn",
+      "2": "Wt",
+      "3": "Śr",
+      "4": "Czw",
+      "5": "Pt",
+      "6": "Sb"
+    },
+    "long": {
+      "0": "niedziela",
+      "1": "poniedziałek",
+      "2": "wtorek",
+      "3": "środa",
+      "4": "czwartek",
+      "5": "piątek",
+      "6": "sobota"
+    }
+  }
+}

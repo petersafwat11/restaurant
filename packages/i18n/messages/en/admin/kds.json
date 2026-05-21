@@ -1,0 +1,36 @@
+{
+  "title": "Kitchen Display",
+  "backToAdmin": "← Admin",
+  "backAria": "Back to admin orders",
+  "tickets": "{count, plural, one {# ticket} other {# tickets}}",
+  "late": "{count, plural, one {# late} other {# late}}",
+  "filters": {
+    "ALL": "All",
+    "DELIVERY": "Delivery",
+    "PICKUP": "Pickup",
+    "DINE_IN": "Dine-in"
+  },
+  "muteAria": "Mute alerts",
+  "unmuteAria": "Unmute alerts",
+  "fullscreenAria": "Toggle fullscreen",
+  "empty": "No tickets",
+  "loadError": {
+    "title": "Couldn't load tickets",
+    "fallback": "Check connection.",
+    "retry": "Retry"
+  },
+  "ticket": {
+    "back": "Back",
+    "advance": {
+      "CONFIRMED": "Start",
+      "PREPARING": "Ready",
+      "READY": "Picked up"
+    },
+    "waiting": "Waiting {minutes, plural, one {# minute} other {# minutes}}",
+    "types": {
+      "DELIVERY": "Delivery",
+      "PICKUP": "Pickup",
+      "DINE_IN": "Dine-in"
+    }
+  }
+}

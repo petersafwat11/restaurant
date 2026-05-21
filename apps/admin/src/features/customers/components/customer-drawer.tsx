@@ -12,6 +12,7 @@ import {
 } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 import { Bookmark, Home, ListOrdered, NotebookPen, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export function CustomerDrawer({ customerId, onOpenChange }: Props) {
+  const t = useTranslations('admin.customers.detail');
+  const tStatus = useTranslations('shared.orderStatus');
   const { has } = usePermissions();
   const q = useCustomer(customerId ?? '');
   const addNote = useUpdateCustomerNote(customerId ?? '');
@@ -34,7 +37,7 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       width={620}
-      ariaLabel="Customer detail"
+      ariaLabel={t('ariaLabel')}
       flushBody
       header={
         c ? (
@@ -42,7 +45,7 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-h2-admin text-fg">
-                  {[c.firstName, c.lastName].filter(Boolean).join(' ') || c.email}
+                  {[c.firstName, c.lastName].filter(Boolean).join(' ') || c.email || t('anonymous')}
                 </h2>
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">
                   <span>{c.email}</span>
@@ -56,7 +59,7 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
               </div>
               {c.segment && (
                 <span className="inline-flex h-5 items-center rounded-full bg-accent/[0.12] px-2 text-[11px] text-accent">
-                  {c.segment.toUpperCase()}
+                  {t(`segment.${c.segment}`)}
                 </span>
               )}
             </div>
@@ -78,35 +81,39 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
           sections={[
             {
               id: 'overview',
-              label: 'Overview',
+              label: t('sections.overview'),
               icon: User,
               children: (
                 <dl className="grid grid-cols-2 gap-3 text-sm">
-                  <Stat label="Lifetime orders" value={String(c.lifetimeOrders)} />
+                  <Stat label={t('stats.lifetimeOrders')} value={String(c.lifetimeOrders)} />
                   <Stat
-                    label="Lifetime spend"
+                    label={t('stats.lifetimeSpend')}
                     value={formatMoney(c.lifetimeSpend, c.recentOrders[0]?.currency ?? 'USD')}
                   />
                   <Stat
-                    label="First order"
-                    value={c.firstOrderAt ? <RelativeTime value={c.firstOrderAt} /> : '—'}
+                    label={t('stats.firstOrder')}
+                    value={
+                      c.firstOrderAt ? <RelativeTime value={c.firstOrderAt} /> : t('stats.empty')
+                    }
                   />
                   <Stat
-                    label="Last order"
-                    value={c.lastOrderAt ? <RelativeTime value={c.lastOrderAt} /> : '—'}
+                    label={t('stats.lastOrder')}
+                    value={
+                      c.lastOrderAt ? <RelativeTime value={c.lastOrderAt} /> : t('stats.empty')
+                    }
                   />
-                  <Stat label="Reviews" value={String(c.reviewCount)} />
-                  <Stat label="Joined" value={<RelativeTime value={c.createdAt} />} />
+                  <Stat label={t('stats.reviews')} value={String(c.reviewCount)} />
+                  <Stat label={t('stats.joined')} value={<RelativeTime value={c.createdAt} />} />
                 </dl>
               ),
             },
             {
               id: 'orders',
-              label: 'Recent orders',
+              label: t('sections.orders'),
               icon: ListOrdered,
               children:
                 c.recentOrders.length === 0 ? (
-                  <div className="text-sm text-fg-subtle">No orders yet.</div>
+                  <div className="text-sm text-fg-subtle">{t('orders.empty')}</div>
                 ) : (
                   <ul className="divide-y divide-border/[var(--border-strong-alpha)] rounded-md border-hairline bg-surface-2">
                     {c.recentOrders.map((o) => (
@@ -115,7 +122,9 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
                         className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
                       >
                         <span className="font-mono text-fg">{o.orderNumber}</span>
-                        <span className="text-xs text-fg-muted">{o.status}</span>
+                        <span className="text-xs text-fg-muted">
+                          {tStatus.has(o.status) ? tStatus(o.status) : o.status}
+                        </span>
                         <span className="tabular-nums text-fg">
                           {formatMoney(o.grandTotal, o.currency)}
                         </span>
@@ -127,11 +136,11 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
             },
             {
               id: 'addresses',
-              label: 'Addresses',
+              label: t('sections.addresses'),
               icon: Home,
               children:
                 c.addresses.length === 0 ? (
-                  <div className="text-sm text-fg-subtle">No saved addresses.</div>
+                  <div className="text-sm text-fg-subtle">{t('addresses.empty')}</div>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     {c.addresses.map((a) => (
@@ -147,16 +156,16 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
             },
             {
               id: 'payment',
-              label: 'Payment methods',
+              label: t('sections.payment'),
               icon: Bookmark,
               children:
                 c.paymentMethods.length === 0 ? (
-                  <div className="text-sm text-fg-subtle">No saved payment methods.</div>
+                  <div className="text-sm text-fg-subtle">{t('payment.empty')}</div>
                 ) : (
                   <ul className="space-y-1 text-sm">
                     {c.paymentMethods.map((p) => (
                       <li key={p.id} className="text-fg-muted">
-                        {p.brand ?? 'Card'} ···· {p.last4 ?? '????'}
+                        {p.brand ?? t('payment.cardFallback')} ···· {p.last4 ?? t('payment.last4Fallback')}
                       </li>
                     ))}
                   </ul>
@@ -164,12 +173,12 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
             },
             {
               id: 'notes',
-              label: 'Internal notes',
+              label: t('sections.notes'),
               icon: NotebookPen,
               children: (
                 <div className="space-y-3">
                   {c.notes.length === 0 ? (
-                    <div className="text-sm text-fg-subtle">No notes yet.</div>
+                    <div className="text-sm text-fg-subtle">{t('notes.empty')}</div>
                   ) : (
                     <ul className="space-y-2">
                       {c.notes.map((n) => (
@@ -192,7 +201,7 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
                       <Textarea
                         value={noteBody}
                         onChange={(e) => setNoteBody(e.target.value)}
-                        placeholder="Add an internal note…"
+                        placeholder={t('notes.placeholder')}
                         rows={3}
                       />
                       <Button
@@ -206,7 +215,7 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
                           )
                         }
                       >
-                        {addNote.isPending ? 'Saving…' : 'Add note'}
+                        {addNote.isPending ? t('notes.saving') : t('notes.add')}
                       </Button>
                     </div>
                   )}

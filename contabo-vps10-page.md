@@ -1,0 +1,543 @@
+- generic [active] [ref=e1]:
+  - button "Cookie settings" [ref=e687] [cursor=pointer]:
+    - img [ref=e688]
+    - text: Cookie settings
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - paragraph [ref=e7]:
+        - text: Host Your Own AI Agent with
+        - link "OpenClaw" [ref=e8] [cursor=pointer]:
+          - /url: https://contabo.com/en/openclaw-hosting/
+        - text: "- Free 1-Click Setup!"
+    - banner [ref=e9]:
+      - generic [ref=e11]:
+        - paragraph [ref=e12]: Cloud VPS and Bare Metal Servers for Less
+        - navigation [ref=e13]:
+          - button "Flag of AD € / EN" [ref=e15] [cursor=pointer]:
+            - img "Flag of AD" [ref=e17]
+            - generic [ref=e18]: €
+            - text: /
+            - generic [ref=e19]: EN
+            - img [ref=e20]
+          - generic [ref=e22]:
+            - link "Help" [ref=e23] [cursor=pointer]:
+              - /url: https://help.contabo.com/en/support/home
+            - link "Log In" [ref=e24] [cursor=pointer]:
+              - /url: https://my.contabo.com/account/login
+            - link "Sign Up" [ref=e25] [cursor=pointer]:
+              - /url: /en/register/email
+      - generic [ref=e27]:
+        - link "Home" [ref=e28] [cursor=pointer]:
+          - /url: /en/
+          - img [ref=e29]
+        - navigation [ref=e40]:
+          - list [ref=e41]:
+            - listitem [ref=e42]:
+              - generic [ref=e43] [cursor=pointer]:
+                - text: VPS
+                - img "Show more nav items" [ref=e44]
+            - listitem [ref=e46]:
+              - generic [ref=e47] [cursor=pointer]:
+                - text: Dedicated Servers
+                - img "Show more nav items" [ref=e48]
+            - listitem [ref=e50]:
+              - generic [ref=e51] [cursor=pointer]:
+                - text: Apps & Panels
+                - img "Show more nav items" [ref=e52]
+            - listitem [ref=e54]:
+              - generic [ref=e55] [cursor=pointer]:
+                - text: More
+                - img "Show more nav items" [ref=e56]
+            - listitem [ref=e58]:
+              - link "Pricing" [ref=e59] [cursor=pointer]:
+                - /url: /en/pricing/
+            - listitem [ref=e60]:
+              - generic [ref=e61] [cursor=pointer]:
+                - text: Company
+                - img "Show more nav items" [ref=e62]
+    - main [ref=e64]:
+      - generic [ref=e65]:
+        - generic [ref=e67]:
+          - generic [ref=e70]: Configuration
+          - generic [ref=e74]: Personal info
+          - generic [ref=e78]: Payment
+          - generic [ref=e82]: Confirmation
+        - generic [ref=e83]:
+          - main [ref=e84]:
+            - generic [ref=e85]:
+              - heading "Configure your Cloud VPS 10" [level=1] [ref=e87]
+              - generic [ref=e88]:
+                - generic [ref=e89]:
+                  - generic [ref=e90]:
+                    - strong [ref=e91]: CPU
+                    - paragraph [ref=e93]: 4 vCPU Cores
+                  - generic [ref=e94]:
+                    - strong [ref=e95]: RAM
+                    - paragraph [ref=e97]: 8 GB RAM
+                  - generic [ref=e98]:
+                    - strong [ref=e99]: Storage
+                    - generic [ref=e100]:
+                      - paragraph [ref=e101]: 75 GB NVMe
+                      - paragraph [ref=e102]: or 150 GB SSD
+                  - generic [ref=e103]:
+                    - strong [ref=e104]: Snapshot
+                    - paragraph [ref=e106]: 1 Snapshot
+                  - generic [ref=e107]:
+                    - strong [ref=e108]: Port
+                    - paragraph [ref=e110]: 200 Mbit/s Port
+                  - link "Change" [ref=e113] [cursor=pointer]:
+                    - /url: /en/vps/
+                - generic [ref=e114]:
+                  - paragraph [ref=e115]: Server Quantity
+                  - button "1" [ref=e119] [cursor=pointer]:
+                    - generic [ref=e120]: "1"
+                    - img [ref=e121]
+              - generic [ref=e123]:
+                - generic [ref=e124]:
+                  - generic [ref=e125]:
+                    - heading "Select your term length" [level=2] [ref=e126]
+                    - img [ref=e129] [cursor=pointer]
+                  - generic [ref=e132]:
+                    - generic [ref=e134]:
+                      - button "1 Month €4.50 / month" [ref=e135] [cursor=pointer]:
+                        - generic [ref=e136]: 1 Month
+                        - generic [ref=e138]:
+                          - strong [ref=e139]: €4.50
+                          - text: / month
+                      - generic [ref=e141]: €4.50 Setup fee
+                    - generic [ref=e142]:
+                      - generic [ref=e143]: SAVE 10%
+                      - generic [ref=e144]:
+                        - button "6 Months €4.50 / month €4.05 / month" [ref=e145] [cursor=pointer]:
+                          - generic [ref=e146]: 6 Months
+                          - generic [ref=e147]:
+                            - generic [ref=e148]:
+                              - generic [ref=e149]: €4.50
+                              - text: / month
+                            - generic [ref=e150]:
+                              - strong [ref=e151]: €4.05
+                              - text: / month
+                        - generic [ref=e153]: €2.25 Setup fee
+                    - generic [ref=e154]:
+                      - generic [ref=e155]: SAVE 20%
+                      - generic [ref=e156]:
+                        - button "12 Months €4.50 / month €3.60 / month" [ref=e157] [cursor=pointer]:
+                          - generic [ref=e158]: 12 Months
+                          - generic [ref=e159]:
+                            - generic [ref=e160]:
+                              - generic [ref=e161]: €4.50
+                              - text: / month
+                            - generic [ref=e162]:
+                              - strong [ref=e163]: €3.60
+                              - text: / month
+                        - generic [ref=e164]: No Setup Fee
+                - generic [ref=e165]:
+                  - generic [ref=e166]:
+                    - heading "Region" [level=2] [ref=e167]
+                    - img [ref=e170] [cursor=pointer]
+                  - generic [ref=e178]:
+                    - generic [ref=e179]:
+                      - tab "Best" [ref=e180] [cursor=pointer]:
+                        - generic [ref=e181]: Best
+                      - tab "Europe" [selected] [ref=e182] [cursor=pointer]:
+                        - generic [ref=e183]: Europe
+                      - tab "America" [ref=e184] [cursor=pointer]:
+                        - generic [ref=e185]: America
+                      - tab "Asia" [ref=e186] [cursor=pointer]:
+                        - generic [ref=e187]: Asia
+                      - tab "Australia" [ref=e188] [cursor=pointer]:
+                        - generic [ref=e189]: Australia
+                    - tabpanel "Europe" [ref=e191]:
+                      - generic [ref=e192]:
+                        - generic [ref=e194] [cursor=pointer]:
+                          - generic [ref=e197]:
+                            - text: European Union
+                            - generic [ref=e690]: – 84 ms latency
+                          - generic [ref=e200]: Free
+                        - generic [ref=e202] [cursor=pointer]:
+                          - generic [ref=e205]:
+                            - text: United Kingdom
+                            - generic [ref=e691]: – 62 ms latency
+                          - generic [ref=e208]:
+                            - text: €0.95
+                            - generic [ref=e209]: /month
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - heading "Storage Type" [level=2] [ref=e212]
+                    - img [ref=e215] [cursor=pointer]
+                  - generic [ref=e218]:
+                    - generic [ref=e220] [cursor=pointer]:
+                      - generic [ref=e222]: 150 GB SSD
+                      - generic [ref=e224]: Free
+                    - generic [ref=e226] [cursor=pointer]:
+                      - generic [ref=e228]: 300 GB SSD
+                      - generic [ref=e230]:
+                        - text: €1.55
+                        - generic [ref=e231]: /month
+                    - generic [ref=e233] [cursor=pointer]:
+                      - generic [ref=e235]: 75 GB NVMe
+                      - generic [ref=e237]: Free
+                    - generic [ref=e239] [cursor=pointer]:
+                      - generic [ref=e241]: 150 GB NVMe
+                      - generic [ref=e243]:
+                        - text: €1.85
+                        - generic [ref=e244]: /month
+                - generic [ref=e245]:
+                  - generic [ref=e246]:
+                    - heading "Image" [level=2] [ref=e247]
+                    - button "Show more images" [ref=e248] [cursor=pointer]:
+                      - text: Close Images
+                      - img [ref=e249]
+                  - generic [ref=e253]:
+                    - tablist [ref=e254]:
+                      - tab "Popular" [selected] [ref=e256] [cursor=pointer]:
+                        - generic [ref=e257]: Popular
+                      - tab "OS" [ref=e259] [cursor=pointer]:
+                        - generic [ref=e260]: OS
+                      - 'tab "New: Apps" [ref=e262] [cursor=pointer]':
+                        - generic [ref=e263]: "New: Apps"
+                      - tab "Panels" [ref=e265] [cursor=pointer]:
+                        - generic [ref=e266]: Panels
+                      - tab "Blockchain" [ref=e268] [cursor=pointer]:
+                        - generic [ref=e269]: Blockchain
+                    - tabpanel "Popular" [ref=e270]:
+                      - generic [ref=e271]:
+                        - generic [ref=e272]:
+                          - img "ubuntu" [ref=e276]
+                          - paragraph [ref=e277]: Ubuntu
+                          - generic [ref=e279]: Included
+                        - generic [ref=e280]:
+                          - img "customimages" [ref=e284]
+                          - paragraph [ref=e285]: Custom Images
+                          - generic [ref=e287]: Included
+                        - generic [ref=e288]:
+                          - img "windows" [ref=e292]
+                          - paragraph [ref=e293]: Windows Server
+                          - generic [ref=e294]:
+                            - text: €7.50
+                            - generic [ref=e295]: /month
+                        - generic [ref=e296]:
+                          - img "cpanel" [ref=e300]
+                          - paragraph [ref=e301]: cPanel
+                          - generic [ref=e302]:
+                            - text: €21.75
+                            - generic [ref=e303]: /month
+                        - generic [ref=e304]:
+                          - img "centos" [ref=e308]
+                          - paragraph [ref=e309]: RHEL Variants
+                          - generic [ref=e311]: Included
+                        - generic [ref=e312]:
+                          - img "plesk" [ref=e316]
+                          - paragraph [ref=e317]: Plesk + Linux
+                          - generic [ref=e318]:
+                            - text: €12.00
+                            - generic [ref=e319]: /month
+                - generic [ref=e320]:
+                  - generic [ref=e321]:
+                    - heading "Data Protection with Auto Backup" [level=2] [ref=e322]
+                    - img [ref=e325] [cursor=pointer]
+                  - generic [ref=e327]:
+                    - generic [ref=e330]:
+                      - list [ref=e331]:
+                        - listitem [ref=e332]:
+                          - paragraph [ref=e333]: Daily automated backups.
+                        - listitem [ref=e334]:
+                          - paragraph [ref=e335]: Instant 1-click recovery.
+                        - listitem [ref=e336]:
+                          - paragraph [ref=e337]: Keeps the last 10 backup versions.
+                        - listitem [ref=e338]:
+                          - paragraph [ref=e339]: No setup needed.
+                      - paragraph
+                    - generic [ref=e340] [cursor=pointer]:
+                      - generic [ref=e341]: Our Recommendation
+                      - generic [ref=e342]:
+                        - generic [ref=e343]:
+                          - generic [ref=e344]: Auto Backup
+                          - generic [ref=e345]: €1.50 / month
+                        - paragraph [ref=e348]:
+                          - text: Set it and forget it.
+                          - text: Effortless data security.
+                    - generic [ref=e349] [cursor=pointer]: No Data Protection
+                - generic [ref=e350]:
+                  - generic [ref=e351]:
+                    - generic [ref=e352]:
+                      - heading "Additional Features" [level=2] [ref=e353]
+                      - img [ref=e356] [cursor=pointer]
+                    - button "Show more additional features" [ref=e358] [cursor=pointer]:
+                      - text: Close additional features
+                      - img [ref=e359]
+                  - generic [ref=e361]:
+                    - generic [ref=e362]:
+                      - heading "Networking" [level=2] [ref=e364]
+                      - generic [ref=e366]:
+                        - heading "Private Networking" [level=3] [ref=e367]:
+                          - generic [ref=e368]: Private Networking
+                          - img [ref=e371] [cursor=pointer]
+                        - button "No Private Networking" [ref=e376] [cursor=pointer]:
+                          - generic [ref=e378]: No Private Networking
+                          - img [ref=e379]
+                      - generic [ref=e382]:
+                        - heading "Bandwidth" [level=3] [ref=e383]:
+                          - generic [ref=e384]: Bandwidth
+                          - img [ref=e387] [cursor=pointer]
+                        - button "Unlimited Traffic Fair Usage Policy" [disabled] [ref=e392]:
+                          - generic [ref=e394]:
+                            - text: Unlimited Traffic
+                            - generic [ref=e395]: Fair Usage Policy
+                      - generic [ref=e397]:
+                        - heading "IPv4" [level=3] [ref=e398]
+                        - button "1 IP Address Free" [ref=e401] [cursor=pointer]:
+                          - generic [ref=e402]:
+                            - generic [ref=e403]: 1 IP Address
+                            - generic [ref=e405]: Free
+                          - img [ref=e406]
+                    - generic [ref=e408]:
+                      - heading "Add-Ons" [level=2] [ref=e410]
+                      - generic [ref=e412]:
+                        - heading "Object Storage" [level=3] [ref=e413]:
+                          - generic [ref=e414]: Object Storage
+                        - button "None" [ref=e418] [cursor=pointer]:
+                          - generic [ref=e420]: None
+                          - img [ref=e421]
+                      - generic [ref=e424]:
+                        - heading "Monitoring" [level=3] [ref=e425]:
+                          - generic [ref=e426]: Monitoring
+                          - img [ref=e429] [cursor=pointer]
+                        - button "None" [ref=e434] [cursor=pointer]:
+                          - generic [ref=e436]: None
+                          - img [ref=e437]
+                - generic [ref=e439]:
+                  - heading "Login & password for your server" [level=2] [ref=e441]
+                  - generic [ref=e442]:
+                    - generic [ref=e443]:
+                      - generic [ref=e444]:
+                        - heading "Username" [level=3] [ref=e445]
+                        - generic [ref=e446]: root
+                      - generic [ref=e447]:
+                        - heading "Password" [level=3] [ref=e448]
+                        - generic [ref=e451]:
+                          - button "Generate new password" [ref=e453] [cursor=pointer]
+                          - generic [ref=e454]:
+                            - textbox [ref=e456]
+                            - button [ref=e457] [cursor=pointer]:
+                              - img [ref=e458]
+                            - paragraph [ref=e462]:
+                              - generic [ref=e463]:
+                                - img [ref=e464]
+                                - generic [ref=e466]: Please enter a valid password
+                    - paragraph [ref=e469]:
+                      - list [ref=e470]:
+                        - listitem [ref=e471]:
+                          - paragraph [ref=e472]: You can add SSH keys later in the Control Panel.
+                        - listitem [ref=e473]:
+                          - paragraph [ref=e474]: Your password won’t be emailed.
+                        - listitem [ref=e475]:
+                          - paragraph [ref=e476]: Keep it safe for Windows access. If lost, a reinstall is required.
+                      - paragraph
+          - complementary [ref=e477]:
+            - generic [ref=e479]:
+              - generic [ref=e483]:
+                - heading "Order Summary" [level=5] [ref=e484]
+                - button "Share" [ref=e486] [cursor=pointer]:
+                  - img [ref=e487]
+                  - generic [ref=e489]: Share
+              - generic [ref=e490]:
+                - generic [ref=e491]: You save €10.80.
+                - generic [ref=e492]:
+                  - term [ref=e493]:
+                    - strong [ref=e494]:
+                      - text: Monthly
+                      - img [ref=e497] [cursor=pointer]
+                  - definition [ref=e499]:
+                    - strong [ref=e500]: €3.60
+                  - term [ref=e501]:
+                    - strong [ref=e502]:
+                      - text: One-Time
+                      - img [ref=e505] [cursor=pointer]
+                  - definition [ref=e507]:
+                    - strong [ref=e508]: €0.00
+                  - term [ref=e509]:
+                    - strong [ref=e510]: Due Today
+                    - generic [ref=e511]: Prepaid 12 Months
+                  - definition [ref=e512]:
+                    - strong [ref=e513]: €43.20
+              - button "Next" [ref=e516]:
+                - generic [ref=e517]: Next
+            - iframe [ref=e518]:
+              
+    - contentinfo [ref=e519]:
+      - generic [ref=e520]:
+        - generic:
+          - img
+        - generic [ref=e522]:
+          - generic [ref=e523]:
+            - generic [ref=e524]:
+              - heading "Keep in touch" [level=2] [ref=e525]
+              - paragraph [ref=e528]: Latest News and Deals from us. No spam guarantee!
+            - generic [ref=e530]:
+              - generic [ref=e531]:
+                - generic [ref=e532]:
+                  - text: Email
+                  - textbox "Email" [ref=e533]
+                - button "Subscribe" [ref=e534] [cursor=pointer]:
+                  - generic [ref=e535]: Subscribe
+              - paragraph [ref=e538]:
+                - text: The
+                - link "privacy statement" [ref=e539] [cursor=pointer]:
+                  - /url: en/legal/privacy/
+                - text: holds information on the involved data processing and right to withdraw consent.
+          - generic [ref=e541]:
+            - generic [ref=e542]: Follow Us
+            - generic [ref=e543]:
+              - link "Facebook" [ref=e544] [cursor=pointer]:
+                - /url: https://www.facebook.com/ContaboCom/
+                - img "Facebook" [ref=e545]
+              - link "Linkedin" [ref=e547] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/contabo-gmbh
+                - img "Linkedin" [ref=e548]
+              - link "X" [ref=e550] [cursor=pointer]:
+                - /url: https://twitter.com/contabocom
+                - img "X" [ref=e551]
+              - link "YouTube" [ref=e553] [cursor=pointer]:
+                - /url: https://www.youtube.com/c/ContaboCom
+                - img "YouTube" [ref=e554]
+          - generic [ref=e556]:
+            - generic [ref=e557]:
+              - generic [ref=e558]: Products
+              - generic [ref=e559]:
+                - link "Cloud VPS" [ref=e560] [cursor=pointer]:
+                  - /url: en/vps/
+                - link "Cloud VDS (Virtual Dedicated Server)" [ref=e561] [cursor=pointer]:
+                  - /url: en/vds/
+                - link "Dedicated Servers" [ref=e562] [cursor=pointer]:
+                  - /url: en/dedicated-servers/
+                - link "Server Deals" [ref=e563] [cursor=pointer]:
+                  - /url: en/server-outlet/
+                - link "Storage VPS" [ref=e564] [cursor=pointer]:
+                  - /url: en/storage-vps/
+                - link "Object Storage" [ref=e565] [cursor=pointer]:
+                  - /url: en/object-storage/
+                - link "Private Networking" [ref=e566] [cursor=pointer]:
+                  - /url: en/private-networking/
+                - link "Contabo API" [ref=e567] [cursor=pointer]:
+                  - /url: en/contabo-api/
+                - link "Contabo CLI" [ref=e568] [cursor=pointer]:
+                  - /url: en/contabo-cli/
+                - link "Custom Images" [ref=e569] [cursor=pointer]:
+                  - /url: en/custom-images/
+                - link "Cloud-init" [ref=e570] [cursor=pointer]:
+                  - /url: en/cloud-init/
+                - link "Domains" [ref=e571] [cursor=pointer]:
+                  - /url: en/domains/
+                - link "Windows VPS" [ref=e572] [cursor=pointer]:
+                  - /url: en/windows-servers-vps/
+                - link "cPanel VPS" [ref=e573] [cursor=pointer]:
+                  - /url: en/cpanel-vps-server/
+                - link "Forex VPS" [ref=e574] [cursor=pointer]:
+                  - /url: en/forex-vps/
+                - link "GPU Servers" [ref=e575] [cursor=pointer]:
+                  - /url: en/gpu-cloud/
+                - link "Pricing" [ref=e576] [cursor=pointer]:
+                  - /url: en/pricing/
+            - generic [ref=e577]:
+              - generic [ref=e578]: Solutions
+              - generic [ref=e579]:
+                - link "Crypto Solutions" [ref=e580] [cursor=pointer]:
+                  - /url: en/crypto/
+                - link "cPanel" [ref=e581] [cursor=pointer]:
+                  - /url: en/cpanel-servers/
+                - link "Plesk" [ref=e582] [cursor=pointer]:
+                  - /url: en/plesk-servers/
+                - link "Windows" [ref=e583] [cursor=pointer]:
+                  - /url: en/windows-licenses/
+                - link "DDoS Protection" [ref=e584] [cursor=pointer]:
+                  - /url: en/ddos-protection/
+                - link "CI/CD Pipelines" [ref=e585] [cursor=pointer]:
+                  - /url: en/ci-cd-pipelines/
+                - link "Database Hosting" [ref=e586] [cursor=pointer]:
+                  - /url: en/database-hosting/
+                - link "eCommerce Hosting" [ref=e587] [cursor=pointer]:
+                  - /url: en/ecommerce-hosting/
+                - link "Nextcloud" [ref=e588] [cursor=pointer]:
+                  - /url: en/nextcloud-hosting/
+                - link "Self-Hosted Mail" [ref=e589] [cursor=pointer]:
+                  - /url: en/mail-server/
+            - generic [ref=e590]:
+              - generic [ref=e591]: Locations
+              - generic [ref=e592]:
+                - link "Location Overview" [ref=e593] [cursor=pointer]:
+                  - /url: en/locations/
+                - link "Europe" [ref=e594] [cursor=pointer]:
+                  - /url: en/locations/europe/
+                - link "United Kingdom" [ref=e595] [cursor=pointer]:
+                  - /url: en/locations/united-kingdom/
+                - link "United States" [ref=e596] [cursor=pointer]:
+                  - /url: en/locations/united-states/
+                - link "Singapore" [ref=e597] [cursor=pointer]:
+                  - /url: en/locations/asia-singapore/
+                - link "Japan" [ref=e598] [cursor=pointer]:
+                  - /url: en/locations/asia-japan/
+                - link "Australia" [ref=e599] [cursor=pointer]:
+                  - /url: en/locations/australia/
+                - link "India" [ref=e600] [cursor=pointer]:
+                  - /url: en/locations/india/
+            - generic [ref=e601]:
+              - generic [ref=e602]: Company
+              - generic [ref=e603]:
+                - link "About Us" [ref=e604] [cursor=pointer]:
+                  - /url: en/about-us/
+                - link "Sustainability" [ref=e605] [cursor=pointer]:
+                  - /url: en/sustainability/
+                - link "Location Overview" [ref=e606] [cursor=pointer]:
+                  - /url: en/locations/
+                - link "Join our Team" [ref=e607] [cursor=pointer]:
+                  - /url: en/careers/
+                - link "Terms & Conditions" [ref=e608] [cursor=pointer]:
+                  - /url: en/legal/terms-and-conditions/
+                - link "Privacy" [ref=e609] [cursor=pointer]:
+                  - /url: en/legal/privacy/
+                - link "Legal Notice" [ref=e610] [cursor=pointer]:
+                  - /url: en/legal/impressum/
+                - link "Affiliate Program" [ref=e611] [cursor=pointer]:
+                  - /url: en/affiliate-program/
+                - link "Blog" [ref=e612] [cursor=pointer]:
+                  - /url: /blog/
+            - generic [ref=e613]:
+              - generic [ref=e614]: Contact & Help
+              - generic [ref=e615]:
+                - link "Support" [ref=e616] [cursor=pointer]:
+                  - /url: https://help.contabo.com/support/home
+                - link "Sales" [ref=e617] [cursor=pointer]:
+                  - /url: en/sales/
+                - link "Tutorials" [ref=e618] [cursor=pointer]:
+                  - /url: /blog/tutorials/
+                - link "FAQ" [ref=e619] [cursor=pointer]:
+                  - /url: https://help.contabo.com/en/support/home
+                - link "Sitemap" [ref=e620] [cursor=pointer]:
+                  - /url: en/sitemap/
+                - link "Server Status" [ref=e621] [cursor=pointer]:
+                  - /url: https://contabo-status.com
+                - link "Order Status" [ref=e622] [cursor=pointer]:
+                  - /url: en/order-status/
+                - link "Abuse" [ref=e623] [cursor=pointer]:
+                  - /url: en/abuse/
+          - generic [ref=e624]:
+            - img [ref=e627]
+            - generic [ref=e639]:
+              - img [ref=e640]
+              - img [ref=e646]
+              - img [ref=e648]
+              - img [ref=e650]
+              - generic [ref=e667]:
+                - generic [ref=e668]:
+                  - img [ref=e669]
+                  - paragraph [ref=e673]:
+                    - generic [ref=e674]: Privacy
+                    - text: Protected
+                - generic [ref=e675]:
+                  - img [ref=e676]
+                  - paragraph [ref=e680]:
+                    - generic [ref=e681]: Secure
+                    - text: Checkout
+            - generic [ref=e682]: Cloud VPS and Bare Metal Servers for Less
+            - generic [ref=e685]: © Contabo 2003-2026

@@ -1,0 +1,22 @@
+{
+  "title": "Polecenia",
+  "subtitle": "Podziel się kodem — oboje zdobędziecie punkty lojalnościowe za pierwsze zamówienie znajomego.",
+  "signInPrompt": "Zaloguj się, aby otrzymać swój kod polecający.",
+  "yourCode": "Twój kod",
+  "copyCode": "Skopiuj kod",
+  "copied": "Skopiowano do schowka",
+  "shareLink": "Albo udostępnij swój link:",
+  "stats": {
+    "invited": "Zaproszeni",
+    "completed": "Zrealizowane",
+    "earned": "Zdobyte"
+  },
+  "pointsUnit": "pkt",
+  "recent": "Ostatnie polecenia",
+  "emptyList": "Brak poleceń — podziel się swoim kodem.",
+  "anonymousFriend": "Znajomy",
+  "howItWorks": "Daj znajomym rabat i zdobądź {points} punktów za każde zamówienie.",
+  "share": "Udostępnij ten link",
+  "invitedCount": "Zaprosiłeś {count, plural, one {# znajomego} few {# znajomych} many {# znajomych} other {# znajomych}}",
+  "referredCount": "{count, plural, one {# polecony znajomy} few {# poleconych znajomych} many {# poleconych znajomych} other {# poleconych znajomych}}"
+}

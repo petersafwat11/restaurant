@@ -1,10 +1,11 @@
 'use client';
 
 import { useAnalyticsOverview } from '@/features/analytics/hooks';
+import { Link } from '@/i18n/navigation';
 import type { AnalyticsPeriod } from '@repo/types';
 import { fmtPrep } from '@repo/utils';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface LivePanelProps {
@@ -19,6 +20,8 @@ interface LivePanelProps {
  * donut (README §6 carry-over #2).
  */
 export function LivePanel({ period }: LivePanelProps) {
+  const t = useTranslations('admin.dashboard.livePanel');
+  const tPeriod = useTranslations('admin.dashboard.period');
   const overview = useAnalyticsOverview({ period });
   const live = overview.data;
 
@@ -30,25 +33,25 @@ export function LivePanel({ period }: LivePanelProps) {
             <span className="absolute inset-0 animate-ping rounded-full bg-accent/60" />
             <span className="relative h-2 w-2 rounded-full bg-accent" />
           </span>
-          Live
+          {t('title')}
         </h2>
-        <span className="text-caption-admin text-fg-subtle">Realtime</span>
+        <span className="text-caption-admin text-fg-subtle">{t('subtitle')}</span>
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
         <Stat
-          label="Active orders"
-          sub="Confirmed → Out for delivery"
+          label={t('activeOrders')}
+          sub={t('activeOrdersSub')}
           value={live?.liveOrdersCount ?? 0}
         />
         <Stat
-          label="Avg prep time"
-          sub="Confirmed → Ready"
+          label={t('avgPrepTime')}
+          sub={t('avgPrepTimeSub')}
           value={live?.avgPrepMinutes.value != null ? fmtPrep(live.avgPrepMinutes.value) : '—'}
         />
         <Stat
-          label="Repeat rate"
-          sub={`${PERIOD_LABEL[period]} · returning customers`}
+          label={t('repeatRate')}
+          sub={t('repeatRateSub', { period: tPeriod(period) })}
           value={live?.repeatRate.value != null ? `${live.repeatRate.value.toFixed(1)}%` : '—'}
         />
       </div>
@@ -58,25 +61,18 @@ export function LivePanel({ period }: LivePanelProps) {
           href="/orders"
           className="inline-flex items-center gap-1 text-xs text-accent hover:opacity-80"
         >
-          Open orders <ArrowRight size={12} />
+          {t('openOrders')} <ArrowRight size={12} />
         </Link>
         <Link
           href="/orders/kitchen"
           className="inline-flex items-center gap-1 text-xs text-accent hover:opacity-80"
         >
-          Kitchen view <ArrowRight size={12} />
+          {t('kitchenView')} <ArrowRight size={12} />
         </Link>
       </div>
     </div>
   );
 }
-
-const PERIOD_LABEL: Record<AnalyticsPeriod, string> = {
-  today: 'Today',
-  '7d': '7 days',
-  '30d': '30 days',
-  custom: 'Custom',
-};
 
 function Stat({
   label,

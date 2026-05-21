@@ -7,8 +7,9 @@ import {
   useReplyToContact,
   useUpdateContactStatus,
 } from '@/features/contact/hooks';
-import { CONTACT_STATUSES, type ContactMessageDto, type ContactStatus } from '@repo/types';
+import { CONTACT_STATUSES, type ContactMessageDto } from '@repo/types';
 import { Button, DetailDrawer, RelativeTime, Textarea } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -16,13 +17,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-const STATUS_LABEL: Record<ContactStatus, string> = {
-  new: 'New',
-  read: 'Read',
-  archived: 'Archived',
-};
-
 export function ContactDrawer({ message, onOpenChange }: Props) {
+  const t = useTranslations('admin.contact');
   const { has } = usePermissions();
   const update = useUpdateContactStatus();
   const notes = useContactNotes(message?.id ?? null);
@@ -48,11 +44,13 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       width={560}
-      ariaLabel="Contact message"
+      ariaLabel={t('drawer.ariaLabel')}
       header={
         message && (
           <div className="px-6 py-4">
-            <div className="text-h2-admin text-fg">{message.subject ?? '(no subject)'}</div>
+            <div className="text-h2-admin text-fg">
+              {message.subject ?? t('drawer.noSubject')}
+            </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">
               <span>{message.name}</span>
               <span className="text-fg-subtle">·</span>
@@ -75,14 +73,14 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
                 disabled={!canHandle || update.isPending || message.status === s}
                 onClick={() => update.mutate({ id: message.id, input: { status: s } })}
               >
-                Mark {STATUS_LABEL[s]}
+                {t('drawer.markStatus', { status: t(`drawer.status.${s}`) })}
               </Button>
             ))}
             <a
               href={`mailto:${message.email}?subject=${encodeURIComponent(`Re: ${message.subject ?? ''}`)}`}
               className="ml-auto text-xs text-fg-subtle hover:text-fg"
             >
-              Open in email client
+              {t('drawer.openInClient')}
             </a>
           </div>
         )
@@ -91,14 +89,16 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
       {message && (
         <div className="space-y-4">
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">Message</div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">
+              {t('drawer.messageLabel')}
+            </div>
             <div className="whitespace-pre-wrap rounded-md border-hairline bg-surface-2 p-3 text-sm text-fg">
               {message.message}
             </div>
           </section>
           {message.handledByUserId && (
             <section className="text-xs text-fg-subtle">
-              Handled by {message.handledByUserId}
+              {t('drawer.handledBy', { id: message.handledByUserId })}
               {message.handledAt && (
                 <>
                   {' '}
@@ -109,10 +109,12 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
           )}
 
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">Activity</div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">
+              {t('drawer.activityLabel')}
+            </div>
             {noteRows.length === 0 ? (
               <div className="rounded-md border-hairline bg-surface-2 p-3 text-xs text-fg-subtle">
-                No notes or replies yet.
+                {t('drawer.activityEmpty')}
               </div>
             ) : (
               <ul className="space-y-2">
@@ -124,7 +126,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
                     }`}
                   >
                     <div className="mb-1 flex items-center justify-between text-[11px] text-fg-subtle">
-                      <span>{n.kind === 'REPLY' ? 'Reply sent' : 'Internal note'}</span>
+                      <span>{n.kind === 'REPLY' ? t('drawer.kind.reply') : t('drawer.kind.note')}</span>
                       <RelativeTime value={n.createdAt} />
                     </div>
                     <div className="whitespace-pre-wrap text-fg">{n.body}</div>
@@ -136,12 +138,14 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
 
           {canReply && (
             <section>
-              <div className="mb-1 text-caption-admin text-fg-subtle">Reply to customer</div>
+              <div className="mb-1 text-caption-admin text-fg-subtle">
+                {t('drawer.replyLabel')}
+              </div>
               <Textarea
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
                 rows={4}
-                placeholder="Type your reply…"
+                placeholder={t('drawer.replyPlaceholder')}
               />
               <div className="mt-2 flex justify-end">
                 <Button
@@ -151,7 +155,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
                     reply.mutate({ body: replyBody.trim() }, { onSuccess: () => setReplyBody('') })
                   }
                 >
-                  {reply.isPending ? 'Sending…' : 'Send reply'}
+                  {reply.isPending ? t('drawer.replySending') : t('drawer.replySend')}
                 </Button>
               </div>
             </section>
@@ -159,12 +163,14 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
 
           {canNote && (
             <section>
-              <div className="mb-1 text-caption-admin text-fg-subtle">Internal note</div>
+              <div className="mb-1 text-caption-admin text-fg-subtle">
+                {t('drawer.noteLabel')}
+              </div>
               <Textarea
                 value={noteBody}
                 onChange={(e) => setNoteBody(e.target.value)}
                 rows={3}
-                placeholder="Visible only to staff…"
+                placeholder={t('drawer.notePlaceholder')}
               />
               <div className="mt-2 flex justify-end">
                 <Button
@@ -174,7 +180,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
                     addNote.mutate({ body: noteBody.trim() }, { onSuccess: () => setNoteBody('') })
                   }
                 >
-                  Add note
+                  {t('drawer.noteAdd')}
                 </Button>
               </div>
             </section>

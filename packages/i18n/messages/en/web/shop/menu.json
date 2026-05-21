@@ -1,0 +1,60 @@
+{
+  "title": "Menu",
+  "eyebrow": "Menu",
+  "heroTitle": "Built fresh, made to order.",
+  "heroSummary": "{dishCount, plural, one {# dish} other {# dishes}} across {categoryCount, plural, one {# category} other {# categories}}. Filter or search to find your usual.",
+  "categories": "Categories",
+  "featured": "Featured",
+  "allItems": "All items",
+  "addToCart": "Add to cart",
+  "outOfStock": "Out of stock",
+  "calories": "{count} cal",
+  "vegetarian": "Vegetarian",
+  "vegan": "Vegan",
+  "glutenFree": "Gluten free",
+  "spicy": "Spicy",
+  "chips": {
+    "vegetarian": "V",
+    "vegan": "Vegan",
+    "glutenFree": "GF",
+    "spicy": "Spicy",
+    "featured": "Featured"
+  },
+  "soldOutToday": "Sold out today",
+  "all": "All",
+  "noResults": "No items match your filters",
+  "searchPlaceholder": "Search the menu…",
+  "dietaryFiltersAria": "Dietary filters",
+  "loadingMenu": "Loading menu…",
+  "error": {
+    "title": "Couldn't load the menu",
+    "description": "Something went wrong. Try refreshing.",
+    "reload": "Reload"
+  },
+  "emptySearch": {
+    "title": "Nothing matches \"{query}\"",
+    "description": "Try a different word, or clear filters.",
+    "clear": "Clear search"
+  },
+  "emptyFilter": {
+    "title": "No dishes match your filters",
+    "description": "Combine fewer filters to see more options.",
+    "clear": "Clear filters"
+  },
+  "categoryItemCount": "{count, plural, one {# item} other {# items}}",
+  "toastAdded": {
+    "title": "Added to cart",
+    "description": "{quantity} × {name}"
+  },
+  "sheet": {
+    "close": "Close",
+    "allergens": "Allergens",
+    "specialInstructions": "Special instructions",
+    "specialInstructionsPlaceholder": "Anything we should know? (no onions, extra sauce…)",
+    "quantity": "Quantity",
+    "total": "Total",
+    "soldOut": "Sold out today — back tomorrow.",
+    "minChoice": "Please choose at least {min, plural, one {one} other {#}}.",
+    "chooseGroups": "Choose: {names}"
+  }
+}

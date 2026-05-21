@@ -3,6 +3,7 @@
 import { cn } from '@repo/ui';
 import { fmtPct } from '@repo/utils';
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
 
@@ -32,6 +33,7 @@ export function KpiCard({
   sparkData,
   sparkColor = 'rgb(var(--chart-1))',
 }: KpiCardProps) {
+  const t = useTranslations('admin.dashboard.kpi');
   const up = deltaPercent >= 0;
   const points = React.useMemo(() => (sparkData ?? []).map((v) => ({ v })), [sparkData]);
 
@@ -50,7 +52,7 @@ export function KpiCard({
         >
           {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
           <span>{fmtPct(Math.abs(deltaPercent), { digits: 1 })}</span>
-          <span className="text-fg-subtle">vs. prev period</span>
+          <span className="text-fg-subtle">{t('vsPrevPeriod')}</span>
         </div>
       </div>
       {points.length > 0 && (

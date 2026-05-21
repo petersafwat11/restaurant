@@ -1,0 +1,28 @@
+{
+  "title": "Lojalność",
+  "subtitle": "Zdobywaj punkty za każde zamówienie i wymieniaj je przy płatności.",
+  "empty": {
+    "title": "Dołącz do programu lojalnościowego",
+    "description": "Twoje pierwsze zamówienie automatycznie otwiera konto lojalnościowe.",
+    "action": "Przeglądaj menu"
+  },
+  "availablePoints": "Dostępne punkty",
+  "pointsUnit": "pkt",
+  "pointsCount": "{points, plural, one {# punkt} few {# punkty} many {# punktów} other {# punktów}}",
+  "tierProgress": "Jeszcze {points} punktów do poziomu <strong>{tier}</strong>.",
+  "lifetime": "Łącznie: <strong>{points}</strong> pkt.",
+  "activity": "Aktywność",
+  "noActivity": "Brak transakcji.",
+  "balance": "{points, plural, one {# punkt} few {# punkty} many {# punktów} other {# punktów}}",
+  "tier": "Poziom {tier}",
+  "redeem": "Wymień punkty",
+  "redeemDiscount": "Wymień {points} punktów na {amount}",
+  "earned": "Zdobyłeś {points} punktów",
+  "history": "Historia punktów",
+  "tiers": {
+    "bronze": "Brąz",
+    "silver": "Srebro",
+    "gold": "Złoto",
+    "platinum": "Platyna"
+  }
+}

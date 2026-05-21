@@ -11,50 +11,92 @@ import {
 import { formatMoney } from '@repo/utils';
 import * as React from 'react';
 
-interface OrderDrawerBodyProps {
-  order: OrderDto;
+export interface OrderDrawerBodyLabels {
+  itemsHeading: string;
+  pricingHeading: string;
+  paymentHeading: string;
+  customerHeading: string;
+  timelineHeading: string;
+  noteFallback: string;
+  subtotal: string;
+  tax: string;
+  deliveryFee: string;
+  tip: string;
+  discount: string;
+  grandTotal: string;
+  refund: string;
+  guest: string;
+  typeLabel: string;
+  notesQuote: string;
+  typeLabels: Record<string, string>;
+  paymentMethodLabels: Record<string, string>;
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  DELIVERY: 'Delivery',
-  PICKUP: 'Pickup',
-  DINE_IN: 'Dine-in',
+const DEFAULT_LABELS: OrderDrawerBodyLabels = {
+  itemsHeading: 'Items',
+  pricingHeading: 'Pricing',
+  paymentHeading: 'Payment',
+  customerHeading: 'Customer',
+  timelineHeading: 'Timeline',
+  noteFallback: 'Note',
+  subtotal: 'Subtotal',
+  tax: 'Tax',
+  deliveryFee: 'Delivery fee',
+  tip: 'Tip',
+  discount: 'Discount',
+  grandTotal: 'Grand total',
+  refund: 'Refund',
+  guest: 'Guest',
+  typeLabel: 'Type',
+  notesQuote: '',
+  typeLabels: {
+    DELIVERY: 'Delivery',
+    PICKUP: 'Pickup',
+    DINE_IN: 'Dine-in',
+  },
+  paymentMethodLabels: {
+    STRIPE_CARD: 'Card',
+    APPLE_PAY: 'Apple Pay',
+    GOOGLE_PAY: 'Google Pay',
+    COD: 'Cash on delivery',
+    WALLET: 'Wallet',
+    P24: 'Przelewy24',
+    BLIK: 'BLIK',
+  },
 };
 
-const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  STRIPE_CARD: 'Card',
-  APPLE_PAY: 'Apple Pay',
-  GOOGLE_PAY: 'Google Pay',
-  COD: 'Cash on delivery',
-  WALLET: 'Wallet',
-  P24: 'Przelewy24',
-  BLIK: 'BLIK',
-};
+interface OrderDrawerBodyProps {
+  order: OrderDto;
+  labels?: Partial<OrderDrawerBodyLabels>;
+}
 
 /**
  * Full body of the order detail drawer. Items, pricing, payment, customer,
  * and the status timeline.
  */
-export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
+export function OrderDrawerBody({ order, labels }: OrderDrawerBodyProps) {
+  const L = { ...DEFAULT_LABELS, ...labels } as OrderDrawerBodyLabels;
+  const TYPE_LABEL = L.typeLabels;
+  const PAYMENT_METHOD_LABEL = L.paymentMethodLabels;
   const timeline: TimelineEntry[] = React.useMemo(
     () =>
       order.statusEvents.map((ev, i) => {
         const isNote = ev.kind === 'NOTE';
         return {
           id: ev.id,
-          title: isNote ? 'Note' : (STATUS_TOKENS[ev.status]?.label ?? ev.status),
+          title: isNote ? L.noteFallback : (STATUS_TOKENS[ev.status]?.label ?? ev.status),
           at: ev.createdAt,
           note: ev.note ?? undefined,
           dotClassName: isNote ? 'bg-fg-subtle' : STATUS_TOKENS[ev.status]?.bg,
           current: i === order.statusEvents.length - 1,
         };
       }),
-    [order.statusEvents],
+    [order.statusEvents, L.noteFallback],
   );
 
   return (
     <div className="flex flex-col gap-6 px-6 py-4">
-      <Section title="Items">
+      <Section title={L.itemsHeading}>
         <ul className="flex flex-col gap-3">
           {order.items.map((item) => (
             <li
@@ -85,20 +127,24 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
         </ul>
       </Section>
 
-      <Section title="Pricing">
+      <Section title={L.pricingHeading}>
         <table className="w-full text-sm">
           <tbody className="text-fg-muted">
-            <PriceRow label="Subtotal" value={order.subtotal} currency={order.currency} />
-            <PriceRow label="Tax" value={order.taxTotal} currency={order.currency} />
+            <PriceRow label={L.subtotal} value={order.subtotal} currency={order.currency} />
+            <PriceRow label={L.tax} value={order.taxTotal} currency={order.currency} />
             {Number(order.deliveryFee) > 0 && (
-              <PriceRow label="Delivery fee" value={order.deliveryFee} currency={order.currency} />
+              <PriceRow
+                label={L.deliveryFee}
+                value={order.deliveryFee}
+                currency={order.currency}
+              />
             )}
             {Number(order.tipAmount) > 0 && (
-              <PriceRow label="Tip" value={order.tipAmount} currency={order.currency} />
+              <PriceRow label={L.tip} value={order.tipAmount} currency={order.currency} />
             )}
             {Number(order.discountTotal) > 0 && (
               <PriceRow
-                label="Discount"
+                label={L.discount}
                 value={`-${order.discountTotal}`}
                 currency={order.currency}
                 positive
@@ -110,7 +156,7 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
               </td>
             </tr>
             <tr>
-              <td className="pt-2 text-fg">Grand total</td>
+              <td className="pt-2 text-fg">{L.grandTotal}</td>
               <td className="pt-2 text-right text-base tabular-nums font-medium text-fg">
                 {formatMoney(order.grandTotal, order.currency)}
               </td>
@@ -120,7 +166,7 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
       </Section>
 
       {order.payment && (
-        <Section title="Payment">
+        <Section title={L.paymentHeading}>
           <div className="flex items-center justify-between rounded-md border-hairline bg-surface p-3">
             <div className="flex items-center gap-2 text-sm text-fg-muted">
               {PAYMENT_METHOD_LABEL[order.payment.method] ?? order.payment.method}
@@ -139,7 +185,7 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
                   className="flex items-start justify-between rounded-md border-hairline bg-surface-2 p-2 text-xs"
                 >
                   <div>
-                    <div className="text-fg-muted">Refund</div>
+                    <div className="text-fg-muted">{L.refund}</div>
                     {r.reason && <div className="mt-0.5 text-fg-subtle">{r.reason}</div>}
                   </div>
                   <div className="text-right tabular-nums font-medium text-negative">
@@ -153,9 +199,9 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
       )}
 
       {order.customer && (
-        <Section title="Customer">
+        <Section title={L.customerHeading}>
           <div className="rounded-md border-hairline bg-surface p-3 text-sm">
-            <div className="font-medium text-fg">{order.customer.name ?? 'Guest'}</div>
+            <div className="font-medium text-fg">{order.customer.name ?? L.guest}</div>
             <div className="mt-1 text-xs text-fg-subtle">
               <span>{order.customer.email}</span>
               {order.customer.phone && (
@@ -167,7 +213,8 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
             </div>
           </div>
           <div className="mt-2 text-xs text-fg-subtle">
-            Type: <span className="text-fg-muted">{TYPE_LABEL[order.type] ?? order.type}</span>
+            {L.typeLabel}:{' '}
+            <span className="text-fg-muted">{TYPE_LABEL[order.type] ?? order.type}</span>
           </div>
           {order.deliveryAddress && order.type === 'DELIVERY' && (
             <div className="mt-2 rounded-md bg-surface p-2 text-xs text-fg-muted">
@@ -184,7 +231,7 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
         </Section>
       )}
 
-      <Section title="Timeline">
+      <Section title={L.timelineHeading}>
         <ActivityTimeline entries={timeline} />
       </Section>
     </div>

@@ -1,4 +1,4 @@
-import ContactPage from '@/app/(dashboard)/contact/page';
+import ContactPage from '@/app/[locale]/(dashboard)/contact/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';

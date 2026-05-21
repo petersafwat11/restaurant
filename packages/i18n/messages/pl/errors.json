@@ -1,0 +1,10 @@
+{
+  "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+  "network": "Błąd sieci. Sprawdź połączenie.",
+  "unauthorized": "Zaloguj się, aby kontynuować.",
+  "forbidden": "Nie masz uprawnień do tej akcji.",
+  "notFound": "Nie znaleziono.",
+  "rateLimited": "Zbyt wiele zapytań. Zwolnij.",
+  "couponInvalid": "Ten kupon nie jest poprawny.",
+  "outOfStock": "Niektóre pozycje nie są już dostępne."
+}

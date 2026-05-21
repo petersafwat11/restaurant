@@ -1,0 +1,74 @@
+{
+  "title": "Overview",
+  "period": {
+    "today": "Today",
+    "7d": "7 days",
+    "30d": "30 days",
+    "custom": "Custom range"
+  },
+  "kpi": {
+    "revenue": "Revenue",
+    "orders": "Orders",
+    "aov": "Avg order value",
+    "completionRate": "Completion rate",
+    "newCustomers": "New customers",
+    "vsPrevPeriod": "vs. prev period"
+  },
+  "revenue": {
+    "title": "Revenue",
+    "seriesAriaLabel": "Series",
+    "seriesRevenue": "Revenue",
+    "seriesOrders": "Orders",
+    "tableAriaLabel": "Revenue data",
+    "tableTime": "Time",
+    "tableRevenue": "Revenue",
+    "tableOrders": "Orders"
+  },
+  "statusDonut": {
+    "title": "Orders by status",
+    "centerLabel": "Orders · {period}",
+    "tableAriaLabel": "Orders by status",
+    "tableStatus": "Status",
+    "tableCount": "Count",
+    "tablePercent": "Percent"
+  },
+  "topItems": {
+    "title": "Top items",
+    "byRevenue": "By revenue",
+    "byQuantity": "By quantity",
+    "colItem": "Item",
+    "colQty": "Qty",
+    "colRevenue": "Revenue",
+    "viewFullReport": "View full report"
+  },
+  "livePanel": {
+    "title": "Live",
+    "subtitle": "Realtime",
+    "activeOrders": "Active orders",
+    "activeOrdersSub": "Confirmed → Out for delivery",
+    "avgPrepTime": "Avg prep time",
+    "avgPrepTimeSub": "Confirmed → Ready",
+    "repeatRate": "Repeat rate",
+    "repeatRateSub": "{period} · returning customers",
+    "openOrders": "Open orders",
+    "kitchenView": "Kitchen view"
+  },
+  "recentOrders": {
+    "title": "Recent orders",
+    "viewAll": "View all",
+    "colOrderNumber": "Order #",
+    "colCustomer": "Customer",
+    "colItems": "Items",
+    "colType": "Type",
+    "colStatus": "Status",
+    "colTotal": "Total",
+    "colPlaced": "Placed",
+    "empty": "No orders yet.",
+    "items": "{count, plural, one {item} other {items}}"
+  },
+  "orderType": {
+    "DELIVERY": "Delivery",
+    "PICKUP": "Pickup",
+    "DINE_IN": "Dine-in"
+  }
+}

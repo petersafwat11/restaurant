@@ -1,12 +1,12 @@
 'use client';
 
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import type { PermissionKey } from '@repo/types';
 import { cn } from '@repo/ui';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { NAV_GROUPS, NAV_OVERVIEW, type NavItem } from './nav-config';
 
@@ -32,10 +32,12 @@ function NavRow({
   item,
   active,
   collapsed,
+  label,
 }: {
   item: NavItem;
   active: boolean;
   collapsed: boolean;
+  label: string;
 }) {
   const Icon = item.icon;
   return (
@@ -44,7 +46,7 @@ function NavRow({
       target={item.external ? '_blank' : undefined}
       rel={item.external ? 'noopener noreferrer' : undefined}
       aria-current={active ? 'page' : undefined}
-      title={collapsed ? item.label : undefined}
+      title={collapsed ? label : undefined}
       className={cn(
         'group relative flex h-9 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-admin-fast',
         active ? 'bg-accent/[0.10] text-fg' : 'text-fg-muted hover:bg-surface-2 hover:text-fg',
@@ -58,7 +60,7 @@ function NavRow({
         />
       )}
       <Icon size={16} className="shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
 }
@@ -67,6 +69,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname() ?? '/';
   const { has } = usePermissions();
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations('admin.layout.sidebar');
 
   const initials = React.useMemo(() => {
     if (!user) return '?';
@@ -76,10 +79,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   }, [user]);
 
   const overviewVisible = !NAV_OVERVIEW.permission || has(NAV_OVERVIEW.permission as PermissionKey);
+  const brandName = t('brandName');
+  const brandInitials = brandName
+    .split(/\s+/)
+    .map((word) => word[0] ?? '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <aside
-      aria-label="Primary"
+      aria-label={t('ariaLabel')}
       className={cn(
         'sticky top-0 flex h-screen shrink-0 flex-col border-r-hairline bg-surface transition-[width] duration-admin-base ease-admin-out',
         collapsed ? 'w-sidebar-collapsed' : 'w-sidebar',
@@ -92,10 +102,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           collapsed && 'justify-center px-0',
         )}
       >
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-accent/[0.12] text-xs font-semibold text-accent">
-          TK
+        <div
+          aria-hidden
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-accent/[0.12] text-xs font-semibold text-accent"
+        >
+          {brandInitials || 'TK'}
         </div>
-        {!collapsed && <div className="truncate text-sm font-semibold text-fg">Test Kitchen</div>}
+        {!collapsed && <div className="truncate text-sm font-semibold text-fg">{brandName}</div>}
       </div>
 
       {/* Nav */}
@@ -106,6 +119,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               item={NAV_OVERVIEW}
               active={isItemActive(pathname, NAV_OVERVIEW.href)}
               collapsed={collapsed}
+              label={t(NAV_OVERVIEW.labelKey)}
             />
           </div>
         )}
@@ -115,7 +129,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           return (
             <div key={group.id} className="mb-3">
               {!collapsed && (
-                <div className="px-3 pb-1.5 text-caption-admin text-fg-subtle">{group.label}</div>
+                <div className="px-3 pb-1.5 text-caption-admin text-fg-subtle">
+                  {t(group.labelKey)}
+                </div>
               )}
               <div className="flex flex-col gap-0.5">
                 {items.map((it) => (
@@ -124,6 +140,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     item={it}
                     active={isItemActive(pathname, it.href)}
                     collapsed={collapsed}
+                    label={t(it.labelKey)}
                   />
                 ))}
               </div>
@@ -153,7 +170,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <button
           type="button"
           onClick={onToggle}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? t('expand') : t('collapse')}
           className="grid h-7 w-7 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
         >
           {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}

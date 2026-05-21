@@ -1,0 +1,27 @@
+{
+  "eyebrow": "Zaproszenie dla personelu",
+  "title": "Zaakceptuj zaproszenie",
+  "subtitle": "Ustaw hasło i uzupełnij dane konta, aby dołączyć do zespołu.",
+  "missingToken": {
+    "title": "Wymagany link z zaproszeniem",
+    "description": "Ta strona wymaga prawidłowego linku z zaproszeniem. Sprawdź wiadomość e-mail, którą wysłaliśmy.",
+    "action": "Przejdź do logowania"
+  },
+  "fields": {
+    "firstName": "Imię",
+    "firstNamePlaceholder": "Jan",
+    "lastName": "Nazwisko",
+    "lastNamePlaceholder": "Kowalski",
+    "password": "Hasło",
+    "passwordHelper": "Co najmniej 8 znaków."
+  },
+  "actions": {
+    "submit": "Zaakceptuj zaproszenie",
+    "submitting": "Akceptowanie…"
+  },
+  "success": {
+    "title": "Zaproszenie zaakceptowane",
+    "description": "Twoje konto jest gotowe. Zaloguj się, aby rozpocząć.",
+    "signIn": "Zaloguj się"
+  }
+}

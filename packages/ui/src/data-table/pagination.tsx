@@ -11,6 +11,14 @@ export interface PaginationState {
   onPageChange: (next: number) => void;
   onPageSizeChange?: (next: number) => void;
   pageSizeOptions?: number[];
+  /** Render the "Showing X–Y of Z" range label. Defaults to English. */
+  formatRange?: (args: { from: number; to: number; total: number }) => React.ReactNode;
+  /** Label for the page-size <select>. Defaults to "Rows per page". */
+  rowsPerPageLabel?: string;
+  /** Aria-label for the previous-page button. Defaults to "Previous page". */
+  previousPageLabel?: string;
+  /** Aria-label for the next-page button. Defaults to "Next page". */
+  nextPageLabel?: string;
 }
 
 function pageWindow(current: number, last: number): number[] {
@@ -28,6 +36,10 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [25, 50, 100],
+  formatRange,
+  rowsPerPageLabel = 'Rows per page',
+  previousPageLabel = 'Previous page',
+  nextPageLabel = 'Next page',
 }: PaginationState) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const last = pageCount - 1;
@@ -38,12 +50,14 @@ export function Pagination({
   return (
     <div className="flex items-center justify-between gap-3 border-t-hairline px-3 py-2 text-xs">
       <span className="tabular-nums text-fg-subtle">
-        Showing {start.toLocaleString()}–{end.toLocaleString()} of {total.toLocaleString()}
+        {formatRange
+          ? formatRange({ from: start, to: end, total })
+          : `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()}`}
       </span>
       <div className="flex items-center gap-2">
         {onPageSizeChange && (
           <>
-            <span className="text-fg-subtle">Rows per page</span>
+            <span className="text-fg-subtle">{rowsPerPageLabel}</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -62,7 +76,7 @@ export function Pagination({
             type="button"
             disabled={pageIndex === 0}
             onClick={() => onPageChange(pageIndex - 1)}
-            aria-label="Previous page"
+            aria-label={previousPageLabel}
             className="grid h-7 w-7 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ChevronLeft size={14} />
@@ -92,7 +106,7 @@ export function Pagination({
             type="button"
             disabled={pageIndex >= last}
             onClick={() => onPageChange(pageIndex + 1)}
-            aria-label="Next page"
+            aria-label={nextPageLabel}
             className="grid h-7 w-7 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ChevronRight size={14} />

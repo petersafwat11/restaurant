@@ -1,0 +1,41 @@
+{
+  "title": "Audit log",
+  "filters": {
+    "actorPlaceholder": "Actor user id…",
+    "actionAll": "All actions",
+    "resourceAll": "All resources",
+    "fromLabel": "From",
+    "toLabel": "To",
+    "clear": "Clear filters",
+    "resources": {
+      "order": "order",
+      "payment": "payment",
+      "menu_item": "menu item",
+      "menu_category": "menu category",
+      "promotion": "promotion",
+      "staff": "staff",
+      "review": "review",
+      "reservation": "reservation",
+      "settings": "settings"
+    }
+  },
+  "columns": {
+    "when": "When",
+    "actor": "Actor",
+    "action": "Action",
+    "resource": "Resource",
+    "ip": "IP"
+  },
+  "row": {
+    "noIp": "—"
+  },
+  "empty": "No audit log entries match these filters.",
+  "drawer": {
+    "ariaLabel": "Audit entry",
+    "actor": "actor {id}",
+    "ip": "ip {ip}",
+    "before": "Before",
+    "after": "After",
+    "empty": "—"
+  }
+}

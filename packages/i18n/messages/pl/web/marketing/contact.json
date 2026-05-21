@@ -1,0 +1,30 @@
+{
+  "eyebrow": "Kontakt",
+  "title": "Napisz do nas.",
+  "description": "Pytania o zamówienie, wydarzenie czy strefę dostawy — czytamy wszystko.",
+  "findUs": "Znajdź nas",
+  "addressLabel": "Adres",
+  "phoneLabel": "Telefon",
+  "directionsLabel": "Dojazd",
+  "openInGoogleMaps": "Otwórz w Mapach Google",
+  "address1": "Marszałkowska 102",
+  "address2": "00-026 Warszawa, Polska",
+  "phone": "+48 22 555 01 23",
+  "form": {
+    "nameLabel": "Imię i nazwisko",
+    "namePlaceholder": "Jan Kowalski",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "jan@example.com",
+    "subjectLabel": "Temat",
+    "subjectPlaceholder": "Czego dotyczy wiadomość?",
+    "messageLabel": "Wiadomość",
+    "messagePlaceholder": "Napisz, co masz na myśli…",
+    "submit": "Wyślij wiadomość",
+    "submitting": "Wysyłanie…"
+  },
+  "success": {
+    "title": "Wiadomość wysłana",
+    "description": "Dzięki — odpowiemy w ciągu jednego, dwóch dni.",
+    "sendAnother": "Wyślij kolejną wiadomość"
+  }
+}

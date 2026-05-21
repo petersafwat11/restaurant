@@ -1,0 +1,121 @@
+{
+  "title": "Order {number}",
+  "titleFallback": "Order",
+  "loading": "Loading order…",
+  "notFound": {
+    "title": "Order not found",
+    "description": "It may have been removed.",
+    "back": "← Back to orders"
+  },
+  "back": "Orders",
+  "advanceTo": "Advance to {status}",
+  "noNextState": "No next state",
+  "orderComplete": "Order complete",
+  "refund": "Refund",
+  "cancel": "Cancel",
+  "print": "Print",
+  "noPermissionAdvance": "You don't have permission to update status",
+  "noPermissionAdvanceLong": "You don't have permission to update order status",
+  "addNote": {
+    "heading": "Add note",
+    "placeholder": "Note for the kitchen, dispatch, or future-you…",
+    "focusHint": "to focus",
+    "submit": "Add note",
+    "submitting": "Adding…"
+  },
+  "keyboard": {
+    "heading": "Keyboard",
+    "back": "back to list",
+    "addNote": "add note",
+    "refund": "refund",
+    "cancel": "cancel"
+  },
+  "drawer": {
+    "ariaLabel": "Order detail",
+    "loadError": "Couldn't load this order",
+    "unknownError": "Unknown error",
+    "retry": "Retry"
+  },
+  "body": {
+    "itemsHeading": "Items",
+    "pricingHeading": "Pricing",
+    "paymentHeading": "Payment",
+    "customerHeading": "Customer",
+    "timelineHeading": "Timeline",
+    "noteFallback": "Note",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "deliveryFee": "Delivery fee",
+    "tip": "Tip",
+    "discount": "Discount",
+    "grandTotal": "Grand total",
+    "refund": "Refund",
+    "guest": "Guest",
+    "typeLabel": "Type",
+    "types": {
+      "DELIVERY": "Delivery",
+      "PICKUP": "Pickup",
+      "DINE_IN": "Dine-in"
+    },
+    "paymentMethods": {
+      "STRIPE_CARD": "Card",
+      "APPLE_PAY": "Apple Pay",
+      "GOOGLE_PAY": "Google Pay",
+      "COD": "Cash on delivery",
+      "WALLET": "Wallet",
+      "P24": "Przelewy24",
+      "BLIK": "BLIK"
+    }
+  },
+  "types": {
+    "DELIVERY": "Delivery",
+    "PICKUP": "Pickup",
+    "DINE_IN": "Dine-in"
+  },
+  "refundModal": {
+    "title": "Refund order {number}",
+    "titleFallback": "Refund order",
+    "description": "Up to {amount} available to refund.",
+    "footerHelper": "This will email the customer.",
+    "primary": "Issue refund · {amount}",
+    "primaryFallback": "Issue refund",
+    "secondary": "Cancel",
+    "amountAria": "Refund amount",
+    "fullRefund": "Full refund",
+    "partialRefund": "Partial refund",
+    "amountLabel": "Amount",
+    "reasonLabel": "Reason",
+    "notesLabel": "Notes",
+    "pickReason": "Pick a reason",
+    "notesPlaceholder": "What happened?",
+    "reasons": {
+      "customerRequested": "Customer requested",
+      "itemOutOfStock": "Item out of stock",
+      "wrongItem": "Wrong item delivered",
+      "qualityIssue": "Food quality issue",
+      "duplicateOrder": "Duplicate order",
+      "other": "Other"
+    }
+  },
+  "cancelModal": {
+    "title": "Cancel order {number}?",
+    "titleFallback": "Cancel order",
+    "description": "The customer will be refunded (if pre-paid) and notified. This action cannot be undone.",
+    "primary": "Cancel order",
+    "secondary": "Keep order",
+    "reasonLabel": "Reason",
+    "notesLabel": "Notes",
+    "notesHelper": "Visible in audit log and on the customer's order page.",
+    "pickReason": "Pick a reason",
+    "notesPlaceholderOther": "Describe the reason…",
+    "notesPlaceholder": "Optional extra context…",
+    "reasons": {
+      "customerRequested": "Customer requested",
+      "outOfStock": "Restaurant out of stock",
+      "outOfRange": "Address out of delivery range",
+      "restaurantClosed": "Restaurant closed",
+      "paymentFailed": "Payment failed",
+      "other": "Other"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "appName": "Restaurant",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "back": "Back",
+  "next": "Next",
+  "search": "Search",
+  "loading": "Loading…",
+  "retry": "Retry",
+  "close": "Close",
+  "yes": "Yes",
+  "no": "No",
+  "currency": "Currency",
+  "language": "Language",
+  "logout": "Log out",
+  "skipToContent": "Skip to content",
+  "days": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+  "daysShort": {
+    "sunday": "Sun",
+    "monday": "Mon",
+    "tuesday": "Tue",
+    "wednesday": "Wed",
+    "thursday": "Thu",
+    "friday": "Fri",
+    "saturday": "Sat"
+  }
+}

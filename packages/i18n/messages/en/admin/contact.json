@@ -1,0 +1,47 @@
+{
+  "title": "Contact messages",
+  "filters": {
+    "all": "All",
+    "status": {
+      "new": "New",
+      "read": "Read",
+      "archived": "Archived"
+    }
+  },
+  "columns": {
+    "subject": "Subject",
+    "from": "From",
+    "status": "Status",
+    "createdAt": "Received"
+  },
+  "row": {
+    "noSubject": "(no subject)"
+  },
+  "empty": "No contact messages.",
+  "drawer": {
+    "ariaLabel": "Contact message",
+    "noSubject": "(no subject)",
+    "messageLabel": "Message",
+    "handledBy": "Handled by {id}",
+    "activityLabel": "Activity",
+    "activityEmpty": "No notes or replies yet.",
+    "kind": {
+      "reply": "Reply sent",
+      "note": "Internal note"
+    },
+    "replyLabel": "Reply to customer",
+    "replyPlaceholder": "Type your reply…",
+    "replySend": "Send reply",
+    "replySending": "Sending…",
+    "noteLabel": "Internal note",
+    "notePlaceholder": "Visible only to staff…",
+    "noteAdd": "Add note",
+    "markStatus": "Mark {status}",
+    "openInClient": "Open in email client",
+    "status": {
+      "new": "New",
+      "read": "Read",
+      "archived": "Archived"
+    }
+  }
+}

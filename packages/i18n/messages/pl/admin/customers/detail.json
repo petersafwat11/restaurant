@@ -1,0 +1,44 @@
+{
+  "ariaLabel": "Szczegóły klienta",
+  "anonymous": "(brak nazwy)",
+  "segment": {
+    "vip": "VIP",
+    "frequent": "STALI",
+    "dormant": "NIEAKTYWNI",
+    "new": "NOWI",
+    "active": "AKTYWNI"
+  },
+  "sections": {
+    "overview": "Przegląd",
+    "orders": "Ostatnie zamówienia",
+    "addresses": "Adresy",
+    "payment": "Metody płatności",
+    "notes": "Notatki wewnętrzne"
+  },
+  "stats": {
+    "lifetimeOrders": "Liczba zamówień",
+    "lifetimeSpend": "Wartość zakupów",
+    "firstOrder": "Pierwsze zamówienie",
+    "lastOrder": "Ostatnie zamówienie",
+    "reviews": "Recenzje",
+    "joined": "Dołączył",
+    "empty": "—"
+  },
+  "orders": {
+    "empty": "Brak zamówień."
+  },
+  "addresses": {
+    "empty": "Brak zapisanych adresów."
+  },
+  "payment": {
+    "empty": "Brak zapisanych metod płatności.",
+    "cardFallback": "Karta",
+    "last4Fallback": "????"
+  },
+  "notes": {
+    "empty": "Brak notatek.",
+    "placeholder": "Dodaj notatkę wewnętrzną…",
+    "add": "Dodaj notatkę",
+    "saving": "Zapisywanie…"
+  }
+}

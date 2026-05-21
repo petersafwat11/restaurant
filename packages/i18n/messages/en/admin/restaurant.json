@@ -1,0 +1,79 @@
+{
+  "title": "Restaurant profile",
+  "loading": "Loading restaurant…",
+  "loadingMap": "Loading map…",
+  "errorTitle": "Couldn't load restaurant",
+  "errorDescriptionFallback": "Try again.",
+  "retry": "Retry",
+  "updated": "Restaurant updated",
+  "nav": {
+    "identity": "Identity",
+    "branding": "Branding",
+    "contact": "Contact",
+    "location": "Location",
+    "channels": "Channels",
+    "danger": "Danger zone"
+  },
+  "identity": {
+    "title": "Identity",
+    "description": "What the world sees first.",
+    "nameLabel": "Name",
+    "slugLabel": "Slug",
+    "slugHint": "The URL segment in your public site. Changing this breaks existing links.",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Short tagline + the gist of the place."
+  },
+  "branding": {
+    "title": "Branding",
+    "description": "Logo and cover image shown on the public site.",
+    "logoLabel": "Logo URL",
+    "logoHint": "Square PNG/SVG, 512px+",
+    "coverLabel": "Cover URL",
+    "coverHint": "16:9 hero image, 1600px+"
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "How customers reach you and where receipts come from.",
+    "phoneLabel": "Phone",
+    "emailLabel": "Email",
+    "addressLineLabel": "Address line 1",
+    "cityLabel": "City",
+    "stateLabel": "State / region",
+    "zipLabel": "ZIP / postcode",
+    "countryLabel": "Country",
+    "countryHint": "ISO 2-letter",
+    "timezoneLabel": "Timezone",
+    "currencyLabel": "Currency",
+    "currencyHint": "3-letter ISO (PLN, EUR, USD)"
+  },
+  "location": {
+    "title": "Location",
+    "description": "Coordinates power the customer map, delivery-zone checks, and search results.",
+    "prompt": "Click the map or use Locate me to set a location.",
+    "clear": "Clear"
+  },
+  "channels": {
+    "title": "Channels",
+    "description": "Per-channel acceptance — gates the public site without unpublishing the restaurant.",
+    "published": "Published",
+    "publishedHint": "Show on the customer site at all.",
+    "acceptsReservations": "Accepts reservations",
+    "acceptsReservationsHint": "Show the reservation widget",
+    "acceptsDelivery": "Accepts delivery",
+    "acceptsPickup": "Accepts pickup",
+    "acceptsDineIn": "Accepts dine-in"
+  },
+  "danger": {
+    "title": "Danger zone",
+    "description": "Unpublishing hides the restaurant from the public site immediately.",
+    "unpublishLabel": "Unpublish restaurant",
+    "unpublishHint": "Equivalent to flipping the Published switch off",
+    "unpublishButton": "Unpublish"
+  },
+  "saveBar": {
+    "unsavedHint": "Unsaved changes — {shortcut} to save.",
+    "discard": "Discard",
+    "save": "Save changes",
+    "saving": "Saving…"
+  }
+}

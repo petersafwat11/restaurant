@@ -23,7 +23,6 @@ import {
   CheckoutSection,
   type CheckoutSectionStatus,
   Container,
-  DeliveryLocationPicker,
   type DeliveryRow,
   EmptyState,
   FormField,
@@ -35,6 +34,14 @@ import {
   type TimeSlotValue,
   TipPicker,
 } from '@repo/ui';
+import dynamic from 'next/dynamic';
+
+// Leaflet hard-requires `window` — load on the client only.
+const DeliveryLocationPicker = dynamic(
+  () => import('@repo/ui').then((m) => m.DeliveryLocationPicker),
+  { ssr: false },
+);
+import { formatMoney } from '@repo/utils';
 import {
   ArrowLeft,
   ArrowRight,
@@ -45,62 +52,19 @@ import {
   Truck,
   Utensils,
 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-const ORDER_TYPE_OPTIONS: RadioCardOption<OrderType>[] = [
-  {
-    id: 'DELIVERY',
-    label: 'Delivery',
-    description: '20–40 min',
-    icon: <Truck size={22} strokeWidth={1.75} />,
-  },
-  {
-    id: 'PICKUP',
-    label: 'Pickup',
-    description: 'Ready in 10–15 min',
-    icon: <ShoppingBag size={22} strokeWidth={1.75} />,
-    badge: 'No fee',
-    badgeTone: 'positive',
-  },
-  {
-    id: 'DINE_IN',
-    label: 'Eat in',
-    description: 'Order from your table',
-    icon: <Utensils size={22} strokeWidth={1.75} />,
-  },
-];
-
-const PAYMENT_OPTIONS: RadioCardOption<CheckoutPaymentMethod>[] = [
-  {
-    id: 'card',
-    label: 'Card',
-    description: 'Visa, Mastercard, Amex.',
-    icon: <CreditCard size={22} strokeWidth={1.75} />,
-  },
-  {
-    id: 'blik',
-    label: 'BLIK',
-    description: 'Enter the 6-digit code from your bank app.',
-    icon: <span className="text-[12px] font-extrabold tracking-tight text-fg">BLIK</span>,
-  },
-  {
-    id: 'cod',
-    label: 'Cash on delivery',
-    description: 'Pay the driver in cash when it arrives.',
-    icon: <Banknote size={22} strokeWidth={1.75} />,
-  },
-];
-
 // Mock promo store — wires to a future server endpoint. For now, in-memory.
+// `labelKey` resolves via the `promo.mock.*` translation namespace.
 const MOCK_PROMOS: Record<
   string,
-  { discountPercent?: number; discountAmount?: string; label: string }
+  { discountPercent?: number; discountAmount?: string; labelKey: 'baklava' | 'student' }
 > = {
-  BAKLAVA: { discountPercent: 15, label: '15% off — first order' },
-  STUDENT: { discountAmount: '5.00', label: '5,00 zł off' },
+  BAKLAVA: { discountPercent: 15, labelKey: 'baklava' },
+  STUDENT: { discountAmount: '5.00', labelKey: 'student' },
 };
 
 function computeSummary(
@@ -109,6 +73,7 @@ function computeSummary(
   appliedPromo: AppliedPromo | null,
   tipAmount: string,
   deliveryFee: string,
+  freeLabel: string,
 ) {
   let discountAmount = 0;
   let discountLabel: string | undefined;
@@ -123,7 +88,7 @@ function computeSummary(
           Number.parseFloat(subtotal),
         );
       }
-      discountLabel = promo.label;
+      discountLabel = appliedPromo.label;
     }
   }
   const sub = Number.parseFloat(subtotal);
@@ -131,7 +96,7 @@ function computeSummary(
   let deliveryAmount = 0;
   let deliveryLabel: string | undefined;
   if (orderType === 'PICKUP' || orderType === 'DINE_IN') {
-    deliveryLabel = 'Free';
+    deliveryLabel = freeLabel;
   } else {
     deliveryAmount = Number.parseFloat(deliveryFee);
   }
@@ -150,6 +115,7 @@ function computeSummary(
 }
 
 export function CheckoutApp() {
+  const t = useTranslations('web.shop.checkout');
   const router = useRouter();
   const cartQuery = useCart();
   const createOrder = useCreateOrder();
@@ -213,12 +179,72 @@ export function CheckoutApp() {
   const defaultDeliveryFee = restaurant?.defaultDeliveryFee ?? '0.00';
   const minOrderAmount = restaurant?.minOrderAmount ?? '0.00';
 
+  // Currency symbol for inline display (e.g. "12.50 zł"). Falls back to ISO.
+  const currencySymbol = React.useMemo(() => {
+    try {
+      return t(`currencySymbol.${currency}` as never);
+    } catch {
+      return currency;
+    }
+  }, [t, currency]);
+
+  const ORDER_TYPE_OPTIONS: RadioCardOption<OrderType>[] = React.useMemo(
+    () => [
+      {
+        id: 'DELIVERY',
+        label: t('sections.orderType.options.DELIVERY.label'),
+        description: t('sections.orderType.options.DELIVERY.description'),
+        icon: <Truck size={22} strokeWidth={1.75} />,
+      },
+      {
+        id: 'PICKUP',
+        label: t('sections.orderType.options.PICKUP.label'),
+        description: t('sections.orderType.options.PICKUP.description'),
+        icon: <ShoppingBag size={22} strokeWidth={1.75} />,
+        badge: t('sections.orderType.options.PICKUP.badge'),
+        badgeTone: 'positive',
+      },
+      {
+        id: 'DINE_IN',
+        label: t('sections.orderType.options.DINE_IN.label'),
+        description: t('sections.orderType.options.DINE_IN.description'),
+        icon: <Utensils size={22} strokeWidth={1.75} />,
+      },
+    ],
+    [t],
+  );
+
+  const PAYMENT_OPTIONS: RadioCardOption<CheckoutPaymentMethod>[] = React.useMemo(
+    () => [
+      {
+        id: 'card',
+        label: t('sections.payment.options.card.label'),
+        description: t('sections.payment.options.card.description'),
+        icon: <CreditCard size={22} strokeWidth={1.75} />,
+      },
+      {
+        id: 'blik',
+        label: t('sections.payment.options.blik.label'),
+        description: t('sections.payment.options.blik.description'),
+        icon: <span className="text-[12px] font-extrabold tracking-tight text-fg">BLIK</span>,
+      },
+      {
+        id: 'cod',
+        label: t('sections.payment.options.cod.label'),
+        description: t('sections.payment.options.cod.description'),
+        icon: <Banknote size={22} strokeWidth={1.75} />,
+      },
+    ],
+    [t],
+  );
+
   const orderType = form.watch('orderType');
   const tipAmount = form.watch('tipAmount');
   const geoPoint = form.watch('address.geoPoint');
   const summary = React.useMemo(
-    () => computeSummary(subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee),
-    [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee],
+    () =>
+      computeSummary(subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t('free')),
+    [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t],
   );
 
   // Run the zone check whenever the pin moves. Throttled inside the hook.
@@ -248,7 +274,7 @@ export function CheckoutApp() {
       const ok = await form.trigger(['address.line1', 'address.city', 'address.geoPoint'] as never);
       if (!ok) return;
       if (!inZone) {
-        setSubmitError('Drop a pin inside our delivery area to continue.');
+        setSubmitError(t('sections.whereWhen.errors.needPinInZone'));
         return;
       }
       setSubmitError(null);
@@ -268,15 +294,18 @@ export function CheckoutApp() {
   const handleApplyPromo = async (code: string) => {
     await new Promise((r) => setTimeout(r, 400));
     const found = MOCK_PROMOS[code];
-    if (!found) return { ok: false as const, error: 'Code not valid.' };
-    setAppliedPromo({ code, label: found.label });
-    return { ok: true as const, label: found.label };
+    if (!found) return { ok: false as const, error: t('promo.notValid') };
+    const label = t(`promo.mock.${found.labelKey}`);
+    setAppliedPromo({ code, label });
+    return { ok: true as const, label };
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null);
     if (values.orderType === 'DELIVERY' && belowMinimum) {
-      setSubmitError(`Minimum order for delivery is ${minOrderAmount} — add a bit more.`);
+      setSubmitError(
+        t('errors.minOrderToast', { amount: formatMoney(minOrderAmount, currency) }),
+      );
       return;
     }
     setSubmitting(true);
@@ -299,7 +328,7 @@ export function CheckoutApp() {
         | undefined;
       if (values.orderType === 'DELIVERY') {
         if (!values.address || !values.address.geoPoint) {
-          setSubmitError('Please confirm your delivery address on the map.');
+          setSubmitError(t('errors.confirmAddress'));
           setSubmitting(false);
           return;
         }
@@ -341,7 +370,7 @@ export function CheckoutApp() {
           await new Promise((r) => setTimeout(r, 100));
         }
         if (!stripeSubmitRef.current) {
-          throw new Error('Card form did not initialise. Please retry.');
+          throw new Error(t('errors.stripeNotInit'));
         }
         const stripeErr = await stripeSubmitRef.current();
         if (stripeErr) {
@@ -354,7 +383,7 @@ export function CheckoutApp() {
       const tokenQuery = order.trackingToken ? `?t=${encodeURIComponent(order.trackingToken)}` : '';
       router.push(`/checkout/success/${order.id}${tokenQuery}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not place your order.';
+      const msg = err instanceof Error ? err.message : t('errors.createOrderFallback');
       setSubmitError(msg);
     } finally {
       setSubmitting(false);
@@ -367,9 +396,9 @@ export function CheckoutApp() {
         <EmptyState
           size="lg"
           icon={<ShoppingBag size={64} strokeWidth={1.25} />}
-          title="Your cart is empty"
-          description="Add something tasty before checking out."
-          action={{ label: 'Browse menu', href: '/menu' }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          action={{ label: t('empty.action'), href: '/menu' }}
         />
       </Container>
     );
@@ -383,9 +412,16 @@ export function CheckoutApp() {
         : zoneCheck.isFetching
           ? { kind: 'checking' as const }
           : zoneCheck.isError
-            ? { kind: 'error' as const, message: 'Could not check the address. Try again.' }
+            ? {
+                kind: 'error' as const,
+                message: t('sections.whereWhen.pickerStatus.errorMessage'),
+              }
             : inZone
-              ? { kind: 'in-zone' as const, zoneName: checkedZoneName ?? 'Delivery area' }
+              ? {
+                  kind: 'in-zone' as const,
+                  zoneName:
+                    checkedZoneName ?? t('sections.whereWhen.pickerStatus.defaultZoneName'),
+                }
               : { kind: 'out-of-zone' as const };
 
   return (
@@ -394,13 +430,13 @@ export function CheckoutApp() {
         href="/menu"
         className="inline-flex items-center gap-1.5 text-small text-fg-muted transition-colors hover:text-accent"
       >
-        <ArrowLeft size={14} /> Back to menu
+        <ArrowLeft size={14} /> {t('backToMenu')}
       </Link>
       <h1
         className="mt-4 font-display text-h2 text-fg sm:text-h1"
         style={{ textWrap: 'balance' as React.CSSProperties['textWrap'] }}
       >
-        Almost there.
+        {t('heading')}
       </h1>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[62fr_38fr]">
@@ -408,11 +444,9 @@ export function CheckoutApp() {
           {/* 1 — Order type */}
           <CheckoutSection
             step={1}
-            title="How do you want it?"
+            title={t('sections.orderType.title')}
             status={completedSteps[1] ? 'complete' : 'active'}
-            summary={
-              orderType === 'DELIVERY' ? 'Delivery' : orderType === 'PICKUP' ? 'Pickup' : 'Eat in'
-            }
+            summary={t(`sections.orderType.summary.${orderType}`)}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 1: false }))}
           >
             <Controller
@@ -420,13 +454,13 @@ export function CheckoutApp() {
               control={form.control}
               render={({ field }) => (
                 <RadioCardGroup
-                  ariaLabel="Order type"
+                  ariaLabel={t('sections.orderType.ariaLabel')}
                   layout="horizontal"
                   options={ORDER_TYPE_OPTIONS.map((o) => ({
                     ...o,
                     badge:
                       o.id === 'DELIVERY'
-                        ? `${defaultDeliveryFee} ${currency === 'PLN' ? 'zł' : currency}`
+                        ? `${defaultDeliveryFee} ${currencySymbol}`
                         : o.badge,
                     badgeTone: o.id === 'DELIVERY' ? undefined : o.badgeTone,
                   }))}
@@ -440,28 +474,28 @@ export function CheckoutApp() {
               onClick={() => continueFrom(1)}
               className="self-start rounded-button bg-accent px-5 py-2 text-small font-medium text-text-on-accent hover:bg-accent-hover"
             >
-              Continue
+              {t('continue')}
             </button>
           </CheckoutSection>
 
           {/* 2 — Contact */}
           <CheckoutSection
             step={2}
-            title="Contact"
+            title={t('sections.contact.title')}
             status={sectionStatus(2, 1)}
             summary={`${form.watch('contact.name')} · +${form.watch('contact.phone')}`}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 2: false }))}
             rightSlot={
               !user && (
                 <Link href="/login" className="text-small text-accent hover:underline">
-                  Already a customer? Sign in →
+                  {t('sections.contact.alreadyCustomer')}
                 </Link>
               )
             }
           >
             <FormField
               id="contact-name"
-              label="Name"
+              label={t('sections.contact.fields.name')}
               required
               size="lg"
               error={form.formState.errors.contact?.name?.message}
@@ -470,39 +504,39 @@ export function CheckoutApp() {
                 {...form.register('contact.name')}
                 type="text"
                 autoComplete="name"
-                placeholder="Jan Kowalski"
+                placeholder={t('sections.contact.fields.namePlaceholder')}
                 className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
               />
             </FormField>
             <FormField
               id="contact-phone"
-              label="Phone"
+              label={t('sections.contact.fields.phone')}
               required
               size="lg"
               prefix="+48"
-              helper="We'll text you when your order is on the way."
+              helper={t('sections.contact.fields.phoneHelper')}
               error={form.formState.errors.contact?.phone?.message}
             >
               <input
                 {...form.register('contact.phone')}
                 type="tel"
                 autoComplete="tel"
-                placeholder="512 345 678"
+                placeholder={t('sections.contact.fields.phonePlaceholder')}
               />
             </FormField>
             <FormField
               id="contact-email"
-              label="Email"
+              label={t('sections.contact.fields.email')}
               required
               size="lg"
-              helper="For the receipt and order confirmation."
+              helper={t('sections.contact.fields.emailHelper')}
               error={form.formState.errors.contact?.email?.message}
             >
               <input
                 {...form.register('contact.email')}
                 type="email"
                 autoComplete="email"
-                placeholder="jan@example.com"
+                placeholder={t('sections.contact.fields.emailPlaceholder')}
                 className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
               />
             </FormField>
@@ -511,7 +545,7 @@ export function CheckoutApp() {
               onClick={() => continueFrom(2)}
               className="self-start rounded-button bg-accent px-5 py-2 text-small font-medium text-text-on-accent hover:bg-accent-hover"
             >
-              Continue
+              {t('continue')}
             </button>
           </CheckoutSection>
 
@@ -520,10 +554,10 @@ export function CheckoutApp() {
             step={3}
             title={
               orderType === 'DELIVERY'
-                ? 'Where + When'
+                ? t('sections.whereWhen.delivery')
                 : orderType === 'PICKUP'
-                  ? 'When to pick up'
-                  : 'Your table'
+                  ? t('sections.whereWhen.pickup')
+                  : t('sections.whereWhen.dineIn')
             }
             status={sectionStatus(3, 2)}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 3: false }))}
@@ -532,7 +566,7 @@ export function CheckoutApp() {
               <>
                 <FormField
                   id="addr-line1"
-                  label="Street + number"
+                  label={t('sections.whereWhen.address.line1')}
                   required
                   size="lg"
                   error={form.formState.errors.address?.line1?.message}
@@ -541,23 +575,28 @@ export function CheckoutApp() {
                     {...form.register('address.line1')}
                     type="text"
                     autoComplete="street-address"
-                    placeholder="ul. Marszałkowska 102"
+                    placeholder={t('sections.whereWhen.address.line1Placeholder')}
                     className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                   />
                 </FormField>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <FormField id="addr-apt" label="Apt / Floor" size="lg" helper="Optional">
+                  <FormField
+                    id="addr-apt"
+                    label={t('sections.whereWhen.address.apartment')}
+                    size="lg"
+                    helper={t('sections.whereWhen.address.apartmentHelper')}
+                  >
                     <input
                       {...form.register('address.apartment')}
                       type="text"
                       autoComplete="address-line2"
-                      placeholder="Apt 5B / Floor 3"
+                      placeholder={t('sections.whereWhen.address.apartmentPlaceholder')}
                       className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                     />
                   </FormField>
                   <FormField
                     id="addr-city"
-                    label="City"
+                    label={t('sections.whereWhen.address.city')}
                     required
                     size="lg"
                     error={form.formState.errors.address?.city?.message}
@@ -566,7 +605,7 @@ export function CheckoutApp() {
                       {...form.register('address.city')}
                       type="text"
                       autoComplete="address-level2"
-                      placeholder="Warszawa"
+                      placeholder={t('sections.whereWhen.address.cityPlaceholder')}
                       className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                     />
                   </FormField>
@@ -603,9 +642,7 @@ export function CheckoutApp() {
                     role="alert"
                     className="flex flex-col gap-2 rounded-card border border-negative/30 bg-negative/10 p-3 text-small text-negative sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <span>
-                      Sorry — we don't deliver to this spot yet. Pickup is still available.
-                    </span>
+                    <span>{t('sections.whereWhen.outOfZone')}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -614,13 +651,15 @@ export function CheckoutApp() {
                       }}
                       className="self-start rounded-button border border-negative/50 px-3 py-1 text-small font-medium hover:bg-negative/20"
                     >
-                      Switch to pickup
+                      {t('sections.whereWhen.switchToPickup')}
                     </button>
                   </div>
                 )}
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-small font-medium text-fg">When</span>
+                  <span className="text-small font-medium text-fg">
+                    {t('sections.whereWhen.when')}
+                  </span>
                   <Controller
                     name="timeSlot"
                     control={form.control}
@@ -655,10 +694,10 @@ export function CheckoutApp() {
             {orderType === 'DINE_IN' && (
               <FormField
                 id="table-num"
-                label="Table number"
+                label={t('sections.whereWhen.table.label')}
                 required
                 size="lg"
-                helper="Look for the number on your table, or scan the QR."
+                helper={t('sections.whereWhen.table.helper')}
                 error={form.formState.errors.tableNumber?.message}
               >
                 <input
@@ -666,7 +705,7 @@ export function CheckoutApp() {
                   type="number"
                   min={1}
                   max={99}
-                  placeholder="12"
+                  placeholder={t('sections.whereWhen.table.placeholder')}
                   className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
                 />
               </FormField>
@@ -678,14 +717,14 @@ export function CheckoutApp() {
               disabled={orderType === 'DELIVERY' && (!geoPoint || !inZone || zoneCheck.isFetching)}
               className="self-start rounded-button bg-accent px-5 py-2 text-small font-medium text-text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Continue
+              {t('continue')}
             </button>
           </CheckoutSection>
 
           {/* 4 — Notes (optional) — only unlocked after step 3 */}
           <CheckoutSection
             step={4}
-            title="Anything else? (optional)"
+            title={t('sections.notes.title')}
             status={sectionStatus(4, 3)}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 4: false }))}
           >
@@ -693,13 +732,13 @@ export function CheckoutApp() {
               id="order-notes"
               label=""
               size="md"
-              helper="For the kitchen — 500 chars max."
+              helper={t('sections.notes.helper')}
             >
               <textarea
                 {...form.register('orderNotes')}
                 rows={3}
                 maxLength={500}
-                placeholder="Special instructions for the kitchen…"
+                placeholder={t('sections.notes.placeholder')}
                 className="w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 p-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
               />
             </FormField>
@@ -708,14 +747,14 @@ export function CheckoutApp() {
               onClick={() => setCompletedSteps((s) => ({ ...s, 4: true }))}
               className="self-start rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-5 py-2 text-small font-medium text-fg hover:bg-surface-warm/30"
             >
-              {form.watch('orderNotes') ? 'Continue' : 'Skip'}
+              {form.watch('orderNotes') ? t('continue') : t('skip')}
             </button>
           </CheckoutSection>
 
           {/* 5 — Payment */}
           <CheckoutSection
             step={5}
-            title="Payment"
+            title={t('sections.payment.title')}
             status={sectionStatus(5, 4)}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 5: false }))}
           >
@@ -731,7 +770,7 @@ export function CheckoutApp() {
                 });
                 return (
                   <RadioCardGroup
-                    ariaLabel="Payment method"
+                    ariaLabel={t('sections.payment.ariaLabel')}
                     layout="vertical"
                     rowVariant
                     options={visible}
@@ -753,14 +792,14 @@ export function CheckoutApp() {
               onClick={() => continueFrom(5)}
               className="self-start rounded-button bg-accent px-5 py-2 text-small font-medium text-text-on-accent hover:bg-accent-hover"
             >
-              Continue
+              {t('continue')}
             </button>
           </CheckoutSection>
 
           {/* 6 — Tip — only unlocked after step 5 */}
           <CheckoutSection
             step={6}
-            title="Add a tip for the team? (optional)"
+            title={t('sections.tip.title')}
             status={sectionStatus(6, 5)}
           >
             <Controller
@@ -772,6 +811,12 @@ export function CheckoutApp() {
                   value={field.value}
                   onChange={field.onChange}
                   currency={currency}
+                  labels={{
+                    noTip: t('sections.tip.noTip'),
+                    other: t('sections.tip.other'),
+                    disclaimer: t('sections.tip.disclaimer'),
+                    groupLabel: t('sections.tip.groupLabel'),
+                  }}
                 />
               )}
             />
@@ -782,11 +827,9 @@ export function CheckoutApp() {
               role="alert"
               className="rounded-card border border-warning/30 bg-warning/10 p-3 text-small text-warning"
             >
-              Minimum order for delivery is{' '}
-              <span className="font-medium">
-                {minOrderAmount} {currency === 'PLN' ? 'zł' : currency}
-              </span>
-              . Add a little more to your cart.
+              {t('errors.minOrderInline', {
+                amount: formatMoney(minOrderAmount, currency),
+              })}
             </div>
           )}
 
@@ -811,11 +854,30 @@ export function CheckoutApp() {
             total={summary.total}
             currency={currency}
             showEditCart={false}
+            labels={{
+              title: t('summary.title'),
+              regionLabel: t('summary.regionLabel'),
+              subtotal: t('summary.subtotal'),
+              delivery: t('summary.delivery'),
+              tip: t('summary.tip'),
+              total: t('summary.total'),
+              notePrefix: t('summary.notePrefix'),
+              editCart: t('summary.editCart'),
+              formatDiscount: (label) => t('summary.discount', { label }),
+            }}
             promoInput={
               <PromoCodeInput
                 applied={appliedPromo}
                 onApply={handleApplyPromo}
                 onRemove={() => setAppliedPromo(null)}
+                labels={{
+                  trigger: t('promo.trigger'),
+                  placeholder: t('promo.placeholder'),
+                  apply: t('promo.apply'),
+                  applying: t('promo.applying'),
+                  inputAriaLabel: t('promo.inputAriaLabel'),
+                  removeAriaLabel: t('promo.removeAriaLabel'),
+                }}
               />
             }
             ctaSlot={
@@ -828,25 +890,30 @@ export function CheckoutApp() {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 size={18} className="animate-spin" /> Placing order…
+                      <Loader2 size={18} className="animate-spin" /> {t('cta.placing')}
                     </>
                   ) : (
                     <>
-                      Place order · {summary.total} {currency === 'PLN' ? 'zł' : currency}
+                      {t('cta.placeOrderTotal', {
+                        total: formatMoney(summary.total, currency),
+                      })}
                       <ArrowRight size={18} />
                     </>
                   )}
                 </button>
                 <p className="text-center text-[12px] text-fg-subtle">
-                  By placing this order, you agree to our{' '}
-                  <Link href="#" className="underline">
-                    Terms
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="#" className="underline">
-                    Privacy Policy
-                  </Link>
-                  .
+                  {t.rich('cta.terms', {
+                    termsLink: (chunks) => (
+                      <Link href="#" className="underline">
+                        {chunks}
+                      </Link>
+                    ),
+                    privacyLink: (chunks) => (
+                      <Link href="#" className="underline">
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
                 </p>
                 <PaymentLogos />
               </div>

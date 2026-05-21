@@ -1,8 +1,10 @@
 'use client';
 
 import { Container, NewsletterForm, SectionHeader } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 
 export function LandingNewsletter() {
+  const t = useTranslations('web.marketing.home.newsletter');
   return (
     <section
       id="newsletter"
@@ -12,9 +14,9 @@ export function LandingNewsletter() {
       <Container>
         <SectionHeader
           id="nl-h"
-          eyebrow="Stay in touch"
-          title="Get a free baklava on your first order."
-          description="Join the list — occasional emails, never spam. Unsubscribe whenever."
+          eyebrow={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
           align="center"
         />
         <NewsletterForm

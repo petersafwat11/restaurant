@@ -1,0 +1,17 @@
+{
+  "title": "Konto",
+  "navAriaLabel": "Nawigacja konta",
+  "nav": {
+    "profile": "Profil",
+    "orders": "Zamówienia",
+    "addresses": "Adresy",
+    "loyalty": "Lojalność",
+    "referrals": "Polecenia",
+    "reservations": "Rezerwacje",
+    "reviews": "Recenzje",
+    "notifications": "Powiadomienia"
+  },
+  "logout": "Wyloguj",
+  "preferences": "Preferencje",
+  "paymentMethods": "Metody płatności"
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Reservations",
+  "inViewCount": "{count, plural, one {# in view} other {# in view}}",
+  "views": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "list": "List"
+  },
+  "actions": {
+    "new": "New reservation",
+    "dismiss": "Dismiss",
+    "retry": "Retry"
+  },
+  "errors": {
+    "loadTitle": "Couldn't load reservations",
+    "conflict": "That table + time is already booked. Try another slot."
+  },
+  "status": {
+    "CONFIRMED": "Confirmed",
+    "SEATED": "Seated",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "NO_SHOW": "No-show"
+  },
+  "listTable": {
+    "when": "When",
+    "guest": "Guest",
+    "party": "Party",
+    "table": "Table",
+    "status": "Status",
+    "notes": "Notes",
+    "empty": {
+      "title": "No reservations in range",
+      "description": "Adjust the date or use the calendar view."
+    },
+    "unseated": "—",
+    "noNotes": "—"
+  },
+  "createDrawer": {
+    "ariaLabel": "New reservation",
+    "eyebrow": "New reservation",
+    "title": "Book a table",
+    "fields": {
+      "when": "When",
+      "partySize": "Party size",
+      "occasion": "Occasion",
+      "occasionHelper": "Birthday, anniversary, etc.",
+      "guestName": "Guest name",
+      "phone": "Phone",
+      "email": "Email",
+      "notes": "Notes",
+      "notesHelper": "Allergies, seating preferences, etc."
+    },
+    "cancel": "Cancel",
+    "submit": "Book reservation",
+    "submitLoading": "Booking…"
+  }
+}

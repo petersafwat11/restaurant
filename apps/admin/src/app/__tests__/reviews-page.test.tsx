@@ -1,4 +1,4 @@
-import ReviewsPage from '@/app/(dashboard)/reviews/page';
+import ReviewsPage from '@/app/[locale]/(dashboard)/reviews/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
 import { screen, waitFor } from '@testing-library/react';
@@ -56,8 +56,9 @@ describe('ReviewsPage', () => {
     expect(text).toContain('Alice');
     expect(text).toContain('Bob');
     expect(text).toContain('Amazing burger');
-    expect(text).toContain('PUBLISHED');
-    expect(text).toContain('FLAGGED');
+    // Moderation status shows translated labels instead of raw enum values.
+    expect(text).toMatch(/Published/);
+    expect(text).toMatch(/Flagged/);
   });
 
   it('shows empty-state copy when no reviews match', async () => {

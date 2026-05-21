@@ -1,0 +1,28 @@
+{
+  "title": "Loyalty",
+  "subtitle": "Earn points on every order, redeem at checkout.",
+  "empty": {
+    "title": "Join loyalty",
+    "description": "Your first order opens a loyalty account automatically.",
+    "action": "Browse menu"
+  },
+  "availablePoints": "Available points",
+  "pointsUnit": "pts",
+  "pointsCount": "{points, plural, one {# point} other {# points}}",
+  "tierProgress": "{points} more points to reach <strong>{tier}</strong>.",
+  "lifetime": "Lifetime: <strong>{points}</strong> pts.",
+  "activity": "Activity",
+  "noActivity": "No transactions yet.",
+  "balance": "{points, plural, one {# point} other {# points}}",
+  "tier": "{tier} tier",
+  "redeem": "Redeem points",
+  "redeemDiscount": "Redeem {points} points for {amount}",
+  "earned": "You earned {points} points",
+  "history": "Points history",
+  "tiers": {
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "platinum": "Platinum"
+  }
+}

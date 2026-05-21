@@ -1,0 +1,68 @@
+{
+  "eyebrow": "Visit us",
+  "heroImageAlt": "",
+  "status": {
+    "openNow": "Open now",
+    "closed": "Closed",
+    "closingIn": "{count, plural, one {Closing in # min} other {Closing in # min}}",
+    "openUntil": "Open until {time}",
+    "opensTodayAt": "Opens today at {time}",
+    "opensTomorrowAt": "Opens tomorrow at {time}",
+    "opensOnAt": "Opens {day} at {time}",
+    "hoursUnavailable": "Hours unavailable"
+  },
+  "clock": "It's {time}, {day}",
+  "ctas": {
+    "orderOnline": "Order online",
+    "getDirections": "Get directions",
+    "callUs": "Call us",
+    "share": "Share"
+  },
+  "address": {
+    "eyebrow": "Find us",
+    "title": "Right in the heart of {city}.",
+    "openInMaps": "Open in Maps",
+    "mapAriaLabel": "Map showing {name} at {address}",
+    "tramAnnotation": "Tram · 2 min walk",
+    "metroAnnotation": "Metro · 5 min walk"
+  },
+  "hours": {
+    "label": "Hours"
+  },
+  "weekTimeline": {
+    "eyebrow": "This week",
+    "title": "Open hours at a glance",
+    "subtitle": "Bars show when we're serving · today is highlighted",
+    "closed": "Closed"
+  },
+  "stickyBar": {
+    "orderOnline": "Order online",
+    "callAria": "Call",
+    "directionsAria": "Directions"
+  },
+  "empty": {
+    "title": "We're not quite ready yet",
+    "description": "The restaurant is being set up. Check back soon.",
+    "browseMenu": "Browse menu"
+  },
+  "days": {
+    "short": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
+    "long": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
+  }
+}

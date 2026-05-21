@@ -1,0 +1,68 @@
+{
+  "title": "Rezerwacja",
+  "titleWithName": "Rezerwacja · {name}",
+  "loading": "Ładowanie rezerwacji…",
+  "notFound": {
+    "title": "Nie znaleziono rezerwacji",
+    "description": "Mogła zostać usunięta.",
+    "back": "← Wróć do rezerwacji"
+  },
+  "backLink": "Rezerwacje",
+  "status": {
+    "confirmed": "Potwierdzona",
+    "seated": "Usadzeni",
+    "completed": "Zakończona",
+    "cancelled": "Anulowana",
+    "no_show": "Nieobecność"
+  },
+  "actions": {
+    "seat": "Usadź",
+    "complete": "Zakończ",
+    "noShow": "Nieobecność"
+  },
+  "booking": {
+    "title": "Rezerwacja",
+    "description": "Godzina, liczba osób i stolik.",
+    "start": "Początek",
+    "end": "Koniec",
+    "party": "Osoby",
+    "guests": "{count, plural, one {# gość} few {# gości} many {# gości} other {# gości}}",
+    "table": "Stolik",
+    "unseated": "Bez stolika",
+    "reassignLabel": "Przydziel / zmień stolik",
+    "pickTable": "— Wybierz stolik —",
+    "tableOption": "{name} (poj. {capacity})"
+  },
+  "customer": {
+    "title": "Klient",
+    "description": "Dane kontaktowe podane przy rezerwacji.",
+    "name": "Imię",
+    "phone": "Telefon",
+    "notes": "Uwagi",
+    "empty": "—"
+  },
+  "timeline": {
+    "title": "Oś czasu",
+    "description": "Daty utworzenia i ostatniej aktualizacji.",
+    "created": "Utworzono",
+    "updated": "Zaktualizowano"
+  },
+  "cancel": {
+    "title": "Anuluj rezerwację",
+    "description": "Zwalnia stolik. Klient nie jest powiadamiany automatycznie — zadzwoń do niego.",
+    "reasonPlaceholder": "Powód (wymagany)",
+    "cta": "Anuluj rezerwację"
+  },
+  "completeModal": {
+    "title": "Oznaczyć rezerwację jako zakończoną?",
+    "description": "Zwalnia stolik i zamyka wizytę.",
+    "primary": "Zakończ",
+    "secondary": "Anuluj"
+  },
+  "noShowModal": {
+    "title": "Oznaczyć jako nieobecność?",
+    "description": "Rezerwacja zostanie zamknięta, a stolik zwolniony.",
+    "primary": "Oznacz nieobecność",
+    "secondary": "Anuluj"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Twój koszyk",
+  "empty": "Twój koszyk jest pusty",
+  "subtotal": "Suma częściowa",
+  "discount": "Rabat",
+  "estimatedTotal": "Przewidywana suma",
+  "applyCoupon": "Zastosuj kupon",
+  "couponApplied": "Zastosowano kupon {code}",
+  "remove": "Usuń",
+  "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+  "checkout": "Do kasy"
+}

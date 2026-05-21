@@ -3,6 +3,7 @@
 import { useCreateExport } from '@/features/reports/hooks';
 import { EXPORT_FORMATS, EXPORT_KINDS, type ExportFormat, type ExportKind } from '@repo/types';
 import { ActionModal, Label } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function CreateExportModal({ open, onOpenChange }: Props) {
+  const t = useTranslations('admin.reports.exports');
   const create = useCreateExport();
   const [kind, setKind] = React.useState<ExportKind>('orders-detail');
   const [format, setFormat] = React.useState<ExportFormat>('csv');
@@ -46,19 +48,19 @@ export function CreateExportModal({ open, onOpenChange }: Props) {
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Create export"
-      description="The job runs in the background. Refresh the list once it's ready."
+      title={t('modal.title')}
+      description={t('modal.description')}
       primary={{
-        label: create.isPending ? 'Queueing…' : 'Queue export',
+        label: create.isPending ? t('modal.queueing') : t('modal.queue'),
         onClick: submit,
         disabled: create.isPending,
         loading: create.isPending,
       }}
-      secondary={{ label: 'Cancel', onClick: () => onOpenChange(false) }}
+      secondary={{ label: t('modal.cancel'), onClick: () => onOpenChange(false) }}
     >
       <div className="space-y-3">
         <div className="space-y-1">
-          <Label htmlFor="export-kind">Report</Label>
+          <Label htmlFor="export-kind">{t('modal.report')}</Label>
           <select
             id="export-kind"
             value={kind}
@@ -67,13 +69,13 @@ export function CreateExportModal({ open, onOpenChange }: Props) {
           >
             {EXPORT_KINDS.map((k) => (
               <option key={k} value={k}>
-                {k}
+                {t(`kinds.${k}`)}
               </option>
             ))}
           </select>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="export-format">Format</Label>
+          <Label htmlFor="export-format">{t('modal.format')}</Label>
           <select
             id="export-format"
             value={format}
@@ -82,14 +84,14 @@ export function CreateExportModal({ open, onOpenChange }: Props) {
           >
             {EXPORT_FORMATS.map((f) => (
               <option key={f} value={f}>
-                {f.toUpperCase()}
+                {t(`format.${f}`)}
               </option>
             ))}
           </select>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label htmlFor="export-from">From</Label>
+            <Label htmlFor="export-from">{t('modal.from')}</Label>
             <input
               id="export-from"
               type="datetime-local"
@@ -99,7 +101,7 @@ export function CreateExportModal({ open, onOpenChange }: Props) {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="export-to">To</Label>
+            <Label htmlFor="export-to">{t('modal.to')}</Label>
             <input
               id="export-to"
               type="datetime-local"

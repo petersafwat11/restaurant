@@ -1,0 +1,38 @@
+{
+  "appName": "Restauracja",
+  "ok": "OK",
+  "cancel": "Anuluj",
+  "save": "Zapisz",
+  "delete": "Usuń",
+  "edit": "Edytuj",
+  "back": "Wstecz",
+  "next": "Dalej",
+  "search": "Szukaj",
+  "loading": "Ładowanie…",
+  "retry": "Spróbuj ponownie",
+  "close": "Zamknij",
+  "yes": "Tak",
+  "no": "Nie",
+  "currency": "Waluta",
+  "language": "Język",
+  "logout": "Wyloguj",
+  "skipToContent": "Przejdź do treści",
+  "days": {
+    "sunday": "Niedziela",
+    "monday": "Poniedziałek",
+    "tuesday": "Wtorek",
+    "wednesday": "Środa",
+    "thursday": "Czwartek",
+    "friday": "Piątek",
+    "saturday": "Sobota"
+  },
+  "daysShort": {
+    "sunday": "Nie",
+    "monday": "Pon",
+    "tuesday": "Wto",
+    "wednesday": "Śro",
+    "thursday": "Czw",
+    "friday": "Pią",
+    "saturday": "Sob"
+  }
+}

@@ -1,9 +1,11 @@
 import { PageHeaderProvider } from '@/components/shell/page-title-context';
 import { useAuthStore } from '@/stores/auth-store';
+import { loadMessages } from '@repo/i18n';
 import { type MeDto, PERMISSION_KEYS, type PermissionKey } from '@repo/types';
 import { TooltipProvider } from '@repo/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type RenderOptions, type RenderResult, render } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 import { type ReactElement, type ReactNode, useState } from 'react';
 
 interface PageProvidersProps {
@@ -13,17 +15,25 @@ interface PageProvidersProps {
 interface RenderPageOptions extends Omit<RenderOptions, 'wrapper'> {
   permissions?: PermissionKey[];
   user?: Partial<MeDto>;
+  locale?: 'pl' | 'en';
 }
+
+const TEST_MESSAGES = loadMessages('en');
 
 /**
  * Seed the auth store with a fully-permissioned owner and render the page
  * inside the provider stack used by the real dashboard layout. Each test gets
  * a fresh QueryClient via state.
+ *
+ * Pages use `useTranslations()` from next-intl, so the wrapper provides an
+ * `NextIntlClientProvider` with the EN message tree. Tests asserting Polish
+ * copy can pass `locale: 'pl'`.
  */
 export function renderPage(ui: ReactElement, opts: RenderPageOptions = {}): RenderResult {
   const {
     permissions = PERMISSION_KEYS as readonly PermissionKey[] as PermissionKey[],
     user,
+    locale = 'en',
     ...rtl
   } = opts;
 
@@ -45,6 +55,8 @@ export function renderPage(ui: ReactElement, opts: RenderPageOptions = {}): Rend
     isHydrated: true,
   });
 
+  const messages = locale === 'en' ? TEST_MESSAGES : loadMessages(locale);
+
   function Wrapper({ children }: PageProvidersProps) {
     const [qc] = useState(
       () =>
@@ -57,9 +69,11 @@ export function renderPage(ui: ReactElement, opts: RenderPageOptions = {}): Rend
     );
     return (
       <QueryClientProvider client={qc}>
-        <TooltipProvider delayDuration={0}>
-          <PageHeaderProvider>{children}</PageHeaderProvider>
-        </TooltipProvider>
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone="Europe/Warsaw">
+          <TooltipProvider delayDuration={0}>
+            <PageHeaderProvider>{children}</PageHeaderProvider>
+          </TooltipProvider>
+        </NextIntlClientProvider>
       </QueryClientProvider>
     );
   }

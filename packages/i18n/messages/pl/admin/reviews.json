@@ -1,0 +1,56 @@
+{
+  "title": "Recenzje",
+  "filters": {
+    "status": {
+      "all": "Wszystkie",
+      "PUBLISHED": "Opublikowane",
+      "HIDDEN": "Ukryte",
+      "FLAGGED": "Oflagowane"
+    },
+    "ratingLabel": "Ocena:",
+    "ratingAll": "Wszystkie",
+    "ratingStars": "{value}★"
+  },
+  "columns": {
+    "rating": "Ocena",
+    "author": "Klient",
+    "comment": "Komentarz",
+    "status": "Status",
+    "reply": "Odpowiedź",
+    "createdAt": "Dodano"
+  },
+  "moderation": {
+    "PUBLISHED": "Opublikowana",
+    "HIDDEN": "Ukryta",
+    "FLAGGED": "Oflagowana",
+    "PENDING": "Oczekuje"
+  },
+  "row": {
+    "anonymous": "Anonim",
+    "noComment": "—",
+    "replied": "odpowiedziano",
+    "noReply": "—"
+  },
+  "empty": "Żadne recenzje nie pasują do filtrów.",
+  "drawer": {
+    "ariaLabel": "Recenzja",
+    "anonymous": "Anonim",
+    "order": "zamówienie {id}",
+    "commentLabel": "Komentarz",
+    "noComment": "(brak komentarza)",
+    "photosLabel": "Zdjęcia",
+    "flagReasonLabel": "Powód oflagowania (opcjonalny)",
+    "flagReasonPlaceholder": "Spam, wulgarny język, nie na temat itp.",
+    "currentFlag": "Aktualna flaga: {reason}",
+    "ownerReplyLabel": "Odpowiedź właściciela",
+    "ownerReplyPlaceholder": "Podziękuj klientowi lub odnieś się do uwag…",
+    "lastReplied": "Ostatnia odpowiedź",
+    "actions": {
+      "publish": "Opublikuj",
+      "hide": "Ukryj",
+      "flag": "Oflaguj",
+      "sendReply": "Wyślij odpowiedź",
+      "updateReply": "Zaktualizuj odpowiedź"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "title": "Profil restauracji",
+  "loading": "Ładowanie restauracji…",
+  "loadingMap": "Ładowanie mapy…",
+  "errorTitle": "Nie udało się załadować restauracji",
+  "errorDescriptionFallback": "Spróbuj ponownie.",
+  "retry": "Spróbuj ponownie",
+  "updated": "Zaktualizowano restaurację",
+  "nav": {
+    "identity": "Tożsamość",
+    "branding": "Branding",
+    "contact": "Kontakt",
+    "location": "Lokalizacja",
+    "channels": "Kanały",
+    "danger": "Strefa niebezpieczna"
+  },
+  "identity": {
+    "title": "Tożsamość",
+    "description": "To, co świat widzi w pierwszej kolejności.",
+    "nameLabel": "Nazwa",
+    "slugLabel": "Slug",
+    "slugHint": "Segment URL na publicznej stronie. Zmiana psuje istniejące linki.",
+    "descriptionLabel": "Opis",
+    "descriptionPlaceholder": "Krótkie hasło + opis miejsca."
+  },
+  "branding": {
+    "title": "Branding",
+    "description": "Logo i obraz tła pokazywane na publicznej stronie.",
+    "logoLabel": "URL logo",
+    "logoHint": "Kwadratowe PNG/SVG, 512px+",
+    "coverLabel": "URL okładki",
+    "coverHint": "Obraz 16:9, 1600px+"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "description": "Jak klienci się z Tobą kontaktują i skąd przychodzą paragony.",
+    "phoneLabel": "Telefon",
+    "emailLabel": "E-mail",
+    "addressLineLabel": "Adres, linia 1",
+    "cityLabel": "Miasto",
+    "stateLabel": "Województwo / region",
+    "zipLabel": "Kod pocztowy",
+    "countryLabel": "Kraj",
+    "countryHint": "ISO 2-literowy",
+    "timezoneLabel": "Strefa czasowa",
+    "currencyLabel": "Waluta",
+    "currencyHint": "3-literowy ISO (PLN, EUR, USD)"
+  },
+  "location": {
+    "title": "Lokalizacja",
+    "description": "Współrzędne zasilają mapę klienta, sprawdzanie stref dostaw oraz wyniki wyszukiwania.",
+    "prompt": "Kliknij mapę lub użyj „Zlokalizuj mnie”, aby ustawić lokalizację.",
+    "clear": "Wyczyść"
+  },
+  "channels": {
+    "title": "Kanały",
+    "description": "Akceptacja per-kanał — kontroluje stronę publiczną bez wyłączania restauracji.",
+    "published": "Opublikowano",
+    "publishedHint": "Czy w ogóle pokazywać na stronie klienta.",
+    "acceptsReservations": "Przyjmuje rezerwacje",
+    "acceptsReservationsHint": "Pokaż widżet rezerwacji",
+    "acceptsDelivery": "Przyjmuje dostawy",
+    "acceptsPickup": "Przyjmuje odbiór",
+    "acceptsDineIn": "Przyjmuje gości na miejscu"
+  },
+  "danger": {
+    "title": "Strefa niebezpieczna",
+    "description": "Wyłączenie publikacji natychmiast ukrywa restaurację na stronie publicznej.",
+    "unpublishLabel": "Wyłącz publikację restauracji",
+    "unpublishHint": "Odpowiednik wyłączenia przełącznika „Opublikowano”",
+    "unpublishButton": "Wyłącz publikację"
+  },
+  "saveBar": {
+    "unsavedHint": "Niezapisane zmiany — {shortcut}, aby zapisać.",
+    "discard": "Odrzuć",
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie…"
+  }
+}

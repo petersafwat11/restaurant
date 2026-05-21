@@ -1,0 +1,59 @@
+{
+  "title": "Rezerwacje",
+  "inViewCount": "{count, plural, one {# w widoku} few {# w widoku} many {# w widoku} other {# w widoku}}",
+  "views": {
+    "day": "Dzień",
+    "week": "Tydzień",
+    "month": "Miesiąc",
+    "list": "Lista"
+  },
+  "actions": {
+    "new": "Nowa rezerwacja",
+    "dismiss": "Zamknij",
+    "retry": "Ponów"
+  },
+  "errors": {
+    "loadTitle": "Nie udało się załadować rezerwacji",
+    "conflict": "Ten stolik i godzina są już zarezerwowane. Spróbuj innego terminu."
+  },
+  "status": {
+    "CONFIRMED": "Potwierdzona",
+    "SEATED": "Usadzeni",
+    "COMPLETED": "Zakończona",
+    "CANCELLED": "Anulowana",
+    "NO_SHOW": "Nieobecność"
+  },
+  "listTable": {
+    "when": "Kiedy",
+    "guest": "Gość",
+    "party": "Osoby",
+    "table": "Stolik",
+    "status": "Status",
+    "notes": "Uwagi",
+    "empty": {
+      "title": "Brak rezerwacji w zakresie",
+      "description": "Zmień datę lub użyj widoku kalendarza."
+    },
+    "unseated": "—",
+    "noNotes": "—"
+  },
+  "createDrawer": {
+    "ariaLabel": "Nowa rezerwacja",
+    "eyebrow": "Nowa rezerwacja",
+    "title": "Zarezerwuj stolik",
+    "fields": {
+      "when": "Kiedy",
+      "partySize": "Liczba osób",
+      "occasion": "Okazja",
+      "occasionHelper": "Urodziny, rocznica itp.",
+      "guestName": "Imię gościa",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "notes": "Uwagi",
+      "notesHelper": "Alergie, preferencje miejsca itp."
+    },
+    "cancel": "Anuluj",
+    "submit": "Zarezerwuj",
+    "submitLoading": "Rezerwowanie…"
+  }
+}

@@ -15,6 +15,17 @@ export interface TipPickerProps {
   allowCustom?: boolean;
   currency: string;
   className?: string;
+  /** Localizable labels. */
+  labels?: {
+    /** Label for the 0% preset. Defaults to "No tip". */
+    noTip?: React.ReactNode;
+    /** Label for the custom-amount preset. Defaults to "Other". */
+    other?: React.ReactNode;
+    /** Disclaimer text below the picker. Defaults to "100% of tips go to the team.". */
+    disclaimer?: React.ReactNode;
+    /** Aria-label for the radio group. Defaults to "Tip". */
+    groupLabel?: string;
+  };
 }
 
 function pctToAmount(subtotal: string, pct: number): string {
@@ -29,7 +40,14 @@ export function TipPicker({
   allowCustom = true,
   currency,
   className,
+  labels,
 }: TipPickerProps) {
+  const {
+    noTip = 'No tip',
+    other = 'Other',
+    disclaimer = '100% of tips go to the team.',
+    groupLabel = 'Tip',
+  } = labels ?? {};
   const [showCustom, setShowCustom] = React.useState(false);
   const [custom, setCustom] = React.useState('');
 
@@ -41,7 +59,7 @@ export function TipPicker({
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
-      <div role="radiogroup" aria-label="Tip" className="flex flex-wrap gap-2">
+      <div role="radiogroup" aria-label={groupLabel} className="flex flex-wrap gap-2">
         {presets.map((p) => {
           const active = isPresetActive(p);
           const amt = pctToAmount(subtotal, p);
@@ -63,7 +81,7 @@ export function TipPicker({
                   : 'border-border/[var(--border-strong-alpha)] bg-surface-2 text-fg hover:border-accent/40',
               )}
             >
-              <span>{p === 0 ? 'No tip' : `${p}%`}</span>
+              <span>{p === 0 ? noTip : `${p}%`}</span>
               {p > 0 && (
                 <span className="text-[12px] opacity-70 tabular-nums">
                   {formatMoney(amt, currency)}
@@ -83,7 +101,7 @@ export function TipPicker({
                 : 'border-border/[var(--border-strong-alpha)] bg-surface-2 text-fg hover:border-accent/40',
             )}
           >
-            Other
+            {other}
           </button>
         )}
       </div>
@@ -110,7 +128,7 @@ export function TipPicker({
           </span>
         </div>
       )}
-      <p className="text-[12px] text-fg-subtle">100% of tips go to the team.</p>
+      <p className="text-[12px] text-fg-subtle">{disclaimer}</p>
     </div>
   );
 }

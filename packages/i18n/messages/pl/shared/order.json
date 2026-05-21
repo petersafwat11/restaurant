@@ -1,0 +1,8 @@
+{
+  "title": "Zamówienie {number}",
+  "history": "Historia zamówień",
+  "trackOrder": "Śledź zamówienie",
+  "reorder": "Zamów ponownie",
+  "estimatedArrival": "Przewidywany czas",
+  "placedOn": "Złożono {date}"
+}

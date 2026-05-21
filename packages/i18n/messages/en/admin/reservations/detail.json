@@ -1,0 +1,68 @@
+{
+  "title": "Reservation",
+  "titleWithName": "Reservation · {name}",
+  "loading": "Loading reservation…",
+  "notFound": {
+    "title": "Reservation not found",
+    "description": "It may have been removed.",
+    "back": "← Back to reservations"
+  },
+  "backLink": "Reservations",
+  "status": {
+    "confirmed": "Confirmed",
+    "seated": "Seated",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "no_show": "No-show"
+  },
+  "actions": {
+    "seat": "Seat",
+    "complete": "Complete",
+    "noShow": "No-show"
+  },
+  "booking": {
+    "title": "Booking",
+    "description": "Time, party size, and table.",
+    "start": "Start",
+    "end": "End",
+    "party": "Party",
+    "guests": "{count, plural, one {# guest} other {# guests}}",
+    "table": "Table",
+    "unseated": "Unseated",
+    "reassignLabel": "Assign / reassign table",
+    "pickTable": "— Pick a table —",
+    "tableOption": "{name} (cap {capacity})"
+  },
+  "customer": {
+    "title": "Customer",
+    "description": "Contact info captured at booking time.",
+    "name": "Name",
+    "phone": "Phone",
+    "notes": "Notes",
+    "empty": "—"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "description": "Created and last-updated stamps.",
+    "created": "Created",
+    "updated": "Updated"
+  },
+  "cancel": {
+    "title": "Cancel reservation",
+    "description": "Frees the table for the slot. Customer is not notified automatically — call them.",
+    "reasonPlaceholder": "Reason (required)",
+    "cta": "Cancel reservation"
+  },
+  "completeModal": {
+    "title": "Mark reservation complete?",
+    "description": "Frees the table and records the visit as finished.",
+    "primary": "Complete",
+    "secondary": "Cancel"
+  },
+  "noShowModal": {
+    "title": "Mark as no-show?",
+    "description": "The reservation will be closed and the table freed.",
+    "primary": "Mark no-show",
+    "secondary": "Cancel"
+  }
+}

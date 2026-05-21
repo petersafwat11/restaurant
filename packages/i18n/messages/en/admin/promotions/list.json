@@ -1,0 +1,48 @@
+{
+  "title": "Promotions",
+  "newPromotion": "New promotion",
+  "noPermission": "You don't have permission to view promotions.",
+  "empty": "No promotions yet. Create one to start offering discounts.",
+  "columns": {
+    "name": "Name",
+    "type": "Type",
+    "value": "Value",
+    "window": "Window",
+    "min": "Min",
+    "status": "Status"
+  },
+  "value": {
+    "percentOff": "{value}% off",
+    "fixedOff": "{amount} off",
+    "bogo": "Buy-one-get-one",
+    "freeDelivery": "Free delivery",
+    "none": "—"
+  },
+  "window": {
+    "range": "{start} → {end}",
+    "none": "—"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "SCHEDULED": "Scheduled",
+    "ACTIVE": "Active",
+    "EXPIRED": "Expired",
+    "PAUSED": "Paused"
+  },
+  "types": {
+    "PERCENT": "Percent off",
+    "FIXED": "Fixed amount",
+    "BOGO": "Buy-one-get-one",
+    "FREE_DELIVERY": "Free delivery"
+  },
+  "create": {
+    "title": "New promotion",
+    "description": "You can configure value, schedule, and coupons after creating it.",
+    "name": "Name",
+    "namePlaceholder": "Summer 10% off",
+    "type": "Type",
+    "submit": "Create",
+    "submitting": "Creating…",
+    "cancel": "Cancel"
+  }
+}

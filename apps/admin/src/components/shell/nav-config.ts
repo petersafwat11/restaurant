@@ -19,7 +19,8 @@ import {
 
 export interface NavItem {
   id: string;
-  label: string;
+  /** Translation key under `admin.layout.sidebar.items.*` (or for overview, `admin.layout.sidebar.overview`). */
+  labelKey: string;
   href: string;
   icon: LucideIcon;
   permission?: PermissionKey | PermissionKey[];
@@ -29,7 +30,8 @@ export interface NavItem {
 
 export interface NavGroup {
   id: string;
-  label: string;
+  /** Translation key under `admin.layout.sidebar.groups.*`. */
+  labelKey: string;
   items: NavItem[];
 }
 
@@ -39,10 +41,12 @@ export interface NavGroup {
  * key needed to see it; the Sidebar filters via usePermissions().
  *
  * Overview sits outside the grouped section because it's the dashboard root.
+ *
+ * Labels are translation keys, resolved with next-intl in `sidebar.tsx`.
  */
 export const NAV_OVERVIEW: NavItem = {
   id: 'overview',
-  label: 'Overview',
+  labelKey: 'overview',
   href: '/',
   icon: Home,
   permission: 'analytics:read',
@@ -51,12 +55,18 @@ export const NAV_OVERVIEW: NavItem = {
 export const NAV_GROUPS: NavGroup[] = [
   {
     id: 'operate',
-    label: 'Operate',
+    labelKey: 'groups.operate',
     items: [
-      { id: 'orders', label: 'Orders', href: '/orders', icon: Receipt, permission: 'order:read' },
+      {
+        id: 'orders',
+        labelKey: 'items.orders',
+        href: '/orders',
+        icon: Receipt,
+        permission: 'order:read',
+      },
       {
         id: 'kitchen',
-        label: 'Kitchen Display',
+        labelKey: 'items.kitchen',
         href: '/kds',
         icon: UtensilsCrossed,
         permission: 'kitchen:read',
@@ -64,7 +74,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         id: 'reservations',
-        label: 'Reservations',
+        labelKey: 'items.reservations',
         href: '/reservations',
         icon: Calendar,
         permission: 'reservation:read',
@@ -73,12 +83,18 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: 'catalog',
-    label: 'Catalog',
+    labelKey: 'groups.catalog',
     items: [
-      { id: 'menu', label: 'Menu', href: '/menu', icon: Utensils, permission: 'menu:read' },
+      {
+        id: 'menu',
+        labelKey: 'items.menu',
+        href: '/menu',
+        icon: Utensils,
+        permission: 'menu:read',
+      },
       {
         id: 'promotions',
-        label: 'Promotions',
+        labelKey: 'items.promotions',
         href: '/promotions',
         icon: Tag,
         permission: 'promotion:read',
@@ -87,33 +103,45 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: 'people',
-    label: 'People',
+    labelKey: 'groups.people',
     items: [
       {
         id: 'customers',
-        label: 'Customers',
+        labelKey: 'items.customers',
         href: '/customers',
         icon: Users,
         permission: 'customer:read',
       },
-      { id: 'reviews', label: 'Reviews', href: '/reviews', icon: Star, permission: 'review:read' },
-      { id: 'staff', label: 'Staff', href: '/staff', icon: Shield, permission: 'staff:read' },
+      {
+        id: 'reviews',
+        labelKey: 'items.reviews',
+        href: '/reviews',
+        icon: Star,
+        permission: 'review:read',
+      },
+      {
+        id: 'staff',
+        labelKey: 'items.staff',
+        href: '/staff',
+        icon: Shield,
+        permission: 'staff:read',
+      },
     ],
   },
   {
     id: 'insights',
-    label: 'Insights',
+    labelKey: 'groups.insights',
     items: [
       {
         id: 'reports',
-        label: 'Reports',
+        labelKey: 'items.reports',
         href: '/reports/exports',
         icon: FileBarChart,
         permission: 'report:read',
       },
       {
         id: 'audit',
-        label: 'Audit log',
+        labelKey: 'items.audit',
         href: '/audit-log',
         icon: History,
         permission: 'audit:read',
@@ -122,25 +150,25 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: 'configure',
-    label: 'Configure',
+    labelKey: 'groups.configure',
     items: [
       {
         id: 'restaurant',
-        label: 'Restaurant',
+        labelKey: 'items.restaurant',
         href: '/restaurant',
         icon: MapPin,
         permission: 'restaurant:read',
       },
       {
         id: 'contact',
-        label: 'Contact messages',
+        labelKey: 'items.contact',
         href: '/contact',
         icon: Inbox,
         permission: 'contact:read',
       },
       {
         id: 'settings',
-        label: 'Settings',
+        labelKey: 'items.settings',
         href: '/settings',
         icon: Cog,
         permission: 'settings:read',

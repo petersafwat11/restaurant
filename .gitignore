@@ -59,3 +59,6 @@ prisma/migrations/dev.db*
 
 # local services runtime artifacts (redis dump from native e2e bring-up)
 dump.rdb
+
+# Playwright MCP session artifacts
+.playwright-mcp/

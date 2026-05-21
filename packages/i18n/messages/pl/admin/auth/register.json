@@ -1,0 +1,19 @@
+{
+  "title": "Załóż konto",
+  "helper": "Pierwsza konfiguracja właściciela. Twój zespół zostanie zaproszony osobno.",
+  "submit": "Załóż konto",
+  "firstName": "Imię",
+  "lastName": "Nazwisko",
+  "email": "E-mail",
+  "emailPlaceholder": "ty@restauracja.com",
+  "phone": "Telefon",
+  "phonePlaceholder": "+48 555 010 000",
+  "optional": "Opcjonalne",
+  "password": "Hasło",
+  "passwordHelper": "Co najmniej 8 znaków, w tym wielka i mała litera oraz cyfra",
+  "haveReferralCode": "Masz kod polecający?",
+  "referralCode": "Kod polecający",
+  "referralPlaceholder": "np. RESTOA1B2",
+  "hasAccount": "Masz już konto?",
+  "login": "Zaloguj się"
+}

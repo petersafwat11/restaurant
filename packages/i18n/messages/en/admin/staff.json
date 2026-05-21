@@ -1,0 +1,68 @@
+{
+  "title": "Staff",
+  "invite": "Invite",
+  "empty": "No staff members yet.",
+  "columns": {
+    "name": "Name",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "added": "Added",
+    "actions": ""
+  },
+  "missing": "—",
+  "status": {
+    "invited": "Invited",
+    "active": "Active",
+    "disabled": "Disabled"
+  },
+  "actions": {
+    "disable": "Disable",
+    "enable": "Enable"
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "kitchen": "Kitchen",
+    "cashier": "Cashier"
+  },
+  "permissions": {
+    "order:read": "View orders",
+    "order:write": "Manage orders",
+    "order:status_update": "Update order status",
+    "order:cancel": "Cancel orders",
+    "order:refund": "Refund orders",
+    "menu:read": "View menu",
+    "menu:write": "Manage menu",
+    "promotion:read": "View promotions",
+    "promotion:write": "Manage promotions",
+    "promotion:archive": "Archive promotions",
+    "staff:read": "View staff",
+    "staff:write": "Manage staff",
+    "settings:read": "View settings",
+    "settings:write": "Manage settings",
+    "reports:read": "View reports",
+    "customers:read": "View customers",
+    "customers:write": "Manage customers",
+    "reservations:read": "View reservations",
+    "reservations:write": "Manage reservations",
+    "reviews:read": "View reviews",
+    "reviews:write": "Reply to reviews",
+    "audit:read": "View audit log"
+  },
+  "inviteModal": {
+    "titleSent": "Invite sent",
+    "titleDefault": "Invite staff member",
+    "descriptionSent": "Share this single-use token with the invitee. They use it on /accept-invite.",
+    "descriptionDefault": "They will receive an email with a one-time link.",
+    "done": "Done",
+    "submit": "Send invite",
+    "submitting": "Sending…",
+    "cancel": "Cancel",
+    "token": "Token",
+    "copy": "Copy",
+    "email": "Email",
+    "emailPlaceholder": "person@example.com",
+    "role": "Role"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "Delivery zones",
+  "backToSettings": "Settings",
+  "mapLoading": "Loading map…",
+  "intro": "Draw the polygons where you deliver. The flat delivery fee and minimum order live on the main {link} page and apply to all zones.",
+  "introLink": "Settings",
+  "zones": {
+    "title": "Zones",
+    "description": "Click a zone to highlight it on the map.",
+    "new": "New",
+    "empty": {
+      "title": "No delivery zones yet",
+      "description": "Click + New, then click on the map to add vertices. Double-click or press Enter to close the polygon."
+    },
+    "vertices": "{count, plural, one {# vertex} other {# vertices}}",
+    "defaultName": "Zone {n}",
+    "renameAria": "Rename {name}",
+    "removeAria": "Remove {name}"
+  },
+  "error": {
+    "title": "Couldn't load delivery zones",
+    "retry": "Retry"
+  },
+  "confirmRemove": {
+    "title": "Remove zone",
+    "description": "Remove \"{name}\"? The polygon will be permanently deleted.",
+    "remove": "Remove",
+    "cancel": "Cancel"
+  }
+}
