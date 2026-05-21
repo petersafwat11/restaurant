@@ -71,9 +71,15 @@ function startOfDayUtc(d: Date, tz: string): Date {
 }
 
 function tzOffsetMinutes(d: Date, tz: string): number {
+  // `hourCycle: 'h23'` forces the formatter to emit 00–23 for the hour part.
+  // Without it, `en-US` + `hour12: false` produces "24" for midnight on
+  // Node's ICU build, which then overflows `Date.UTC(..., 24, 0, 0)` into the
+  // next day and yields a bogus +1440-minute offset — flipping `today` back
+  // by 24h in `startOfDayUtc`. Reproduces on Linux/CI but not on every host
+  // because the en-US fallback behavior varies by ICU version.
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
-    hour12: false,
+    hourCycle: 'h23',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
