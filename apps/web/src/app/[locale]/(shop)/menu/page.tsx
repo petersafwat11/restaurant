@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { MenuApp } from '@/features/menu/components/menu-app';
+import { getAlternates } from '@/lib/seo/alternates';
+
+export function generateMetadata(): Metadata {
+  return { alternates: getAlternates('/menu') };
+}
 
 /**
  * Menu page (/menu) — composes the full menu surface.

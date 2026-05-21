@@ -4,6 +4,7 @@ import { usePermissions } from '@/features/auth/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import type { PermissionKey } from '@repo/types';
 import { Lock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 export interface RequirePermissionProps {
@@ -50,6 +51,7 @@ export function RequirePermission({
 }
 
 function PermissionDenied({ keys }: { keys: PermissionKey[] }) {
+  const t = useTranslations('admin.layout.permissionDenied');
   return (
     <div
       role="alert"
@@ -58,13 +60,11 @@ function PermissionDenied({ keys }: { keys: PermissionKey[] }) {
       <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-full bg-surface-2 text-fg-muted">
         <Lock size={18} />
       </div>
-      <div className="text-sm font-medium text-fg">You don&apos;t have access to this page</div>
+      <div className="text-sm font-medium text-fg">{t('title')}</div>
       <div className="mt-1 text-xs text-fg-subtle">
-        Requires: <span className="font-mono">{keys.join(', ')}</span>
+        {t('requiresLabel')} <span className="font-mono">{keys.join(', ')}</span>
       </div>
-      <div className="mt-3 text-xs text-fg-subtle">
-        Ask your owner or admin to grant the required permission.
-      </div>
+      <div className="mt-3 text-xs text-fg-subtle">{t('askAdmin')}</div>
     </div>
   );
 }

@@ -43,5 +43,10 @@
       "contact": "Contact messages",
       "settings": "Settings"
     }
+  },
+  "permissionDenied": {
+    "title": "You don't have access to this page",
+    "requiresLabel": "Requires:",
+    "askAdmin": "Ask your owner or admin to grant the required permission."
   }
 }

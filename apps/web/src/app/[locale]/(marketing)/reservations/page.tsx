@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import { Container, EmptyState } from '@repo/ui';
 import { CalendarClock } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getAlternates } from '@/lib/seo/alternates';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];
+}
+
+export function generateMetadata(): Metadata {
+  return { alternates: getAlternates('/reservations') };
 }
 
 export default async function ReservationsLandingPage({

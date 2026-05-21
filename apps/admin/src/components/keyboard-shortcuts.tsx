@@ -1,6 +1,7 @@
 'use client';
 
 import { ActionModal } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 export interface ShortcutBinding {
@@ -22,17 +23,18 @@ export interface KeyboardShortcutsProps {
 /**
  * Generic shortcuts cheatsheet rendered inside an ActionModal. Pages register
  * their own bindings via the `groups` prop so a single modal serves the whole
- * dashboard. Orders is the first caller (see `ORDERS_SHORTCUT_GROUPS`).
+ * dashboard. Orders is the first caller (see `useOrdersShortcutGroups`).
  */
 export function KeyboardShortcuts({ open, onOpenChange, groups }: KeyboardShortcutsProps) {
+  const t = useTranslations('admin.keyboardShortcuts');
   return (
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Keyboard shortcuts"
-      description="Power-user bindings for the current page."
+      title={t('title')}
+      description={t('description')}
       width={520}
-      secondary={{ label: 'Close', onClick: () => onOpenChange(false) }}
+      secondary={{ label: t('close'), onClick: () => onOpenChange(false) }}
     >
       <div className="space-y-5">
         {groups.map((group) => (
@@ -48,7 +50,7 @@ export function KeyboardShortcuts({ open, onOpenChange, groups }: KeyboardShortc
                   <span className="flex items-center gap-1">
                     {s.keys.map((k, i) => (
                       <React.Fragment key={`${s.label}-${i}`}>
-                        {i > 0 && <span className="text-[10px] text-fg-subtle">then</span>}
+                        {i > 0 && <span className="text-[10px] text-fg-subtle">{t('then')}</span>}
                         <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border-hairline-strong bg-surface px-1.5 font-mono text-[11px] text-fg">
                           {k}
                         </kbd>
@@ -65,39 +67,49 @@ export function KeyboardShortcuts({ open, onOpenChange, groups }: KeyboardShortc
   );
 }
 
-export const ORDERS_SHORTCUT_GROUPS: ShortcutGroup[] = [
-  {
-    title: 'Search & navigation',
-    shortcuts: [
-      { keys: ['/'], label: 'Focus search' },
-      { keys: ['⌘', 'F'], label: 'Focus search (alt)' },
-      { keys: ['j'], label: 'Move focus down' },
-      { keys: ['k'], label: 'Move focus up' },
-      { keys: ['↑'], label: 'Move focus up' },
-      { keys: ['↓'], label: 'Move focus down' },
+/**
+ * Localized shortcut definitions for the Orders page. Built via a hook so
+ * `useTranslations` resolves against the active locale on each render.
+ */
+export function useOrdersShortcutGroups(): ShortcutGroup[] {
+  const t = useTranslations('admin.keyboardShortcuts');
+  return React.useMemo(
+    () => [
+      {
+        title: t('groups.searchNav'),
+        shortcuts: [
+          { keys: ['/'], label: t('shortcuts.focusSearch') },
+          { keys: ['⌘', 'F'], label: t('shortcuts.focusSearchAlt') },
+          { keys: ['j'], label: t('shortcuts.moveFocusDown') },
+          { keys: ['k'], label: t('shortcuts.moveFocusUp') },
+          { keys: ['↑'], label: t('shortcuts.moveFocusUp') },
+          { keys: ['↓'], label: t('shortcuts.moveFocusDown') },
+        ],
+      },
+      {
+        title: t('groups.filtering'),
+        shortcuts: [
+          { keys: ['1'], label: t('shortcuts.allOrders') },
+          { keys: ['2'], label: t('shortcuts.pending') },
+          { keys: ['3'], label: t('shortcuts.confirmed') },
+          { keys: ['4'], label: t('shortcuts.preparing') },
+          { keys: ['5'], label: t('shortcuts.ready') },
+          { keys: ['6'], label: t('shortcuts.outForDelivery') },
+          { keys: ['7'], label: t('shortcuts.delivered') },
+          { keys: ['8'], label: t('shortcuts.cancelled') },
+        ],
+      },
+      {
+        title: t('groups.selectionActions'),
+        shortcuts: [
+          { keys: ['Space'], label: t('shortcuts.toggleRowSelection') },
+          { keys: ['Enter'], label: t('shortcuts.openFocusedOrder') },
+          { keys: ['⌘', 'A'], label: t('shortcuts.selectAllVisible') },
+          { keys: ['Esc'], label: t('shortcuts.clearSelection') },
+          { keys: ['?'], label: t('shortcuts.showCheatsheet') },
+        ],
+      },
     ],
-  },
-  {
-    title: 'Filtering',
-    shortcuts: [
-      { keys: ['1'], label: 'All orders' },
-      { keys: ['2'], label: 'Pending' },
-      { keys: ['3'], label: 'Confirmed' },
-      { keys: ['4'], label: 'Preparing' },
-      { keys: ['5'], label: 'Ready' },
-      { keys: ['6'], label: 'Out for delivery' },
-      { keys: ['7'], label: 'Delivered' },
-      { keys: ['8'], label: 'Cancelled' },
-    ],
-  },
-  {
-    title: 'Selection & actions',
-    shortcuts: [
-      { keys: ['Space'], label: 'Toggle row selection' },
-      { keys: ['Enter'], label: 'Open focused order' },
-      { keys: ['⌘', 'A'], label: 'Select all visible' },
-      { keys: ['Esc'], label: 'Clear selection / close drawer' },
-      { keys: ['?'], label: 'Show this cheatsheet' },
-    ],
-  },
-];
+    [t],
+  );
+}

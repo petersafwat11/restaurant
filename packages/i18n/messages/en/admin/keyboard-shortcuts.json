@@ -1,0 +1,30 @@
+{
+  "title": "Keyboard shortcuts",
+  "description": "Power-user bindings for the current page.",
+  "close": "Close",
+  "then": "then",
+  "groups": {
+    "searchNav": "Search & navigation",
+    "filtering": "Filtering",
+    "selectionActions": "Selection & actions"
+  },
+  "shortcuts": {
+    "focusSearch": "Focus search",
+    "focusSearchAlt": "Focus search (alt)",
+    "moveFocusDown": "Move focus down",
+    "moveFocusUp": "Move focus up",
+    "allOrders": "All orders",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "outForDelivery": "Out for delivery",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "toggleRowSelection": "Toggle row selection",
+    "openFocusedOrder": "Open focused order",
+    "selectAllVisible": "Select all visible",
+    "clearSelection": "Clear selection / close drawer",
+    "showCheatsheet": "Show this cheatsheet"
+  }
+}

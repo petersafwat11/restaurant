@@ -397,15 +397,16 @@ function DietarySection({
   draft: Draft;
   set: <K extends keyof Draft>(key: K, value: Draft[K]) => void;
 }) {
+  const t = useTranslations('admin.menu.itemEditor.dietary');
   const flags: Array<{
     key: 'isVegetarian' | 'isVegan' | 'isGlutenFree' | 'isFeatured';
     label: string;
     sub: string;
   }> = [
-    { key: 'isVegetarian', label: 'Vegetarian', sub: 'No meat or fish.' },
-    { key: 'isVegan', label: 'Vegan', sub: 'No animal products.' },
-    { key: 'isGlutenFree', label: 'Gluten-free', sub: 'Made without gluten.' },
-    { key: 'isFeatured', label: 'Featured', sub: 'Promote on the menu.' },
+    { key: 'isVegetarian', label: t('vegetarian'), sub: t('vegetarianHint') },
+    { key: 'isVegan', label: t('vegan'), sub: t('veganHint') },
+    { key: 'isGlutenFree', label: t('glutenFree'), sub: t('glutenFreeHint') },
+    { key: 'isFeatured', label: t('featured'), sub: t('featuredHint') },
   ];
   return (
     <div className="flex flex-col gap-2">

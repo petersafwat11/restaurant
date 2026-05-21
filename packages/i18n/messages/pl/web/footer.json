@@ -1,0 +1,36 @@
+{
+  "tagline": "Kebab taki, jaki powinien być.",
+  "social": {
+    "instagram": "Instagram",
+    "facebook": "Facebook"
+  },
+  "columns": {
+    "menu": {
+      "heading": "Menu",
+      "kebab": "Kebab",
+      "falafel": "Falafel",
+      "tacos": "Tacos",
+      "boxAndPlates": "Boxy i talerze",
+      "drinks": "Napoje",
+      "viewFullMenu": "Zobacz całe menu →"
+    },
+    "visit": {
+      "heading": "Odwiedź nas"
+    },
+    "company": {
+      "heading": "Firma",
+      "about": "O nas",
+      "contact": "Kontakt",
+      "loyalty": "Lojalność",
+      "referrals": "Polecenia"
+    }
+  },
+  "bottom": {
+    "copyright": "© 2026 Szef Donald sp. z o.o. · NIP 1234567890",
+    "legal": {
+      "privacy": "Prywatność",
+      "terms": "Regulamin",
+      "cookies": "Pliki cookie"
+    }
+  }
+}

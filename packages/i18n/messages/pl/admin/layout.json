@@ -43,5 +43,10 @@
       "contact": "Wiadomości kontaktowe",
       "settings": "Ustawienia"
     }
+  },
+  "permissionDenied": {
+    "title": "Nie masz dostępu do tej strony",
+    "requiresLabel": "Wymagane uprawnienia:",
+    "askAdmin": "Poproś właściciela lub administratora o przyznanie wymaganego uprawnienia."
   }
 }

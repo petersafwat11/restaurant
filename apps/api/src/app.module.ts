@@ -104,7 +104,9 @@ import { UsersModule } from './users/users.module';
         new CookieResolver(['NEXT_LOCALE']),
         AcceptLanguageResolver,
       ],
-      typesOutputPath: path.join(__dirname, '../../src/generated/i18n.generated.ts'),
+      // Type generation is handled by `scripts/generate-i18n-types.ts` so a
+      // committed `src/generated/i18n.generated.ts` is the source of truth and
+      // a stray dev boot can't write the file outside `apps/api/`.
     }),
     AnalyticsProductModule,
     FeatureFlagsModule,

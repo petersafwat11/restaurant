@@ -1,7 +1,10 @@
+'use client';
+
 import { Logo } from '@/components/logo';
 import { mockHours, mockLocation } from '@/lib/mock/szef-donald';
 import { HoursTable, SiteFooter } from '@repo/ui';
 import { Facebook, Instagram } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 /**
@@ -9,23 +12,24 @@ import Link from 'next/link';
  * from the local mock. Wraps the theme-agnostic `<SiteFooter>` primitive.
  */
 export function SzefSiteFooter() {
+  const t = useTranslations('web.footer');
   return (
     <SiteFooter
       brandSlot={
         <div className="flex flex-col gap-4">
           <Logo variant="inverse" size={40} />
-          <p className="text-body text-surface/80">Kebab the way it should be.</p>
+          <p className="text-body text-surface/80">{t('tagline')}</p>
           <div className="flex items-center gap-3">
             <Link
               href="#"
-              aria-label="Instagram"
+              aria-label={t('social.instagram')}
               className="text-surface/60 transition-colors hover:text-accent"
             >
               <Instagram size={20} strokeWidth={1.5} />
             </Link>
             <Link
               href="#"
-              aria-label="Facebook"
+              aria-label={t('social.facebook')}
               className="text-surface/60 transition-colors hover:text-accent"
             >
               <Facebook size={20} strokeWidth={1.5} />
@@ -35,32 +39,32 @@ export function SzefSiteFooter() {
       }
       columns={[
         {
-          heading: 'Menu',
+          heading: t('columns.menu.heading'),
           body: (
             <>
               <Link href="/menu#kebab" className="hover:text-accent">
-                Kebab
+                {t('columns.menu.kebab')}
               </Link>
               <Link href="/menu#falafel" className="hover:text-accent">
-                Falafel
+                {t('columns.menu.falafel')}
               </Link>
               <Link href="/menu#tacos" className="hover:text-accent">
-                Tacos
+                {t('columns.menu.tacos')}
               </Link>
               <Link href="/menu#box" className="hover:text-accent">
-                Box & Plates
+                {t('columns.menu.boxAndPlates')}
               </Link>
               <Link href="/menu#drinks" className="hover:text-accent">
-                Drinks
+                {t('columns.menu.drinks')}
               </Link>
               <Link href="/menu" className="text-accent hover:underline">
-                View full menu →
+                {t('columns.menu.viewFullMenu')}
               </Link>
             </>
           ),
         },
         {
-          heading: 'Visit',
+          heading: t('columns.visit.heading'),
           body: (
             <>
               <div className="flex flex-col leading-relaxed text-surface/80">
@@ -80,31 +84,31 @@ export function SzefSiteFooter() {
           ),
         },
         {
-          heading: 'Company',
+          heading: t('columns.company.heading'),
           body: (
             <>
               <Link href="/about" className="hover:text-accent">
-                About
+                {t('columns.company.about')}
               </Link>
               <Link href="/contact" className="hover:text-accent">
-                Contact
+                {t('columns.company.contact')}
               </Link>
               <Link href="/account/loyalty" className="hover:text-accent">
-                Loyalty
+                {t('columns.company.loyalty')}
               </Link>
               <Link href="/account/referrals" className="hover:text-accent">
-                Referrals
+                {t('columns.company.referrals')}
               </Link>
             </>
           ),
         },
       ]}
       bottom={{
-        copyright: '© 2026 Szef Donald sp. z o.o. · NIP 1234567890',
+        copyright: t('bottom.copyright'),
         legal: [
-          { href: '#', label: 'Privacy' },
-          { href: '#', label: 'Terms' },
-          { href: '#', label: 'Cookies' },
+          { href: '#', label: t('bottom.legal.privacy') },
+          { href: '#', label: t('bottom.legal.terms') },
+          { href: '#', label: t('bottom.legal.cookies') },
         ],
       }}
     />

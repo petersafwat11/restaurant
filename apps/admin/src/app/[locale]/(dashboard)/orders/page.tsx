@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardShortcuts, ORDERS_SHORTCUT_GROUPS } from '@/components/keyboard-shortcuts';
+import { KeyboardShortcuts, useOrdersShortcutGroups } from '@/components/keyboard-shortcuts';
 import { usePageHeader } from '@/components/shell/page-title-context';
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import {
@@ -74,6 +74,7 @@ export default function OrdersPage() {
   const [refundOrderId, setRefundOrderId] = React.useState<string | null>(null);
   const [cancelOrderId, setCancelOrderId] = React.useState<string | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
+  const ordersShortcutGroups = useOrdersShortcutGroups();
   const [confirmBulkAdvance, setConfirmBulkAdvance] = React.useState(false);
   const { has } = usePermissions();
   const canAdvanceStatus = has('order:status_update');
@@ -386,7 +387,7 @@ export default function OrdersPage() {
       <KeyboardShortcuts
         open={shortcutsOpen}
         onOpenChange={setShortcutsOpen}
-        groups={ORDERS_SHORTCUT_GROUPS}
+        groups={ordersShortcutGroups}
       />
       <ActionModal
         open={confirmBulkAdvance}

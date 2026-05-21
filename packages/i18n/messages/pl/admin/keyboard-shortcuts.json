@@ -1,0 +1,30 @@
+{
+  "title": "Skróty klawiszowe",
+  "description": "Skróty dla zaawansowanych na tej stronie.",
+  "close": "Zamknij",
+  "then": "potem",
+  "groups": {
+    "searchNav": "Wyszukiwanie i nawigacja",
+    "filtering": "Filtrowanie",
+    "selectionActions": "Zaznaczanie i akcje"
+  },
+  "shortcuts": {
+    "focusSearch": "Przejdź do wyszukiwania",
+    "focusSearchAlt": "Przejdź do wyszukiwania (alt.)",
+    "moveFocusDown": "Przenieś fokus w dół",
+    "moveFocusUp": "Przenieś fokus w górę",
+    "allOrders": "Wszystkie zamówienia",
+    "pending": "Oczekujące",
+    "confirmed": "Potwierdzone",
+    "preparing": "W przygotowaniu",
+    "ready": "Gotowe",
+    "outForDelivery": "W dostawie",
+    "delivered": "Dostarczone",
+    "cancelled": "Anulowane",
+    "toggleRowSelection": "Przełącz zaznaczenie wiersza",
+    "openFocusedOrder": "Otwórz aktywne zamówienie",
+    "selectAllVisible": "Zaznacz wszystkie widoczne",
+    "clearSelection": "Wyczyść zaznaczenie / zamknij panel",
+    "showCheatsheet": "Pokaż tę ściągę"
+  }
+}

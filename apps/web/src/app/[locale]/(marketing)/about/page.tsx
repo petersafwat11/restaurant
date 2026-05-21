@@ -1,8 +1,14 @@
+import type { Metadata } from 'next';
 import { Container, SectionHeader } from '@repo/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getAlternates } from '@/lib/seo/alternates';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];
+}
+
+export function generateMetadata(): Metadata {
+  return { alternates: getAlternates('/about') };
 }
 
 export default async function AboutPage({

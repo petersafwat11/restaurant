@@ -1,0 +1,36 @@
+{
+  "tagline": "Kebab the way it should be.",
+  "social": {
+    "instagram": "Instagram",
+    "facebook": "Facebook"
+  },
+  "columns": {
+    "menu": {
+      "heading": "Menu",
+      "kebab": "Kebab",
+      "falafel": "Falafel",
+      "tacos": "Tacos",
+      "boxAndPlates": "Box & Plates",
+      "drinks": "Drinks",
+      "viewFullMenu": "View full menu →"
+    },
+    "visit": {
+      "heading": "Visit"
+    },
+    "company": {
+      "heading": "Company",
+      "about": "About",
+      "contact": "Contact",
+      "loyalty": "Loyalty",
+      "referrals": "Referrals"
+    }
+  },
+  "bottom": {
+    "copyright": "© 2026 Szef Donald sp. z o.o. · NIP 1234567890",
+    "legal": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    }
+  }
+}

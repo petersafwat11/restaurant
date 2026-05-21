@@ -15,6 +15,7 @@ import enAdminCustomersDetail from '../messages/en/admin/customers/detail.json';
 import enAdminCustomersList from '../messages/en/admin/customers/list.json';
 import enAdminDashboard from '../messages/en/admin/dashboard.json';
 import enAdminKds from '../messages/en/admin/kds.json';
+import enAdminKeyboardShortcuts from '../messages/en/admin/keyboard-shortcuts.json';
 import enAdminLayout from '../messages/en/admin/layout.json';
 import enAdminMenu from '../messages/en/admin/menu.json';
 import enAdminOrdersDetail from '../messages/en/admin/orders/detail.json';
@@ -53,6 +54,7 @@ import enWebAuthLogin from '../messages/en/web/auth/login.json';
 import enWebAuthRegister from '../messages/en/web/auth/register.json';
 import enWebAuthResetPassword from '../messages/en/web/auth/reset-password.json';
 import enWebAuthVerifyEmail from '../messages/en/web/auth/verify-email.json';
+import enWebFooter from '../messages/en/web/footer.json';
 import enWebLayout from '../messages/en/web/layout.json';
 import enWebMarketingAbout from '../messages/en/web/marketing/about.json';
 import enWebMarketingContact from '../messages/en/web/marketing/contact.json';
@@ -80,6 +82,7 @@ import plAdminCustomersDetail from '../messages/pl/admin/customers/detail.json';
 import plAdminCustomersList from '../messages/pl/admin/customers/list.json';
 import plAdminDashboard from '../messages/pl/admin/dashboard.json';
 import plAdminKds from '../messages/pl/admin/kds.json';
+import plAdminKeyboardShortcuts from '../messages/pl/admin/keyboard-shortcuts.json';
 import plAdminLayout from '../messages/pl/admin/layout.json';
 import plAdminMenu from '../messages/pl/admin/menu.json';
 import plAdminOrdersDetail from '../messages/pl/admin/orders/detail.json';
@@ -118,6 +121,7 @@ import plWebAuthLogin from '../messages/pl/web/auth/login.json';
 import plWebAuthRegister from '../messages/pl/web/auth/register.json';
 import plWebAuthResetPassword from '../messages/pl/web/auth/reset-password.json';
 import plWebAuthVerifyEmail from '../messages/pl/web/auth/verify-email.json';
+import plWebFooter from '../messages/pl/web/footer.json';
 import plWebLayout from '../messages/pl/web/layout.json';
 import plWebMarketingAbout from '../messages/pl/web/marketing/about.json';
 import plWebMarketingContact from '../messages/pl/web/marketing/contact.json';
@@ -151,6 +155,7 @@ const EN_MESSAGES = {
     },
     dashboard: enAdminDashboard,
     kds: enAdminKds,
+    keyboardShortcuts: enAdminKeyboardShortcuts,
     layout: enAdminLayout,
     menu: enAdminMenu,
     orders: {
@@ -207,6 +212,7 @@ const EN_MESSAGES = {
       resetPassword: enWebAuthResetPassword,
       verifyEmail: enWebAuthVerifyEmail,
     },
+    footer: enWebFooter,
     layout: enWebLayout,
     marketing: {
       about: enWebMarketingAbout,
@@ -250,6 +256,7 @@ const PL_MESSAGES = {
     },
     dashboard: plAdminDashboard,
     kds: plAdminKds,
+    keyboardShortcuts: plAdminKeyboardShortcuts,
     layout: plAdminLayout,
     menu: plAdminMenu,
     orders: {
@@ -306,6 +313,7 @@ const PL_MESSAGES = {
       resetPassword: plWebAuthResetPassword,
       verifyEmail: plWebAuthVerifyEmail,
     },
+    footer: plWebFooter,
     layout: plWebLayout,
     marketing: {
       about: plWebMarketingAbout,
