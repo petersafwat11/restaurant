@@ -1,13 +1,12 @@
 import type { Coupon, Promotion } from '@repo/db';
 import { type ValidateCouponResponseDto, type ValidationFailureReason } from '@repo/types';
-import { clampNonNegative, decimalToString, multiply, toDecimal } from '@repo/utils';
+import { clampNonNegative, decimalToString, multiply, toDecimal } from '@repo/utils/money';
 
 export interface ValidationContext {
   coupon: Coupon & { promotion: Promotion };
   subtotal: string;
   redemptionCount: number;
   perUserRedemptions: number;
-  restaurantId: string;
 }
 
 const REASON_MESSAGES: Record<ValidationFailureReason, string> = {
@@ -17,7 +16,6 @@ const REASON_MESSAGES: Record<ValidationFailureReason, string> = {
   MIN_SUBTOTAL_NOT_MET: 'Your subtotal does not meet the minimum for this coupon',
   PER_USER_LIMIT_REACHED: 'You have already used this coupon the maximum number of times',
   MAX_REDEMPTIONS_REACHED: 'This coupon has been fully redeemed',
-  WRONG_RESTAURANT: 'This coupon is not valid at this restaurant',
 };
 
 export function fail(reason: ValidationFailureReason): ValidateCouponResponseDto {
@@ -34,7 +32,6 @@ export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDt
   const promo = coupon.promotion;
 
   if (!promo.isActive) return fail('PROMOTION_INACTIVE');
-  if (promo.restaurantId !== ctx.restaurantId) return fail('WRONG_RESTAURANT');
 
   const now = new Date();
   if (promo.startsAt && now < promo.startsAt) return fail('OUT_OF_WINDOW');

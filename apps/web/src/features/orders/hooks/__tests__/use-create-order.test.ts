@@ -11,7 +11,6 @@ const fakeOrder = {
   id: 'order_1',
   orderNumber: 'R-2026-000001',
   userId: 'u1',
-  restaurantId: 'r1',
   type: 'PICKUP' as const,
   status: 'PENDING' as const,
   subtotal: '38.00',
@@ -41,10 +40,10 @@ describe('useCreateOrder', () => {
       }),
     );
 
-    const { result } = renderHookWithProviders(() => useCreateOrder('r1'));
+    const { result } = renderHookWithProviders(() => useCreateOrder());
 
     // Two mutate() calls in quick succession should reuse the same key.
-    const input = { restaurantId: 'r1', type: 'PICKUP' as const, tipAmount: '0' };
+    const input = { type: 'PICKUP' as const, tipAmount: '0' };
     result.current.mutate(input);
     result.current.mutate(input);
 

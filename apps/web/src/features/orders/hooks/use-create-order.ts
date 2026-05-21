@@ -18,7 +18,7 @@ import { orderQueryKeys } from '../query-keys';
  * 5xx, accidental double-clicks). When the order succeeds, the ref is
  * regenerated so the next order gets a fresh key.
  */
-export function useCreateOrder(restaurantId: string) {
+export function useCreateOrder() {
   const qc = useQueryClient();
   const setCart = useCartStore((s) => s.setCart);
   const idempotencyKey = useRef<string>(crypto.randomUUID());
@@ -27,7 +27,7 @@ export function useCreateOrder(restaurantId: string) {
     mutationFn: (input) => getApiClient().orders.create(input, idempotencyKey.current),
     onSuccess: (data) => {
       // Cart is cleared server-side; mirror in the local cache.
-      qc.invalidateQueries({ queryKey: cartQueryKeys.byRestaurant(restaurantId) });
+      qc.invalidateQueries({ queryKey: cartQueryKeys.all });
       setCart(null);
       qc.setQueryData(orderQueryKeys.detail(data.id), data);
       qc.invalidateQueries({ queryKey: orderQueryKeys.all });

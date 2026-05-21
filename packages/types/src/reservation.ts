@@ -11,7 +11,6 @@ export type ReservationStatus = (typeof RESERVATION_STATUSES)[number];
 
 export const TableSchema = z.object({
   id: z.string(),
-  restaurantId: z.string(),
   name: z.string(),
   capacity: z.number().int().min(1),
 });
@@ -31,7 +30,6 @@ export const TableListSchema = z.array(TableSchema);
 export const ReservationSchema = z.object({
   id: z.string(),
   userId: z.string().nullable(),
-  restaurantId: z.string(),
   tableId: z.string().nullable(),
   guestCount: z.number().int().min(1),
   startAt: z.string(),
@@ -52,7 +50,6 @@ export const ReservationListSchema = z.object({
 export type ReservationListDto = z.infer<typeof ReservationListSchema>;
 
 export const CreateReservationSchema = z.object({
-  restaurantId: z.string().min(1),
   startAt: z.string().datetime(),
   partySize: z.number().int().min(1).max(50),
   contactName: z.string().min(1).max(120),
@@ -83,8 +80,16 @@ export const SeatReservationSchema = z.object({
 });
 export type SeatReservationDto = z.infer<typeof SeatReservationSchema>;
 
+// Admin drag-to-move on the calendar. Conflict-checked server-side inside a
+// Serializable transaction; returns 409 with `{ conflictingReservationId }`
+// when the target table+window is already booked.
+export const MoveReservationSchema = z.object({
+  startAt: z.string().datetime(),
+  tableId: z.string().min(1).nullable().optional(),
+});
+export type MoveReservationDto = z.infer<typeof MoveReservationSchema>;
+
 export const AvailabilityQuerySchema = z.object({
-  restaurantId: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD'),
   partySize: z.coerce.number().int().min(1).max(50),
 });
@@ -103,7 +108,6 @@ export const AvailabilityResponseSchema = z.object({
 export type AvailabilityResponseDto = z.infer<typeof AvailabilityResponseSchema>;
 
 export const ReservationListQuerySchema = z.object({
-  restaurantId: z.string().optional(),
   status: z.enum(RESERVATION_STATUSES).optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),

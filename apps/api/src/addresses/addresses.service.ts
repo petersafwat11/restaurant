@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Prisma, UserAddress } from '@repo/db';
-import type { AddressDto, CreateAddressDto, UpdateAddressDto } from '@repo/types';
+import type {
+  AddressDto,
+  CreateAddressDto,
+  UpdateAddressDto,
+} from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AddressesService {
+  private readonly logger = new Logger(AddressesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async list(userId: string): Promise<AddressDto[]> {
@@ -33,9 +39,8 @@ export class AddressesService {
           line2: dto.line2 ?? null,
           city: dto.city,
           state: dto.state ?? null,
-          zip: dto.zip ?? null,
           country: dto.country,
-          geoPoint: (dto.geoPoint ?? null) as Prisma.InputJsonValue,
+          geoPoint: dto.geoPoint as Prisma.InputJsonValue,
           isDefault: shouldBeDefault,
         },
       });
@@ -61,10 +66,9 @@ export class AddressesService {
           ...(dto.line2 !== undefined ? { line2: dto.line2 } : {}),
           ...(dto.city !== undefined ? { city: dto.city } : {}),
           ...(dto.state !== undefined ? { state: dto.state } : {}),
-          ...(dto.zip !== undefined ? { zip: dto.zip } : {}),
           ...(dto.country !== undefined ? { country: dto.country } : {}),
           ...(dto.geoPoint !== undefined
-            ? { geoPoint: (dto.geoPoint ?? null) as Prisma.InputJsonValue }
+            ? { geoPoint: dto.geoPoint as Prisma.InputJsonValue }
             : {}),
           ...(dto.isDefault !== undefined ? { isDefault: dto.isDefault } : {}),
         },
@@ -112,7 +116,6 @@ function toDto(row: UserAddress): AddressDto {
     line2: row.line2,
     city: row.city,
     state: row.state,
-    zip: row.zip,
     country: row.country,
     geoPoint: row.geoPoint as AddressDto['geoPoint'],
     isDefault: row.isDefault,

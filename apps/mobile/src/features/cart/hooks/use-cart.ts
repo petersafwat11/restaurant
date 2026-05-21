@@ -5,19 +5,18 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { cartQueryKeys } from '../query-keys';
 
-export function useCart(restaurantId: string): UseQueryResult<CartDto> {
+export function useCart(): UseQueryResult<CartDto> {
   const sessionKey = useCartStore((s) => s.sessionKey);
   const isHydrated = useCartStore((s) => s.isHydrated);
   const setCart = useCartStore((s) => s.setCart);
 
   const query = useQuery<CartDto>({
-    queryKey: cartQueryKeys.byRestaurant(restaurantId),
+    queryKey: cartQueryKeys.current(),
     queryFn: () =>
       getApiClient().cart.get({
-        restaurantId,
         sessionKey: sessionKey ?? undefined,
       }),
-    enabled: Boolean(restaurantId) && isHydrated,
+    enabled: isHydrated,
   });
 
   useEffect(() => {

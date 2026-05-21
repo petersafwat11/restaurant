@@ -1,6 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Coupon, Promotion } from '@repo/db';
 import type {
+  BulkGenerateCouponsDto,
+  BulkGenerateCouponsResponseDto,
   CouponDto,
   CreateCouponDto,
   CreatePromotionDto,
@@ -10,6 +12,7 @@ import type {
   ValidateCouponDto,
   ValidateCouponResponseDto,
 } from '@repo/types';
+import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { fail, validateCoupon } from './coupon-validation';
 
@@ -19,12 +22,35 @@ export class PromotionsService {
 
   // ---- Promotion CRUD ----------------------------------------------------
 
-  async list(activeOnly?: boolean): Promise<PromotionDto[]> {
+  async list(activeOnly?: boolean, includeArchived = false): Promise<PromotionDto[]> {
     const rows = await this.prisma.promotion.findMany({
-      where: activeOnly ? { isActive: true } : undefined,
+      where: {
+        ...(activeOnly ? { isActive: true } : {}),
+        ...(includeArchived ? {} : { isArchived: false }),
+      },
       orderBy: { name: 'asc' },
     });
     return rows.map(toPromotionDto);
+  }
+
+  async archive(id: string): Promise<PromotionDto> {
+    const existing = await this.prisma.promotion.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Promotion not found');
+    const updated = await this.prisma.promotion.update({
+      where: { id },
+      data: { isArchived: true, archivedAt: new Date(), isActive: false },
+    });
+    return toPromotionDto(updated);
+  }
+
+  async unarchive(id: string): Promise<PromotionDto> {
+    const existing = await this.prisma.promotion.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Promotion not found');
+    const updated = await this.prisma.promotion.update({
+      where: { id },
+      data: { isArchived: false, archivedAt: null },
+    });
+    return toPromotionDto(updated);
   }
 
   async getById(id: string): Promise<PromotionDto> {
@@ -36,7 +62,6 @@ export class PromotionsService {
   async create(dto: CreatePromotionDto): Promise<PromotionDto> {
     const row = await this.prisma.promotion.create({
       data: {
-        restaurantId: dto.restaurantId,
         name: dto.name,
         description: dto.description ?? null,
         type: dto.type,
@@ -72,10 +97,11 @@ export class PromotionsService {
     return toPromotionDto(updated);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<{ id: string }> {
     const existing = await this.prisma.promotion.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Promotion not found');
     await this.prisma.promotion.delete({ where: { id } });
+    return { id: existing.id };
   }
 
   // ---- Coupon CRUD -------------------------------------------------------
@@ -111,6 +137,56 @@ export class PromotionsService {
       }
       throw err;
     }
+  }
+
+  async bulkGenerateCoupons(
+    promotionId: string,
+    dto: BulkGenerateCouponsDto,
+  ): Promise<BulkGenerateCouponsResponseDto> {
+    const promo = await this.prisma.promotion.findUnique({
+      where: { id: promotionId },
+    });
+    if (!promo) throw new NotFoundException('Promotion not found');
+
+    const prefix = (dto.prefix ?? '').toUpperCase();
+    const codeLen = dto.codeLength ?? 8;
+    const codes = new Set<string>();
+    while (codes.size < dto.quantity) {
+      codes.add(`${prefix}${this.randomCode(codeLen)}`);
+    }
+
+    const created: CouponDto[] = [];
+    for (const code of codes) {
+      try {
+        const row = await this.prisma.coupon.create({
+          data: {
+            promotionId,
+            code,
+            maxRedemptions: dto.maxRedemptions ?? null,
+            perUserLimit: dto.perUserLimit ?? 1,
+          },
+        });
+        created.push(toCouponDto({ ...row, _count: { redemptions: 0 } }));
+      } catch (err) {
+        if ((err as { code?: string }).code === 'P2002') {
+          // Skip duplicate (collided with an existing code); continue with the rest.
+          continue;
+        }
+        throw err;
+      }
+    }
+    return { created: created.length, coupons: created };
+  }
+
+  private randomCode(length: number): string {
+    const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const bytes = randomBytes(length);
+    let out = '';
+    for (let i = 0; i < length; i++) {
+      const byte = bytes[i] ?? 0;
+      out += alphabet[byte % alphabet.length];
+    }
+    return out;
   }
 
   async removeCoupon(id: string): Promise<void> {
@@ -152,7 +228,6 @@ export class PromotionsService {
       subtotal: dto.subtotal,
       redemptionCount,
       perUserRedemptions,
-      restaurantId: dto.restaurantId,
     });
   }
 }
@@ -162,7 +237,6 @@ export class PromotionsService {
 function toPromotionDto(row: Promotion): PromotionDto {
   return {
     id: row.id,
-    restaurantId: row.restaurantId,
     name: row.name,
     description: row.description,
     type: row.type as PromotionType,
@@ -171,6 +245,8 @@ function toPromotionDto(row: Promotion): PromotionDto {
     startsAt: row.startsAt?.toISOString() ?? null,
     endsAt: row.endsAt?.toISOString() ?? null,
     isActive: row.isActive,
+    isArchived: row.isArchived,
+    archivedAt: row.archivedAt?.toISOString() ?? null,
   };
 }
 

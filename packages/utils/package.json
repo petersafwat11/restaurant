@@ -4,8 +4,17 @@
 	"private": true,
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"sideEffects": false,
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./money": "./src/money.ts",
+		"./loyalty": "./src/loyalty.ts"
+	},
+	"typesVersions": {
+		"*": {
+			"money": ["./src/money.ts"],
+			"loyalty": ["./src/loyalty.ts"]
+		}
 	},
 	"scripts": {
 		"test": "vitest run",

@@ -22,15 +22,14 @@ const WEEKDAY_INDEX: Record<string, number> = {
 export class MarketingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async landing(restaurantId?: string): Promise<LandingDataDto> {
-    const restaurant = await this.resolveRestaurant(restaurantId);
+  async landing(): Promise<LandingDataDto> {
+    const restaurant = await this.resolveRestaurant();
 
     const [featured, specials, aggregateRating, locations] = await Promise.all([
       this.prisma.menuItem.findMany({
         where: {
           isAvailable: true,
           isFeatured: true,
-          category: { restaurantId: restaurant.id },
         },
         include: {
           category: { select: { slug: true } },
@@ -39,8 +38,8 @@ export class MarketingService {
         orderBy: { position: 'asc' },
         take: 12,
       }),
-      this.activeSpecials(restaurant.id),
-      this.aggregateRating(restaurant.id),
+      this.activeSpecials(),
+      this.aggregateRating(),
       this.locationSummaries(),
     ]);
 
@@ -68,9 +67,9 @@ export class MarketingService {
     };
   }
 
-  async about(restaurantId?: string): Promise<AboutDataDto> {
-    const restaurant = await this.resolveRestaurant(restaurantId);
-    const aggregateRating = await this.aggregateRating(restaurant.id);
+  async about(): Promise<AboutDataDto> {
+    const restaurant = await this.resolveRestaurant();
+    const aggregateRating = await this.aggregateRating();
     return {
       restaurant: {
         id: restaurant.id,
@@ -85,22 +84,18 @@ export class MarketingService {
     };
   }
 
-  private async resolveRestaurant(restaurantId?: string): Promise<Restaurant> {
-    const restaurant = restaurantId
-      ? await this.prisma.restaurant.findUnique({ where: { id: restaurantId } })
-      : await this.prisma.restaurant.findFirst({
-          where: { isActive: true },
-          orderBy: { createdAt: 'asc' },
-        });
+  private async resolveRestaurant(): Promise<Restaurant> {
+    const restaurant = await this.prisma.restaurant.findFirst({
+      orderBy: { createdAt: 'asc' },
+    });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
     return restaurant;
   }
 
-  private async activeSpecials(restaurantId: string) {
+  private async activeSpecials() {
     const now = new Date();
     const promos = await this.prisma.promotion.findMany({
       where: {
-        restaurantId,
         isActive: true,
         OR: [{ startsAt: null }, { startsAt: { lte: now } }],
         AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
@@ -117,9 +112,9 @@ export class MarketingService {
     }));
   }
 
-  private async aggregateRating(restaurantId: string): Promise<AggregateRatingDto> {
+  private async aggregateRating(): Promise<AggregateRatingDto> {
     const agg = await this.prisma.review.aggregate({
-      where: { isVisible: true, order: { restaurantId } },
+      where: { isVisible: true },
       _avg: { rating: true },
       _count: true,
     });
@@ -135,12 +130,12 @@ export class MarketingService {
   private async locationSummaries(): Promise<LocationSummaryDto[]> {
     const restaurants = await this.prisma.restaurant.findMany({
       where: { isActive: true },
-      include: { hours: true },
       orderBy: { createdAt: 'asc' },
     });
+    const hours = await this.prisma.operatingHours.findMany();
     return restaurants.map((r) => {
       const dow = weekdayInTz(new Date(), r.timezone);
-      const today = r.hours.find((h) => h.dayOfWeek === dow);
+      const today = hours.find((h) => h.dayOfWeek === dow);
       const geo = r.geoPoint as { lat?: number; lng?: number } | null;
       return {
         id: r.id,

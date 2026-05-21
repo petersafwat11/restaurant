@@ -1,12 +1,11 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('reservations (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -20,27 +19,18 @@ describe('reservations (e2e)', () => {
     await resetMenuDb(app);
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
-
-    const r = await inject('POST', '/api/v1/restaurants', {
-      slug: 'reservations-e2e',
-      name: 'Reservations E2E',
-      phone: '+48 22 555 0002',
-      email: 'res@e2e.local',
-      address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-    }, ownerToken);
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     // Set up open hours every day 11:00-23:00 in UTC.
     const prisma = app.get(PrismaService);
     for (let day = 0; day < 7; day++) {
       await prisma.operatingHours.upsert({
-        where: { restaurantId_dayOfWeek: { restaurantId, dayOfWeek: day } },
+        where: { dayOfWeek: day },
         update: { opensAt: '11:00', closesAt: '23:00', isClosed: false },
-        create: { restaurantId, dayOfWeek: day, opensAt: '11:00', closesAt: '23:00', isClosed: false },
+        create: { dayOfWeek: day, opensAt: '11:00', closesAt: '23:00', isClosed: false },
       });
     }
-    await prisma.restaurant.update({
-      where: { id: restaurantId },
+    await prisma.restaurant.updateMany({
       data: { timezone: 'UTC' },
     });
   });
@@ -58,7 +48,7 @@ describe('reservations (e2e)', () => {
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const res = await inject(
       'GET',
-      `/api/v1/reservations/availability?restaurantId=${restaurantId}&date=${tomorrow}&partySize=2`,
+      `/api/v1/reservations/availability?date=${tomorrow}&partySize=2`,
     );
     expect(res.statusCode).toBe(200);
     expect(res.json().slots).toEqual([]);
@@ -67,7 +57,7 @@ describe('reservations (e2e)', () => {
   it('books a reservation when capacity allows', async () => {
     await inject(
       'POST',
-      `/api/v1/restaurants/${restaurantId}/tables`,
+      `/api/v1/tables`,
       { name: 'T1', capacity: 4 },
       ownerToken,
     );
@@ -76,7 +66,6 @@ describe('reservations (e2e)', () => {
     future.setUTCHours(18, 0, 0, 0);
 
     const res = await inject('POST', '/api/v1/reservations', {
-      restaurantId,
       startAt: future.toISOString(),
       partySize: 2,
       contactName: 'Casey',
@@ -90,7 +79,7 @@ describe('reservations (e2e)', () => {
   it('rejects second concurrent booking on same slot', async () => {
     await inject(
       'POST',
-      `/api/v1/restaurants/${restaurantId}/tables`,
+      `/api/v1/tables`,
       { name: 'T1', capacity: 4 },
       ownerToken,
     );
@@ -99,7 +88,6 @@ describe('reservations (e2e)', () => {
     future.setUTCHours(18, 0, 0, 0);
 
     const payload = {
-      restaurantId,
       startAt: future.toISOString(),
       partySize: 2,
       contactName: 'A',
@@ -119,14 +107,13 @@ describe('reservations (e2e)', () => {
   it('admin can cancel a reservation', async () => {
     await inject(
       'POST',
-      `/api/v1/restaurants/${restaurantId}/tables`,
+      `/api/v1/tables`,
       { name: 'T1', capacity: 4 },
       ownerToken,
     );
     const future = new Date(Date.now() + 48 * 60 * 60 * 1000);
     future.setUTCHours(18, 0, 0, 0);
     const created = await inject('POST', '/api/v1/reservations', {
-      restaurantId,
       startAt: future.toISOString(),
       partySize: 2,
       contactName: 'A',

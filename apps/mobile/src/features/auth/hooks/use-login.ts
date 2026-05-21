@@ -10,6 +10,11 @@ export function useLogin(): UseMutationResult<AuthResponseDto, ApiError, LoginDt
   return useMutation<AuthResponseDto, ApiError, LoginDto>({
     mutationFn: (input) => getApiClient().auth.login(input),
     onSuccess: async (res) => {
+      // Mobile uses the header-based auth path — the API always returns
+      // tokens in the body for non-cookie audiences.
+      if (!res.accessToken || !res.refreshToken) {
+        throw new Error('Login response missing tokens');
+      }
       await setSession({
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,

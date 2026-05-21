@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { formatMoney } from './format';
 import {
   addAll,
   clampNonNegative,
   decimalToString,
-  formatMoney,
   multiply,
   round2,
   toDecimal,
@@ -41,6 +41,22 @@ describe('money', () => {
   it('formatMoney pins PLN to pl-PL (zł suffix)', () => {
     const out = formatMoney('12.5', 'PLN');
     expect(out).toMatch(/12,50/);
+    expect(out).toMatch(/zł/);
+  });
+
+  // Web port regression — locks the PLN contract the customer site depends on.
+  // Polish locale always uses comma decimal + zł suffix. Thousands grouping
+  // (non-breaking space) requires full ICU data; Node's small-icu build may
+  // omit it, so we accept either grouped or ungrouped. Browser is always grouped.
+  it('formatMoney PLN renders 2dp comma decimal for whole values', () => {
+    const out = formatMoney('24.00', 'PLN');
+    expect(out).toMatch(/24,00/);
+    expect(out).toMatch(/zł/);
+  });
+
+  it('formatMoney PLN renders large values with comma decimal + zł suffix', () => {
+    const out = formatMoney('1234.50', 'PLN');
+    expect(out).toMatch(/1.?234,50/);
     expect(out).toMatch(/zł/);
   });
 

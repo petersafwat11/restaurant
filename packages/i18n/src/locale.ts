@@ -1,7 +1,7 @@
-export type Locale = 'en' | 'ar';
+export type Locale = 'en' | 'ar' | 'pl';
 export type Direction = 'rtl' | 'ltr';
 
-export const LOCALES: readonly Locale[] = ['en', 'ar'] as const;
+export const LOCALES: readonly Locale[] = ['en', 'ar', 'pl'] as const;
 export const DEFAULT_LOCALE: Locale = 'en';
 
 export function getDir(locale: Locale): Direction {

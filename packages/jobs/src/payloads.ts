@@ -105,6 +105,34 @@ export const EmailContactPayloadSchema = z.object({
 });
 export type EmailContactPayload = z.infer<typeof EmailContactPayloadSchema>;
 
+export const EmailContactReplyPayloadSchema = z.object({
+  contactMessageId: z.string(),
+  toEmail: z.string().email(),
+  toName: z.string(),
+  subject: z.string(),
+  body: z.string(),
+  fromUserId: z.string(),
+});
+export type EmailContactReplyPayload = z.infer<typeof EmailContactReplyPayloadSchema>;
+
+export const EmailPromoPayloadSchema = z.object({
+  campaignId: z.string(),
+  recipients: z
+    .array(
+      z.object({
+        userId: z.string().nullable(),
+        email: z.string().email(),
+        name: z.string().nullable(),
+      }),
+    )
+    .min(1)
+    .max(5000),
+  subject: z.string().min(1).max(200),
+  body: z.string().min(1).max(20000),
+  fromUserId: z.string(),
+});
+export type EmailPromoPayload = z.infer<typeof EmailPromoPayloadSchema>;
+
 // Sprint 11 — loyalty / referral reward push + referral invite email.
 export const PushLoyaltyPayloadSchema = z.object({
   userId: z.string(),
@@ -134,14 +162,12 @@ export const ReportsGeneratePayloadSchema = z.object({
 export type ReportsGeneratePayload = z.infer<typeof ReportsGeneratePayloadSchema>;
 
 export const AnalyticsRollupPayloadSchema = z.object({
-  restaurantId: z.string().optional(),
   date: z.string().optional(),
 });
 export type AnalyticsRollupPayload = z.infer<typeof AnalyticsRollupPayloadSchema>;
 
 export const AuditWritePayloadSchema = z.object({
   actorUserId: z.string(),
-  restaurantId: z.string().nullable().optional(),
   action: z.string(),
   resourceType: z.string(),
   resourceId: z.string(),

@@ -12,6 +12,7 @@ import type {
   StaffListQuery,
   UpdateStaffRoleDto,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -31,6 +32,7 @@ export class StaffController {
 
   @Permissions('staff:write')
   @Post('admin/staff/invite')
+  @AuditAction('staff:invite', 'staff')
   invite(
     @CurrentUser() user: RequestUser,
     @Body(new ZodValidationPipe(InviteStaffSchema)) dto: InviteStaffDto,
@@ -46,6 +48,7 @@ export class StaffController {
 
   @Permissions('staff:write')
   @Patch('admin/staff/:userId/role')
+  @AuditAction('staff:role_change', 'staff', { idFrom: 'userId' })
   updateRole(
     @CurrentUser() user: RequestUser,
     @Param('userId') userId: string,
@@ -56,12 +59,14 @@ export class StaffController {
 
   @Permissions('staff:write')
   @Post('admin/staff/:userId/deactivate')
+  @AuditAction('staff:deactivate', 'staff', { idFrom: 'userId' })
   deactivate(@CurrentUser() user: RequestUser, @Param('userId') userId: string) {
     return this.staff.deactivate({ userId: user.id, roleKeys: user.roles }, userId);
   }
 
   @Permissions('staff:write')
   @Post('admin/staff/:userId/reactivate')
+  @AuditAction('staff:reactivate', 'staff', { idFrom: 'userId' })
   reactivate(@Param('userId') userId: string) {
     return this.staff.reactivate(userId);
   }

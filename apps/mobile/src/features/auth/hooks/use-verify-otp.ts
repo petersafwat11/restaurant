@@ -10,6 +10,9 @@ export function useVerifyOtp(): UseMutationResult<AuthResponseDto, ApiError, Ver
   return useMutation<AuthResponseDto, ApiError, VerifyOtpDto>({
     mutationFn: (input) => getApiClient().auth.verifyOtp(input),
     onSuccess: async (res) => {
+      if (!res.accessToken || !res.refreshToken) {
+        throw new Error('Verify OTP response missing tokens');
+      }
       await setSession({
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,

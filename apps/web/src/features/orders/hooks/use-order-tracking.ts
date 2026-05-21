@@ -12,9 +12,9 @@ import { useOrder } from './use-order';
  * Subscribes to `order:{orderId}` and patches the TanStack Query cache when
  * a status_changed event arrives. Returns the live order via `useOrder`.
  */
-export function useOrderTracking(orderId: string) {
+export function useOrderTracking(orderId: string, token?: string | null) {
   const qc = useQueryClient();
-  const query = useOrder(orderId);
+  const query = useOrder(orderId, token);
 
   useEffect(() => {
     if (!orderId) return;
@@ -23,15 +23,21 @@ export function useOrderTracking(orderId: string) {
     let mounted = true;
 
     (async () => {
-      await client.connect();
-      await client.subscribe(ROOMS.order(orderId));
-      if (!mounted) return;
-      unsubscribe = client.on('order.status_changed', (event: OrderStatusChangedEvent) => {
-        if (event.orderId !== orderId) return;
-        qc.setQueryData<OrderDto>(orderQueryKeys.detail(orderId), (prev) =>
-          prev ? { ...prev, status: event.to } : prev,
-        );
-      });
+      try {
+        await client.connect();
+        await client.subscribe(ROOMS.order(orderId));
+        if (!mounted) return;
+        unsubscribe = client.on('order.status_changed', (event: OrderStatusChangedEvent) => {
+          if (event.orderId !== orderId) return;
+          qc.setQueryData<OrderDto>(orderQueryKeys.detail(orderId), (prev) =>
+            prev ? { ...prev, status: event.to } : prev,
+          );
+        });
+      } catch {
+        // Guest orders + auth-less sessions can't authenticate the socket; the
+        // confirmation page still works via the cached order. Swallow so the
+        // rejection doesn't surface as an unhandled error.
+      }
     })();
 
     return () => {

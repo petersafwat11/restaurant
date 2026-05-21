@@ -34,7 +34,6 @@ export class ReceiptProcessor extends WorkerHost {
       include: {
         items: true,
         payment: true,
-        restaurant: { select: { name: true } },
         user: { select: { email: true } },
       },
     });
@@ -43,8 +42,10 @@ export class ReceiptProcessor extends WorkerHost {
       return;
     }
 
+    const restaurant = await this.prisma.restaurant.findFirst({ select: { name: true } });
+
     const pdf = await renderReceiptPdf({
-      restaurantName: order.restaurant.name,
+      restaurantName: restaurant?.name ?? '',
       orderNumber: order.orderNumber,
       createdAt: order.createdAt.toISOString(),
       currency: order.currency,

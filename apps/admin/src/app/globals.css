@@ -1,3 +1,153 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Admin dashboard theme — dark mint palette.
+ * Locked design tokens from docs/design-prompts/README.md §4.
+ *
+ * Customer-facing web and mobile apps will define their own :root block
+ * in their own globals.css with a different palette. `@repo/ui` primitives
+ * never reference hex directly — only the semantic Tailwind classes that
+ * resolve to these vars (bg-surface, text-fg, border-border, etc.).
+ *
+ * Each color is declared as a space-separated RGB triple so that Tailwind's
+ * `<alpha-value>` placeholder works (e.g. bg-surface/60, border-border/30).
+ */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --bg: 11 13 18; /* #0B0D12 */
+    --surface: 20 23 31; /* #14171F */
+    --surface-elevated: 26 30 39; /* #1A1E27 */
+    --surface-warm: 26 30 39; /* alias to surface-elevated for admin (web has a distinct warm beige) */
+
+    /* Borders use white with alpha — declared as the white triple, alpha set
+       at the utility level (border-border/40, border-border-strong/60). */
+    --border: 255 255 255; /* used as rgb(255 255 255 / 0.06) */
+    --border-strong: 255 255 255; /* used as rgb(255 255 255 / 0.12) */
+
+    /* Foreground */
+    --fg: 236 238 243; /* #ECEEF3 */
+    --fg-muted: 156 163 175; /* #9CA3AF */
+    --fg-subtle: 91 96 112; /* #5B6070 */
+    --fg-disabled: 58 63 75; /* #3A3F4B */
+
+    /* Accent (mint) */
+    --accent: 127 232 200; /* #7FE8C8 */
+    --accent-hover: 91 216 180; /* #5BD8B4 */
+    --text-on-accent: 11 13 18; /* near-black on mint */
+
+    /* Semantic state */
+    --positive: 52 211 153; /* #34D399 */
+    --negative: 248 113 113; /* #F87171 */
+    --warning: 251 191 36; /* #FBBF24 */
+    --info: 167 139 250; /* #A78BFA */
+
+    /* Order status palette (README §4 status map) */
+    --status-pending: 91 96 112; /* fg-subtle  */
+    --status-confirmed: 167 139 250; /* info purple */
+    --status-preparing: 251 191 36; /* warning amber */
+    --status-ready: 127 232 200; /* accent mint */
+    --status-out-for-delivery: 96 165 250; /* #60A5FA blue */
+    --status-delivered: 52 211 153; /* positive emerald */
+    --status-cancelled: 248 113 113; /* negative red */
+    --status-refunded: 167 139 250; /* info purple */
+
+    /* Chart palette (5 series, plotting order) */
+    --chart-1: 127 232 200;
+    --chart-2: 167 139 250;
+    --chart-3: 96 165 250;
+    --chart-4: 251 191 36;
+    --chart-5: 248 113 113;
+
+    /* Default border alphas for the border colors above */
+    --border-alpha: 0.06;
+    --border-strong-alpha: 0.12;
+  }
+
+  html,
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-family: Inter, system-ui, sans-serif;
+  }
+
+  /* Tabular numerals everywhere — KPIs, prices, times. */
+  body {
+    font-feature-settings: "tnum" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: rgb(var(--accent) / 0.25);
+    color: rgb(var(--fg));
+  }
+
+  /* Scrollbar — admin uses subtle scrollbars on dark surfaces */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border-strong) / 0.4);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--border-strong) / 0.6);
+  }
+
+  /* Reduced motion — disables row-arrive + accent-pulse animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Hairline border helpers — most surfaces use these two */
+  .border-hairline {
+    border: 1px solid rgb(var(--border) / var(--border-alpha));
+  }
+  .border-hairline-strong {
+    border: 1px solid rgb(var(--border-strong) / var(--border-strong-alpha));
+  }
+
+  .border-b-hairline {
+    border-bottom: 1px solid rgb(var(--border) / var(--border-alpha));
+  }
+  .border-t-hairline {
+    border-top: 1px solid rgb(var(--border) / var(--border-alpha));
+  }
+  .border-r-hairline {
+    border-right: 1px solid rgb(var(--border) / var(--border-alpha));
+  }
+  .border-l-hairline {
+    border-left: 1px solid rgb(var(--border) / var(--border-alpha));
+  }
+}
+
+@media print {
+  /* Hide app chrome on print — keep just the page body so receipts print clean. */
+  [data-print="hide"],
+  [aria-label="Primary"],
+  aside[role="complementary"] {
+    display: none !important;
+  }
+  body,
+  [data-print="surface"] {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

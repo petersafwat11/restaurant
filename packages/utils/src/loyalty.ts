@@ -8,8 +8,11 @@ import { type DecimalLike, round2, toDecimal } from './money';
 
 // 1 point per whole currency unit of eligible spend (tips excluded upstream).
 export const POINTS_PER_CURRENCY_UNIT = 1;
-// 100 points == 1 currency unit when redeemed.
-export const CURRENCY_PER_POINT = new Decimal('0.01');
+// 100 points == 1 currency unit when redeemed. Lazily constructed because
+// `@prisma/client/runtime/library` doesn't expose `Decimal` as a constructor
+// in browser bundles — a top-level `new Decimal()` would crash the whole
+// utils barrel when imported from the admin app.
+const currencyPerPoint = (): Decimal => new Decimal('0.01');
 
 export const LOYALTY_TIERS = ['bronze', 'silver', 'gold', 'platinum'] as const;
 export type LoyaltyTierName = (typeof LOYALTY_TIERS)[number];
@@ -39,7 +42,7 @@ export function pointsForAmount(eligibleAmount: DecimalLike): number {
 /** Currency discount for a number of points (rounded to 2dp). */
 export function discountForPoints(points: number): Decimal {
   if (!Number.isFinite(points) || points <= 0) return new Decimal(0);
-  return round2(new Decimal(Math.floor(points)).times(CURRENCY_PER_POINT));
+  return round2(new Decimal(Math.floor(points)).times(currencyPerPoint()));
 }
 
 /**
@@ -50,7 +53,7 @@ export function maxRedeemablePoints(balance: number, subtotal: DecimalLike): num
   const safeBalance = Math.max(0, Math.floor(balance));
   const sub = toDecimal(subtotal);
   if (sub.lte(0)) return 0;
-  const pointsCappedBySubtotal = Math.floor(sub.dividedBy(CURRENCY_PER_POINT).toNumber());
+  const pointsCappedBySubtotal = Math.floor(sub.dividedBy(currencyPerPoint()).toNumber());
   return Math.max(0, Math.min(safeBalance, pointsCappedBySubtotal));
 }
 

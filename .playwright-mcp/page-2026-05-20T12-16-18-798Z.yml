@@ -1,0 +1,186 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Customers
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [active] [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Audit log" [level=1] [ref=e1153]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "Search (Cmd+K)" [ref=e1056] [cursor=pointer]:
+          - img [ref=e1057]
+          - generic [ref=e1060]: Search orders, customers, items…
+          - generic [ref=e1061]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e1062] [cursor=pointer]:
+          - img [ref=e1063]
+        - button "Account" [ref=e1067] [cursor=pointer]: OO
+      - main [ref=e212]:
+        - generic [ref=e1157]:
+          - textbox "Actor user id…" [ref=e1158]
+          - combobox [ref=e1159]:
+            - option "All actions" [selected]
+            - option "order:create"
+            - option "order:status_changed"
+            - option "order:refund"
+            - option "menu:item:write"
+            - option "menu:item:delete"
+            - option "menu:category:write"
+            - option "menu:category:delete"
+            - option "promotion:write"
+            - option "promotion:delete"
+            - option "staff:invite"
+            - option "staff:role_change"
+            - option "staff:deactivate"
+            - option "staff:reactivate"
+            - option "settings:write"
+            - option "review:moderate"
+            - option "reservation:cancel"
+            - option "reservation:seat"
+            - option "reservation:no_show"
+            - option "reservation:complete"
+          - combobox [ref=e1160]:
+            - option "All resources" [selected]
+            - option "order"
+            - option "payment"
+            - option "menu_item"
+            - option "menu_category"
+            - option "promotion"
+            - option "staff"
+            - option "review"
+            - option "reservation"
+            - option "settings"
+          - generic [ref=e1161]:
+            - text: From
+            - textbox "From" [ref=e1162]
+          - generic [ref=e1163]:
+            - text: To
+            - textbox "To" [ref=e1164]
+        - table [ref=e1167]:
+          - rowgroup [ref=e1168]:
+            - row "When Actor Action Resource IP" [ref=e1169]:
+              - columnheader "When" [ref=e1170]:
+                - generic [ref=e1171]: When
+              - columnheader "Actor" [ref=e1172]:
+                - generic [ref=e1173]: Actor
+              - columnheader "Action" [ref=e1174]:
+                - generic [ref=e1175]: Action
+              - columnheader "Resource" [ref=e1176]:
+                - generic [ref=e1177]: Resource
+              - columnheader "IP" [ref=e1178]:
+                - generic [ref=e1179]: IP
+          - rowgroup [ref=e1180]:
+            - row "3d ago 2026-05-17T19:36:37.568Z cmpa6es12000eu5cchejxx3kk order:create order cmpa6es32000mu5ccj8u2n4im 127.0.0.1" [ref=e1181] [cursor=pointer]:
+              - cell "3d ago 2026-05-17T19:36:37.568Z" [ref=e1182]:
+                - generic [ref=e1183]:
+                  - time [ref=e1184]: 3d ago
+                  - generic [ref=e1185]: 2026-05-17T19:36:37.568Z
+              - cell "cmpa6es12000eu5cchejxx3kk" [ref=e1186]
+              - cell "order:create" [ref=e1187]
+              - cell "order cmpa6es32000mu5ccj8u2n4im" [ref=e1188]:
+                - generic [ref=e1189]:
+                  - generic [ref=e1190]: order
+                  - generic [ref=e1191]: cmpa6es32000mu5ccj8u2n4im
+              - cell "127.0.0.1" [ref=e1192]
+            - row "3d ago 2026-05-17T19:36:23.565Z cmpa6egs50000u5cc07arro5n order:create order cmpa6eh9d0008u5cck7dvioyy 127.0.0.1" [ref=e1193] [cursor=pointer]:
+              - cell "3d ago 2026-05-17T19:36:23.565Z" [ref=e1194]:
+                - generic [ref=e1195]:
+                  - time [ref=e1196]: 3d ago
+                  - generic [ref=e1197]: 2026-05-17T19:36:23.565Z
+              - cell "cmpa6egs50000u5cc07arro5n" [ref=e1198]
+              - cell "order:create" [ref=e1199]
+              - cell "order cmpa6eh9d0008u5cck7dvioyy" [ref=e1200]:
+                - generic [ref=e1201]:
+                  - generic [ref=e1202]: order
+                  - generic [ref=e1203]: cmpa6eh9d0008u5cck7dvioyy
+              - cell "127.0.0.1" [ref=e1204]

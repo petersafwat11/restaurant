@@ -1,7 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { OperatingHours, Prisma, Restaurant } from '@repo/db';
 import type {
-  CreateRestaurantDto,
   OperatingHoursDto,
   RestaurantAdminDto,
   RestaurantPublicDto,
@@ -12,9 +11,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../redis/cache.service';
 
 const CACHE_TTL_SECONDS = 300;
-const LIST_KEY = 'restaurants:list';
-const slugKey = (slug: string) => `restaurant:slug:${slug}`;
+// Single-restaurant project — one cached entry covers all reads. v3 = post
+// restaurantId drop (cart/menu/etc. no longer carry it).
+const PUBLIC_KEY = 'restaurant:public:v3';
 
+/**
+ * Single-restaurant project (decision: drop restaurantId everywhere).
+ *
+ * Every method here operates on the lone `Restaurant` row. Internal callers
+ * that need the singleton id can use `requireRestaurantId()` — but most
+ * downstream services don't need it any more since the FK columns are gone.
+ */
 @Injectable()
 export class RestaurantsService {
   constructor(
@@ -22,58 +29,41 @@ export class RestaurantsService {
     private readonly cache: CacheService,
   ) {}
 
-  async list(): Promise<RestaurantPublicDto[]> {
-    return this.cache.getOrSet<RestaurantPublicDto[]>(LIST_KEY, CACHE_TTL_SECONDS, async () => {
-      const rows = await this.prisma.restaurant.findMany({
-        where: { isActive: true },
-        orderBy: { name: 'asc' },
+  async get(): Promise<RestaurantPublicDto> {
+    return this.cache.getOrSet<RestaurantPublicDto>(PUBLIC_KEY, CACHE_TTL_SECONDS, async () => {
+      const row = await this.prisma.restaurant.findFirst({
+        orderBy: { createdAt: 'asc' },
       });
-      return rows.map((r) => toPublic(r));
+      if (!row || !row.isActive) throw new NotFoundException('Restaurant not configured');
+      const hours = await this.prisma.operatingHours.findMany({ orderBy: { dayOfWeek: 'asc' } });
+      return toPublic(row, hours);
     });
   }
 
-  async getBySlug(slug: string): Promise<RestaurantPublicDto> {
-    return this.cache.getOrSet<RestaurantPublicDto>(slugKey(slug), CACHE_TTL_SECONDS, async () => {
-      const row = await this.prisma.restaurant.findUnique({
-        where: { slug },
-        include: { hours: { orderBy: { dayOfWeek: 'asc' } } },
-      });
-      if (!row || !row.isActive) throw new NotFoundException('Restaurant not found');
-      return toPublic(row, row.hours);
-    });
+  async getAdmin(): Promise<RestaurantAdminDto> {
+    const row = await this.prisma.restaurant.findFirst({ orderBy: { createdAt: 'asc' } });
+    if (!row) throw new NotFoundException('Restaurant not configured');
+    const hours = await this.prisma.operatingHours.findMany({ orderBy: { dayOfWeek: 'asc' } });
+    return {
+      ...toPublic(row, hours),
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
   }
 
-  async create(dto: CreateRestaurantDto): Promise<RestaurantAdminDto> {
-    const existing = await this.prisma.restaurant.findUnique({
-      where: { slug: dto.slug },
-    });
-    if (existing) throw new ConflictException('Slug already in use');
+  async update(dto: UpdateRestaurantDto): Promise<RestaurantAdminDto> {
+    const current = await this.prisma.restaurant.findFirst({ orderBy: { createdAt: 'asc' } });
+    if (!current) throw new NotFoundException('Restaurant not configured');
 
-    const created = await this.prisma.restaurant.create({
-      data: {
-        slug: dto.slug,
-        name: dto.name,
-        description: dto.description ?? null,
-        logoUrl: dto.logoUrl ?? null,
-        coverUrl: dto.coverUrl ?? null,
-        phone: dto.phone,
-        email: dto.email,
-        address: dto.address as Prisma.InputJsonValue,
-        geoPoint: (dto.geoPoint ?? null) as Prisma.InputJsonValue,
-        timezone: dto.timezone ?? 'Europe/Warsaw',
-        currency: dto.currency ?? 'PLN',
-      },
-    });
-    await this.cache.invalidate(LIST_KEY);
-    return toAdmin(created);
-  }
-
-  async update(id: string, dto: UpdateRestaurantDto): Promise<RestaurantAdminDto> {
-    const current = await this.prisma.restaurant.findUnique({ where: { id } });
-    if (!current) throw new NotFoundException('Restaurant not found');
+    if (dto.slug && dto.slug !== current.slug) {
+      const collide = await this.prisma.restaurant.findUnique({ where: { slug: dto.slug } });
+      if (collide && collide.id !== current.id) {
+        throw new ConflictException('Slug already in use');
+      }
+    }
 
     const updated = await this.prisma.restaurant.update({
-      where: { id },
+      where: { id: current.id },
       data: {
         ...(dto.slug !== undefined ? { slug: dto.slug } : {}),
         ...(dto.name !== undefined ? { name: dto.name } : {}),
@@ -87,38 +77,29 @@ export class RestaurantsService {
         ...(dto.timezone !== undefined ? { timezone: dto.timezone } : {}),
         ...(dto.currency !== undefined ? { currency: dto.currency } : {}),
         ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
+        ...(dto.acceptsReservations !== undefined
+          ? { acceptsReservations: dto.acceptsReservations }
+          : {}),
+        ...(dto.acceptsDelivery !== undefined ? { acceptsDelivery: dto.acceptsDelivery } : {}),
+        ...(dto.acceptsPickup !== undefined ? { acceptsPickup: dto.acceptsPickup } : {}),
+        ...(dto.acceptsDineIn !== undefined ? { acceptsDineIn: dto.acceptsDineIn } : {}),
       },
     });
-    await this.cache.invalidate([LIST_KEY, slugKey(current.slug)]);
-    if (dto.slug && dto.slug !== current.slug) {
-      await this.cache.invalidate(slugKey(dto.slug));
-    }
-    return toAdmin(updated);
+    await this.cache.invalidate(PUBLIC_KEY);
+    const hours = await this.prisma.operatingHours.findMany({ orderBy: { dayOfWeek: 'asc' } });
+    return {
+      ...toPublic(updated, hours),
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+    };
   }
 
-  async getHours(restaurantId: string): Promise<OperatingHoursDto[]> {
-    const exists = await this.prisma.restaurant.findUnique({
-      where: { id: restaurantId },
-      select: { id: true, slug: true },
-    });
-    if (!exists) throw new NotFoundException('Restaurant not found');
-
-    const rows = await this.prisma.operatingHours.findMany({
-      where: { restaurantId },
-      orderBy: { dayOfWeek: 'asc' },
-    });
+  async getHours(): Promise<OperatingHoursDto[]> {
+    const rows = await this.prisma.operatingHours.findMany({ orderBy: { dayOfWeek: 'asc' } });
     return rows.map(toHoursDto);
   }
 
-  async updateHours(
-    restaurantId: string,
-    dto: UpdateOperatingHoursDto,
-  ): Promise<OperatingHoursDto[]> {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: restaurantId },
-    });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
-
+  async updateHours(dto: UpdateOperatingHoursDto): Promise<OperatingHoursDto[]> {
     const seen = new Set<number>();
     for (const h of dto.hours) {
       if (seen.has(h.dayOfWeek)) {
@@ -131,19 +112,13 @@ export class RestaurantsService {
       const out: OperatingHours[] = [];
       for (const h of dto.hours) {
         const row = await tx.operatingHours.upsert({
-          where: {
-            restaurantId_dayOfWeek: {
-              restaurantId,
-              dayOfWeek: h.dayOfWeek,
-            },
-          },
+          where: { dayOfWeek: h.dayOfWeek },
           update: {
             opensAt: h.opensAt,
             closesAt: h.closesAt,
             isClosed: h.isClosed,
           },
           create: {
-            restaurantId,
             dayOfWeek: h.dayOfWeek,
             opensAt: h.opensAt,
             closesAt: h.closesAt,
@@ -155,8 +130,18 @@ export class RestaurantsService {
       return out;
     });
 
-    await this.cache.invalidate([LIST_KEY, slugKey(restaurant.slug)]);
+    await this.cache.invalidate(PUBLIC_KEY);
     return result.sort((a, b) => a.dayOfWeek - b.dayOfWeek).map(toHoursDto);
+  }
+
+  /** Returns the singleton restaurant id (needed by a few legacy callers). */
+  async requireRestaurantId(): Promise<string> {
+    const row = await this.prisma.restaurant.findFirst({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    });
+    if (!row) throw new NotFoundException('Restaurant not configured');
+    return row.id;
   }
 }
 
@@ -174,23 +159,20 @@ function toPublic(row: Restaurant, hours?: OperatingHours[]): RestaurantPublicDt
     geoPoint: row.geoPoint as RestaurantPublicDto['geoPoint'],
     timezone: row.timezone,
     currency: row.currency,
+    defaultDeliveryFee: row.defaultDeliveryFee.toFixed(2),
+    minOrderAmount: row.minOrderAmount.toFixed(2),
     isActive: row.isActive,
+    acceptsReservations: row.acceptsReservations,
+    acceptsDelivery: row.acceptsDelivery,
+    acceptsPickup: row.acceptsPickup,
+    acceptsDineIn: row.acceptsDineIn,
     ...(hours ? { hours: hours.map(toHoursDto) } : {}),
-  };
-}
-
-function toAdmin(row: Restaurant): RestaurantAdminDto {
-  return {
-    ...toPublic(row),
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
   };
 }
 
 function toHoursDto(row: OperatingHours): OperatingHoursDto {
   return {
     id: row.id,
-    restaurantId: row.restaurantId,
     dayOfWeek: row.dayOfWeek,
     opensAt: row.opensAt,
     closesAt: row.closesAt,

@@ -21,7 +21,6 @@ export const StaffListSchema = z.array(StaffMemberSchema);
 export const InviteStaffSchema = z.object({
   email: z.string().email(),
   roleKey: z.enum(STAFF_ROLE_KEYS),
-  restaurantId: z.string().optional(),
 });
 export type InviteStaffDto = z.infer<typeof InviteStaffSchema>;
 
@@ -50,6 +49,5 @@ export type UpdateStaffRoleDto = z.infer<typeof UpdateStaffRoleSchema>;
 
 export const StaffListQuerySchema = z.object({
   roleKey: z.enum(STAFF_ROLE_KEYS).optional(),
-  restaurantId: z.string().optional(),
 });
 export type StaffListQuery = z.infer<typeof StaffListQuerySchema>;

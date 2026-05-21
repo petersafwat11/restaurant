@@ -7,7 +7,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:4000';
-const RESTAURANT_ID = __ENV.RESTAURANT_ID || '';
+const ITEM_ID = __ENV.ITEM_ID || '';
 
 export const options = {
   stages: [
@@ -30,18 +30,18 @@ export default function () {
   });
   check(menu, { 'menu 200': (r) => r.status === 200 });
 
-  // Guest cart + order requires a seeded restaurant + session; in CI this
-  // script is smoke-only unless RESTAURANT_ID is provided.
-  if (RESTAURANT_ID) {
+  // Guest cart + order requires a seeded item; in CI this script is
+  // smoke-only unless ITEM_ID is provided.
+  if (ITEM_ID) {
     const sessionKey = `k6-${__VU}-${__ITER}`;
     http.post(
-      `${BASE_URL}/api/v1/cart/items?restaurantId=${RESTAURANT_ID}&sessionKey=${sessionKey}`,
-      JSON.stringify({ menuItemId: __ENV.ITEM_ID, quantity: 1, modifierSelections: [] }),
+      `${BASE_URL}/api/v1/cart/items?sessionKey=${sessionKey}`,
+      JSON.stringify({ menuItemId: ITEM_ID, quantity: 1, modifierSelections: [] }),
       { headers: { 'Content-Type': 'application/json' }, tags: { name: 'addToCart' } },
     );
     const order = http.post(
       `${BASE_URL}/api/v1/orders`,
-      JSON.stringify({ restaurantId: RESTAURANT_ID, type: 'PICKUP', sessionKey, tipAmount: '0' }),
+      JSON.stringify({ type: 'PICKUP', sessionKey, tipAmount: '0' }),
       {
         headers: {
           'Content-Type': 'application/json',

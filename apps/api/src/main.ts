@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+import { join } from 'node:path';
+import fastifyCookie from '@fastify/cookie';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
@@ -43,7 +45,19 @@ async function bootstrap() {
     bodyParser: false,
   });
 
+  // Cookie support — must be registered before any routes consume cookies.
+  await app.register(fastifyCookie as Parameters<typeof app.register>[0]);
+
   app.setGlobalPrefix('api/v1');
+
+  // Serve uploaded files (menu images, etc.) from the host filesystem. Kept
+  // outside the /api/v1 prefix so URLs are short and cache-friendly. In
+  // production the same directory can be fronted by a CDN or nginx.
+  app.useStaticAssets({
+    root: join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+    decorateReply: false,
+  });
 
   app.enableCors({
     origin: [env.APP_URL_WEB, env.APP_URL_ADMIN],

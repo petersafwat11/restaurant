@@ -12,7 +12,6 @@ describe('PricingService.calculateTotals (pure)', () => {
 
   it('3 × 9.99 at 8% tax: exact Decimal arithmetic, no float drift', async () => {
     const result = await service.calculateTotals({
-      restaurantId: 'r1',
       lines: [
         { unitPrice: '9.99', quantity: 1 },
         { unitPrice: '9.99', quantity: 1 },
@@ -27,7 +26,6 @@ describe('PricingService.calculateTotals (pure)', () => {
 
   it('clamps discount to ≤ subtotal, never producing a negative line', async () => {
     const result = await service.calculateTotals({
-      restaurantId: 'r1',
       lines: [{ unitPrice: '10.00', quantity: 1 }],
       couponDiscount: '50.00',
       taxRateOverride: '0',
@@ -38,7 +36,6 @@ describe('PricingService.calculateTotals (pure)', () => {
 
   it('applies tax after discount', async () => {
     const result = await service.calculateTotals({
-      restaurantId: 'r1',
       lines: [{ unitPrice: '100.00', quantity: 1 }],
       couponDiscount: '10.00',
       taxRateOverride: '0.08',
@@ -51,7 +48,6 @@ describe('PricingService.calculateTotals (pure)', () => {
 
   it('adds delivery fee and tip on top', async () => {
     const result = await service.calculateTotals({
-      restaurantId: 'r1',
       lines: [{ unitPrice: '50.00', quantity: 1 }],
       deliveryFee: '8.00',
       tipAmount: '5.00',
@@ -63,7 +59,6 @@ describe('PricingService.calculateTotals (pure)', () => {
   it('rejects a tip greater than subtotal', async () => {
     await expect(
       service.calculateTotals({
-        restaurantId: 'r1',
         lines: [{ unitPrice: '10.00', quantity: 1 }],
         tipAmount: '999.00',
         taxRateOverride: '0',

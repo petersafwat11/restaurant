@@ -3,8 +3,12 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   type ContactMessageListQuery,
   ContactMessageListQuerySchema,
+  type ContactReplyDto,
+  ContactReplySchema,
   type CreateContactMessageDto,
   CreateContactMessageSchema,
+  type CreateContactNoteDto,
+  CreateContactNoteSchema,
   type UpdateContactMessageDto,
   UpdateContactMessageSchema,
 } from '@repo/types';
@@ -45,5 +49,33 @@ export class ContactController {
     @Body(new ZodValidationPipe(UpdateContactMessageSchema)) dto: UpdateContactMessageDto,
   ) {
     return this.contact.updateStatus(id, dto, user.id);
+  }
+
+  @Permissions('contact:read')
+  @Get('admin/contact/:id/notes')
+  listNotes(@Param('id') id: string) {
+    return this.contact.listNotes(id);
+  }
+
+  @Permissions('contact:notes')
+  @Post('admin/contact/:id/notes')
+  @HttpCode(201)
+  addNote(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(CreateContactNoteSchema)) dto: CreateContactNoteDto,
+  ) {
+    return this.contact.addNote(id, dto, user.id);
+  }
+
+  @Permissions('contact:reply')
+  @Post('admin/contact/:id/reply')
+  @HttpCode(201)
+  reply(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(ContactReplySchema)) dto: ContactReplyDto,
+  ) {
+    return this.contact.reply(id, dto, user.id);
   }
 }

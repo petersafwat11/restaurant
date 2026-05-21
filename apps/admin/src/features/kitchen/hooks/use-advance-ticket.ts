@@ -4,6 +4,7 @@ import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
 import type { OrderDto, OrderStatus } from '@repo/types';
+import { STATUS_TOKENS } from '@repo/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderQueryKeys } from '../../orders/query-keys';
 import { kitchenQueryKeys } from '../query-keys';
@@ -26,7 +27,7 @@ export function nextKitchenStatus(current: OrderStatus): OrderStatus | null {
  * shared `POST /orders/:id/status` state-machine endpoint (kitchen role is
  * permitted CONFIRMED→PREPARING→READY server-side).
  */
-export function useAdvanceKitchenTicket(restaurantId: string) {
+export function useAdvanceKitchenTicket() {
   const qc = useQueryClient();
   return useMutation<OrderDto, ApiError, { orderId: string; current: OrderStatus }>({
     mutationFn: async ({ orderId, current }) => {
@@ -35,8 +36,12 @@ export function useAdvanceKitchenTicket(restaurantId: string) {
       return getApiClient().orders.updateStatus(orderId, { to });
     },
     onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: kitchenQueryKeys.feed(restaurantId) });
+      qc.invalidateQueries({ queryKey: kitchenQueryKeys.feed() });
       qc.invalidateQueries({ queryKey: orderQueryKeys.detail(data.id) });
+      notify(
+        'success',
+        `Ticket #${data.orderNumber} → ${STATUS_TOKENS[data.status]?.label ?? data.status}`,
+      );
     },
     onError: (err) => notify('error', err.message),
   });

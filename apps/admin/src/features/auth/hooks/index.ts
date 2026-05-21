@@ -9,3 +9,4 @@ export { useRequestOtp } from './use-request-otp';
 export { useVerifyOtp } from './use-verify-otp';
 export { useUpdateProfile } from './use-update-profile';
 export { useChangePassword } from './use-change-password';
+export { usePermissions } from './use-permissions';

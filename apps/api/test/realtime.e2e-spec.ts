@@ -4,7 +4,7 @@ import { type Socket, io } from 'socket.io-client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ROOMS } from '@repo/types';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 const SOCKET_PATH = '/socket.io/';
 const SUBSCRIBE_TIMEOUT_MS = 3_000;
@@ -15,7 +15,6 @@ describe('realtime (e2e)', () => {
   let baseUrl: string;
   let ownerToken: string;
   let customerToken: string;
-  let restaurantId: string;
   let orderId: string;
 
   beforeAll(async () => {
@@ -40,24 +39,12 @@ describe('realtime (e2e)', () => {
     ownerToken = await ensureOwnerToken(app, 'rt.owner.e2e@test.local');
     customerToken = await register('rt.customer.e2e@test.local');
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'rt-e2e',
-        name: 'Realtime E2E',
-        phone: '+48 22 555 0001',
-        email: 'rt@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const item = await inject(
@@ -73,14 +60,14 @@ describe('realtime (e2e)', () => {
     );
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: item.json().id, quantity: 1, modifierSelections: [] },
       customerToken,
     );
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       customerToken,
       { 'idempotency-key': `rt-${Date.now()}` },
     );
@@ -227,10 +214,10 @@ describe('realtime (e2e)', () => {
     socket.close();
   });
 
-  it("delivers order.created on the restaurant orders room", async () => {
+  it("delivers order.created on the orders room", async () => {
     const socket = connect(ownerToken);
     await waitForConnect(socket);
-    const ack = await subscribe(socket, ROOMS.restaurantOrders(restaurantId));
+    const ack = await subscribe(socket, ROOMS.orders);
     expect(ack.ok).toBe(true);
 
     const eventP = waitForEvent<{ orderId: string; type: string }>(socket, 'order.created');
@@ -239,7 +226,7 @@ describe('realtime (e2e)', () => {
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'sides', name: 'Sides' },
+      { slug: 'sides', name: 'Sides' },
       ownerToken,
     );
     const fries = await inject(
@@ -251,14 +238,14 @@ describe('realtime (e2e)', () => {
     const customer2 = await register('rt.customer2.e2e@test.local');
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: fries.json().id, quantity: 1, modifierSelections: [] },
       customer2,
     );
     await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       customer2,
       { 'idempotency-key': `rt-evt-${Date.now()}` },
     );
@@ -272,7 +259,7 @@ describe('realtime (e2e)', () => {
   it('delivers kitchen.ticket_added when a CONFIRMED order moves to PREPARING', async () => {
     const socket = connect(ownerToken);
     await waitForConnect(socket);
-    const ack = await subscribe(socket, ROOMS.restaurantKitchen(restaurantId));
+    const ack = await subscribe(socket, ROOMS.kitchen);
     expect(ack.ok).toBe(true);
 
     const eventP = waitForEvent<{ orderId: string; status: string }>(socket, 'kitchen.ticket_added');

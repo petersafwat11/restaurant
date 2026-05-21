@@ -14,46 +14,54 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const settingsKeys = {
   all: ['settings'] as const,
-  byRestaurant: (id: string) => ['settings', id] as const,
+  current: () => ['settings', 'current'] as const,
 };
 
-export function useRestaurantSettings(restaurantId: string) {
+export function useRestaurantSettings() {
   return useQuery<RestaurantSettingsDto>({
-    queryKey: settingsKeys.byRestaurant(restaurantId),
-    queryFn: () => getApiClient().settings.get(restaurantId),
-    enabled: Boolean(restaurantId),
+    queryKey: settingsKeys.current(),
+    queryFn: () => getApiClient().settings.get(),
   });
 }
 
-export function useUpdateRestaurantSettings(restaurantId: string) {
+export function useUpdateRestaurantSettings() {
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, UpdateRestaurantSettingsDto>({
-    mutationFn: (input) => getApiClient().settings.update(restaurantId, input),
-    onSuccess: (data) => qc.setQueryData(settingsKeys.byRestaurant(restaurantId), data),
+    mutationFn: (input) => getApiClient().settings.update(input),
+    onSuccess: (data) => {
+      qc.setQueryData(settingsKeys.current(), data);
+      notify('success', 'Settings saved');
+    },
     onError: (err) => notify('error', err.message),
   });
 }
 
-export function useAddHoliday(restaurantId: string) {
+export function useAddHoliday() {
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, HolidayDto>({
-    mutationFn: (input) => getApiClient().settings.addHoliday(restaurantId, input),
-    onSuccess: (data) => qc.setQueryData(settingsKeys.byRestaurant(restaurantId), data),
+    mutationFn: (input) => getApiClient().settings.addHoliday(input),
+    onSuccess: (data) => {
+      qc.setQueryData(settingsKeys.current(), data);
+      notify('success', 'Holiday added');
+    },
     onError: (err) => notify('error', err.message),
   });
 }
 
-export function useRemoveHoliday(restaurantId: string) {
+export function useRemoveHoliday() {
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, string>({
-    mutationFn: (date) => getApiClient().settings.removeHoliday(restaurantId, date),
-    onSuccess: (data) => qc.setQueryData(settingsKeys.byRestaurant(restaurantId), data),
+    mutationFn: (date) => getApiClient().settings.removeHoliday(date),
+    onSuccess: (data) => {
+      qc.setQueryData(settingsKeys.current(), data);
+      notify('success', 'Holiday removed');
+    },
     onError: (err) => notify('error', err.message),
   });
 }
 
-export function useCheckDeliveryZone(restaurantId: string) {
+export function useCheckDeliveryZone() {
   return useMutation<DeliveryZoneCheckResponseDto, ApiError, DeliveryZoneCheckQuery>({
-    mutationFn: (q) => getApiClient().settings.checkDeliveryZone(restaurantId, q),
+    mutationFn: (q) => getApiClient().settings.checkDeliveryZone(q),
   });
 }

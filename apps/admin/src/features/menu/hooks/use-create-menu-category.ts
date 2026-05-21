@@ -11,8 +11,8 @@ export function useCreateMenuCategory() {
   const qc = useQueryClient();
   return useMutation<MenuCategoryDto, ApiError, CreateMenuCategoryDto>({
     mutationFn: (input) => getApiClient().menu.categories.create(input),
-    onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: menuQueryKeys.tree(data.restaurantId) });
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
       notify('success', 'Category created');
     },
     onError: (err) => notify('error', err.message),

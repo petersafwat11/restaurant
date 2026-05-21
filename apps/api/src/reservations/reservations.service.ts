@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -10,6 +11,7 @@ import type {
   AvailabilityResponseDto,
   CreateReservationDto,
   CreateTableDto,
+  MoveReservationDto,
   ReservationDto,
   ReservationListDto,
   ReservationListQuery,
@@ -34,32 +36,29 @@ export class ReservationsService {
     private readonly events: EventEmitter2,
   ) {}
 
+  private async requireRestaurant() {
+    const r = await this.prisma.restaurant.findFirst();
+    if (!r) throw new NotFoundException('Restaurant not configured');
+    return r;
+  }
+
   // ---- Availability ------------------------------------------------------
 
   async getAvailability(query: {
-    restaurantId: string;
     date: string;
     partySize: number;
   }): Promise<AvailabilityResponseDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: query.restaurantId },
-    });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
 
-    const hours = await this.prisma.operatingHours.findMany({
-      where: { restaurantId: query.restaurantId },
-    });
+    const hours = await this.prisma.operatingHours.findMany();
     const tables = await this.prisma.table.findMany({
-      where: { restaurantId: query.restaurantId },
       select: { id: true, capacity: true },
     });
 
-    // Pull existing reservations occupying the day window.
     const dayStart = new Date(`${query.date}T00:00:00Z`);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
     const existing = await this.prisma.reservation.findMany({
       where: {
-        restaurantId: query.restaurantId,
         status: { in: ['confirmed', 'seated'] },
         startAt: { lt: dayEnd },
         endAt: { gt: dayStart },
@@ -82,29 +81,21 @@ export class ReservationsService {
   // ---- Create -----------------------------------------------------------
 
   async create(actor: Actor, dto: CreateReservationDto): Promise<ReservationDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: dto.restaurantId },
-    });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
 
     const startAt = new Date(dto.startAt);
     const slotMs = restaurant.reservationSlotMinutes * 60_000;
     const endAt = new Date(startAt.getTime() + slotMs);
 
-    // Race-safe: book inside a Serializable transaction. If two requests
-    // see the same free table and both try to insert, one will be aborted
-    // by the DB and we surface a clean 400 to the caller.
     let created;
     try {
       created = await this.prisma.$transaction(
         async (tx) => {
           const tables = await tx.table.findMany({
-            where: { restaurantId: dto.restaurantId },
             select: { id: true, capacity: true },
           });
           const overlapping = await tx.reservation.findMany({
             where: {
-              restaurantId: dto.restaurantId,
               status: { in: ['confirmed', 'seated'] },
               startAt: { lt: endAt },
               endAt: { gt: startAt },
@@ -124,7 +115,6 @@ export class ReservationsService {
           return tx.reservation.create({
             data: {
               userId: actor.userId,
-              restaurantId: dto.restaurantId,
               tableId: candidate.id,
               guestCount: dto.partySize,
               startAt,
@@ -155,7 +145,6 @@ export class ReservationsService {
 
     this.events.emit('reservation.created', {
       reservationId: created.id,
-      restaurantId: created.restaurantId,
       userId: created.userId,
       startAt: created.startAt.toISOString(),
       contactEmail: dto.contactEmail ?? null,
@@ -172,7 +161,6 @@ export class ReservationsService {
     }
     const limit = query.limit ?? 20;
     const where: Prisma.ReservationWhereInput = {
-      ...(query.restaurantId ? { restaurantId: query.restaurantId } : {}),
       ...(query.status ? { status: query.status } : {}),
       ...(query.from || query.to
         ? {
@@ -230,7 +218,6 @@ export class ReservationsService {
     if (!canAdmin && !isMine) throw new ForbiddenException('Not yours');
 
     if (!canAdmin) {
-      // Customer-side: notes only, can't change date/time within 24h of start.
       const within24h = row.startAt.getTime() - Date.now() < 24 * 60 * 60_000;
       if (within24h && (dto.startAt || dto.partySize)) {
         throw new BadRequestException(
@@ -250,6 +237,70 @@ export class ReservationsService {
 
     const updated = await this.prisma.reservation.update({ where: { id }, data });
     return toDto(updated);
+  }
+
+  async move(actor: Actor, id: string, dto: MoveReservationDto): Promise<ReservationDto> {
+    if (!actor.permissions.includes('reservation:write')) {
+      throw new ForbiddenException('Not allowed to move reservations');
+    }
+    const existing = await this.prisma.reservation.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Reservation not found');
+    if (existing.status === 'cancelled' || existing.status === 'completed' || existing.status === 'no_show') {
+      throw new BadRequestException('Cannot move a finalized reservation');
+    }
+
+    const restaurant = await this.requireRestaurant();
+
+    const startAt = new Date(dto.startAt);
+    const slotMs = restaurant.reservationSlotMinutes * 60_000;
+    const endAt = new Date(startAt.getTime() + slotMs);
+    const targetTableId = dto.tableId !== undefined ? dto.tableId : existing.tableId;
+
+    try {
+      const updated = await this.prisma.$transaction(
+        async (tx) => {
+          if (targetTableId) {
+            const conflict = await tx.reservation.findFirst({
+              where: {
+                id: { not: id },
+                tableId: targetTableId,
+                status: { in: ['confirmed', 'seated'] },
+                startAt: { lt: endAt },
+                endAt: { gt: startAt },
+              },
+              select: { id: true },
+            });
+            if (conflict) {
+              throw new ConflictException({
+                message: 'Target table is already booked for that window',
+                conflictingReservationId: conflict.id,
+              });
+            }
+          }
+          return tx.reservation.update({
+            where: { id },
+            data: {
+              startAt,
+              endAt,
+              ...(targetTableId
+                ? { table: { connect: { id: targetTableId } } }
+                : { table: { disconnect: true } }),
+            },
+          });
+        },
+        { isolationLevel: 'Serializable' },
+      );
+      return toDto(updated);
+    } catch (err) {
+      if (err instanceof ConflictException) throw err;
+      if (err instanceof BadRequestException) throw err;
+      const code = (err as { code?: string }).code ?? '';
+      const msg = (err as Error).message ?? '';
+      if (code === 'P2034' || msg.includes('could not serialize')) {
+        throw new ConflictException({ message: 'Concurrent edit — retry' });
+      }
+      throw err;
+    }
   }
 
   async cancel(actor: Actor, id: string, reason: string): Promise<ReservationDto> {
@@ -274,7 +325,6 @@ export class ReservationsService {
 
     this.events.emit('reservation.cancelled', {
       reservationId: updated.id,
-      restaurantId: updated.restaurantId,
       userId: updated.userId,
       reason,
     });
@@ -318,13 +368,11 @@ export class ReservationsService {
 
     this.events.emit(`reservation.${to}`, {
       reservationId: updated.id,
-      restaurantId: updated.restaurantId,
     });
 
     return toDto(updated);
   }
 
-  /** Cron-driven no-show sweeper. Returns count of newly no-show'd. */
   async sweepNoShows(now = new Date()): Promise<number> {
     const cutoff = new Date(now.getTime() - 30 * 60_000);
     const candidates = await this.prisma.reservation.findMany({
@@ -342,26 +390,21 @@ export class ReservationsService {
 
   // ---- Tables ------------------------------------------------------------
 
-  async listTables(restaurantId: string): Promise<TableDto[]> {
-    const rows = await this.prisma.table.findMany({
-      where: { restaurantId },
-      orderBy: { name: 'asc' },
-    });
+  async listTables(): Promise<TableDto[]> {
+    const rows = await this.prisma.table.findMany({ orderBy: { name: 'asc' } });
     return rows.map((t) => ({
       id: t.id,
-      restaurantId: t.restaurantId,
       name: t.name,
       capacity: t.capacity,
     }));
   }
 
-  async createTable(restaurantId: string, dto: CreateTableDto): Promise<TableDto> {
+  async createTable(dto: CreateTableDto): Promise<TableDto> {
     const created = await this.prisma.table.create({
-      data: { restaurantId, name: dto.name, capacity: dto.capacity },
+      data: { name: dto.name, capacity: dto.capacity },
     });
     return {
       id: created.id,
-      restaurantId: created.restaurantId,
       name: created.name,
       capacity: created.capacity,
     };
@@ -374,7 +417,6 @@ export class ReservationsService {
     });
     return {
       id: updated.id,
-      restaurantId: updated.restaurantId,
       name: updated.name,
       capacity: updated.capacity,
     };
@@ -388,7 +430,6 @@ export class ReservationsService {
 function toDto(row: {
   id: string;
   userId: string | null;
-  restaurantId: string;
   tableId: string | null;
   guestCount: number;
   startAt: Date;
@@ -403,7 +444,6 @@ function toDto(row: {
   return {
     id: row.id,
     userId: row.userId,
-    restaurantId: row.restaurantId,
     tableId: row.tableId,
     guestCount: row.guestCount,
     startAt: row.startAt.toISOString(),

@@ -16,7 +16,6 @@ export type RealtimeEventName = (typeof REALTIME_EVENT_NAMES)[number];
 export const OrderCreatedEventSchema = z.object({
   orderId: z.string(),
   orderNumber: z.string(),
-  restaurantId: z.string(),
   userId: z.string().nullable(),
   status: z.enum(ORDER_STATUSES),
   type: z.enum(ORDER_TYPES),
@@ -31,7 +30,6 @@ export type OrderCreatedEvent = z.infer<typeof OrderCreatedEventSchema>;
 export const OrderStatusChangedEventSchema = z.object({
   orderId: z.string(),
   orderNumber: z.string(),
-  restaurantId: z.string(),
   userId: z.string().nullable(),
   from: z.enum(ORDER_STATUSES),
   to: z.enum(ORDER_STATUSES),
@@ -56,7 +54,7 @@ export type OrderRefundedEvent = z.infer<typeof OrderRefundedEventSchema>;
 export const KitchenTicketEventSchema = z.object({
   orderId: z.string(),
   orderNumber: z.string(),
-  restaurantId: z.string(),
+  type: z.enum(ORDER_TYPES),
   status: z.enum(ORDER_STATUSES),
   itemCount: z.number().int().min(0),
 });
@@ -89,8 +87,10 @@ export type UpdateOrderStatusDto = z.infer<typeof UpdateOrderStatusSchema>;
 export const KitchenTicketSchema = z.object({
   orderId: z.string(),
   orderNumber: z.string(),
+  type: z.enum(ORDER_TYPES),
   status: z.enum(ORDER_STATUSES),
   confirmedAt: z.string().nullable(),
+  specialRequests: z.string().nullable(),
   items: z.array(
     z.object({
       name: z.string(),
@@ -108,6 +108,6 @@ export const KitchenTicketsListSchema = z.array(KitchenTicketSchema);
 
 export const ROOMS = {
   order: (orderId: string) => `order:${orderId}`,
-  restaurantOrders: (restaurantId: string) => `restaurant:${restaurantId}:orders`,
-  restaurantKitchen: (restaurantId: string) => `restaurant:${restaurantId}:kitchen`,
-};
+  orders: 'orders',
+  kitchen: 'kitchen',
+} as const;

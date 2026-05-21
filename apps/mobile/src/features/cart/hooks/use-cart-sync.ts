@@ -10,12 +10,12 @@ import { cartQueryKeys } from '../query-keys';
  * so the server copy becomes the source of truth again. UI wiring of the
  * actual connectivity listener is the UI sprint's job — this is the data hook.
  */
-export function useCartSync(restaurantId: string, isOnline: boolean): void {
+export function useCartSync(isOnline: boolean): void {
   const qc = useQueryClient();
   const isHydrated = useCartStore((s) => s.isHydrated);
 
   useEffect(() => {
-    if (!restaurantId || !isHydrated || !isOnline) return;
-    qc.invalidateQueries({ queryKey: cartQueryKeys.byRestaurant(restaurantId) });
-  }, [restaurantId, isHydrated, isOnline, qc]);
+    if (!isHydrated || !isOnline) return;
+    qc.invalidateQueries({ queryKey: cartQueryKeys.current() });
+  }, [isHydrated, isOnline, qc]);
 }

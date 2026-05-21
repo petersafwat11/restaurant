@@ -1,4 +1,5 @@
-// TODO(ui): implement location editor (info + hours)
+import { redirect } from 'next/navigation';
+
 export default function LocationEditPage() {
-  return null;
+  redirect('/restaurant');
 }

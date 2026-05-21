@@ -1,8 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { type MarketingQuery, MarketingQuerySchema } from '@repo/types';
 import { Public } from '../common/decorators/public.decorator';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { MarketingService } from './marketing.service';
 
 @ApiTags('marketing')
@@ -12,13 +10,13 @@ export class MarketingController {
 
   @Public()
   @Get('landing')
-  landing(@Query(new ZodValidationPipe(MarketingQuerySchema)) q: MarketingQuery) {
-    return this.marketing.landing(q.restaurantId);
+  landing() {
+    return this.marketing.landing();
   }
 
   @Public()
   @Get('about')
-  about(@Query(new ZodValidationPipe(MarketingQuerySchema)) q: MarketingQuery) {
-    return this.marketing.about(q.restaurantId);
+  about() {
+    return this.marketing.about();
   }
 }

@@ -22,6 +22,12 @@ describe('i18n catalog', () => {
     expect(ar).toEqual(en);
     expect(en.length).toBeGreaterThan(50);
   });
+
+  it('pl has the same key set as en', () => {
+    const en = leafPaths(getMessageCatalog('en')).sort();
+    const pl = leafPaths(getMessageCatalog('pl')).sort();
+    expect(pl).toEqual(en);
+  });
 });
 
 describe('translator', () => {

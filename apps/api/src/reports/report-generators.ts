@@ -5,7 +5,6 @@ import type { PrismaService } from '../prisma/prisma.service';
 const COMPLETED: OrderStatus[] = [OrderStatus.COMPLETED, OrderStatus.DELIVERED];
 
 export interface ReportRunInput {
-  restaurantId: string;
   from?: Date;
   to?: Date;
 }
@@ -55,6 +54,8 @@ export async function runReport(
       return customerRetention(input, prisma);
     case 'orders-detail':
       return ordersDetail(input, prisma);
+    case 'customers':
+      return customersExport(input, prisma);
     default: {
       const _exhaustive: never = kind;
       throw new Error(`Unknown report kind: ${_exhaustive as string}`);
@@ -67,7 +68,6 @@ async function salesByItem(input: ReportRunInput, prisma: PrismaService): Promis
     by: ['menuItemId', 'nameSnapshot'],
     where: {
       order: {
-        restaurantId: input.restaurantId,
         status: { in: COMPLETED },
         ...(input.from || input.to ? { createdAt: between(input.from, input.to) } : {}),
       },
@@ -98,8 +98,7 @@ async function salesByCategory(
     JOIN "Order" o ON o.id = oi."orderId"
     JOIN "MenuItem" mi ON mi.id = oi."menuItemId"
     JOIN "MenuCategory" mc ON mc.id = mi."categoryId"
-    WHERE o."restaurantId" = ${input.restaurantId}
-      AND o.status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
+    WHERE o.status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
       ${input.from ? Prisma.sql`AND o."createdAt" >= ${input.from}` : Prisma.empty}
       ${input.to ? Prisma.sql`AND o."createdAt" < ${input.to}` : Prisma.empty}
     GROUP BY mc.name
@@ -118,8 +117,7 @@ async function salesByHour(input: ReportRunInput, prisma: PrismaService): Promis
            COUNT(*)::bigint AS qty,
            SUM("grandTotal") AS revenue
     FROM "Order"
-    WHERE "restaurantId" = ${input.restaurantId}
-      AND status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
+    WHERE status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
       ${input.from ? Prisma.sql`AND "createdAt" >= ${input.from}` : Prisma.empty}
       ${input.to ? Prisma.sql`AND "createdAt" < ${input.to}` : Prisma.empty}
     GROUP BY hour
@@ -141,8 +139,7 @@ async function salesByDayOfWeek(
            COUNT(*)::bigint AS qty,
            SUM("grandTotal") AS revenue
     FROM "Order"
-    WHERE "restaurantId" = ${input.restaurantId}
-      AND status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
+    WHERE status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
       ${input.from ? Prisma.sql`AND "createdAt" >= ${input.from}` : Prisma.empty}
       ${input.to ? Prisma.sql`AND "createdAt" < ${input.to}` : Prisma.empty}
     GROUP BY dow
@@ -158,7 +155,6 @@ async function salesByDayOfWeek(
 async function taxSummary(input: ReportRunInput, prisma: PrismaService): Promise<GeneratedReport> {
   const orders = await prisma.order.findMany({
     where: {
-      restaurantId: input.restaurantId,
       status: { in: COMPLETED },
       ...(input.from || input.to ? { createdAt: between(input.from, input.to) } : {}),
     },
@@ -168,7 +164,6 @@ async function taxSummary(input: ReportRunInput, prisma: PrismaService): Promise
     where: {
       payment: {
         order: {
-          restaurantId: input.restaurantId,
           ...(input.from || input.to ? { createdAt: between(input.from, input.to) } : {}),
         },
       },
@@ -213,7 +208,6 @@ async function paymentMethods(
     where: {
       status: 'PAID',
       order: {
-        restaurantId: input.restaurantId,
         ...(input.from || input.to ? { createdAt: between(input.from, input.to) } : {}),
       },
     },
@@ -237,13 +231,13 @@ async function customerRetention(
     WITH firsts AS (
       SELECT "userId", MIN(date_trunc('month', "createdAt")) AS cohort
       FROM "Order"
-      WHERE "restaurantId" = ${input.restaurantId} AND "userId" IS NOT NULL
+      WHERE "userId" IS NOT NULL
       GROUP BY "userId"
     ),
     orders_per_month AS (
       SELECT o."userId", date_trunc('month', o."createdAt") AS month
       FROM "Order" o
-      WHERE o."restaurantId" = ${input.restaurantId} AND o."userId" IS NOT NULL
+      WHERE o."userId" IS NOT NULL
       GROUP BY 1, 2
     ),
     cohort_sizes AS (
@@ -282,7 +276,6 @@ async function ordersDetail(
   const items = await prisma.orderItem.findMany({
     where: {
       order: {
-        restaurantId: input.restaurantId,
         ...(input.from || input.to ? { createdAt: between(input.from, input.to) } : {}),
       },
     },
@@ -312,6 +305,75 @@ async function ordersDetail(
     ]),
   ];
   return { csv: csv(out), rowCount: items.length };
+}
+
+async function customersExport(
+  input: ReportRunInput,
+  prisma: PrismaService,
+): Promise<GeneratedReport> {
+  const rows = await prisma.$queryRaw<
+    {
+      id: string;
+      email: string;
+      phone: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      createdAt: Date;
+      lifetimeOrders: bigint;
+      lifetimeSpend: Prisma.Decimal | null;
+      firstOrderAt: Date | null;
+      lastOrderAt: Date | null;
+    }[]
+  >`
+    SELECT u.id, u.email, u.phone, u."firstName", u."lastName", u."createdAt",
+           COALESCE(o.cnt, 0)::bigint AS "lifetimeOrders",
+           o.total AS "lifetimeSpend",
+           o.first_at AS "firstOrderAt",
+           o.last_at AS "lastOrderAt"
+    FROM "User" u
+    JOIN "UserRole" ur ON ur."userId" = u.id
+    JOIN "Role" r ON r.id = ur."roleId" AND r.key = 'customer'
+    LEFT JOIN (
+      SELECT "userId",
+             COUNT(*)::bigint AS cnt,
+             SUM("grandTotal") AS total,
+             MIN("createdAt") AS first_at,
+             MAX("createdAt") AS last_at
+      FROM "Order"
+      WHERE status = ANY(${COMPLETED}::text[]::"OrderStatus"[])
+        ${input.from ? Prisma.sql`AND "createdAt" >= ${input.from}` : Prisma.empty}
+        ${input.to ? Prisma.sql`AND "createdAt" < ${input.to}` : Prisma.empty}
+      GROUP BY "userId"
+    ) o ON o."userId" = u.id
+    ORDER BY u."createdAt" DESC
+  `;
+  const out: (string | number)[][] = [
+    [
+      'customerId',
+      'email',
+      'phone',
+      'firstName',
+      'lastName',
+      'createdAt',
+      'lifetimeOrders',
+      'lifetimeSpend',
+      'firstOrderAt',
+      'lastOrderAt',
+    ],
+    ...rows.map((r) => [
+      r.id,
+      r.email,
+      r.phone ?? '',
+      r.firstName ?? '',
+      r.lastName ?? '',
+      r.createdAt.toISOString(),
+      Number(r.lifetimeOrders),
+      r.lifetimeSpend?.toFixed(2) ?? '0.00',
+      r.firstOrderAt?.toISOString() ?? '',
+      r.lastOrderAt?.toISOString() ?? '',
+    ]),
+  ];
+  return { csv: csv(out), rowCount: rows.length };
 }
 
 function between(from?: Date, to?: Date): Prisma.DateTimeFilter {

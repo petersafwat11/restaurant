@@ -1,12 +1,10 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('marketing (e2e)', () => {
   let app: NestFastifyApplication;
-  let ownerToken: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -19,26 +17,15 @@ describe('marketing (e2e)', () => {
   beforeEach(async () => {
     await resetMenuDb(app);
     await resetDb(app);
-    ownerToken = await ensureOwnerToken(app);
-
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'marketing-e2e',
-        name: 'Marketing E2E',
-        phone: '+48 22 555 0011',
-        email: 'mkt@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-        geoPoint: { lat: 52.23, lng: 21.01 },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureOwnerToken(app);
+    await ensureRestaurant(app);
 
     const prisma = app.get(PrismaService);
+    await prisma.restaurant.updateMany({
+      data: { slug: 'marketing-e2e', email: 'mkt@e2e.local', geoPoint: { lat: 52.23, lng: 21.01 } },
+    });
     const cat = await prisma.menuCategory.create({
-      data: { restaurantId, name: 'Mains', slug: 'mains', position: 0 },
+      data: { name: 'Mains', slug: 'mains', position: 0 },
     });
     await prisma.menuItem.create({
       data: {
@@ -64,7 +51,7 @@ describe('marketing (e2e)', () => {
   it('returns landing data: featured items, rating, locations (public)', async () => {
     const res = await inject(
       'GET',
-      `/api/v1/marketing/landing?restaurantId=${restaurantId}`,
+      `/api/v1/marketing/landing`,
     );
     expect(res.statusCode).toBe(200);
     const body = res.json();
@@ -78,7 +65,7 @@ describe('marketing (e2e)', () => {
   it('returns about data (public)', async () => {
     const res = await inject(
       'GET',
-      `/api/v1/marketing/about?restaurantId=${restaurantId}`,
+      `/api/v1/marketing/about`,
     );
     expect(res.statusCode).toBe(200);
     expect(res.json().restaurant.email).toBe('mkt@e2e.local');

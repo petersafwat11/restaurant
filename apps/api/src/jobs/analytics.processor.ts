@@ -8,9 +8,8 @@ import {
 } from '@repo/jobs';
 import type { Job, Queue } from 'bullmq';
 import { AnalyticsService } from '../analytics/analytics.service';
-import { PrismaService } from '../prisma/prisma.service';
 
-// Hourly: refresh today's working DailyMetric row for every active restaurant.
+// Hourly: refresh today's working DailyMetric row.
 const DAILY_CRON = '0 * * * *';
 // 02:00 UTC: finalize the previous day.
 const FINALIZE_CRON = '0 2 * * *';
@@ -21,7 +20,6 @@ export class AnalyticsProcessor extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(AnalyticsProcessor.name);
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly analytics: AnalyticsService,
     @InjectQueue(QUEUE_ANALYTICS) private readonly queue: Queue,
   ) {
@@ -51,12 +49,6 @@ export class AnalyticsProcessor extends WorkerHost implements OnModuleInit {
       job.name === JOB_ANALYTICS_ROLLUP_FINALIZE
     ) {
       const data = AnalyticsRollupPayloadSchema.parse(job.data ?? {});
-      const restaurants = data.restaurantId
-        ? [{ id: data.restaurantId }]
-        : await this.prisma.restaurant.findMany({
-            where: { isActive: true },
-            select: { id: true },
-          });
 
       const target = data.date ? new Date(data.date) : new Date();
       if (job.name === JOB_ANALYTICS_ROLLUP_FINALIZE && !data.date) {
@@ -64,12 +56,8 @@ export class AnalyticsProcessor extends WorkerHost implements OnModuleInit {
         target.setUTCDate(target.getUTCDate() - 1);
       }
 
-      for (const r of restaurants) {
-        await this.analytics.rollupDay(r.id, target);
-      }
-      this.logger.log(
-        `Rolled up ${restaurants.length} restaurants for ${target.toISOString().slice(0, 10)}`,
-      );
+      await this.analytics.rollupDay(target);
+      this.logger.log(`Rolled up ${target.toISOString().slice(0, 10)}`);
     }
   }
 }

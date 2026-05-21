@@ -8,7 +8,6 @@ export { useCreateMenuItem } from './use-create-menu-item';
 export { useUpdateMenuItem } from './use-update-menu-item';
 export { useDeleteMenuItem } from './use-delete-menu-item';
 export { useToggleItemAvailability } from './use-toggle-item-availability';
-export { useReorderItems } from './use-reorder-items';
 export { useAddMenuItemImage } from './use-add-menu-item-image';
 export { useRemoveMenuItemImage } from './use-remove-menu-item-image';
 export { useReorderMenuItemImages } from './use-reorder-menu-item-images';

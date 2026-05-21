@@ -30,8 +30,7 @@ export class ReportsService {
   }
 
   async create(actorUserId: string, dto: CreateExportDto): Promise<ExportDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { id: dto.restaurantId },
+    const restaurant = await this.prisma.restaurant.findFirst({
       select: { id: true, slug: true },
     });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
@@ -40,7 +39,6 @@ export class ReportsService {
     const rec = await this.prisma.export.create({
       data: {
         requestedByUserId: actorUserId,
-        restaurantId: dto.restaurantId,
         kind: dto.kind,
         params: { ...(dto.params ?? {}), format: dto.format } as unknown as import('@repo/db').Prisma.InputJsonValue,
         status: 'queued',
@@ -96,11 +94,17 @@ export class ReportsService {
     const fs = await import('node:fs/promises');
     const content = await fs.readFile(row.filePath);
     const format = (row.params as { format?: string } | null)?.format ?? 'csv';
+    const slug = await this.restaurantSlug();
     return {
-      filename: this.filenameFor(row.kind, row.restaurantId ?? 'restaurant', format),
+      filename: this.filenameFor(row.kind, slug, format),
       content,
       contentType: format === 'pdf' ? 'application/pdf' : 'text/csv; charset=utf-8',
     };
+  }
+
+  private async restaurantSlug(): Promise<string> {
+    const r = await this.prisma.restaurant.findFirst({ select: { slug: true } });
+    return r?.slug ?? 'restaurant';
   }
 
   /**
@@ -121,20 +125,13 @@ export class ReportsService {
       const report = await runReport(
         row.kind as Parameters<typeof runReport>[0],
         {
-          restaurantId: row.restaurantId ?? '',
           from: params.from ? new Date(params.from) : undefined,
           to: params.to ? new Date(params.to) : undefined,
         },
         this.prisma,
       );
 
-      const restaurant = row.restaurantId
-        ? await this.prisma.restaurant.findUnique({
-            where: { id: row.restaurantId },
-            select: { slug: true },
-          })
-        : null;
-      const slug = restaurant?.slug ?? 'restaurant';
+      const slug = await this.restaurantSlug();
       const filename = this.filenameFor(row.kind, slug, params.format ?? 'csv');
       const filePath = join(EXPORT_DIR, `${id}-${filename}`);
       await writeFile(filePath, report.csv, 'utf8');
@@ -184,7 +181,6 @@ export class ReportsService {
     const report = await runReport(
       dto.kind,
       {
-        restaurantId: dto.restaurantId,
         from: params.from ? new Date(params.from) : undefined,
         to: params.to ? new Date(params.to) : undefined,
       },
@@ -208,7 +204,6 @@ export class ReportsService {
       const count = await this.prisma.orderItem.count({
         where: {
           order: {
-            restaurantId: dto.restaurantId,
             ...(from || to
               ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lt: to } : {}) } }
               : {}),
@@ -234,7 +229,6 @@ export class ReportsService {
 function toDto(row: {
   id: string;
   requestedByUserId: string;
-  restaurantId: string | null;
   kind: string;
   status: string;
   fileSize: number | null;
@@ -248,7 +242,6 @@ function toDto(row: {
   return {
     id: row.id,
     requestedByUserId: row.requestedByUserId,
-    restaurantId: row.restaurantId,
     kind: row.kind as ExportDto['kind'],
     format: (params.format ?? 'csv') as ExportDto['format'],
     status: row.status as ExportStatus,

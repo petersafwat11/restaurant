@@ -1,13 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('payments (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let userToken: string;
-  let restaurantId: string;
   let orderId: string;
   let paymentIntentRef: string;
 
@@ -25,26 +24,12 @@ describe('payments (e2e)', () => {
     ownerToken = await ensureOwnerToken(app);
     userToken = await register('payer.e2e@test.local');
 
-    // Restaurant + menu item + cart + order in PENDING.
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'pay-e2e',
-        name: 'Pay E2E',
-        phone: '+48 22 555 0001',
-        email: 'pay@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
       {
-        restaurantId,
         slug: 'mains',
         name: 'Mains',
       },
@@ -63,14 +48,14 @@ describe('payments (e2e)', () => {
     );
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: item.json().id, quantity: 2, modifierSelections: [] },
       userToken,
     );
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'idempotency-key': 'pay-idem-1' },
     );

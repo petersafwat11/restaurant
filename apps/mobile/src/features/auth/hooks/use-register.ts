@@ -10,6 +10,9 @@ export function useRegister(): UseMutationResult<AuthResponseDto, ApiError, Regi
   return useMutation<AuthResponseDto, ApiError, RegisterDto>({
     mutationFn: (input) => getApiClient().auth.register(input),
     onSuccess: async (res) => {
+      if (!res.accessToken || !res.refreshToken) {
+        throw new Error('Register response missing tokens');
+      }
       await setSession({
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,

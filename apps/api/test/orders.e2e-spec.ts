@@ -1,13 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('orders (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let userToken: string;
   let otherToken: string;
-  let restaurantId: string;
   let burgerId: string;
 
   beforeAll(async () => {
@@ -25,25 +24,12 @@ describe('orders (e2e)', () => {
     userToken = await register('alice.e2e@test.local');
     otherToken = await register('bob.e2e@test.local');
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'orders-e2e',
-        name: 'Orders E2E',
-        phone: '+48 22 555 0001',
-        email: 'orders@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
       {
-        restaurantId,
         slug: 'mains',
         name: 'Mains',
       },
@@ -67,7 +53,7 @@ describe('orders (e2e)', () => {
     // Seed alice's cart with one burger.
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: burgerId, quantity: 2, modifierSelections: [] },
       userToken,
     );
@@ -102,7 +88,6 @@ describe('orders (e2e)', () => {
   it('creates an order with idempotency: same key → same orderId', async () => {
     const idempotencyKey = 'idem-1';
     const body = {
-      restaurantId,
       type: 'PICKUP' as const,
       tipAmount: '0',
     };
@@ -126,7 +111,7 @@ describe('orders (e2e)', () => {
   });
 
   it('concurrent POST /orders with the same Idempotency-Key never creates two orders', async () => {
-    const body = { restaurantId, type: 'PICKUP' as const, tipAmount: '0' };
+    const body = { type: 'PICKUP' as const, tipAmount: '0' };
     const headers = { 'idempotency-key': 'idem-concurrent' };
     const [r1, r2] = await Promise.all([
       inject('POST', '/api/v1/orders', body, userToken, headers),
@@ -151,7 +136,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
     );
     expect(res.statusCode).toBe(400);
@@ -161,7 +146,7 @@ describe('orders (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'idempotency-key': 'idem-scope' },
     );
@@ -184,7 +169,6 @@ describe('orders (e2e)', () => {
       'POST',
       '/api/v1/promotions',
       {
-        restaurantId,
         name: 'Order10',
         type: 'PERCENT',
         value: '10',
@@ -201,7 +185,7 @@ describe('orders (e2e)', () => {
     );
     await inject(
       'POST',
-      `/api/v1/cart/coupon?restaurantId=${restaurantId}`,
+      `/api/v1/cart/coupon`,
       { code: 'ORDER10' },
       userToken,
     );
@@ -209,7 +193,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'idempotency-key': 'idem-coupon' },
     );
@@ -223,6 +207,173 @@ describe('orders (e2e)', () => {
     expect(res.json().couponCode).toBe('ORDER10');
   });
 
+  it('accepts a guest delivery order with inline deliveryAddress', async () => {
+    // Guest seeds a cart via sessionKey, then places a DELIVERY order with
+    // inline deliveryAddress (no signed-in user, no saved UserAddress).
+    const sessionKey = 'guest-inline-1';
+    await inject(
+      'POST',
+      `/api/v1/cart/items?sessionKey=${sessionKey}`,
+      { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
+    );
+
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        sessionKey,
+        type: 'DELIVERY' as const,
+        tipAmount: '0',
+        deliveryAddress: {
+          line1: 'ul. Marszałkowska 102',
+          city: 'Warsaw',
+          country: 'PL',
+          geoPoint: { lat: 52.2308, lng: 21.0114 },
+        },
+      },
+      undefined,
+      { 'idempotency-key': 'idem-guest-inline' },
+    );
+    expect(res.statusCode).toBe(201);
+    expect(res.json().type).toBe('DELIVERY');
+    expect(res.json().deliveryAddress).toMatchObject({
+      line1: 'ul. Marszałkowska 102',
+      city: 'Warsaw',
+      country: 'PL',
+    });
+  });
+
+  it('rejects a DELIVERY order missing both deliveryAddressId and inline deliveryAddress', async () => {
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { type: 'DELIVERY' as const, tipAmount: '0' },
+      userToken,
+      { 'idempotency-key': 'idem-noaddr' },
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('rejects a DELIVERY order whose pin falls outside the configured zones', async () => {
+    // Seed a single tight polygon around (52.230, 21.010); pin is far away.
+    await inject(
+      'PATCH',
+      `/api/v1/admin/restaurant/settings`,
+      {
+        deliveryZones: [
+          {
+            id: 'z1',
+            name: 'Centrum',
+            polygon: {
+              type: 'Polygon' as const,
+              coordinates: [
+                [
+                  [21.005, 52.225],
+                  [21.015, 52.225],
+                  [21.015, 52.235],
+                  [21.005, 52.235],
+                  [21.005, 52.225],
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      ownerToken,
+    );
+
+    const sessionKey = 'guest-out-of-zone';
+    await inject(
+      'POST',
+      `/api/v1/cart/items?sessionKey=${sessionKey}`,
+      { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
+    );
+
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        sessionKey,
+        type: 'DELIVERY' as const,
+        tipAmount: '0',
+        deliveryAddress: {
+          line1: 'far away',
+          city: 'Warsaw',
+          country: 'PL',
+          // way outside the polygon
+          geoPoint: { lat: 51.5, lng: 19.0 },
+        },
+      },
+      undefined,
+      { 'idempotency-key': 'idem-out-of-zone' },
+    );
+    expect(res.statusCode).toBe(400);
+    expect(res.json().message).toMatch(/delivery area/i);
+  });
+
+  it('exposes the public delivery-zones list endpoint', async () => {
+    await inject(
+      'PATCH',
+      `/api/v1/admin/restaurant/settings`,
+      {
+        deliveryZones: [
+          {
+            id: 'z1',
+            name: 'Centrum',
+            polygon: {
+              type: 'Polygon' as const,
+              coordinates: [
+                [
+                  [21.0, 52.2],
+                  [21.05, 52.2],
+                  [21.05, 52.25],
+                  [21.0, 52.25],
+                  [21.0, 52.2],
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      ownerToken,
+    );
+
+    const res = await inject(
+      'GET',
+      `/api/v1/admin/restaurant/delivery-zones`,
+    );
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      zones: Array<{ id: string; name: string; polygon: unknown }>;
+    };
+    expect(body.zones).toHaveLength(1);
+    expect(body.zones[0]).toMatchObject({ id: 'z1', name: 'Centrum' });
+    // Slim public shape — no fee/minOrderAmount leak.
+    expect(body.zones[0]).not.toHaveProperty('fee');
+    expect(body.zones[0]).not.toHaveProperty('minOrderAmount');
+  });
+
+  it('rejects when both deliveryAddressId and inline deliveryAddress are supplied', async () => {
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        type: 'DELIVERY' as const,
+        tipAmount: '0',
+        deliveryAddressId: 'addr_fake',
+        deliveryAddress: {
+          line1: 'a',
+          city: 'b',
+          country: 'PL',
+          geoPoint: { lat: 52.2297, lng: 21.0122 },
+        },
+      },
+      userToken,
+      { 'idempotency-key': 'idem-bothaddr' },
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
   it('rejects an order when the underlying item is no longer available', async () => {
     await inject(
       'POST',
@@ -234,7 +385,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'idempotency-key': 'idem-unavail' },
     );

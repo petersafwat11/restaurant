@@ -1,0 +1,168 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e43] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e44]:
+    - generic [ref=e45]:
+      - link "Szef Donald home" [ref=e46] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e47]:
+          - img [ref=e48]:
+            - generic [ref=e51]: SD
+            - generic [ref=e52]: EST · 2014
+          - generic [ref=e53]: Szef Donald
+      - navigation "Primary" [ref=e54]:
+        - link "Menu" [ref=e55] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e56] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e57] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e58] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e59]:
+        - group "Language" [ref=e61]:
+          - button "PL" [ref=e62] [cursor=pointer]
+          - button "EN" [pressed] [ref=e63] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e64] [cursor=pointer]:
+          - img [ref=e65]
+        - link "Order now" [ref=e69] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e70]:
+    - generic [ref=e72]:
+      - complementary "Account navigation" [ref=e73]:
+        - link "Profile" [ref=e74] [cursor=pointer]:
+          - /url: /account/profile
+          - img [ref=e75]
+          - generic [ref=e78]: Profile
+        - link "Orders" [ref=e79] [cursor=pointer]:
+          - /url: /account/orders
+          - img [ref=e80]
+          - generic [ref=e83]: Orders
+        - link "Addresses" [ref=e84] [cursor=pointer]:
+          - /url: /account/addresses
+          - img [ref=e85]
+          - generic [ref=e88]: Addresses
+        - link "Favorites" [ref=e89] [cursor=pointer]:
+          - /url: /account/favorites
+          - img [ref=e90]
+          - generic [ref=e92]: Favorites
+        - link "Loyalty" [ref=e93] [cursor=pointer]:
+          - /url: /account/loyalty
+          - img [ref=e94]
+          - generic [ref=e98]: Loyalty
+        - link "Referrals" [ref=e99] [cursor=pointer]:
+          - /url: /account/referrals
+          - img [ref=e100]
+          - generic [ref=e105]: Referrals
+        - link "Reviews" [ref=e106] [cursor=pointer]:
+          - /url: /account/reviews
+          - img [ref=e107]
+          - generic [ref=e109]: Reviews
+        - link "Notifications" [ref=e110] [cursor=pointer]:
+          - /url: /account/notifications
+          - img [ref=e111]
+          - generic [ref=e114]: Notifications
+        - button "Sign out" [ref=e116] [cursor=pointer]:
+          - img [ref=e117]
+          - generic [ref=e120]: Sign out
+      - generic [ref=e122]:
+        - generic [ref=e123]:
+          - heading "Profile" [level=1] [ref=e124]
+          - paragraph [ref=e125]: customer@local.test
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]:
+              - generic [ref=e130]: First name
+              - textbox "First name" [ref=e132]: Casey
+            - generic [ref=e133]:
+              - generic [ref=e135]: Last name
+              - textbox "Last name" [ref=e137]: Customer
+          - generic [ref=e138]:
+            - generic [ref=e140]: Phone
+            - generic [ref=e141]:
+              - generic [ref=e142]: "+48"
+              - textbox "Phone" [ref=e144]:
+                - /placeholder: 512 345 678
+          - button "Save changes" [disabled] [ref=e145]
+  - contentinfo [ref=e146]:
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - img [ref=e152]:
+              - generic [ref=e155]: SD
+              - generic [ref=e156]: EST · 2014
+            - generic [ref=e157]: Szef Donald
+          - paragraph [ref=e158]: Kebab the way it should be.
+          - generic [ref=e159]:
+            - link "Instagram" [ref=e160] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e161]
+            - link "Facebook" [ref=e164] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e165]
+        - generic [ref=e167]:
+          - heading "Menu" [level=3] [ref=e168]
+          - generic [ref=e169]:
+            - link "Kebab" [ref=e170] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e171] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e172] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e173] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e174] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e175] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e176]:
+          - heading "Visit" [level=3] [ref=e177]
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: Marszałkowska 102
+              - generic [ref=e181]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e182] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e184]:
+              - generic [ref=e185]:
+                - generic [ref=e186]: Sun
+                - generic [ref=e187]: 12:00–21:00
+              - generic [ref=e188]:
+                - generic [ref=e189]: Mon–Thu
+                - generic [ref=e190]: 11:00–22:00
+              - generic [ref=e191]:
+                - generic [ref=e192]: Fri
+                - generic [ref=e193]: 11:00–23:00
+              - generic [ref=e194]:
+                - generic [ref=e195]: Sat
+                - generic [ref=e196]: 12:00–23:00
+        - generic [ref=e197]:
+          - heading "Company" [level=3] [ref=e198]
+          - generic [ref=e199]:
+            - link "About" [ref=e200] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e201] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e202] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e203] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e204]:
+        - generic [ref=e205]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e206]:
+          - link "Privacy" [ref=e207] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e208] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e209] [cursor=pointer]:
+            - /url: "#"
+  - region "Notifications alt+T"
+  - status [ref=e32]:
+    - generic [ref=e33]:
+      - img [ref=e35]
+      - generic [ref=e37]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+  - alert [ref=e42]

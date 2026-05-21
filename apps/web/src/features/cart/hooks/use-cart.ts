@@ -1,5 +1,6 @@
 'use client';
 
+import { useCartSessionKey } from '@/components/cart-session-provider';
 import { getApiClient } from '@/lib/api-client';
 import { useCartStore } from '@/stores/cart-store';
 import type { CartDto } from '@repo/types';
@@ -7,18 +8,17 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { cartQueryKeys } from '../query-keys';
 
-export function useCart(restaurantId: string): UseQueryResult<CartDto> {
+export function useCart(): UseQueryResult<CartDto> {
   const setCart = useCartStore((s) => s.setCart);
-  const getSessionKey = useCartStore((s) => s.getSessionKey);
+  const sessionKey = useCartSessionKey();
 
   const query = useQuery<CartDto>({
-    queryKey: cartQueryKeys.byRestaurant(restaurantId),
+    queryKey: cartQueryKeys.current(sessionKey),
     queryFn: () =>
       getApiClient().cart.get({
-        restaurantId,
-        sessionKey: getSessionKey(),
+        sessionKey: sessionKey ?? undefined,
       }),
-    enabled: Boolean(restaurantId),
+    enabled: Boolean(sessionKey),
   });
 
   useEffect(() => {

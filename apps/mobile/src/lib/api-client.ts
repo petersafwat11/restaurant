@@ -10,6 +10,7 @@ export function getApiClient(): ApiClient {
 
   cached = createApiClient({
     baseUrl: env.EXPO_PUBLIC_API_URL,
+    audience: 'mobile',
     getAccessToken: () => useAuthStore.getState().accessToken,
     refreshAccessToken: async () => {
       const refreshToken = await secureStorage.getRefreshToken();

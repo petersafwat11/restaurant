@@ -4,15 +4,20 @@ import {
   type ExceptionFilter,
   HttpException,
   HttpStatus,
+  Inject,
   Logger,
 } from '@nestjs/common';
 import { captureException } from '@repo/observability';
 import type { ErrorDto } from '@repo/types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { ENV, type ENV_TYPE } from '../../config/config.module';
+import { clearAuthCookies, isCookieAudience, readAudience } from '../auth/cookies';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
+
+  constructor(@Inject(ENV) private readonly env: ENV_TYPE) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -56,6 +61,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         method: req.method,
         statusCode: status,
       });
+    }
+
+    // Clear stale auth cookies on 401 for cookie-based audiences so the next
+    // request from the same browser starts fresh.
+    if (status === HttpStatus.UNAUTHORIZED) {
+      const audience = readAudience(req);
+      if (isCookieAudience(audience)) {
+        clearAuthCookies(res, this.env, audience);
+      }
     }
 
     res.status(status).send(body);

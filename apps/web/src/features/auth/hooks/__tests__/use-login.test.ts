@@ -23,22 +23,13 @@ const fakeUser = {
 };
 
 afterEach(() => {
-  useAuthStore.setState({ accessToken: null, user: null, isHydrated: false });
+  useAuthStore.setState({ user: null, isHydrated: false });
 });
 
 describe('useLogin', () => {
   it('sets the session on success', async () => {
     server.use(
-      http.post(`${API}/auth/login`, async () =>
-        HttpResponse.json({
-          accessToken: 'at',
-          refreshToken: 'rt',
-          expiresIn: 900,
-          user: fakeUser,
-        }),
-      ),
-      // The store fires a server action to persist the refresh cookie
-      http.post('/api/auth/set-session', async () => HttpResponse.json({ success: true })),
+      http.post(`${API}/auth/login`, async () => HttpResponse.json({ user: fakeUser })),
     );
 
     const { result } = renderHookWithProviders(() => useLogin());
@@ -48,7 +39,6 @@ describe('useLogin', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(useAuthStore.getState().accessToken).toBe('at');
     expect(useAuthStore.getState().user?.email).toBe('user@example.test');
   });
 

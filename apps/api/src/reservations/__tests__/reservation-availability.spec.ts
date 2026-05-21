@@ -12,7 +12,6 @@ const tuesday11to13 = [
   // dayOfWeek 2 = Tuesday
   {
     id: 'h2',
-    restaurantId: 'r',
     dayOfWeek: 2,
     opensAt: '11:00',
     closesAt: '13:00',

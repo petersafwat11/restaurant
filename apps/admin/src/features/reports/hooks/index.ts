@@ -1,6 +1,7 @@
 'use client';
 
 import { getApiClient } from '@/lib/api-client';
+import { triggerBrowserDownload } from '@/lib/download';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
 import type { CreateExportDto, ExportDto } from '@repo/types';
@@ -19,6 +20,7 @@ export function useCreateExport() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: exportKeys.all });
       qc.setQueryData(exportKeys.detail(data.id), data);
+      notify('success', 'Export queued — we’ll let you know when it’s ready');
     },
     onError: (err) => notify('error', err.message),
   });
@@ -28,6 +30,12 @@ export function useExports() {
   return useQuery<ExportDto[]>({
     queryKey: exportKeys.all,
     queryFn: () => getApiClient().reports.listExports(),
+    refetchInterval: (q) => {
+      const data = q.state.data as ExportDto[] | undefined;
+      if (!data) return false;
+      const hasPending = data.some((r) => r.status === 'queued' || r.status === 'processing');
+      return hasPending ? 3000 : false;
+    },
   });
 }
 
@@ -47,9 +55,10 @@ export function useExportStatus(exportId: string | null) {
 export function useDownloadExport() {
   return useMutation<void, ApiError, string>({
     mutationFn: async (exportId) => {
-      const url = getApiClient().reports.downloadUrl(exportId);
-      window.open(url, '_blank');
+      const { blob, filename } = await getApiClient().reports.download(exportId);
+      triggerBrowserDownload(blob, filename);
     },
+    onError: (err) => notify('error', err.message),
   });
 }
 
@@ -67,14 +76,17 @@ export function useExportFlow() {
     }
   }, [create.data, exportId]);
 
+  const ready = status.data?.status === 'ready' && Boolean(exportId);
+  const download = useDownloadExport();
+
   return {
     start: (input: CreateExportDto) => create.mutate(input),
     status: status.data?.status ?? null,
     exportId,
-    downloadUrl:
-      status.data?.status === 'ready' && exportId
-        ? getApiClient().reports.downloadUrl(exportId)
-        : null,
+    canDownload: ready,
+    download: () => {
+      if (exportId && ready) download.mutate(exportId);
+    },
     error: create.error ?? status.error ?? null,
     reset: () => {
       setExportId(null);

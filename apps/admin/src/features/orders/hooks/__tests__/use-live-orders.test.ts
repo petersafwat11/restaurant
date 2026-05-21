@@ -7,7 +7,6 @@ import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const API = 'http://localhost:4000/api/v1';
-const RESTAURANT_ID = 'rest_1';
 
 // Mock the realtime client. We capture handlers passed to `on()` so we can
 // drive event delivery from the test deterministically.
@@ -18,8 +17,8 @@ vi.mock('@/lib/realtime-client', () => ({
   getRealtimeClient: () => ({
     connect: vi.fn().mockResolvedValue(undefined),
     disconnect: vi.fn(),
-    subscribe: vi.fn().mockResolvedValue({ ok: true, room: 'restaurant' }),
-    unsubscribe: vi.fn().mockResolvedValue({ ok: true, room: 'restaurant' }),
+    subscribe: vi.fn().mockResolvedValue({ ok: true, room: 'orders' }),
+    unsubscribe: vi.fn().mockResolvedValue({ ok: true, room: 'orders' }),
     on: (event: RealtimeEventName, handler: Handler) => {
       handlers.set(event, handler);
       return () => handlers.delete(event);
@@ -36,7 +35,6 @@ const seededList: OrderListDto = {
     {
       id: 'ord_seed_1',
       orderNumber: 'R-2026-000001',
-      restaurantId: RESTAURANT_ID,
       status: 'PENDING',
       type: 'PICKUP',
       grandTotal: '10.00',
@@ -57,7 +55,7 @@ beforeEach(() => {
 describe('useLiveOrders', () => {
   it('prepends an order.created event with the type from the payload (no PICKUP placeholder)', async () => {
     const { useLiveOrders } = await import('../use-live-orders');
-    const { result } = renderHookWithProviders(() => useLiveOrders(RESTAURANT_ID));
+    const { result } = renderHookWithProviders(() => useLiveOrders());
 
     // Wait until the seeded list lands in cache and the subscription is up.
     await waitFor(() => {
@@ -69,7 +67,6 @@ describe('useLiveOrders', () => {
     const event: OrderCreatedEvent = {
       orderId: 'ord_live_2',
       orderNumber: 'R-2026-000002',
-      restaurantId: RESTAURANT_ID,
       userId: 'usr_1',
       status: 'PENDING',
       type: 'DELIVERY',
@@ -89,9 +86,8 @@ describe('useLiveOrders', () => {
     expect(injected?.type).toBe('DELIVERY');
     expect(injected?.itemCount).toBe(3);
     expect(injected?.customerName).toBe('Anna K.');
-    expect(injected?.restaurantId).toBe(RESTAURANT_ID);
 
-    // Defensive: confirm the room name helper hasn't shifted under us.
-    expect(ROOMS.restaurantOrders(RESTAURANT_ID)).toBe(`restaurant:${RESTAURANT_ID}:orders`);
+    // Defensive: confirm the room constant hasn't shifted under us.
+    expect(ROOMS.orders).toBe('orders');
   });
 });

@@ -1,0 +1,144 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Staff
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [active] [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Promotions" [level=1] [ref=e1651]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "New promotion" [ref=e1652] [cursor=pointer]:
+          - img [ref=e1564]
+          - text: New promotion
+      - main [ref=e212]:
+        - table [ref=e1655]:
+          - rowgroup [ref=e1656]:
+            - row "Name Type Value Window Min Status" [ref=e1657]:
+              - columnheader "Name" [ref=e1658]:
+                - generic [ref=e1659]: Name
+              - columnheader "Type" [ref=e1660]:
+                - generic [ref=e1661]: Type
+              - columnheader "Value" [ref=e1662]:
+                - generic [ref=e1663]: Value
+              - columnheader "Window" [ref=e1664]:
+                - generic [ref=e1665]: Window
+              - columnheader "Min" [ref=e1666]:
+                - generic [ref=e1667]: Min
+              - columnheader "Status" [ref=e1668]:
+                - generic [ref=e1669]: Status
+          - rowgroup [ref=e1670]:
+            - row "Free Delivery Free delivery on orders over 100 PLN FREE_DELIVERY Free delivery — → — $100.00 ACTIVE" [ref=e1671] [cursor=pointer]:
+              - cell "Free Delivery Free delivery on orders over 100 PLN" [ref=e1672]:
+                - generic [ref=e1673]:
+                  - generic [ref=e1674]: Free Delivery
+                  - generic [ref=e1675]: Free delivery on orders over 100 PLN
+              - cell "FREE_DELIVERY" [ref=e1676]:
+                - generic [ref=e1677]: FREE_DELIVERY
+              - cell "Free delivery" [ref=e1678]
+              - cell "— → —" [ref=e1679]
+              - cell "$100.00" [ref=e1680]
+              - cell "ACTIVE" [ref=e1681]:
+                - generic [ref=e1682]: ACTIVE
+            - row "Welcome 10% Welcome offer — 10% off your first order PERCENT 10.00% off — → — — ACTIVE" [ref=e1683] [cursor=pointer]:
+              - cell "Welcome 10% Welcome offer — 10% off your first order" [ref=e1684]:
+                - generic [ref=e1685]:
+                  - generic [ref=e1686]: Welcome 10%
+                  - generic [ref=e1687]: Welcome offer — 10% off your first order
+              - cell "PERCENT" [ref=e1688]:
+                - generic [ref=e1689]: PERCENT
+              - cell "10.00% off" [ref=e1690]
+              - cell "— → —" [ref=e1691]
+              - cell "—" [ref=e1692]
+              - cell "ACTIVE" [ref=e1693]:
+                - generic [ref=e1694]: ACTIVE

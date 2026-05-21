@@ -40,9 +40,10 @@ export function useUpdateFeatureFlag() {
   const qc = useQueryClient();
   return useMutation<FeatureFlagAdminDto, ApiError, { key: string; patch: UpdateFeatureFlagDto }>({
     mutationFn: ({ key, patch }) => getApiClient().featureFlags.update(key, patch),
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: flagKeys.all });
       qc.invalidateQueries({ queryKey: flagKeys.admin });
+      notify('success', `Flag "${data.key}" ${data.enabled ? 'enabled' : 'disabled'}`);
     },
     onError: (err) => notify('error', err.message),
   });

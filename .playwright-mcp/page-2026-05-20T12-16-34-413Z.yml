@@ -1,0 +1,308 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Contact messages
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [active] [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Menu" [level=1] [ref=e1269]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "Search (Cmd+K)" [ref=e1056] [cursor=pointer]:
+          - img [ref=e1057]
+          - generic [ref=e1060]: Search orders, customers, items…
+          - generic [ref=e1061]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e1062] [cursor=pointer]:
+          - img [ref=e1063]
+        - button "Account" [ref=e1067] [cursor=pointer]: OO
+      - main [ref=e212]:
+        - generic [ref=e1271]:
+          - generic [ref=e1273]:
+            - generic [ref=e1274]:
+              - generic [ref=e1275]: Categories
+              - button "Add category" [ref=e1276] [cursor=pointer]:
+                - img [ref=e1277]
+            - generic [ref=e1278]:
+              - generic [ref=e1279]:
+                - generic [ref=e1281]:
+                  - button "Drag to reorder" [ref=e1282]:
+                    - img [ref=e1283]
+                  - button "Category name 8" [ref=e1290] [cursor=pointer]:
+                    - button "Category name" [ref=e1291]:
+                      - generic [ref=e1292]: Kebab
+                      - img [ref=e1293]
+                    - generic [ref=e1296]: "8"
+                  - button "Delete category" [ref=e1297] [cursor=pointer]:
+                    - img [ref=e1298]
+                - generic [ref=e1302]:
+                  - button "Drag to reorder" [ref=e1303]:
+                    - img [ref=e1304]
+                  - button "Category name 4" [ref=e1311] [cursor=pointer]:
+                    - button "Category name" [ref=e1312]:
+                      - generic [ref=e1313]: Danie Vege — Falafel
+                      - img [ref=e1314]
+                    - generic [ref=e1317]: "4"
+                  - button "Delete category" [ref=e1318] [cursor=pointer]:
+                    - img [ref=e1319]
+                - generic [ref=e1323]:
+                  - button "Drag to reorder" [ref=e1324]:
+                    - img [ref=e1325]
+                  - button "Category name 2" [ref=e1332] [cursor=pointer]:
+                    - button "Category name" [ref=e1333]:
+                      - generic [ref=e1334]: Box Strips i Tacos
+                      - img [ref=e1335]
+                    - generic [ref=e1338]: "2"
+                  - button "Delete category" [ref=e1339] [cursor=pointer]:
+                    - img [ref=e1340]
+                - generic [ref=e1344]:
+                  - button "Drag to reorder" [ref=e1345]:
+                    - img [ref=e1346]
+                  - button "Category name 2" [ref=e1353] [cursor=pointer]:
+                    - button "Category name" [ref=e1354]:
+                      - generic [ref=e1355]: Zestawy
+                      - img [ref=e1356]
+                    - generic [ref=e1359]: "2"
+                  - button "Delete category" [ref=e1360] [cursor=pointer]:
+                    - img [ref=e1361]
+                - generic [ref=e1365]:
+                  - button "Drag to reorder" [ref=e1366]:
+                    - img [ref=e1367]
+                  - button "Category name 3" [ref=e1374] [cursor=pointer]:
+                    - button "Category name" [ref=e1375]:
+                      - generic [ref=e1376]: Dodatki
+                      - img [ref=e1377]
+                    - generic [ref=e1380]: "3"
+                  - button "Delete category" [ref=e1381] [cursor=pointer]:
+                    - img [ref=e1382]
+                - generic [ref=e1386]:
+                  - button "Drag to reorder" [ref=e1387]:
+                    - img [ref=e1388]
+                  - button "Category name 10" [ref=e1395] [cursor=pointer]:
+                    - button "Category name" [ref=e1396]:
+                      - generic [ref=e1397]: Napoje Zimne
+                      - img [ref=e1398]
+                    - generic [ref=e1401]: "10"
+                  - button "Delete category" [ref=e1402] [cursor=pointer]:
+                    - img [ref=e1403]
+              - status [ref=e1406]
+          - generic [ref=e1409]:
+            - generic [ref=e1410]:
+              - tablist "Item filter" [ref=e1411]:
+                - tab "All 8" [selected] [ref=e1412] [cursor=pointer]:
+                  - generic [ref=e1413]: All
+                  - generic [ref=e1414]: "8"
+                - tab "Available 8" [ref=e1415] [cursor=pointer]:
+                  - generic [ref=e1416]: Available
+                  - generic [ref=e1417]: "8"
+                - tab "Unavailable 0" [ref=e1418] [cursor=pointer]:
+                  - generic [ref=e1419]: Unavailable
+                  - generic [ref=e1420]: "0"
+                - tab "Featured 2" [ref=e1421] [cursor=pointer]:
+                  - generic [ref=e1422]: Featured
+                  - generic [ref=e1423]: "2"
+              - button "New item" [ref=e1425] [cursor=pointer]:
+                - img [ref=e1426]
+                - text: New item
+            - table [ref=e1430]:
+              - rowgroup [ref=e1431]:
+                - row "Item Price Dietary Available" [ref=e1432]:
+                  - columnheader [ref=e1433]
+                  - columnheader "Item" [ref=e1434] [cursor=pointer]:
+                    - generic [ref=e1435]:
+                      - text: Item
+                      - img [ref=e1436]
+                  - columnheader "Price" [ref=e1439] [cursor=pointer]:
+                    - generic [ref=e1440]:
+                      - text: Price
+                      - img [ref=e1441]
+                  - columnheader "Dietary" [ref=e1444]:
+                    - generic [ref=e1445]: Dietary
+                  - columnheader "Available" [ref=e1446]:
+                    - generic [ref=e1447]: Available
+              - rowgroup [ref=e1448]:
+                - row "K Kebab Tortilla Kebab w tortilli — mięso, surówki i sos. $21.00 — Toggle availability" [ref=e1449] [cursor=pointer]:
+                  - cell "K" [ref=e1450]:
+                    - generic [ref=e1451]: K
+                  - cell "Kebab Tortilla Kebab w tortilli — mięso, surówki i sos." [ref=e1452]:
+                    - generic [ref=e1453]:
+                      - generic [ref=e1454]: Kebab Tortilla
+                      - generic [ref=e1455]: Kebab w tortilli — mięso, surówki i sos.
+                  - cell "$21.00" [ref=e1456]
+                  - cell "—" [ref=e1457]:
+                    - generic [ref=e1459]: —
+                  - cell "Toggle availability" [ref=e1460]:
+                    - switch "Toggle availability" [checked] [ref=e1462]
+                - row "K Kebab Pita Kebab w picie — mięso, surówki i sos. $21.00 — Toggle availability" [ref=e1463] [cursor=pointer]:
+                  - cell "K" [ref=e1464]:
+                    - generic [ref=e1465]: K
+                  - cell "Kebab Pita Kebab w picie — mięso, surówki i sos." [ref=e1466]:
+                    - generic [ref=e1467]:
+                      - generic [ref=e1468]: Kebab Pita
+                      - generic [ref=e1469]: Kebab w picie — mięso, surówki i sos.
+                  - cell "$21.00" [ref=e1470]
+                  - cell "—" [ref=e1471]:
+                    - generic [ref=e1473]: —
+                  - cell "Toggle availability" [ref=e1474]:
+                    - switch "Toggle availability" [checked] [ref=e1476]
+                - row "K Kebab w Bułce Kebab w bułce — mięso, surówki i sos. $22.00 — Toggle availability" [ref=e1477] [cursor=pointer]:
+                  - cell "K" [ref=e1478]:
+                    - generic [ref=e1479]: K
+                  - cell "Kebab w Bułce Kebab w bułce — mięso, surówki i sos." [ref=e1480]:
+                    - generic [ref=e1481]:
+                      - generic [ref=e1482]: Kebab w Bułce
+                      - generic [ref=e1483]: Kebab w bułce — mięso, surówki i sos.
+                  - cell "$22.00" [ref=e1484]
+                  - cell "—" [ref=e1485]:
+                    - generic [ref=e1487]: —
+                  - cell "Toggle availability" [ref=e1488]:
+                    - switch "Toggle availability" [checked] [ref=e1490]
+                - row "K Kebab Kapsalon Mięso + ser + frytki + sos. $36.00 — Toggle availability" [ref=e1491] [cursor=pointer]:
+                  - cell "K" [ref=e1492]:
+                    - generic [ref=e1493]: K
+                  - cell "Kebab Kapsalon Mięso + ser + frytki + sos." [ref=e1494]:
+                    - generic [ref=e1495]:
+                      - generic [ref=e1496]: Kebab Kapsalon
+                      - generic [ref=e1497]: Mięso + ser + frytki + sos.
+                  - cell "$36.00" [ref=e1498]
+                  - cell "—" [ref=e1499]:
+                    - generic [ref=e1501]: —
+                  - cell "Toggle availability" [ref=e1502]:
+                    - switch "Toggle availability" [checked] [ref=e1504]
+                - row "K Kebab na Talerzu Kebab na talerzu — mięso, surówki i sos. $29.00 — Toggle availability" [ref=e1505] [cursor=pointer]:
+                  - cell "K" [ref=e1506]:
+                    - generic [ref=e1507]: K
+                  - cell "Kebab na Talerzu Kebab na talerzu — mięso, surówki i sos." [ref=e1508]:
+                    - generic [ref=e1509]:
+                      - generic [ref=e1510]: Kebab na Talerzu
+                      - generic [ref=e1511]: Kebab na talerzu — mięso, surówki i sos.
+                  - cell "$29.00" [ref=e1512]
+                  - cell "—" [ref=e1513]:
+                    - generic [ref=e1515]: —
+                  - cell "Toggle availability" [ref=e1516]:
+                    - switch "Toggle availability" [checked] [ref=e1518]
+                - row "K Kebab Box Mięso, surówki, frytki i sos w boxie. $26.00 — Toggle availability" [ref=e1519] [cursor=pointer]:
+                  - cell "K" [ref=e1520]:
+                    - generic [ref=e1521]: K
+                  - cell "Kebab Box Mięso, surówki, frytki i sos w boxie." [ref=e1522]:
+                    - generic [ref=e1523]:
+                      - generic [ref=e1524]: Kebab Box
+                      - generic [ref=e1525]: Mięso, surówki, frytki i sos w boxie.
+                  - cell "$26.00" [ref=e1526]
+                  - cell "—" [ref=e1527]:
+                    - generic [ref=e1529]: —
+                  - cell "Toggle availability" [ref=e1530]:
+                    - switch "Toggle availability" [checked] [ref=e1532]
+                - row "F Fryto Kebab Mięso, surówki, frytki i sos w tortilli. $29.00 — Toggle availability" [ref=e1533] [cursor=pointer]:
+                  - cell "F" [ref=e1534]:
+                    - generic [ref=e1535]: F
+                  - cell "Fryto Kebab Mięso, surówki, frytki i sos w tortilli." [ref=e1536]:
+                    - generic [ref=e1537]:
+                      - generic [ref=e1538]: Fryto Kebab
+                      - generic [ref=e1539]: Mięso, surówki, frytki i sos w tortilli.
+                  - cell "$29.00" [ref=e1540]
+                  - cell "—" [ref=e1541]:
+                    - generic [ref=e1543]: —
+                  - cell "Toggle availability" [ref=e1544]:
+                    - switch "Toggle availability" [checked] [ref=e1546]
+                - row "S Sałatka Kebab Sałatka z mięsem, surówkami i sosem. $26.00 — Toggle availability" [ref=e1547] [cursor=pointer]:
+                  - cell "S" [ref=e1548]:
+                    - generic [ref=e1549]: S
+                  - cell "Sałatka Kebab Sałatka z mięsem, surówkami i sosem." [ref=e1550]:
+                    - generic [ref=e1551]:
+                      - generic [ref=e1552]: Sałatka Kebab
+                      - generic [ref=e1553]: Sałatka z mięsem, surówkami i sosem.
+                  - cell "$26.00" [ref=e1554]
+                  - cell "—" [ref=e1555]:
+                    - generic [ref=e1557]: —
+                  - cell "Toggle availability" [ref=e1558]:
+                    - switch "Toggle availability" [checked] [ref=e1560]

@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import type { MenuItem, MenuItemModifierGroup, MenuItemModifierOption } from '@repo/db';
 import type { ModifierSelectionDto, ModifierSnapshotEntry } from '@repo/types';
-import { Decimal } from '@repo/utils';
+import { Decimal } from '@repo/utils/money';
 
 type MenuItemWithModifiers = MenuItem & {
   modifierGroups: (MenuItemModifierGroup & {

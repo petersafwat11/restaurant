@@ -6,12 +6,13 @@ import type { ApiError } from '@repo/api-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { menuQueryKeys } from '../query-keys';
 
-export function useRemoveMenuItemImage(restaurantId: string, itemId: string) {
+export function useRemoveMenuItemImage(itemId: string) {
   const qc = useQueryClient();
   return useMutation<{ success: true }, ApiError, { imageId: string }>({
     mutationFn: ({ imageId }) => getApiClient().menu.items.removeImage(itemId, imageId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: menuQueryKeys.tree(restaurantId) });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      notify('success', 'Image removed');
     },
     onError: (err) => notify('error', err.message),
   });

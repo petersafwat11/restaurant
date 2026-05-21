@@ -10,11 +10,13 @@ import { Prisma } from '@repo/db';
 import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
 import type {
   CreateOrderDto,
+  DeliveryZoneDto,
   GeoPointDto,
   ModifierSnapshotEntry,
   OrderCreatedEvent,
   OrderCustomerDto,
   OrderDto,
+  OrderExportQuery,
   OrderListDto,
   OrderListItemDto,
   OrderListQuery,
@@ -23,16 +25,29 @@ import type {
   OrderTrackingDto,
   PaymentMethodKind,
 } from '@repo/types';
-import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils';
+import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils/money';
+import {
+  CSV_CONTENT_TYPE,
+  PDF_CONTENT_TYPE,
+  assertWithinRowCap,
+  buildCsv,
+  buildPdf,
+  exportFilename,
+} from '../common/table-export';
+import { buildSearchWhere } from '../common/table-search/build-search-where';
 import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
+import { DeliveryZoneService } from '../settings/delivery-zone.service';
 import { IdempotencyService } from './idempotency.service';
 import { OrderNumberService } from './order-number';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
 import { computeEta, isTerminalStatus } from './order-tracking';
+import { signOrderTrackingToken } from './order-tracking-token';
+import { ORDER_EXPORT_COLUMNS, type OrderExportRow } from './orders.export-columns';
+import { ORDER_SEARCH_DESCRIPTORS } from './orders.search-descriptor';
 
 interface OrderActor {
   userId: string | null;
@@ -52,6 +67,7 @@ export class OrdersService {
     private readonly loyalty: LoyaltyService,
     private readonly analytics: AnalyticsProductService,
     private readonly events: EventEmitter2,
+    private readonly deliveryZones: DeliveryZoneService,
   ) {}
 
   // ---- Create ------------------------------------------------------------
@@ -71,11 +87,22 @@ export class OrdersService {
       return this.getById(actor, existingOrderId);
     }
 
+    const restaurantRow = await this.prisma.restaurant.findFirst({
+      select: {
+        id: true,
+        currency: true,
+        deliveryZones: true,
+        minOrderAmount: true,
+        defaultDeliveryFee: true,
+      },
+    });
+    if (!restaurantRow) throw new BadRequestException('Restaurant not configured');
+
     // Load the caller's cart (server-side authoritative).
     const cart = await this.prisma.cart.findFirst({
       where: actor.userId
-        ? { userId: actor.userId, restaurantId: dto.restaurantId }
-        : { sessionKey: dto.sessionKey ?? actor.sessionKey ?? '', restaurantId: dto.restaurantId },
+        ? { userId: actor.userId }
+        : { sessionKey: dto.sessionKey ?? actor.sessionKey ?? '' },
       include: {
         items: true,
         appliedCoupon: true,
@@ -85,15 +112,11 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
-    const restaurant = await this.prisma.restaurant.findUniqueOrThrow({
-      where: { id: dto.restaurantId },
-      select: { currency: true },
-    });
+    const restaurant = { currency: restaurantRow.currency };
 
     // Re-validate each line against the live menu.
     const menuItems = await this.prisma.menuItem.findMany({
       where: { id: { in: cart.items.map((it) => it.menuItemId) } },
-      include: { category: { select: { restaurantId: true } } },
     });
     const menuById = new Map(menuItems.map((m) => [m.id, m]));
 
@@ -111,9 +134,6 @@ export class OrdersService {
       const menuItem = menuById.get(it.menuItemId);
       if (!menuItem) {
         throw new BadRequestException(`Menu item ${it.menuItemId} no longer exists`);
-      }
-      if (menuItem.category.restaurantId !== dto.restaurantId) {
-        throw new BadRequestException(`Item ${menuItem.name} does not belong to this restaurant`);
       }
       if (!menuItem.isAvailable) {
         throw new BadRequestException(`${menuItem.name} is no longer available`);
@@ -142,7 +162,6 @@ export class OrdersService {
         code: cart.appliedCoupon.code,
         subtotal: decimalToString(subtotalPreview),
         userId: actor.userId ?? undefined,
-        restaurantId: dto.restaurantId,
       });
       if (!result.valid) {
         throw new BadRequestException(`Coupon: ${result.message}`);
@@ -178,10 +197,12 @@ export class OrdersService {
     let totals;
     try {
       totals = await this.pricing.calculateTotals({
-        restaurantId: dto.restaurantId,
         lines: lineSnapshots.map((l) => ({ unitPrice: l.unitPrice, quantity: l.quantity })),
         couponDiscount: couponDiscount.plus(loyaltyDiscount),
         tipAmount: dto.tipAmount ?? '0',
+        // Flat restaurant-wide fee — only charged for DELIVERY orders.
+        deliveryFee:
+          dto.type === 'DELIVERY' ? restaurantRow.defaultDeliveryFee.toString() : 0,
       });
     } catch (err) {
       throw new BadRequestException((err as Error).message);
@@ -190,22 +211,81 @@ export class OrdersService {
     const { subtotal, taxTotal, deliveryFee, tipAmount, discountTotal, grandTotal } = totals;
 
     let deliveryAddress: Prisma.InputJsonValue | null = null;
-    if (dto.type === 'DELIVERY' && dto.deliveryAddressId) {
-      if (!actor.userId) {
-        throw new BadRequestException('Delivery orders require a signed-in user');
+    if (dto.type === 'DELIVERY') {
+      // 1. Resolve the address (saved or inline) → flat snapshot with geoPoint.
+      let snapshot: {
+        line1: string;
+        line2: string | null;
+        city: string;
+        state: string | null;
+        country: string;
+        geoPoint: GeoPointDto;
+      } | null = null;
+
+      if (dto.deliveryAddressId) {
+        if (!actor.userId) {
+          throw new BadRequestException(
+            'Saved delivery addresses require a signed-in user; guests must pass inline deliveryAddress',
+          );
+        }
+        const addr = await this.prisma.userAddress.findFirst({
+          where: { id: dto.deliveryAddressId, userId: actor.userId },
+        });
+        if (!addr) throw new NotFoundException('Delivery address not found');
+        const geo = addr.geoPoint as GeoPointDto | null;
+        if (!geo || !Number.isFinite(geo.lat) || !Number.isFinite(geo.lng)) {
+          throw new BadRequestException(
+            'Saved address is missing a map pin — re-save it from your account.',
+          );
+        }
+        snapshot = {
+          line1: addr.line1,
+          line2: addr.line2,
+          city: addr.city,
+          state: addr.state,
+          country: addr.country,
+          geoPoint: geo,
+        };
+      } else if (dto.deliveryAddress) {
+        snapshot = {
+          line1: dto.deliveryAddress.line1,
+          line2: dto.deliveryAddress.line2 ?? null,
+          city: dto.deliveryAddress.city,
+          state: dto.deliveryAddress.state ?? null,
+          country: dto.deliveryAddress.country,
+          geoPoint: dto.deliveryAddress.geoPoint,
+        };
       }
-      const addr = await this.prisma.userAddress.findFirst({
-        where: { id: dto.deliveryAddressId, userId: actor.userId },
-      });
-      if (!addr) throw new NotFoundException('Delivery address not found');
-      deliveryAddress = {
-        line1: addr.line1,
-        line2: addr.line2,
-        city: addr.city,
-        state: addr.state,
-        zip: addr.zip,
-        country: addr.country,
-      };
+
+      if (!snapshot) {
+        throw new BadRequestException('Delivery address required');
+      }
+
+      // 2. Re-validate the pin against the restaurant's delivery zones. The
+      //    client also checks, but we never trust client values.
+      const zones = (restaurantRow.deliveryZones as unknown as DeliveryZoneDto[]) ?? [];
+      if (zones.length > 0) {
+        const zone = this.deliveryZones.findZone(
+          zones,
+          snapshot.geoPoint.lat,
+          snapshot.geoPoint.lng,
+        );
+        if (!zone) {
+          throw new BadRequestException(
+            'Address is outside our delivery area — choose pickup or a different address.',
+          );
+        }
+      }
+
+      // 3. Enforce restaurant-wide minimum order.
+      const minOrder = toDecimal(restaurantRow.minOrderAmount.toString());
+      if (minOrder.gt(0) && subtotalPreview.lt(minOrder)) {
+        throw new BadRequestException(
+          `Minimum order for delivery is ${minOrder.toFixed(2)} — add a bit more.`,
+        );
+      }
+
+      deliveryAddress = snapshot as unknown as Prisma.InputJsonValue;
     }
 
     // Atomically claim the idempotency key right before we create the order.
@@ -228,7 +308,6 @@ export class OrdersService {
           data: {
             orderNumber,
             userId: actor.userId,
-            restaurantId: dto.restaurantId,
             type: dto.type,
             status: 'PENDING',
             subtotal,
@@ -301,7 +380,6 @@ export class OrdersService {
     const createdEvent: OrderCreatedEvent = {
       orderId: created.id,
       orderNumber: created.orderNumber,
-      restaurantId: created.restaurantId,
       userId: created.userId,
       status: created.status,
       type: created.type,
@@ -322,7 +400,28 @@ export class OrdersService {
       });
     }
 
-    return this.getById(actor, created.id);
+    // Just-created order — bypass the ownership check so guests (no userId)
+    // can read the response. The frontend only ever sees the order id from
+    // this path; subsequent reads still go through the standard ownership
+    // gate (or signed-token tracking for guests).
+    const responseDto = await this.getById(actor, created.id, { bypassOwnership: true });
+    // Issue a signed tracking token so guests can refresh the confirmation
+    // page (or share the link) without an auth header. Authed users can
+    // ignore it — their session already proves ownership.
+    responseDto.trackingToken = signOrderTrackingToken(created.id);
+    return responseDto;
+  }
+
+  // Public read by signed HMAC token — used by /checkout/success on refresh
+  // and by any shareable link. The token itself proves ownership, so no
+  // actor is required.
+  async getByVerifiedToken(orderId: string): Promise<OrderDto> {
+    const dto = await this.getById(
+      { userId: null, sessionKey: null, permissions: [] },
+      orderId,
+      { bypassOwnership: true },
+    );
+    return dto;
   }
 
   // ---- Status transitions ------------------------------------------------
@@ -414,7 +513,6 @@ export class OrdersService {
     const statusEvent: OrderStatusChangedEvent = {
       orderId: updated.id,
       orderNumber: updated.orderNumber,
-      restaurantId: updated.restaurantId,
       userId: updated.userId,
       from: previousStatus,
       to,
@@ -446,6 +544,37 @@ export class OrdersService {
     return updated;
   }
 
+  /**
+   * Add a staff note to an order without transitioning status. Writes an
+   * `OrderStatusEvent` with `kind: NOTE` so it appears in the same activity
+   * timeline as status events, ordered by `createdAt`.
+   */
+  async addNote(
+    actor: { userId: string | null; permissions: string[] },
+    orderId: string,
+    note: string,
+  ): Promise<OrderDto> {
+    if (!actor.permissions.includes('order:update')) {
+      throw new ForbiddenException('Not allowed to annotate orders');
+    }
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, status: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    await this.prisma.orderStatusEvent.create({
+      data: {
+        orderId,
+        kind: 'NOTE',
+        status: order.status,
+        byUserId: actor.userId,
+        note,
+      },
+    });
+    return this.toDtoById(orderId);
+  }
+
   private async loadCustomerName(userId: string | null): Promise<string | null> {
     if (!userId) return null;
     const user = await this.prisma.user.findUnique({
@@ -461,38 +590,22 @@ export class OrdersService {
 
   /**
    * Dual-mode list:
-   * - Staff (caller has `order:read`) supplying `restaurantId` → restaurant-wide
-   *   admin list with server-side filtering (status, type, date range, search).
+   * - Staff (caller has `order:read`) → admin list with server-side filtering
+   *   (status, type, date range, search).
    * - Everyone else → the caller's own orders (account history), unchanged.
    */
   async list(actor: OrderActor, query: OrderListQuery): Promise<OrderListDto> {
     const isStaff = actor.permissions.includes('order:read');
 
     let where: Prisma.OrderWhereInput;
-    if (isStaff && query.restaurantId) {
-      where = {
-        restaurantId: query.restaurantId,
-        ...(query.status ? { status: query.status } : {}),
-        ...(query.type ? { type: query.type } : {}),
-        ...(query.from || query.to
-          ? {
-              createdAt: {
-                ...(query.from ? { gte: new Date(query.from) } : {}),
-                ...(query.to ? { lte: new Date(query.to) } : {}),
-              },
-            }
-          : {}),
-        ...(query.search
-          ? {
-              OR: [
-                { orderNumber: { contains: query.search, mode: 'insensitive' } },
-                { user: { firstName: { contains: query.search, mode: 'insensitive' } } },
-                { user: { lastName: { contains: query.search, mode: 'insensitive' } } },
-                { user: { email: { contains: query.search, mode: 'insensitive' } } },
-              ],
-            }
-          : {}),
-      };
+    if (isStaff) {
+      where = this.buildAdminListWhere({
+        status: query.status,
+        type: query.type,
+        from: query.from,
+        to: query.to,
+        search: query.search,
+      });
     } else {
       if (!actor.userId) {
         throw new ForbiddenException('Sign in to view your orders');
@@ -523,7 +636,104 @@ export class OrdersService {
     };
   }
 
-  async getById(actor: OrderActor, id: string): Promise<OrderDto> {
+  /**
+   * Admin-mode where-builder. Shared between `list` (when called with staff
+   * permissions) and `exportList`. Customer-self-view uses a different where
+   * shape (userId scoping) and stays inline in `list`.
+   */
+  private buildAdminListWhere(input: {
+    status?: OrderListQuery['status'];
+    type?: OrderListQuery['type'];
+    from?: string;
+    to?: string;
+    search?: string;
+  }): Prisma.OrderWhereInput {
+    return {
+      ...(input.status ? { status: input.status } : {}),
+      ...(input.type ? { type: input.type } : {}),
+      ...(input.from || input.to
+        ? {
+            createdAt: {
+              ...(input.from ? { gte: new Date(input.from) } : {}),
+              ...(input.to ? { lte: new Date(input.to) } : {}),
+            },
+          }
+        : {}),
+      ...(buildSearchWhere(
+        ORDER_SEARCH_DESCRIPTORS,
+        input.search,
+      ) as Prisma.OrderWhereInput),
+    };
+  }
+
+  /**
+   * CSV / PDF export of the admin orders list — same filter surface as
+   * `list`, no pagination. Caller must hold `order:read` (enforced at the
+   * controller). Caps at 50k rows for CSV / 1k for PDF; over the cap throws
+   * 413 with a structured hint.
+   */
+  async exportList(
+    query: OrderExportQuery,
+  ): Promise<{ filename: string; content: Buffer; contentType: string }> {
+    const where = this.buildAdminListWhere({
+      status: query.status,
+      type: query.type,
+      from: query.from,
+      to: query.to,
+      search: query.search,
+    });
+
+    const count = await this.prisma.order.count({ where });
+    assertWithinRowCap(count, query.format, 'orders');
+
+    const rows = await this.prisma.order.findMany({
+      where,
+      include: {
+        _count: { select: { items: true } },
+        user: { select: { firstName: true, lastName: true, email: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const exportRows: OrderExportRow[] = rows.map((r) => ({
+      orderNumber: r.orderNumber,
+      type: r.type,
+      status: r.status,
+      grandTotal: r.grandTotal,
+      currency: r.currency,
+      itemCount: r._count.items,
+      customerName: r.user
+        ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ') || null
+        : null,
+      customerEmail: r.user?.email ?? null,
+      createdAt: r.createdAt,
+    }));
+
+    const slug = await this.restaurantSlug();
+    const filename = exportFilename('orders', slug, query.format);
+
+    if (query.format === 'pdf') {
+      const content = await buildPdf(exportRows, ORDER_EXPORT_COLUMNS, {
+        title: `Orders — ${slug}`,
+        generatedAt: `Generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC`,
+      });
+      return { filename, content, contentType: PDF_CONTENT_TYPE };
+    }
+    const content = buildCsv(exportRows, ORDER_EXPORT_COLUMNS);
+    return { filename, content, contentType: CSV_CONTENT_TYPE };
+  }
+
+  private async restaurantSlug(): Promise<string> {
+    const r = await this.prisma.restaurant.findFirst({ select: { slug: true } });
+    if (!r) throw new NotFoundException('Restaurant not configured');
+    return r.slug;
+  }
+
+  async getById(
+    actor: OrderActor,
+    id: string,
+    opts: { bypassOwnership?: boolean } = {},
+  ): Promise<OrderDto> {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
@@ -535,7 +745,7 @@ export class OrdersService {
 
     const isOwner = actor.userId !== null && order.userId === actor.userId;
     const canReadAny = actor.permissions.includes('order:read');
-    if (!isOwner && !canReadAny) {
+    if (!opts.bypassOwnership && !isOwner && !canReadAny) {
       throw new NotFoundException('Order not found');
     }
 
@@ -552,19 +762,37 @@ export class OrdersService {
   }
 
   async getTracking(actor: OrderActor, id: string): Promise<OrderTrackingDto> {
+    return this.buildTracking(id, { skipAuth: false, actor });
+  }
+
+  /**
+   * Public, token-authenticated tracking — used for confirmation-email deep
+   * links. Caller has already verified an HMAC token bound to this orderId, so
+   * no user/permission check is performed here.
+   */
+  async getTrackingByVerifiedToken(orderId: string): Promise<OrderTrackingDto> {
+    return this.buildTracking(orderId, { skipAuth: true });
+  }
+
+  private async buildTracking(
+    id: string,
+    opts: { skipAuth: true } | { skipAuth: false; actor: OrderActor },
+  ): Promise<OrderTrackingDto> {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
         statusEvents: { orderBy: { createdAt: 'asc' } },
-        restaurant: { select: { geoPoint: true } },
       },
     });
     if (!order) throw new NotFoundException('Order not found');
+    const restaurant = await this.prisma.restaurant.findFirst({ select: { geoPoint: true } });
 
-    const isOwner = actor.userId !== null && order.userId === actor.userId;
-    const canReadAny = actor.permissions.includes('order:read');
-    if (!isOwner && !canReadAny) {
-      throw new NotFoundException('Order not found');
+    if (!opts.skipAuth) {
+      const isOwner = opts.actor.userId !== null && order.userId === opts.actor.userId;
+      const canReadAny = opts.actor.permissions.includes('order:read');
+      if (!isOwner && !canReadAny) {
+        throw new NotFoundException('Order not found');
+      }
     }
 
     const lastEvent = order.statusEvents[order.statusEvents.length - 1];
@@ -584,6 +812,7 @@ export class OrdersService {
       timeline: order.statusEvents.map((e) => ({
         id: e.id,
         orderId: e.orderId,
+        kind: e.kind,
         status: e.status,
         byUserId: e.byUserId,
         note: e.note,
@@ -591,7 +820,7 @@ export class OrdersService {
       })),
       etaMinutes,
       estimatedReadyAt,
-      restaurantGeo: parseGeoPoint(order.restaurant.geoPoint),
+      restaurantGeo: parseGeoPoint(restaurant?.geoPoint ?? null),
       deliveryGeo: parseGeoPoint(
         (order.deliveryAddress as { geoPoint?: unknown } | null)?.geoPoint,
       ),
@@ -654,12 +883,14 @@ export class OrdersService {
   }
 
   /** Public read helper for the kitchen module — no per-order ownership check. */
-  async listKitchenTickets(restaurantId: string): Promise<
+  async listKitchenTickets(): Promise<
     {
       orderId: string;
       orderNumber: string;
+      type: OrderDto['type'];
       status: OrderDto['status'];
       confirmedAt: string | null;
+      specialRequests: string | null;
       items: {
         name: string;
         quantity: number;
@@ -670,7 +901,6 @@ export class OrdersService {
   > {
     const rows = await this.prisma.order.findMany({
       where: {
-        restaurantId,
         status: { in: ['CONFIRMED', 'PREPARING'] },
       },
       include: {
@@ -688,8 +918,10 @@ export class OrdersService {
         .map((r) => ({
           orderId: r.id,
           orderNumber: r.orderNumber,
+          type: r.type,
           status: r.status,
           confirmedAt: r.statusEvents[0]?.createdAt.toISOString() ?? null,
+          specialRequests: r.notes,
           items: r.items.map((it) => {
             const snapshot = it.modifierSnapshot as unknown as ModifierSnapshotEntry[] | null;
             return {
@@ -733,7 +965,6 @@ function toListItem(r: OrderListRow): OrderListItemDto {
   return {
     id: r.id,
     orderNumber: r.orderNumber,
-    restaurantId: r.restaurantId,
     status: r.status,
     type: r.type,
     grandTotal: r.grandTotal.toFixed(2),
@@ -751,7 +982,6 @@ function toOrderDto(row: OrderWithRelations): OrderDto {
     id: row.id,
     orderNumber: row.orderNumber,
     userId: row.userId,
-    restaurantId: row.restaurantId,
     type: row.type,
     status: row.status,
     subtotal: row.subtotal.toFixed(2),
@@ -780,6 +1010,7 @@ function toOrderDto(row: OrderWithRelations): OrderDto {
     statusEvents: row.statusEvents.map((e) => ({
       id: e.id,
       orderId: e.orderId,
+      kind: e.kind,
       status: e.status,
       byUserId: e.byUserId,
       note: e.note,

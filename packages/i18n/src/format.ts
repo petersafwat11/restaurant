@@ -6,6 +6,7 @@ import type { Locale } from './locale';
 const BCP47: Record<Locale, string> = {
   en: 'en-US',
   ar: 'ar-u-nu-latn',
+  pl: 'pl-PL',
 };
 
 export function localeTag(locale: Locale): string {

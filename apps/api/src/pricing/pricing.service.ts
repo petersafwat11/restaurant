@@ -7,7 +7,7 @@ import {
   decimalToString,
   multiply,
   toDecimal,
-} from '@repo/utils';
+} from '@repo/utils/money';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface PricingLine {
@@ -16,7 +16,6 @@ export interface PricingLine {
 }
 
 export interface CalculateTotalsInput {
-  restaurantId: string;
   lines: PricingLine[];
   /** Discount from an applied coupon (≥0). */
   couponDiscount?: DecimalLike;
@@ -53,17 +52,10 @@ export interface TotalsResult {
 export class PricingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Resolve a restaurant's tax rate. Falls back to the DB-default (8%) if the
-   * restaurant row doesn't exist; the calling service will usually reject
-   * earlier on a missing restaurant.
-   */
-  async getTaxRate(restaurantId: string): Promise<Decimal> {
-    const row = await this.prisma.restaurant.findUnique({
-      where: { id: restaurantId },
-      select: { taxRate: true },
-    });
-    if (!row) throw new NotFoundException('Restaurant not found');
+  /** Resolve the (single) restaurant's tax rate. */
+  async getTaxRate(): Promise<Decimal> {
+    const row = await this.prisma.restaurant.findFirst({ select: { taxRate: true } });
+    if (!row) throw new NotFoundException('Restaurant not configured');
     return toDecimal(row.taxRate.toString());
   }
 
@@ -71,7 +63,7 @@ export class PricingService {
     const taxRate =
       input.taxRateOverride !== undefined
         ? toDecimal(input.taxRateOverride)
-        : await this.getTaxRate(input.restaurantId);
+        : await this.getTaxRate();
 
     const lineTotals = input.lines.map((l) => multiply(toDecimal(l.unitPrice), l.quantity));
     const subtotal = addAll(lineTotals);

@@ -43,6 +43,11 @@ const EnvSchema = z.object({
   STRIPE_PUBLISHABLE_KEY: z.string().optional().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default(''),
 
+  // Secret used to HMAC-sign public deep links (order tracking URLs sent in
+  // confirmation emails). Falls back to JWT_ACCESS_SECRET in non-prod for dev
+  // bring-up; production deployments should set this explicitly.
+  ORDER_TRACKING_SECRET: z.string().optional().default(''),
+
   // Sprint 12 — observability + analytics + feature flags. All optional;
   // empty → safe no-op (same contract as Stripe/R2 above).
   SENTRY_DSN: z.string().optional().default(''),
@@ -51,6 +56,12 @@ const EnvSchema = z.object({
   POSTHOG_KEY: z.string().optional().default(''),
   POSTHOG_HOST: z.string().optional().default('https://app.posthog.com'),
   FEATURE_FLAG_OVERRIDES: z.string().optional().default(''),
+
+  // Auth cookie attributes. Default `lax` works when web/admin/api share an
+  // eTLD+1; set `none` (plus HTTPS) for fully cross-site deployments.
+  COOKIE_SAMESITE: z.enum(['lax', 'none', 'strict']).default('lax'),
+  // Window before AT expiry (seconds) where the sliding refresh kicks in.
+  AUTH_SLIDING_REFRESH_THRESHOLD: z.coerce.number().int().positive().default(300),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

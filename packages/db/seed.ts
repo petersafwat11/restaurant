@@ -2,8 +2,9 @@
  * Seed script. Idempotent — safe to re-run.
  *
  * Sprint 1: permissions + roles + 2 test users.
- * Sprint 2: 1 Polish restaurant (Europe/Warsaw, PLN) + 6 categories +
- *           ~30 menu items + 5 items with modifier groups + operating hours.
+ * Sprint 2: 1 Polish restaurant — Szef Donald (Europe/Warsaw, PLN, kebab +
+ *           falafel) + 6 categories + 29 menu items + modifier groups
+ *           (size, meat, sauce, add-ons) + operating hours.
  *
  * Later sprints append their own seed functions below; do NOT rewrite the
  * earlier seeders.
@@ -29,8 +30,12 @@ const ALL_PERMISSIONS = [
   'customer:read',
   'customer:write',
   'customer:notes',
+  'customer:tag',
+  'customer:email',
   'promotion:read',
   'promotion:write',
+  'promotion:archive',
+  'promotion:bulk_coupons',
   'reservation:read',
   'reservation:write',
   'review:read',
@@ -49,6 +54,8 @@ const ALL_PERMISSIONS = [
   'report:export',
   'audit:read',
   'contact:read',
+  'contact:reply',
+  'contact:notes',
   'flags:write',
 ] as const;
 
@@ -175,28 +182,28 @@ async function seedUsers() {
 // Sprint 2 — restaurant + menu
 // ---------------------------------------------------------------------------
 
-const RESTAURANT_SLUG = 'the-test-kitchen';
+const RESTAURANT_SLUG = 'szef-donald';
 
 async function seedRestaurants() {
-  console.log('▸ Seeding restaurant: the-test-kitchen (Europe/Warsaw, PLN)');
+  console.log(`▸ Seeding restaurant: ${RESTAURANT_SLUG} (Europe/Warsaw, PLN)`);
 
   const restaurant = await prisma.restaurant.upsert({
     where: { slug: RESTAURANT_SLUG },
     update: {
-      name: 'The Test Kitchen',
-      description: 'A Polish demo restaurant seeded for local development.',
+      name: 'Szef Donald',
+      description: 'Kebab i falafel — Warsaw kebab shop.',
       phone: '+48 22 555 0100',
-      email: 'hello@thetestkitchen.local',
+      email: 'hello@szefdonald.local',
       timezone: 'Europe/Warsaw',
       currency: 'PLN',
       isActive: true,
     },
     create: {
       slug: RESTAURANT_SLUG,
-      name: 'The Test Kitchen',
-      description: 'A Polish demo restaurant seeded for local development.',
+      name: 'Szef Donald',
+      description: 'Kebab i falafel — Warsaw kebab shop.',
       phone: '+48 22 555 0100',
-      email: 'hello@thetestkitchen.local',
+      email: 'hello@szefdonald.local',
       address: {
         line1: 'ul. Marszałkowska 1',
         city: 'Warsaw',
@@ -228,14 +235,9 @@ async function seedRestaurants() {
 
   for (const d of days) {
     await prisma.operatingHours.upsert({
-      where: {
-        restaurantId_dayOfWeek: {
-          restaurantId: restaurant.id,
-          dayOfWeek: d.dayOfWeek,
-        },
-      },
+      where: { dayOfWeek: d.dayOfWeek },
       update: { opensAt: d.opensAt, closesAt: d.closesAt, isClosed: d.isClosed },
-      create: { ...d, restaurantId: restaurant.id },
+      create: { ...d },
     });
   }
 
@@ -270,357 +272,438 @@ interface SeedCategory {
   items: SeedItem[];
 }
 
+const SAUCE_OPTIONS = [
+  { name: 'Łagodny', isDefault: true },
+  { name: 'Ostry' },
+  { name: 'Mieszany' },
+];
+
+const MEAT_OPTIONS = [
+  { name: 'Kurczak', isDefault: true },
+  { name: 'Wołowina' },
+  { name: 'Mieszane' },
+];
+
+const ADDONS_OPTIONS = [
+  { name: 'Ser żółty', priceDelta: '4.00' },
+  { name: 'Ser feta', priceDelta: '4.00' },
+  { name: 'Dodatkowy sos', priceDelta: '1.00' },
+  { name: 'Opakowanie', priceDelta: '1.00' },
+];
+
+type ModGroup = NonNullable<SeedItem['modifierGroups']>[number];
+
+const kebabMods = (): ModGroup[] => [
+  { name: 'Mięso', isRequired: true, minSelect: 1, maxSelect: 1, options: MEAT_OPTIONS },
+  { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
+  { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
+];
+
+const falafelMods = (): ModGroup[] => [
+  { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
+  { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
+];
+
+const sizeGroup = (
+  options: Array<{ name: string; priceDelta: string; isDefault?: boolean }>,
+): ModGroup => ({
+  name: 'Rozmiar',
+  isRequired: true,
+  minSelect: 1,
+  maxSelect: 1,
+  options,
+});
+
 const CATEGORIES: SeedCategory[] = [
   {
-    slug: 'starters',
-    name: 'Starters',
-    description: 'Small plates to begin your meal.',
+    slug: 'kebab',
+    name: 'Kebab',
+    description: 'Mięso (kurczak, wołowina lub mieszane) + surówki + sos.',
     items: [
       {
-        slug: 'zurek',
-        name: 'Żurek',
-        description: 'Traditional sour rye soup with sausage and egg.',
+        slug: 'kebab-tortilla',
+        name: 'Kebab Tortilla',
+        description: 'Kebab w tortilli — mięso, surówki i sos.',
+        basePrice: '21.00',
+        isFeatured: true,
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Mały', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni', priceDelta: '3.00' },
+            { name: 'Duży', priceDelta: '6.00' },
+            { name: 'Mega', priceDelta: '10.00' },
+          ]),
+          ...kebabMods(),
+        ],
+      },
+      {
+        slug: 'kebab-pita',
+        name: 'Kebab Pita',
+        description: 'Kebab w picie — mięso, surówki i sos.',
+        basePrice: '21.00',
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Mały', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni', priceDelta: '3.00' },
+            { name: 'Duży', priceDelta: '6.00' },
+            { name: 'Mega', priceDelta: '10.00' },
+          ]),
+          ...kebabMods(),
+        ],
+      },
+      {
+        slug: 'kebab-w-bulce',
+        name: 'Kebab w Bułce',
+        description: 'Kebab w bułce — mięso, surówki i sos.',
         basePrice: '22.00',
         prepMinutes: 8,
-      },
-      {
-        slug: 'pierogi-russkie',
-        name: 'Pierogi Ruskie',
-        description: 'Dumplings filled with potato and cottage cheese.',
-        basePrice: '28.00',
-        isVegetarian: true,
-        prepMinutes: 12,
-      },
-      {
-        slug: 'bruschetta',
-        name: 'Bruschetta',
-        description: 'Toasted bread with tomato, basil and olive oil.',
-        basePrice: '18.00',
-        isVegan: true,
-        prepMinutes: 6,
-      },
-      {
-        slug: 'tatar',
-        name: 'Tatar wołowy',
-        description: 'Hand-chopped beef tartare with onion and pickles.',
-        basePrice: '39.00',
-        prepMinutes: 10,
-      },
-    ],
-  },
-  {
-    slug: 'mains',
-    name: 'Mains',
-    description: 'Hearty main dishes.',
-    items: [
-      {
-        slug: 'kotlet-schabowy',
-        name: 'Kotlet Schabowy',
-        description: 'Breaded pork cutlet served with mashed potatoes and cabbage.',
-        basePrice: '48.00',
-        isFeatured: true,
-        prepMinutes: 18,
-      },
-      {
-        slug: 'golabki',
-        name: 'Gołąbki',
-        description: 'Cabbage rolls in tomato sauce.',
-        basePrice: '42.00',
-        prepMinutes: 16,
-      },
-      {
-        slug: 'grilled-salmon',
-        name: 'Grilled Salmon',
-        description: 'Atlantic salmon with seasonal vegetables.',
-        basePrice: '62.00',
-        isGlutenFree: true,
-        prepMinutes: 14,
-      },
-      {
-        slug: 'risotto-funghi',
-        name: 'Risotto Funghi',
-        description: 'Arborio rice with wild mushrooms and parmesan.',
-        basePrice: '45.00',
-        isVegetarian: true,
-        prepMinutes: 18,
-      },
-      {
-        slug: 'lamb-shank',
-        name: 'Braised Lamb Shank',
-        description: 'Slow-cooked lamb shank with root vegetables.',
-        basePrice: '65.00',
-        prepMinutes: 25,
-      },
-    ],
-  },
-  {
-    slug: 'pizzas',
-    name: 'Pizzas',
-    description: 'Wood-fired Neapolitan-style pizzas.',
-    items: [
-      {
-        slug: 'margherita',
-        name: 'Margherita',
-        description: 'San Marzano tomato, mozzarella, basil.',
-        basePrice: '35.00',
-        isVegetarian: true,
-        prepMinutes: 10,
-        isFeatured: true,
         modifierGroups: [
-          {
-            name: 'Size',
-            isRequired: true,
-            minSelect: 1,
-            maxSelect: 1,
-            options: [
-              { name: '30 cm', priceDelta: '0', isDefault: true },
-              { name: '40 cm', priceDelta: '12.00' },
-            ],
-          },
-          {
-            name: 'Toppings',
-            isRequired: false,
-            minSelect: 0,
-            maxSelect: 4,
-            options: [
-              { name: 'Extra mozzarella', priceDelta: '6.00' },
-              { name: 'Fresh basil', priceDelta: '2.00' },
-              { name: 'Mushrooms', priceDelta: '5.00' },
-              { name: 'Olives', priceDelta: '4.00' },
-            ],
-          },
+          sizeGroup([
+            { name: 'Mały', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni', priceDelta: '3.00' },
+            { name: 'Duży', priceDelta: '6.00' },
+            { name: 'Mega', priceDelta: '10.00' },
+          ]),
+          ...kebabMods(),
         ],
       },
       {
-        slug: 'pepperoni',
-        name: 'Pepperoni',
-        description: 'Tomato, mozzarella, spicy pepperoni.',
-        basePrice: '42.00',
-        spiceLevel: 2,
-        prepMinutes: 10,
-        modifierGroups: [
-          {
-            name: 'Size',
-            isRequired: true,
-            minSelect: 1,
-            maxSelect: 1,
-            options: [
-              { name: '30 cm', priceDelta: '0', isDefault: true },
-              { name: '40 cm', priceDelta: '12.00' },
-            ],
-          },
-        ],
-      },
-      {
-        slug: 'quattro-formaggi',
-        name: 'Quattro Formaggi',
-        description: 'Mozzarella, gorgonzola, parmesan and goat cheese.',
-        basePrice: '48.00',
-        isVegetarian: true,
-        prepMinutes: 11,
-      },
-      {
-        slug: 'diavola',
-        name: 'Diavola',
-        description: 'Hot salami, chili, mozzarella.',
-        basePrice: '44.00',
-        spiceLevel: 3,
-        prepMinutes: 11,
-      },
-    ],
-  },
-  {
-    slug: 'burgers',
-    name: 'Burgers',
-    description: 'Hand-formed Polish beef patties.',
-    items: [
-      {
-        slug: 'classic-burger',
-        name: 'Classic Burger',
-        description: 'Beef patty, cheddar, lettuce, tomato, house sauce.',
-        basePrice: '38.00',
-        prepMinutes: 12,
-        isFeatured: true,
-        modifierGroups: [
-          {
-            name: 'Doneness',
-            isRequired: true,
-            minSelect: 1,
-            maxSelect: 1,
-            options: [
-              { name: 'Medium-rare', priceDelta: '0' },
-              { name: 'Medium', priceDelta: '0', isDefault: true },
-              { name: 'Well done', priceDelta: '0' },
-            ],
-          },
-          {
-            name: 'Add-ons',
-            isRequired: false,
-            minSelect: 0,
-            maxSelect: 3,
-            options: [
-              { name: 'Bacon', priceDelta: '6.00' },
-              { name: 'Egg', priceDelta: '4.00' },
-              { name: 'Avocado', priceDelta: '5.00' },
-            ],
-          },
-        ],
-      },
-      {
-        slug: 'bbq-burger',
-        name: 'BBQ Burger',
-        description: 'Beef patty, smoked cheddar, onion rings, BBQ sauce.',
-        basePrice: '44.00',
-        prepMinutes: 12,
-      },
-      {
-        slug: 'veggie-burger',
-        name: 'Veggie Burger',
-        description: 'Black-bean patty, avocado, sprouts.',
+        slug: 'kebab-kapsalon',
+        name: 'Kebab Kapsalon',
+        description: 'Mięso + ser + frytki + sos.',
         basePrice: '36.00',
-        isVegetarian: true,
-        isVegan: false,
-        prepMinutes: 11,
+        isFeatured: true,
+        prepMinutes: 12,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Duży', priceDelta: '0.00', isDefault: true },
+            { name: 'Mega', priceDelta: '6.00' },
+          ]),
+          ...kebabMods(),
+        ],
       },
       {
-        slug: 'chicken-burger',
-        name: 'Chicken Burger',
-        description: 'Buttermilk-fried chicken, slaw, pickles.',
-        basePrice: '40.00',
-        prepMinutes: 12,
+        slug: 'kebab-na-talerzu',
+        name: 'Kebab na Talerzu',
+        description: 'Kebab na talerzu — mięso, surówki i sos.',
+        basePrice: '29.00',
+        prepMinutes: 10,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard', priceDelta: '0.00', isDefault: true },
+            { name: 'Duży', priceDelta: '5.00' },
+            { name: 'Mega', priceDelta: '11.00' },
+          ]),
+          ...kebabMods(),
+        ],
+      },
+      {
+        slug: 'kebab-box',
+        name: 'Kebab Box',
+        description: 'Mięso, surówki, frytki i sos w boxie.',
+        basePrice: '26.00',
+        prepMinutes: 10,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard', priceDelta: '0.00', isDefault: true },
+            { name: 'Duży', priceDelta: '6.00' },
+            { name: 'Mega', priceDelta: '12.00' },
+          ]),
+          ...kebabMods(),
+        ],
+      },
+      {
+        slug: 'fryto-kebab',
+        name: 'Fryto Kebab',
+        description: 'Mięso, surówki, frytki i sos w tortilli.',
+        basePrice: '29.00',
+        prepMinutes: 10,
+        modifierGroups: kebabMods(),
+      },
+      {
+        slug: 'salatka-kebab',
+        name: 'Sałatka Kebab',
+        description: 'Sałatka z mięsem, surówkami i sosem.',
+        basePrice: '26.00',
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard', priceDelta: '0.00', isDefault: true },
+            { name: 'Duży', priceDelta: '6.00' },
+            { name: 'Mega', priceDelta: '12.00' },
+          ]),
+          ...kebabMods(),
+        ],
       },
     ],
   },
   {
-    slug: 'desserts',
-    name: 'Desserts',
-    description: 'Sweet endings.',
+    slug: 'falafel',
+    name: 'Danie Vege — Falafel',
+    description: 'Falafel, sałata + sos łagodny, mieszany lub ostry.',
     items: [
       {
-        slug: 'sernik',
-        name: 'Sernik',
-        description: 'Polish cheesecake with raisins.',
-        basePrice: '18.00',
+        slug: 'tortilla-falafel',
+        name: 'Tortilla Falafel',
+        description: 'Falafel w tortilli z sałatą i sosem.',
+        basePrice: '19.00',
         isVegetarian: true,
-        prepMinutes: 4,
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard (2 szt)', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni (3 szt)', priceDelta: '2.00' },
+            { name: 'Duży (4 szt)', priceDelta: '4.00' },
+            { name: 'Mega (5 szt)', priceDelta: '6.00' },
+          ]),
+          ...falafelMods(),
+        ],
       },
       {
-        slug: 'szarlotka',
-        name: 'Szarlotka',
-        description: 'Warm apple pie with vanilla ice cream.',
+        slug: 'bulka-falafel',
+        name: 'Bułka Falafel',
+        description: 'Falafel w bułce z sałatą i sosem.',
         basePrice: '20.00',
         isVegetarian: true,
-        prepMinutes: 6,
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard (2 szt)', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni (3 szt)', priceDelta: '2.00' },
+            { name: 'Duży (4 szt)', priceDelta: '4.00' },
+            { name: 'Mega (5 szt)', priceDelta: '6.00' },
+          ]),
+          ...falafelMods(),
+        ],
       },
       {
-        slug: 'tiramisu',
-        name: 'Tiramisu',
-        description: 'Layered mascarpone and coffee dessert.',
-        basePrice: '22.00',
+        slug: 'pita-falafel',
+        name: 'Pita Falafel',
+        description: 'Falafel w picie z sałatą i sosem.',
+        basePrice: '19.00',
         isVegetarian: true,
-        prepMinutes: 4,
+        prepMinutes: 8,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Standard (2 szt)', priceDelta: '0.00', isDefault: true },
+            { name: 'Średni (3 szt)', priceDelta: '2.00' },
+            { name: 'Duży (4 szt)', priceDelta: '4.00' },
+            { name: 'Mega (5 szt)', priceDelta: '6.00' },
+          ]),
+          ...falafelMods(),
+        ],
       },
       {
-        slug: 'lava-cake',
-        name: 'Chocolate Lava Cake',
-        description: 'Molten chocolate cake with vanilla ice cream.',
+        slug: 'talerz-falafel',
+        name: 'Talerz Falafel',
+        description: 'Falafel na talerzu z sałatą i sosem.',
         basePrice: '24.00',
         isVegetarian: true,
-        prepMinutes: 9,
+        prepMinutes: 10,
+        modifierGroups: [
+          sizeGroup([
+            { name: 'Mały (3 szt)', priceDelta: '0.00', isDefault: true },
+            { name: 'Duży (4 szt)', priceDelta: '3.00' },
+            { name: 'Mega (5 szt)', priceDelta: '6.00' },
+          ]),
+          ...falafelMods(),
+        ],
       },
     ],
   },
   {
-    slug: 'drinks',
-    name: 'Drinks',
-    description: 'Soft drinks, juices, beer and coffee.',
+    slug: 'strips-tacos',
+    name: 'Box Strips i Tacos',
+    description: 'Stripsy z kurczaka i tacos.',
     items: [
       {
-        slug: 'still-water',
-        name: 'Still Water',
-        description: '330ml bottle.',
-        basePrice: '8.00',
-        isVegan: true,
-        isGlutenFree: true,
-        prepMinutes: 1,
+        slug: 'box-strips',
+        name: 'Box Strips',
+        description: 'Stripsy + frytki + surówki + sos.',
+        basePrice: '28.00',
+        prepMinutes: 10,
         modifierGroups: [
-          {
-            name: 'Size',
-            isRequired: true,
-            minSelect: 1,
-            maxSelect: 1,
-            options: [
-              { name: '330 ml', priceDelta: '0', isDefault: true },
-              { name: '500 ml', priceDelta: '3.00' },
-              { name: '1 L', priceDelta: '6.00' },
-            ],
-          },
+          sizeGroup([
+            { name: 'Standard (3 szt)', priceDelta: '0.00', isDefault: true },
+            { name: 'Duży (4 szt)', priceDelta: '5.00' },
+            { name: 'Mega (5 szt)', priceDelta: '11.00' },
+          ]),
+          { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
+          { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
         ],
       },
       {
-        slug: 'sparkling-water',
-        name: 'Sparkling Water',
-        description: '330ml bottle.',
-        basePrice: '8.00',
-        isVegan: true,
-        prepMinutes: 1,
+        slug: 'tacos',
+        name: 'Tacos',
+        description: 'Ser, sos, sałata lodowa, frytki i 3 stripsy w tortilli.',
+        basePrice: '29.00',
+        prepMinutes: 10,
+        modifierGroups: [
+          { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
+          { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'zestawy',
+    name: 'Zestawy',
+    description: 'Zestawy kebab + Coca-Cola 0.5L w cenie promocyjnej.',
+    items: [
+      {
+        slug: 'zestaw-kebab-tortilla-sredni-cola',
+        name: 'Kebab Tortilla Średni + Coca-Cola 0.5L',
+        description: 'Kebab Tortilla Średni z napojem Coca-Cola 0.5L. Oszczędzasz 2 zł.',
+        basePrice: '34.00',
+        isFeatured: true,
+        prepMinutes: 10,
+        modifierGroups: kebabMods(),
       },
       {
-        slug: 'cola',
-        name: 'Cola',
-        description: 'Chilled cola, 330ml.',
-        basePrice: '10.00',
-        prepMinutes: 1,
+        slug: 'zestaw-kapsalon-duzy-cola',
+        name: 'Kapsalon Duży + Coca-Cola 0.5L',
+        description: 'Kebab Kapsalon Duży z napojem Coca-Cola 0.5L. Oszczędzasz 2 zł.',
+        basePrice: '43.00',
+        isFeatured: true,
+        prepMinutes: 12,
+        modifierGroups: kebabMods(),
       },
+    ],
+  },
+  {
+    slug: 'dodatki',
+    name: 'Dodatki',
+    description: 'Frytki i deser.',
+    items: [
       {
-        slug: 'orange-juice',
-        name: 'Fresh Orange Juice',
-        description: 'Squeezed to order, 300ml.',
-        basePrice: '14.00',
-        isVegan: true,
-        prepMinutes: 3,
-      },
-      {
-        slug: 'tyskie',
-        name: 'Tyskie',
-        description: 'Polish lager on tap, 500ml.',
-        basePrice: '13.00',
-        prepMinutes: 2,
-      },
-      {
-        slug: 'espresso',
-        name: 'Espresso',
-        description: 'Single shot.',
+        slug: 'frytki-male',
+        name: 'Frytki Małe',
+        description: 'Małe frytki.',
         basePrice: '9.00',
-        prepMinutes: 2,
+        isVegetarian: true,
+        prepMinutes: 5,
       },
       {
-        slug: 'cappuccino',
-        name: 'Cappuccino',
-        description: 'Espresso with steamed milk.',
-        basePrice: '12.00',
-        prepMinutes: 3,
+        slug: 'frytki-duze',
+        name: 'Frytki Duże',
+        description: 'Duże frytki.',
+        basePrice: '13.00',
+        isVegetarian: true,
+        prepMinutes: 5,
       },
       {
-        slug: 'lemonade',
-        name: 'House Lemonade',
-        description: 'Lemon, mint, ginger.',
-        basePrice: '15.00',
+        slug: 'baklawa',
+        name: 'Baklawa',
+        description: 'Tradycyjna baklawa.',
+        basePrice: '7.00',
+        isVegetarian: true,
+        prepMinutes: 1,
+      },
+    ],
+  },
+  {
+    slug: 'napoje-zimne',
+    name: 'Napoje Zimne',
+    description: 'Napoje gazowane, soki, woda.',
+    items: [
+      {
+        slug: 'coca-cola',
+        name: 'Coca-Cola',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'coca-cola-zero',
+        name: 'Coca-Cola Zero',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'coca-cola-light',
+        name: 'Coca-Cola Light',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'fanta',
+        name: 'Fanta',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'sprite',
+        name: 'Sprite',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'kinley',
+        name: 'Kinley',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'kropla-beskidu',
+        name: 'Kropla Beskidu',
+        description: 'Woda 0.5L',
+        basePrice: '5.50',
         isVegan: true,
-        prepMinutes: 3,
+        isGlutenFree: true,
+        prepMinutes: 1,
+      },
+      {
+        slug: 'fuze-tea',
+        name: 'Fuze Tea',
+        description: '0.5L',
+        basePrice: '8.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'cappy',
+        name: 'Cappy',
+        description: 'Sok 0.33L',
+        basePrice: '7.50',
+        prepMinutes: 1,
+      },
+      {
+        slug: 'burn',
+        name: 'Burn',
+        description: 'Napój energetyczny 0.25L',
+        basePrice: '7.50',
+        prepMinutes: 1,
       },
     ],
   },
 ];
 
-async function seedMenu(restaurantId: string) {
-  console.log('▸ Seeding 6 categories + ~30 menu items + modifier groups');
+// Locally hosted menu images live under apps/api/uploads/menu-items/ and are
+// served by the API at /uploads/. URLs are hardcoded to dev since seeding is
+// dev-only; deployed envs reseed with a different base if needed.
+const MENU_IMAGE_BASE = process.env.MENU_IMAGE_BASE_URL ?? 'http://localhost:4000/uploads/menu-items';
+
+async function seedMenu() {
+  // Wipe existing menu so renamed/removed items don't linger. CartItem has
+  // no FK on menuItemId — clear cart items first so live carts don't hold
+  // dead references after the cascade. OrderItem also lacks an FK but is
+  // self-contained via nameSnapshot/unitPrice/modifierSnapshot, so order
+  // history stays intact and readable.
+  await prisma.cartItem.deleteMany({});
+  await prisma.menuCategory.deleteMany({});
+
+  const itemCount = CATEGORIES.reduce((n, c) => n + c.items.length, 0);
+  console.log(`▸ Seeding ${CATEGORIES.length} categories + ${itemCount} menu items + modifier groups`);
 
   for (const [cIdx, cat] of CATEGORIES.entries()) {
     const category = await prisma.menuCategory.upsert({
-      where: {
-        restaurantId_slug: { restaurantId, slug: cat.slug },
-      },
+      where: { slug: cat.slug },
       update: {
         name: cat.name,
         description: cat.description,
@@ -628,7 +711,6 @@ async function seedMenu(restaurantId: string) {
         isActive: true,
       },
       create: {
-        restaurantId,
         slug: cat.slug,
         name: cat.name,
         description: cat.description,
@@ -671,6 +753,18 @@ async function seedMenu(restaurantId: string) {
           prepMinutes: it.prepMinutes ?? null,
           position: iIdx,
           isAvailable: true,
+        },
+      });
+
+      // Each item gets one MenuItemImage row pointing at the locally hosted
+      // JPG. The cascade from menuCategory.deleteMany above already cleared
+      // these, so a plain create keeps the seed idempotent.
+      await prisma.menuItemImage.create({
+        data: {
+          itemId: item.id,
+          url: `${MENU_IMAGE_BASE}/${it.slug}.jpg`,
+          alt: it.name,
+          position: 0,
         },
       });
 
@@ -718,11 +812,20 @@ async function seedMenu(restaurantId: string) {
   }
 }
 
-async function seedPromotions(restaurantId: string) {
-  console.log('▸ Seeding 3 promotions + coupons (WELCOME10, FREEDEL, BOGO-PIZZA)');
+async function seedPromotions() {
+  console.log('▸ Seeding 2 promotions + coupons (WELCOME10, FREEDEL)');
+
+  // Remove legacy BOGO Pizza promo from earlier seeds (cascade deletes its
+  // coupon + redemptions).
+  const legacyBogo = await prisma.promotion.findFirst({
+    where: { name: 'BOGO Pizza' },
+  });
+  if (legacyBogo) {
+    await prisma.promotion.delete({ where: { id: legacyBogo.id } });
+  }
 
   // WELCOME10 — 10% off, first-order only (perUserLimit: 1).
-  const welcome = await upsertPromotionByName(restaurantId, 'Welcome 10%', {
+  const welcome = await upsertPromotionByName('Welcome 10%', {
     description: 'Welcome offer — 10% off your first order',
     type: 'PERCENT',
     value: new Prisma.Decimal('10'),
@@ -731,7 +834,7 @@ async function seedPromotions(restaurantId: string) {
   await ensureCoupon(welcome.id, 'WELCOME10', { perUserLimit: 1, maxRedemptions: null });
 
   // FREEDEL — free delivery, min 100 PLN subtotal.
-  const freedel = await upsertPromotionByName(restaurantId, 'Free Delivery', {
+  const freedel = await upsertPromotionByName('Free Delivery', {
     description: 'Free delivery on orders over 100 PLN',
     type: 'FREE_DELIVERY',
     value: null,
@@ -739,20 +842,9 @@ async function seedPromotions(restaurantId: string) {
     isActive: true,
   });
   await ensureCoupon(freedel.id, 'FREEDEL', { perUserLimit: null, maxRedemptions: null });
-
-  // BOGO-PIZZA — buy one get one (estimated 20 PLN savings for cart preview).
-  const bogo = await upsertPromotionByName(restaurantId, 'BOGO Pizza', {
-    description: 'Buy one pizza, get one half off',
-    type: 'BOGO',
-    value: new Prisma.Decimal('20'),
-    minSubtotal: null,
-    isActive: true,
-  });
-  await ensureCoupon(bogo.id, 'BOGO-PIZZA', { perUserLimit: null, maxRedemptions: 500 });
 }
 
 async function upsertPromotionByName(
-  restaurantId: string,
   name: string,
   data: {
     description: string;
@@ -763,7 +855,7 @@ async function upsertPromotionByName(
   },
 ) {
   const existing = await prisma.promotion.findFirst({
-    where: { restaurantId, name },
+    where: { name },
   });
   if (existing) {
     return prisma.promotion.update({
@@ -779,7 +871,6 @@ async function upsertPromotionByName(
   }
   return prisma.promotion.create({
     data: {
-      restaurantId,
       name,
       description: data.description,
       type: data.type,
@@ -815,7 +906,7 @@ async function ensureCoupon(
 // Sprint 7 — tables, reservations, reviews, delivery zones, staff
 // ---------------------------------------------------------------------------
 
-async function seedTables(restaurantId: string) {
+async function seedTables() {
   console.log('▸ Seeding 8 tables');
   const tables = [
     { name: 'T1', capacity: 2 },
@@ -829,21 +920,21 @@ async function seedTables(restaurantId: string) {
   ];
   for (const t of tables) {
     const existing = await prisma.table.findFirst({
-      where: { restaurantId, name: t.name },
+      where: { name: t.name },
     });
     if (existing) {
       await prisma.table.update({ where: { id: existing.id }, data: { capacity: t.capacity } });
     } else {
-      await prisma.table.create({ data: { restaurantId, ...t } });
+      await prisma.table.create({ data: { ...t } });
     }
   }
 }
 
-async function seedReservations(restaurantId: string) {
+async function seedReservations() {
   console.log('▸ Seeding 5 future reservations');
   const customer = await prisma.user.findUnique({ where: { email: 'customer@local.test' } });
   if (!customer) return;
-  const tables = await prisma.table.findMany({ where: { restaurantId }, take: 5 });
+  const tables = await prisma.table.findMany({ take: 5 });
   for (let i = 0; i < 5; i++) {
     const startAt = new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000);
     startAt.setUTCHours(18, 0, 0, 0);
@@ -855,7 +946,6 @@ async function seedReservations(restaurantId: string) {
       await prisma.reservation.create({
         data: {
           userId: customer.id,
-          restaurantId,
           tableId: tables[i]?.id ?? null,
           guestCount: 2 + i,
           startAt,
@@ -891,8 +981,8 @@ const STATUS_TRAIL: Record<SeededOrderStatus, SeededOrderStatus[]> = {
 
 const money = (n: number) => n.toFixed(2);
 
-async function seedOrders(restaurantId: string) {
-  const existing = await prisma.order.count({ where: { restaurantId } });
+async function seedOrders() {
+  const existing = await prisma.order.count();
   if (existing > 0) {
     console.log(`▸ Skipping orders — ${existing} already present`);
     return;
@@ -900,9 +990,7 @@ async function seedOrders(restaurantId: string) {
   const customer = await prisma.user.findUnique({
     where: { email: 'customer@local.test' },
   });
-  const menuItem = await prisma.menuItem.findFirst({
-    where: { category: { restaurantId } },
-  });
+  const menuItem = await prisma.menuItem.findFirst();
   if (!customer || !menuItem) {
     console.log('▸ Skipping orders — missing customer or menu item');
     return;
@@ -947,7 +1035,6 @@ async function seedOrders(restaurantId: string) {
       data: {
         orderNumber: `R-2026-9${String(i).padStart(5, '0')}`,
         userId: customer.id,
-        restaurantId,
         type: s.type,
         status: s.status,
         subtotal: money(subtotal),
@@ -1036,14 +1123,12 @@ async function seedReviews() {
   }
 }
 
-async function seedDeliveryZones(restaurantId: string) {
+async function seedDeliveryZones() {
   console.log('▸ Seeding 2 delivery zones (Warsaw)');
   const zones = [
     {
       id: 'zone-central',
       name: 'Central Warsaw',
-      fee: '8.00',
-      minOrderAmount: '40.00',
       polygon: {
         type: 'Polygon',
         coordinates: [
@@ -1060,8 +1145,6 @@ async function seedDeliveryZones(restaurantId: string) {
     {
       id: 'zone-extended',
       name: 'Outer Warsaw',
-      fee: '14.00',
-      minOrderAmount: '80.00',
       polygon: {
         type: 'Polygon',
         coordinates: [
@@ -1077,7 +1160,7 @@ async function seedDeliveryZones(restaurantId: string) {
     },
   ];
   await prisma.restaurant.update({
-    where: { id: restaurantId },
+    where: { slug: RESTAURANT_SLUG },
     data: { deliveryZones: zones as unknown as Prisma.InputJsonValue },
   });
 }
@@ -1152,27 +1235,6 @@ async function seedLoyalty() {
       ],
     });
   }
-}
-
-async function seedFavorites() {
-  const customer = await prisma.user.findUnique({
-    where: { email: 'customer@local.test' },
-  });
-  if (!customer) return;
-  const already = await prisma.favorite.count({
-    where: { userId: customer.id },
-  });
-  if (already > 0) {
-    console.log('▸ Skipping favorites — already seeded');
-    return;
-  }
-  const items = await prisma.menuItem.findMany({ take: 3 });
-  if (items.length === 0) return;
-  console.log(`▸ Seeding ${items.length} favorites for customer@local.test`);
-  await prisma.favorite.createMany({
-    data: items.map((it) => ({ userId: customer.id, menuItemId: it.id })),
-    skipDuplicates: true,
-  });
 }
 
 async function seedReferrals() {
@@ -1271,7 +1333,7 @@ async function seedReviewImages() {
   }
 }
 
-async function seedContactMessages(restaurantId: string) {
+async function seedContactMessages() {
   const count = await prisma.contactMessage.count();
   if (count > 0) {
     console.log('▸ Skipping contact messages — already seeded');
@@ -1281,14 +1343,12 @@ async function seedContactMessages(restaurantId: string) {
   await prisma.contactMessage.createMany({
     data: [
       {
-        restaurantId,
         name: 'Anna Nowak',
         email: 'anna@example.com',
         subject: 'Catering inquiry',
         message: 'Do you cater office events for 30 people?',
       },
       {
-        restaurantId,
         name: 'Piotr Kowalski',
         email: 'piotr@example.com',
         subject: null,
@@ -1342,21 +1402,20 @@ async function main() {
   await seedPermissions();
   await seedRoles();
   await seedUsers();
-  const restaurant = await seedRestaurants();
-  await seedMenu(restaurant.id);
-  await seedPromotions(restaurant.id);
-  await seedTables(restaurant.id);
-  await seedReservations(restaurant.id);
-  await seedOrders(restaurant.id);
+  await seedRestaurants();
+  await seedMenu();
+  await seedPromotions();
+  await seedTables();
+  await seedReservations();
+  await seedOrders();
   await seedReviews();
   await seedReviewImages();
-  await seedDeliveryZones(restaurant.id);
+  await seedDeliveryZones();
   await seedStaff();
   await seedLoyalty();
-  await seedFavorites();
   await seedReferrals();
   await seedNotifications();
-  await seedContactMessages(restaurant.id);
+  await seedContactMessages();
   await seedFeatureFlags();
   console.log('✓ Seed complete');
 }

@@ -33,7 +33,6 @@ export const AnalyticsOverviewSchema = z.object({
 export type AnalyticsOverviewDto = z.infer<typeof AnalyticsOverviewSchema>;
 
 export const AnalyticsBaseQuerySchema = z.object({
-  restaurantId: z.string().min(1),
   period: z.enum(ANALYTICS_PERIODS).default('today'),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
@@ -102,7 +101,6 @@ export const SalesByDayOfWeekSchema = z.array(
 export type SalesByDayOfWeekDto = z.infer<typeof SalesByDayOfWeekSchema>;
 
 export const CustomerRetentionQuerySchema = z.object({
-  restaurantId: z.string().min(1),
   cohortMonth: z.string().regex(/^\d{4}-\d{2}$/).optional(),
 });
 export type CustomerRetentionQuery = z.infer<typeof CustomerRetentionQuerySchema>;

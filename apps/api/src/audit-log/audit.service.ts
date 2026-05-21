@@ -31,7 +31,6 @@ export class AuditService {
     await this.prisma.auditLog.create({
       data: {
         actorUserId: input.actorUserId,
-        restaurantId: input.restaurantId ?? null,
         action: input.action,
         resourceType: input.resourceType,
         resourceId: input.resourceId,
@@ -46,9 +45,9 @@ export class AuditService {
   async list(query: AuditLogListQuery): Promise<AuditLogListDto> {
     const limit = query.limit ?? 50;
     const where: Prisma.AuditLogWhereInput = {
-      ...(query.restaurantId ? { restaurantId: query.restaurantId } : {}),
       ...(query.actorUserId ? { actorUserId: query.actorUserId } : {}),
       ...(query.action ? { action: query.action } : {}),
+      ...(query.resourceType ? { resourceType: query.resourceType } : {}),
       ...(query.from || query.to
         ? {
             createdAt: {
@@ -70,7 +69,6 @@ export class AuditService {
       items: slice.map((r) => ({
         id: r.id,
         actorUserId: r.actorUserId,
-        restaurantId: r.restaurantId,
         action: r.action,
         resourceType: r.resourceType,
         resourceId: r.resourceId,

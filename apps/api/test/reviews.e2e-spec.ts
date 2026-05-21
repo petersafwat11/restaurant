@@ -1,14 +1,13 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('reviews (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let userToken: string;
   let userId: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -23,19 +22,7 @@ describe('reviews (e2e)', () => {
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'reviews-e2e',
-        name: 'Reviews E2E',
-        phone: '+48 22 555 0009',
-        email: 'rev@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const reg = await inject('POST', '/api/v1/auth/register', {
       email: 'reviewer.e2e@test.local',
@@ -60,7 +47,6 @@ describe('reviews (e2e)', () => {
       data: {
         orderNumber: `R-TEST-${Math.random().toString(36).slice(2, 9)}`,
         userId,
-        restaurantId,
         type: 'PICKUP',
         status,
         subtotal: '20.00',
@@ -119,7 +105,7 @@ describe('reviews (e2e)', () => {
     expect(body.images).toHaveLength(2);
     expect(body.images[0].url).toContain('reviews/a.jpg');
 
-    const list = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews`);
+    const list = await inject('GET', `/api/v1/reviews`);
     expect(list.json().items[0].images).toHaveLength(2);
   });
 
@@ -138,7 +124,7 @@ describe('reviews (e2e)', () => {
     expect(res.statusCode).toBe(201);
     const id = res.json().id;
 
-    const publicList = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews`);
+    const publicList = await inject('GET', `/api/v1/reviews`);
     expect(publicList.json().items.find((x: { id: string }) => x.id === id)).toBeUndefined();
 
     const mod = await inject(
@@ -185,7 +171,7 @@ describe('reviews (e2e)', () => {
       const order = await makeOrder('COMPLETED');
       await inject('POST', '/api/v1/reviews', { orderId: order.id, rating }, userToken);
     }
-    const res = await inject('GET', `/api/v1/restaurants/${restaurantId}/reviews/summary`);
+    const res = await inject('GET', `/api/v1/reviews/summary`);
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.count).toBe(3);

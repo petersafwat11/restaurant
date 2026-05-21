@@ -69,7 +69,5 @@ export const AboutDataSchema = z.object({
 });
 export type AboutDataDto = z.infer<typeof AboutDataSchema>;
 
-export const MarketingQuerySchema = z.object({
-  restaurantId: z.string().optional(),
-});
+export const MarketingQuerySchema = z.object({}).optional();
 export type MarketingQuery = z.infer<typeof MarketingQuerySchema>;

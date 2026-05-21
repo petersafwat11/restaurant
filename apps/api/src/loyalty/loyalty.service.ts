@@ -9,16 +9,14 @@ import type {
   LoyaltyTxnKind,
   OrderStatusChangedEvent,
 } from '@repo/types';
+import { Decimal, type DecimalLike, toDecimal } from '@repo/utils/money';
 import {
-  Decimal,
-  type DecimalLike,
   discountForPoints,
   maxRedeemablePoints,
   nextTier,
   pointsForAmount,
   tierForLifetime,
-  toDecimal,
-} from '@repo/utils';
+} from '@repo/utils/loyalty';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**

@@ -11,12 +11,8 @@ export function useLogin(): UseMutationResult<AuthResponseDto, ApiError, LoginDt
   const setSession = useAuthStore((s) => s.setSession);
   return useMutation<AuthResponseDto, ApiError, LoginDto>({
     mutationFn: (input) => getApiClient().auth.login(input),
-    onSuccess: async (res) => {
-      await setSession({
-        accessToken: res.accessToken,
-        refreshToken: res.refreshToken,
-        user: res.user,
-      });
+    onSuccess: (res) => {
+      setSession({ user: res.user });
       notify('success', 'Signed in');
     },
     onError: (err) => notify('error', err.message),

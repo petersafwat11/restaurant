@@ -13,10 +13,10 @@ import { CartModule } from './cart/cart.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
+import { SlidingRefreshInterceptor } from './common/interceptors/sliding-refresh.interceptor';
 import { ConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
-import { FavoritesModule } from './favorites/favorites.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { I18nModule } from './i18n/i18n.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -78,7 +78,6 @@ import { UsersModule } from './users/users.module';
     AnalyticsModule,
     ReportsModule,
     LoyaltyModule,
-    FavoritesModule,
     ReferralsModule,
     I18nModule,
     AnalyticsProductModule,
@@ -93,6 +92,7 @@ import { UsersModule } from './users/users.module';
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: SlidingRefreshInterceptor },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],
 })

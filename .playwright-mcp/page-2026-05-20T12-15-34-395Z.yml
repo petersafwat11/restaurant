@@ -1,0 +1,367 @@
+- generic [active] [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Admin
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Overview" [level=1] [ref=e187]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - generic [ref=e193]:
+          - tab "Today" [ref=e194] [cursor=pointer]
+          - tab "7 days" [ref=e195] [cursor=pointer]
+          - tab "30 days" [ref=e196] [cursor=pointer]
+          - tab "Custom" [ref=e197] [cursor=pointer]:
+            - img [ref=e198]
+            - text: Custom
+        - button "Search (Cmd+K)" [ref=e200] [cursor=pointer]:
+          - img [ref=e201]
+          - generic [ref=e204]: Search orders, customers, items…
+          - generic [ref=e205]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e206] [cursor=pointer]:
+          - img [ref=e207]
+        - button "Account" [ref=e211] [cursor=pointer]: OO
+      - main [ref=e212]:
+        - generic [ref=e213]:
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]: Revenue
+              - generic [ref=e217]:
+                - generic [ref=e218]: $0.00
+                - generic [ref=e219]:
+                  - img [ref=e220]
+                  - generic [ref=e222]: 0.0%
+                  - generic [ref=e223]: vs. prev period
+            - generic [ref=e224]:
+              - generic [ref=e225]: Orders
+              - generic [ref=e226]:
+                - generic [ref=e227]: "1"
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e231]: 0.0%
+                  - generic [ref=e232]: vs. prev period
+            - generic [ref=e233]:
+              - generic [ref=e234]: Avg order value
+              - generic [ref=e235]:
+                - generic [ref=e236]: $0.00
+                - generic [ref=e237]:
+                  - img [ref=e238]
+                  - generic [ref=e240]: 0.0%
+                  - generic [ref=e241]: vs. prev period
+            - generic [ref=e242]:
+              - generic [ref=e243]: Completion rate
+              - generic [ref=e244]:
+                - generic [ref=e245]: 0.0%
+                - generic [ref=e246]:
+                  - img [ref=e247]
+                  - generic [ref=e249]: 0.0%
+                  - generic [ref=e250]: vs. prev period
+            - generic [ref=e251]:
+              - generic [ref=e252]: New customers
+              - generic [ref=e253]:
+                - generic [ref=e254]: "0"
+                - generic [ref=e255]:
+                  - img [ref=e256]
+                  - generic [ref=e258]: 0.0%
+                  - generic [ref=e259]: vs. prev period
+          - generic [ref=e260]:
+            - generic [ref=e262]:
+              - generic [ref=e263]:
+                - heading "Revenue" [level=2] [ref=e264]
+                - group "Series" [ref=e265]:
+                  - button "Revenue" [pressed] [ref=e266] [cursor=pointer]: Revenue
+                  - button "Orders" [ref=e268] [cursor=pointer]: Orders
+              - img [ref=e273]
+              - table "Revenue data" [ref=e276]:
+                - rowgroup [ref=e277]:
+                  - row "Time Revenue Orders" [ref=e278]:
+                    - columnheader "Time" [ref=e279]
+                    - columnheader "Revenue" [ref=e280]
+                    - columnheader "Orders" [ref=e281]
+                - rowgroup
+            - generic [ref=e282]:
+              - generic [ref=e283]:
+                - heading "Orders by status" [level=2] [ref=e284]
+                - generic [ref=e285]: Today
+              - generic [ref=e286]:
+                - img [ref=e289]:
+                  - img [ref=e490]
+                - generic:
+                  - generic:
+                    - generic: "1"
+                    - generic: Orders · Today
+              - generic [ref=e295]:
+                - generic [ref=e297]: Pending
+                - generic [ref=e298]: "1"
+                - generic [ref=e299]: 100.0%
+              - table "Orders by status" [ref=e300]:
+                - rowgroup [ref=e301]:
+                  - row "Status Count Percent" [ref=e302]:
+                    - columnheader "Status" [ref=e303]
+                    - columnheader "Count" [ref=e304]
+                    - columnheader "Percent" [ref=e305]
+                - rowgroup [ref=e306]:
+                  - row "Pending 1 100.0%" [ref=e307]:
+                    - cell "Pending" [ref=e308]
+                    - cell "1" [ref=e309]
+                    - cell "100.0%" [ref=e310]
+          - generic [ref=e311]:
+            - generic [ref=e313]:
+              - generic [ref=e314]:
+                - heading "Top items" [level=2] [ref=e315]
+                - generic [ref=e316]:
+                  - button "By revenue" [pressed] [ref=e317] [cursor=pointer]
+                  - button "By quantity" [ref=e318] [cursor=pointer]
+              - table [ref=e320]:
+                - rowgroup [ref=e321]:
+                  - row "Item Qty Revenue" [ref=e322]:
+                    - columnheader "Item" [ref=e323]
+                    - columnheader "Qty" [ref=e324]
+                    - columnheader "Revenue" [ref=e325]
+                - rowgroup
+              - link "View full report" [ref=e327] [cursor=pointer]:
+                - /url: /reports/exports
+                - text: View full report
+                - img [ref=e328]
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - heading "Live" [level=2] [ref=e332]: Live
+                - generic [ref=e336]: Realtime
+              - generic [ref=e337]:
+                - generic [ref=e338]:
+                  - generic [ref=e339]:
+                    - generic [ref=e340]: Active orders
+                    - generic [ref=e341]: Confirmed → Out for delivery
+                  - generic [ref=e342]: "3"
+                - generic [ref=e343]:
+                  - generic [ref=e344]:
+                    - generic [ref=e345]: Avg prep time
+                    - generic [ref=e346]: Confirmed → Ready
+                  - generic [ref=e347]: —
+                - generic [ref=e348]:
+                  - generic [ref=e349]:
+                    - generic [ref=e350]: Repeat rate
+                    - generic [ref=e351]: Today · returning customers
+                  - generic [ref=e352]: 0.0%
+              - generic [ref=e353]:
+                - link "Open orders" [ref=e354] [cursor=pointer]:
+                  - /url: /orders
+                  - text: Open orders
+                  - img [ref=e355]
+                - link "Kitchen view" [ref=e357] [cursor=pointer]:
+                  - /url: /orders/kitchen
+                  - text: Kitchen view
+                  - img [ref=e358]
+          - generic [ref=e360]:
+            - generic [ref=e361]:
+              - heading "Recent orders" [level=2] [ref=e362]
+              - link "View all" [ref=e363] [cursor=pointer]:
+                - /url: /orders
+                - text: View all
+                - img [ref=e364]
+            - table [ref=e366]:
+              - rowgroup [ref=e367]:
+                - 'row "Order # Customer Items Type Status Total Placed" [ref=e368]':
+                  - 'columnheader "Order #" [ref=e369]'
+                  - columnheader "Customer" [ref=e370]
+                  - columnheader "Items" [ref=e371]
+                  - columnheader "Type" [ref=e372]
+                  - columnheader "Status" [ref=e373]
+                  - columnheader "Total" [ref=e374]
+                  - columnheader "Placed" [ref=e375]
+              - rowgroup [ref=e376]:
+                - row "R-2026-000260 — 2 items DELIVERY Pending 35,64 zł 3h ago" [ref=e377]:
+                  - cell "R-2026-000260" [ref=e378]
+                  - cell "—" [ref=e379]
+                  - cell "2 items" [ref=e380]:
+                    - generic [ref=e381]: "2"
+                    - text: items
+                  - cell "DELIVERY" [ref=e382]:
+                    - generic [ref=e383]: DELIVERY
+                  - cell "Pending" [ref=e384]:
+                    - generic [ref=e387]: Pending
+                  - cell "35,64 zł" [ref=e388]
+                  - cell "3h ago" [ref=e389]:
+                    - time [ref=e390]: 3h ago
+                - row "R-2026-000259 smoke3-1779046596958@test.local 1 item PICKUP Pending 19,44 zł 3d ago" [ref=e391]:
+                  - cell "R-2026-000259" [ref=e392]
+                  - cell "smoke3-1779046596958@test.local" [ref=e393]
+                  - cell "1 item" [ref=e394]:
+                    - generic [ref=e395]: "1"
+                    - text: item
+                  - cell "PICKUP" [ref=e396]:
+                    - generic [ref=e397]: PICKUP
+                  - cell "Pending" [ref=e398]:
+                    - generic [ref=e401]: Pending
+                  - cell "19,44 zł" [ref=e402]
+                  - cell "3d ago" [ref=e403]:
+                    - time [ref=e404]: 3d ago
+                - row "R-2026-000258 smoke2@test.local 1 item PICKUP Pending 19,44 zł 3d ago" [ref=e405]:
+                  - cell "R-2026-000258" [ref=e406]
+                  - cell "smoke2@test.local" [ref=e407]
+                  - cell "1 item" [ref=e408]:
+                    - generic [ref=e409]: "1"
+                    - text: item
+                  - cell "PICKUP" [ref=e410]:
+                    - generic [ref=e411]: PICKUP
+                  - cell "Pending" [ref=e412]:
+                    - generic [ref=e415]: Pending
+                  - cell "19,44 zł" [ref=e416]
+                  - cell "3d ago" [ref=e417]:
+                    - time [ref=e418]: 3d ago
+                - row "R-2026-000257 — 1 item DELIVERY Pending 19,44 zł 3d ago" [ref=e419]:
+                  - cell "R-2026-000257" [ref=e420]
+                  - cell "—" [ref=e421]
+                  - cell "1 item" [ref=e422]:
+                    - generic [ref=e423]: "1"
+                    - text: item
+                  - cell "DELIVERY" [ref=e424]:
+                    - generic [ref=e425]: DELIVERY
+                  - cell "Pending" [ref=e426]:
+                    - generic [ref=e429]: Pending
+                  - cell "19,44 zł" [ref=e430]
+                  - cell "3d ago" [ref=e431]:
+                    - time [ref=e432]: 3d ago
+                - row "R-2026-000256 — 1 item PICKUP Pending 23,76 zł 3d ago" [ref=e433]:
+                  - cell "R-2026-000256" [ref=e434]
+                  - cell "—" [ref=e435]
+                  - cell "1 item" [ref=e436]:
+                    - generic [ref=e437]: "1"
+                    - text: item
+                  - cell "PICKUP" [ref=e438]:
+                    - generic [ref=e439]: PICKUP
+                  - cell "Pending" [ref=e440]:
+                    - generic [ref=e443]: Pending
+                  - cell "23,76 zł" [ref=e444]
+                  - cell "3d ago" [ref=e445]:
+                    - time [ref=e446]: 3d ago
+                - row "R-2026-000255 — 1 item PICKUP Pending 23,76 zł 3d ago" [ref=e447]:
+                  - cell "R-2026-000255" [ref=e448]
+                  - cell "—" [ref=e449]
+                  - cell "1 item" [ref=e450]:
+                    - generic [ref=e451]: "1"
+                    - text: item
+                  - cell "PICKUP" [ref=e452]:
+                    - generic [ref=e453]: PICKUP
+                  - cell "Pending" [ref=e454]:
+                    - generic [ref=e457]: Pending
+                  - cell "23,76 zł" [ref=e458]
+                  - cell "3d ago" [ref=e459]:
+                    - time [ref=e460]: 3d ago
+                - row "R-2026-000254 — 2 items DELIVERY Pending 43,20 zł 3d ago" [ref=e461]:
+                  - cell "R-2026-000254" [ref=e462]
+                  - cell "—" [ref=e463]
+                  - cell "2 items" [ref=e464]:
+                    - generic [ref=e465]: "2"
+                    - text: items
+                  - cell "DELIVERY" [ref=e466]:
+                    - generic [ref=e467]: DELIVERY
+                  - cell "Pending" [ref=e468]:
+                    - generic [ref=e471]: Pending
+                  - cell "43,20 zł" [ref=e472]
+                  - cell "3d ago" [ref=e473]:
+                    - time [ref=e474]: 3d ago
+                - row "R-2026-900000 Casey Customer 1 item PICKUP Pending 23,76 zł 3d ago" [ref=e475]:
+                  - cell "R-2026-900000" [ref=e476]
+                  - cell "Casey Customer" [ref=e477]
+                  - cell "1 item" [ref=e478]:
+                    - generic [ref=e479]: "1"
+                    - text: item
+                  - cell "PICKUP" [ref=e480]:
+                    - generic [ref=e481]: PICKUP
+                  - cell "Pending" [ref=e482]:
+                    - generic [ref=e485]: Pending
+                  - cell "23,76 zł" [ref=e486]
+                  - cell "3d ago" [ref=e487]:
+                    - time [ref=e488]: 3d ago

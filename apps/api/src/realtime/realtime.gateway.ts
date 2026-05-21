@@ -11,6 +11,7 @@ import {
 } from '@nestjs/websockets';
 import { verifyAccessToken } from '@repo/auth-core';
 import type {
+  AuthAudience,
   KitchenTicketEvent,
   OrderCancelledEvent,
   OrderCreatedEvent,
@@ -19,6 +20,7 @@ import type {
   SubscribeAck,
 } from '@repo/types';
 import { ROOMS, SubscribeMessageSchema } from '@repo/types';
+import fastifyCookie from '@fastify/cookie';
 import type { Server, Socket } from 'socket.io';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,8 +38,19 @@ interface AuthedSocket extends Socket {
   data: { user?: SocketUser };
 }
 
+// CORS for the Socket.IO server. Cookies on the handshake require credentials,
+// and browsers refuse credentials with `origin: '*'` — so the allowed origins
+// must mirror the HTTP CORS list. Resolved lazily so env is available.
+function gatewayCorsOptions(): { origin: string[]; credentials: boolean } {
+  // biome-ignore lint/style/noProcessEnv: gateway decorator is evaluated at module load
+  const web = process.env.APP_URL_WEB || 'http://localhost:3000';
+  // biome-ignore lint/style/noProcessEnv: gateway decorator is evaluated at module load
+  const admin = process.env.APP_URL_ADMIN || 'http://localhost:3001';
+  return { origin: [web, admin], credentials: true };
+}
+
 @WebSocketGateway({
-  cors: { origin: '*', credentials: false },
+  cors: gatewayCorsOptions(),
 })
 export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(RealtimeGateway.name);
@@ -130,31 +143,25 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @OnEvent('order.created')
   onOrderCreated(event: OrderCreatedEvent): void {
-    this.server?.to(ROOMS.restaurantOrders(event.restaurantId)).emit('order.created', event);
+    this.server?.to(ROOMS.orders).emit('order.created', event);
   }
 
   @OnEvent('order.status_changed')
   onOrderStatusChanged(event: OrderStatusChangedEvent): void {
     this.server?.to(ROOMS.order(event.orderId)).emit('order.status_changed', event);
-    this.server
-      ?.to(ROOMS.restaurantOrders(event.restaurantId))
-      .emit('order.status_changed', event);
+    this.server?.to(ROOMS.orders).emit('order.status_changed', event);
   }
 
   @OnEvent('order.cancelled')
   onOrderCancelled(event: OrderCancelledEvent): void {
     this.server?.to(ROOMS.order(event.orderId)).emit('order.cancelled', event);
-    this.server
-      ?.to(ROOMS.restaurantOrders(event.restaurantId))
-      .emit('order.cancelled', event);
+    this.server?.to(ROOMS.orders).emit('order.cancelled', event);
   }
 
   @OnEvent('order.refunded')
   onOrderRefunded(event: OrderRefundedEvent): void {
     this.server?.to(ROOMS.order(event.orderId)).emit('order.refunded', event);
-    this.server
-      ?.to(ROOMS.restaurantOrders(event.restaurantId))
-      .emit('order.refunded', event);
+    this.server?.to(ROOMS.orders).emit('order.refunded', event);
   }
 
   @OnEvent('kitchen.ticket_added')
@@ -162,13 +169,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     const ticket: KitchenTicketEvent = {
       orderId: event.orderId,
       orderNumber: event.orderNumber,
-      restaurantId: event.restaurantId,
+      type: event.type,
       status: event.to,
       itemCount: event.itemCount,
     };
-    this.server
-      ?.to(ROOMS.restaurantKitchen(event.restaurantId))
-      .emit('kitchen.ticket_added', ticket);
+    this.server?.to(ROOMS.kitchen).emit('kitchen.ticket_added', ticket);
   }
 
   @OnEvent('kitchen.ticket_removed')
@@ -176,13 +181,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     const ticket: KitchenTicketEvent = {
       orderId: event.orderId,
       orderNumber: event.orderNumber,
-      restaurantId: event.restaurantId,
+      type: event.type,
       status: event.to,
       itemCount: event.itemCount,
     };
-    this.server
-      ?.to(ROOMS.restaurantKitchen(event.restaurantId))
-      .emit('kitchen.ticket_removed', ticket);
+    this.server?.to(ROOMS.kitchen).emit('kitchen.ticket_removed', ticket);
   }
 
   // ---- Permission checks ----------------------------------------------
@@ -194,7 +197,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       if (!orderId) return { ok: false, reason: 'Invalid order room' };
       const order = await this.prisma.order.findUnique({
         where: { id: orderId },
-        select: { userId: true, restaurantId: true },
+        select: { userId: true },
       });
       if (!order) return { ok: false, reason: 'Order not found' };
       const isOwner = order.userId === user.id;
@@ -203,16 +206,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       return { ok: true, room };
     }
 
-    const ordersMatch = /^restaurant:([^:]+):orders$/.exec(room);
-    if (ordersMatch) {
+    if (room === ROOMS.orders) {
       if (!user.permissions.includes('order:read')) {
         return { ok: false, reason: 'Forbidden' };
       }
       return { ok: true, room };
     }
 
-    const kitchenMatch = /^restaurant:([^:]+):kitchen$/.exec(room);
-    if (kitchenMatch) {
+    if (room === ROOMS.kitchen) {
       if (!user.permissions.includes('kitchen:read')) {
         return { ok: false, reason: 'Forbidden' };
       }
@@ -223,10 +224,26 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   private extractToken(client: Socket): string | null {
+    // Mobile / header path.
     const headerToken = (client.handshake.headers.authorization ?? '')
       .replace(/^Bearer\s+/i, '')
       .trim();
     const authToken = (client.handshake.auth?.token as string | undefined) ?? '';
-    return authToken || headerToken || null;
+    if (authToken) return authToken;
+    if (headerToken) return headerToken;
+
+    // Cookie path — read audience from the handshake query, then the matching
+    // cookie. Web/admin clients send `?audience=web|admin` plus the browser's
+    // cookies on the upgrade.
+    const audienceRaw = client.handshake.query?.audience;
+    const audience = (Array.isArray(audienceRaw) ? audienceRaw[0] : audienceRaw) as
+      | AuthAudience
+      | undefined;
+    if (audience !== 'web' && audience !== 'admin') return null;
+
+    const cookieHeader = client.handshake.headers.cookie;
+    if (!cookieHeader) return null;
+    const cookies = fastifyCookie.parse(cookieHeader);
+    return cookies[`${audience}_at`] || null;
   }
 }

@@ -17,14 +17,14 @@ const TOP_ITEMS_LIMIT = 5;
  * top items + orders-by-status + a recent-orders feed, in one call. Mirrors the
  * `useExportFlow` composite pattern so the UI sprint wires a single hook.
  */
-export function useDashboardOverview(restaurantId: string, period: AnalyticsPeriod = 'today') {
-  const base = { restaurantId, period };
+export function useDashboardOverview(period: AnalyticsPeriod = 'today') {
+  const base = { period };
 
   const overview = useAnalyticsOverview(base);
   const revenue = useRevenueTimeseries(base);
   const topItems = useTopItems({ ...base, limit: TOP_ITEMS_LIMIT });
   const ordersByStatus = useOrdersByStatus(base);
-  const recentOrders = useAdminOrders({ restaurantId, limit: RECENT_ORDERS_LIMIT });
+  const recentOrders = useAdminOrders({ limit: RECENT_ORDERS_LIMIT });
 
   return {
     overview,

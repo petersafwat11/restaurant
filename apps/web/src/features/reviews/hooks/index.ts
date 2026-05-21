@@ -22,10 +22,9 @@ export function useMyReviews() {
   });
 }
 
-export function useRestaurantReviews(restaurantId: string, q?: ReviewListQuery) {
+export function useReviews(q?: ReviewListQuery) {
   return useQuery<ReviewListDto>({
-    queryKey: ['reviews', 'restaurant', restaurantId, q ?? {}],
-    queryFn: () => getApiClient().reviews.forRestaurant(restaurantId, q),
-    enabled: Boolean(restaurantId),
+    queryKey: ['reviews', 'list', q ?? {}],
+    queryFn: () => getApiClient().reviews.list(q),
   });
 }

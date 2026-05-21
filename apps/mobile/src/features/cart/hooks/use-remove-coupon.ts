@@ -6,16 +6,15 @@ import type { CartDto } from '@repo/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartQueryKeys } from '../query-keys';
 
-export function useRemoveCoupon(restaurantId: string) {
+export function useRemoveCoupon() {
   const qc = useQueryClient();
   const sessionKey = useCartStore((s) => s.sessionKey);
   const setCart = useCartStore((s) => s.setCart);
 
   return useMutation<CartDto, ApiError, void>({
-    mutationFn: () =>
-      getApiClient().cart.removeCoupon({ restaurantId, sessionKey: sessionKey ?? undefined }),
+    mutationFn: () => getApiClient().cart.removeCoupon({ sessionKey: sessionKey ?? undefined }),
     onSuccess: (data) => {
-      qc.setQueryData(cartQueryKeys.byRestaurant(restaurantId), data);
+      qc.setQueryData(cartQueryKeys.current(), data);
       setCart(data);
     },
     onError: (err) => notify('error', err.message),

@@ -23,19 +23,42 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 // ---- Order creation --------------------------------------------------------
 
+// Inline delivery address — used by guest delivery checkout where there is no
+// saved UserAddress to reference. Mirrors the JSON shape we persist on Order.
+export const InlineDeliveryAddressSchema = z.object({
+  line1: z.string().min(1).max(200),
+  line2: z.string().max(200).nullish(),
+  city: z.string().min(1).max(100),
+  state: z.string().max(100).nullish(),
+  country: z.string().length(2),
+  // Required: backend re-validates against delivery zones.
+  geoPoint: z.object({
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+  }),
+});
+export type InlineDeliveryAddressDto = z.infer<typeof InlineDeliveryAddressSchema>;
+
 export const CreateOrderSchema = z
   .object({
-    restaurantId: z.string().min(1),
     sessionKey: z.string().min(1).optional(), // required for guests
     type: z.enum(ORDER_TYPES),
     deliveryAddressId: z.string().min(1).nullish(),
+    deliveryAddress: InlineDeliveryAddressSchema.nullish(),
     pickupAt: z.string().datetime().nullish(),
     notes: z.string().max(1000).nullish(),
     tipAmount: MoneyStringSchema.default('0'),
   })
-  .refine((d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId, {
-    message: 'deliveryAddressId is required for delivery orders',
-    path: ['deliveryAddressId'],
+  .refine(
+    (d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress,
+    {
+      message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
+      path: ['deliveryAddressId'],
+    },
+  )
+  .refine((d) => !(d.deliveryAddressId && d.deliveryAddress), {
+    message: 'Provide either deliveryAddressId or deliveryAddress, not both',
+    path: ['deliveryAddress'],
   });
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 
@@ -63,15 +86,26 @@ export type OrderItemDto = z.infer<typeof OrderItemSchema>;
 
 // ---- Status event ----------------------------------------------------------
 
+export const ORDER_EVENT_KINDS = ['STATUS_CHANGE', 'NOTE'] as const;
+export type OrderEventKind = (typeof ORDER_EVENT_KINDS)[number];
+
 export const OrderStatusEventSchema = z.object({
   id: z.string(),
   orderId: z.string(),
+  kind: z.enum(ORDER_EVENT_KINDS).default('STATUS_CHANGE'),
   status: z.enum(ORDER_STATUSES),
   byUserId: z.string().nullable(),
   note: z.string().nullable(),
   createdAt: z.string(),
 });
 export type OrderStatusEventDto = z.infer<typeof OrderStatusEventSchema>;
+
+// ---- Add note --------------------------------------------------------------
+
+export const AddOrderNoteSchema = z.object({
+  note: z.string().min(1).max(2000),
+});
+export type AddOrderNoteDto = z.infer<typeof AddOrderNoteSchema>;
 
 // ---- Admin-only enrichment (populated only for callers with order:read) ----
 
@@ -94,7 +128,6 @@ export const OrderSchema = z.object({
   id: z.string(),
   orderNumber: z.string(),
   userId: z.string().nullable(),
-  restaurantId: z.string(),
   type: z.enum(ORDER_TYPES),
   status: z.enum(ORDER_STATUSES),
   subtotal: MoneyStringSchema,
@@ -112,8 +145,11 @@ export const OrderSchema = z.object({
       line2: z.string().nullable(),
       city: z.string(),
       state: z.string().nullable(),
-      zip: z.string().nullable(),
       country: z.string(),
+      geoPoint: z
+        .object({ lat: z.number(), lng: z.number() })
+        .nullable()
+        .optional(),
     })
     .nullable(),
   pickupAt: z.string().nullable(),
@@ -125,6 +161,10 @@ export const OrderSchema = z.object({
   // Self/customer view leaves these null — the user already has their data.
   customer: OrderCustomerSchema.nullable().optional(),
   payment: OrderPaymentSchema.nullable().optional(),
+  // Signed HMAC tracking token. Populated by POST /orders and GET /orders/by-token
+  // so guest sessions can re-read the order after a page refresh without auth.
+  // All other endpoints leave this undefined.
+  trackingToken: z.string().nullish(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -135,7 +175,6 @@ export type OrderDto = z.infer<typeof OrderSchema>;
 export const OrderListItemSchema = z.object({
   id: z.string(),
   orderNumber: z.string(),
-  restaurantId: z.string(),
   status: z.enum(ORDER_STATUSES),
   type: z.enum(ORDER_TYPES),
   grandTotal: MoneyStringSchema,
@@ -156,9 +195,6 @@ export type OrderListDto = z.infer<typeof OrderListSchema>;
 
 export const OrderListQuerySchema = z.object({
   status: z.enum(ORDER_STATUSES).optional(),
-  // Admin-list filters — only honored when the caller has `order:read`
-  // and supplies `restaurantId`. Customer callers ignore these.
-  restaurantId: z.string().min(1).optional(),
   type: z.enum(ORDER_TYPES).optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
@@ -167,6 +203,19 @@ export const OrderListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).optional(),
 });
 export type OrderListQuery = z.infer<typeof OrderListQuerySchema>;
+
+// Admin orders export — same filter surface as OrderListQuery minus
+// pagination, plus a `format` selector. Kept as a flat schema (matches the
+// codebase convention; no `.omit().extend()`).
+export const OrderExportQuerySchema = z.object({
+  status: z.enum(ORDER_STATUSES).optional(),
+  type: z.enum(ORDER_TYPES).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  search: z.string().max(100).optional(),
+  format: z.enum(['csv', 'pdf']).default('csv'),
+});
+export type OrderExportQuery = z.infer<typeof OrderExportQuerySchema>;
 
 // Sprint 9 — order tracking snapshot for the live-tracking screen. Realtime
 // updates still flow through the socket; this is the initial map/ETA payload.

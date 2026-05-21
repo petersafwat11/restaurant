@@ -14,16 +14,15 @@ import { orderQueryKeys } from '../query-keys';
 import { useOrders } from './use-orders';
 
 /**
- * Live orders list for a restaurant. Subscribes to `restaurant:{id}:orders`
- * and prepends newly created orders (with a transient `isNew: true` flag for
- * 3s) and patches statuses on existing rows.
+ * Live orders list. Subscribes to the global orders room and prepends newly
+ * created orders (with a transient `isNew: true` flag for 3s) and patches
+ * statuses on existing rows.
  */
-export function useLiveOrders(restaurantId: string) {
+export function useLiveOrders() {
   const qc = useQueryClient();
   const query = useOrders();
 
   useEffect(() => {
-    if (!restaurantId) return;
     const client = getRealtimeClient();
     let unsubCreated: (() => void) | undefined;
     let unsubStatus: (() => void) | undefined;
@@ -31,7 +30,7 @@ export function useLiveOrders(restaurantId: string) {
 
     (async () => {
       await client.connect();
-      await client.subscribe(ROOMS.restaurantOrders(restaurantId));
+      await client.subscribe(ROOMS.orders);
       if (!mounted) return;
 
       unsubCreated = client.on('order.created', (event: OrderCreatedEvent) => {
@@ -40,7 +39,6 @@ export function useLiveOrders(restaurantId: string) {
           const newItem: OrderListItemDto = {
             id: event.orderId,
             orderNumber: event.orderNumber,
-            restaurantId: event.restaurantId,
             status: event.status,
             type: event.type,
             grandTotal: event.grandTotal,
@@ -70,9 +68,9 @@ export function useLiveOrders(restaurantId: string) {
       mounted = false;
       unsubCreated?.();
       unsubStatus?.();
-      client.unsubscribe(ROOMS.restaurantOrders(restaurantId)).catch(() => {});
+      client.unsubscribe(ROOMS.orders).catch(() => {});
     };
-  }, [restaurantId, qc]);
+  }, [qc]);
 
   return query;
 }

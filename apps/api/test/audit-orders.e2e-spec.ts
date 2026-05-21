@@ -1,6 +1,6 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 /**
  * Sprint 6 wires `@AuditAction` onto the order/payment write surface. The
@@ -11,7 +11,6 @@ describe('audit log on order writes (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let aliceToken: string;
-  let restaurantId: string;
   let itemId: string;
 
   beforeAll(async () => {
@@ -27,25 +26,12 @@ describe('audit log on order writes (e2e)', () => {
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
     aliceToken = await register('alice.e2e@test.local');
-
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'audit-orders-e2e',
-        name: 'Audit Orders E2E',
-        phone: '+48 22 555 0010',
-        email: 'auditord@e2e.local',
-        address: { line1: 'ul. 10', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const item = await inject(
@@ -58,7 +44,7 @@ describe('audit log on order writes (e2e)', () => {
 
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       aliceToken,
     );
@@ -109,7 +95,7 @@ describe('audit log on order writes (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       aliceToken,
       { 'idempotency-key': 'audit-create-1' },
     );
@@ -126,7 +112,7 @@ describe('audit log on order writes (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       aliceToken,
       { 'idempotency-key': 'audit-refund-1' },
     );

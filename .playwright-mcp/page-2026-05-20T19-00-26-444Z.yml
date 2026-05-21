@@ -1,0 +1,196 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e52]:
+    - complementary "Primary" [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: TK
+        - generic [ref=e56]: Test Kitchen
+      - navigation [ref=e57]:
+        - link "Overview" [ref=e59] [cursor=pointer]:
+          - /url: /
+          - img [ref=e60]
+          - generic [ref=e63]: Overview
+        - generic [ref=e64]:
+          - generic [ref=e65]: Operate
+          - generic [ref=e66]:
+            - link "Orders" [ref=e67] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e69]
+              - generic [ref=e72]: Orders
+            - link "Kitchen Display" [ref=e73] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e74]
+              - generic [ref=e79]: Kitchen Display
+            - link "Reservations" [ref=e80] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e81]
+              - generic [ref=e83]: Reservations
+        - generic [ref=e84]:
+          - generic [ref=e85]: Catalog
+          - generic [ref=e86]:
+            - link "Menu" [ref=e87] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e88]
+              - generic [ref=e91]: Menu
+            - link "Promotions" [ref=e92] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e93]
+              - generic [ref=e96]: Promotions
+        - generic [ref=e97]:
+          - generic [ref=e98]: People
+          - generic [ref=e99]:
+            - link "Customers" [ref=e100] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e101]
+              - generic [ref=e106]: Customers
+            - link "Reviews" [ref=e107] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e108]
+              - generic [ref=e110]: Reviews
+            - link "Staff" [ref=e111] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e112]
+              - generic [ref=e114]: Staff
+        - generic [ref=e115]:
+          - generic [ref=e116]: Insights
+          - generic [ref=e117]:
+            - link "Reports" [ref=e118] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e119]
+              - generic [ref=e122]: Reports
+            - link "Audit log" [ref=e123] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e124]
+              - generic [ref=e128]: Audit log
+        - generic [ref=e129]:
+          - generic [ref=e130]: Configure
+          - generic [ref=e131]:
+            - link "Restaurant" [ref=e132] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e133]
+              - generic [ref=e136]: Restaurant
+            - link "Contact messages" [ref=e137] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e138]
+              - generic [ref=e141]: Contact messages
+            - link "Settings" [ref=e142] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e143]
+              - generic [ref=e154]: Settings
+      - generic [ref=e155]:
+        - generic [ref=e156]: OO
+        - generic [ref=e157]:
+          - generic [ref=e158]: Olive Owner
+          - generic [ref=e159]: owner
+        - button "Collapse sidebar" [ref=e160] [cursor=pointer]:
+          - img [ref=e161]
+    - generic [ref=e164]:
+      - banner [ref=e165]:
+        - heading "Orders" [level=1] [ref=e166]
+        - button "TK Select restaurant" [ref=e167] [cursor=pointer]:
+          - generic [ref=e168]: TK
+          - generic [ref=e169]: Select restaurant
+          - img [ref=e170]
+        - button "Mute new-order chime" [ref=e172] [cursor=pointer]:
+          - img [ref=e173]
+      - main [ref=e177]:
+        - generic [ref=e181]:
+          - generic [ref=e182]: All caught up
+          - tablist "Status" [ref=e184]:
+            - tab "All 0" [selected] [ref=e185] [cursor=pointer]:
+              - generic [ref=e186]: All
+              - generic [ref=e187]: "0"
+            - tab "Pending 0" [ref=e188] [cursor=pointer]:
+              - generic [ref=e190]: Pending
+              - generic [ref=e191]: "0"
+            - tab "Confirmed 0" [ref=e192] [cursor=pointer]:
+              - generic [ref=e194]: Confirmed
+              - generic [ref=e195]: "0"
+            - tab "Preparing 0" [ref=e196] [cursor=pointer]:
+              - generic [ref=e198]: Preparing
+              - generic [ref=e199]: "0"
+            - tab "Ready 0" [ref=e200] [cursor=pointer]:
+              - generic [ref=e202]: Ready
+              - generic [ref=e203]: "0"
+            - tab "Out for delivery 0" [ref=e204] [cursor=pointer]:
+              - generic [ref=e206]: Out for delivery
+              - generic [ref=e207]: "0"
+            - tab "Delivered 0" [ref=e208] [cursor=pointer]:
+              - generic [ref=e210]: Delivered
+              - generic [ref=e211]: "0"
+            - tab "Cancelled 0" [ref=e212] [cursor=pointer]:
+              - generic [ref=e214]: Cancelled
+              - generic [ref=e215]: "0"
+          - generic [ref=e216]:
+            - button "Type" [ref=e217] [cursor=pointer]:
+              - generic [ref=e218]: Type
+              - img [ref=e219]
+            - button "Payment" [ref=e221] [cursor=pointer]:
+              - generic [ref=e222]: Payment
+              - img [ref=e223]
+            - generic [ref=e225]:
+              - img
+              - 'textbox "Search order #, customer…" [ref=e226]'
+              - generic: /
+            - combobox [ref=e227] [cursor=pointer]:
+              - generic: Newest first
+              - img [ref=e228]
+          - generic [ref=e230]:
+            - button "Export orders" [disabled]:
+              - img
+              - text: Export
+              - img
+        - generic [ref=e232]:
+          - table [ref=e233]:
+            - rowgroup [ref=e234]:
+              - 'row "Select all Order # Customer Items Type Status Total Placed Elapsed" [ref=e235]':
+                - columnheader "Select all" [ref=e236]:
+                  - checkbox "Select all" [ref=e237] [cursor=pointer]
+                - 'columnheader "Order #" [ref=e238] [cursor=pointer]':
+                  - generic [ref=e239]:
+                    - text: "Order #"
+                    - img [ref=e240]
+                - columnheader "Customer" [ref=e243] [cursor=pointer]:
+                  - generic [ref=e244]:
+                    - text: Customer
+                    - img [ref=e245]
+                - columnheader "Items" [ref=e248] [cursor=pointer]:
+                  - generic [ref=e249]:
+                    - text: Items
+                    - img [ref=e250]
+                - columnheader "Type" [ref=e253] [cursor=pointer]:
+                  - generic [ref=e254]:
+                    - text: Type
+                    - img [ref=e255]
+                - columnheader "Status" [ref=e258] [cursor=pointer]:
+                  - generic [ref=e259]:
+                    - text: Status
+                    - img [ref=e260]
+                - columnheader "Total" [ref=e263] [cursor=pointer]:
+                  - generic [ref=e264]:
+                    - text: Total
+                    - img [ref=e265]
+                - columnheader "Placed" [ref=e268] [cursor=pointer]:
+                  - generic [ref=e269]:
+                    - text: Placed
+                    - img [ref=e270]
+                - columnheader "Elapsed" [ref=e273] [cursor=pointer]:
+                  - generic [ref=e274]:
+                    - text: Elapsed
+                    - img [ref=e275]
+            - rowgroup
+          - generic [ref=e280]: No orders yet. New ones will appear here in real time.
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e281]:
+        - button "Close toast" [ref=e282] [cursor=pointer]:
+          - img [ref=e283]
+        - img [ref=e287]
+        - generic [ref=e290]: Signed in
+  - status [ref=e41]:
+    - generic [ref=e42]:
+      - img [ref=e44]
+      - generic [ref=e46]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+  - alert [ref=e51]: Admin

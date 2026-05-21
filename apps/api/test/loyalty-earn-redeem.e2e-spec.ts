@@ -2,14 +2,13 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { LoyaltyService } from '../src/loyalty/loyalty.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('loyalty earn/redeem (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let userToken: string;
   let userId: string;
-  let restaurantId: string;
   let itemId: string;
 
   beforeAll(async () => {
@@ -24,24 +23,12 @@ describe('loyalty earn/redeem (e2e)', () => {
     await resetMenuDb(app);
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
+    await ensureRestaurant(app);
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'loyal-e2e',
-        name: 'Loyal E2E',
-        phone: '+48 22 555 0011',
-        email: 'loyal@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const item = await inject(
@@ -85,7 +72,6 @@ describe('loyalty earn/redeem (e2e)', () => {
       data: {
         orderNumber: `R-EARN-${Math.random().toString(36).slice(2, 8)}`,
         userId,
-        restaurantId,
         type: 'PICKUP',
         status: 'COMPLETED',
         subtotal: '50.00',
@@ -130,13 +116,13 @@ describe('loyalty earn/redeem (e2e)', () => {
 
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
     await inject(
       'PATCH',
-      `/api/v1/cart/loyalty?restaurantId=${restaurantId}`,
+      `/api/v1/cart/loyalty`,
       { points: 500 },
       userToken,
     );
@@ -144,7 +130,7 @@ describe('loyalty earn/redeem (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'Idempotency-Key': 'loyalty-redeem-1' },
     );
@@ -166,7 +152,7 @@ describe('loyalty earn/redeem (e2e)', () => {
     const promo = await inject(
       'POST',
       '/api/v1/promotions',
-      { restaurantId, name: '80 off', type: 'PERCENT', value: '80' },
+      { name: '80 off', type: 'PERCENT', value: '80' },
       ownerToken,
     );
     await inject(
@@ -178,20 +164,20 @@ describe('loyalty earn/redeem (e2e)', () => {
 
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
     await inject(
       'POST',
-      `/api/v1/cart/coupon?restaurantId=${restaurantId}`,
+      `/api/v1/cart/coupon`,
       { code: 'EIGHTY' },
       userToken,
     );
     // Ask to redeem far more than the post-coupon remainder allows.
     await inject(
       'PATCH',
-      `/api/v1/cart/loyalty?restaurantId=${restaurantId}`,
+      `/api/v1/cart/loyalty`,
       { points: 5000 },
       userToken,
     );
@@ -199,7 +185,7 @@ describe('loyalty earn/redeem (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'Idempotency-Key': 'loyalty-coupon-cap' },
     );

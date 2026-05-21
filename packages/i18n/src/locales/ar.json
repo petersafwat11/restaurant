@@ -113,7 +113,6 @@
     "addresses": "العناوين",
     "paymentMethods": "طرق الدفع",
     "loyalty": "الولاء",
-    "favorites": "المفضلة",
     "referrals": "الإحالات",
     "notifications": "الإشعارات",
     "preferences": "التفضيلات"
@@ -143,12 +142,6 @@
     "ownerReply": "رد المالك",
     "averageRating": "{average} من 5 ({count, plural, zero {لا تقييمات} one {تقييم واحد} two {تقييمان} few {# تقييمات} many {# تقييماً} other {# تقييم}})",
     "thanks": "شكراً لتقييمك"
-  },
-  "favorites": {
-    "title": "المفضلة",
-    "empty": "ليس لديك مفضلات بعد",
-    "add": "أضف إلى المفضلة",
-    "remove": "إزالة من المفضلة"
   },
   "referral": {
     "title": "ادعُ أصدقاءك",

@@ -1,11 +1,10 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { Cart, CartItem, Prisma } from '@repo/db';
+import type { Cart, Prisma } from '@repo/db';
 import type {
   AddCartItemDto,
   ApplyCouponDto,
@@ -15,7 +14,7 @@ import type {
   ModifierSnapshotEntry,
   UpdateCartItemDto,
 } from '@repo/types';
-import { Decimal, decimalToString, multiply, toDecimal } from '@repo/utils';
+import { Decimal, decimalToString, multiply, toDecimal } from '@repo/utils/money';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
 import { calculateCartTotals } from './cart-pricing';
@@ -33,44 +32,46 @@ export class CartService {
     private readonly promotions: PromotionsService,
   ) {}
 
-  async getCart(identity: CartIdentity, restaurantId: string): Promise<CartDto> {
-    const cart = await this.findOrCreateCart(identity, restaurantId);
+  async getCart(identity: CartIdentity): Promise<CartDto> {
+    const cart = await this.findOrCreateCart(identity);
     return this.toDto(cart.id);
   }
 
-  async addItem(
-    identity: CartIdentity,
-    restaurantId: string,
-    dto: AddCartItemDto,
-  ): Promise<CartDto> {
-    const cart = await this.findOrCreateCart(identity, restaurantId);
+  async addItem(identity: CartIdentity, dto: AddCartItemDto): Promise<CartDto> {
+    const cart = await this.findOrCreateCart(identity);
 
     const item = await this.prisma.menuItem.findUnique({
       where: { id: dto.menuItemId },
-      include: {
-        modifierGroups: { include: { options: true } },
-        category: { select: { restaurantId: true } },
-      },
+      include: { modifierGroups: { include: { options: true } } },
     });
     if (!item) throw new NotFoundException('Menu item not found');
-    if (item.category.restaurantId !== restaurantId) {
-      throw new BadRequestException('Menu item does not belong to this restaurant');
-    }
     if (!item.isAvailable) {
       throw new BadRequestException('Menu item is not currently available');
     }
 
     const { snapshot, totalDelta } = resolveModifierSelections(item, dto.modifierSelections);
     const unitPrice = toDecimal(item.basePrice).plus(totalDelta);
+    const fingerprint = modifierFingerprint(snapshot);
 
-    await this.prisma.cartItem.create({
-      data: {
+    await this.prisma.cartItem.upsert({
+      where: {
+        cartId_menuItemId_modifierFingerprint: {
+          cartId: cart.id,
+          menuItemId: item.id,
+          modifierFingerprint: fingerprint,
+        },
+      },
+      create: {
         cartId: cart.id,
         menuItemId: item.id,
         quantity: dto.quantity,
         unitPrice,
         modifierSnapshot: snapshot as unknown as Prisma.InputJsonValue,
+        modifierFingerprint: fingerprint,
         notes: dto.notes ?? null,
+      },
+      update: {
+        quantity: { increment: dto.quantity },
       },
     });
 
@@ -97,11 +98,39 @@ export class CartService {
 
     let unitPrice: Decimal | undefined;
     let snapshot: ModifierSnapshotEntry[] | undefined;
+    let fingerprint: string | undefined;
 
     if (dto.modifierSelections) {
       const resolved = resolveModifierSelections(menuItem, dto.modifierSelections);
       snapshot = resolved.snapshot;
       unitPrice = toDecimal(menuItem.basePrice).plus(resolved.totalDelta);
+      fingerprint = modifierFingerprint(snapshot);
+    }
+
+    if (fingerprint !== undefined) {
+      const collision = await this.prisma.cartItem.findUnique({
+        where: {
+          cartId_menuItemId_modifierFingerprint: {
+            cartId: cartItem.cartId,
+            menuItemId: cartItem.menuItemId,
+            modifierFingerprint: fingerprint,
+          },
+        },
+      });
+      if (collision && collision.id !== cartItemId) {
+        await this.prisma.$transaction([
+          this.prisma.cartItem.update({
+            where: { id: collision.id },
+            data: {
+              quantity: { increment: dto.quantity ?? cartItem.quantity },
+              ...(unitPrice ? { unitPrice } : {}),
+              ...(snapshot ? { modifierSnapshot: snapshot as unknown as Prisma.InputJsonValue } : {}),
+            },
+          }),
+          this.prisma.cartItem.delete({ where: { id: cartItemId } }),
+        ]);
+        return this.toDto(cartItem.cartId);
+      }
     }
 
     await this.prisma.cartItem.update({
@@ -110,6 +139,7 @@ export class CartService {
         ...(dto.quantity !== undefined ? { quantity: dto.quantity } : {}),
         ...(unitPrice ? { unitPrice } : {}),
         ...(snapshot ? { modifierSnapshot: snapshot as unknown as Prisma.InputJsonValue } : {}),
+        ...(fingerprint !== undefined ? { modifierFingerprint: fingerprint } : {}),
         ...(dto.notes !== undefined ? { notes: dto.notes ?? null } : {}),
       },
     });
@@ -129,8 +159,8 @@ export class CartService {
     return this.toDto(cartItem.cartId);
   }
 
-  async clearCart(identity: CartIdentity, restaurantId: string): Promise<CartDto> {
-    const cart = await this.findOrCreateCart(identity, restaurantId);
+  async clearCart(identity: CartIdentity): Promise<CartDto> {
+    const cart = await this.findOrCreateCart(identity);
     await this.prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
     await this.prisma.cart.update({
       where: { id: cart.id },
@@ -139,18 +169,13 @@ export class CartService {
     return this.toDto(cart.id);
   }
 
-  async applyCoupon(
-    identity: CartIdentity,
-    restaurantId: string,
-    dto: ApplyCouponDto,
-  ): Promise<CartDto> {
-    const cart = await this.findOrCreateCart(identity, restaurantId);
+  async applyCoupon(identity: CartIdentity, dto: ApplyCouponDto): Promise<CartDto> {
+    const cart = await this.findOrCreateCart(identity);
     const totals = await this.computeRawTotals(cart.id);
     const result = await this.promotions.validate({
       code: dto.code,
       subtotal: totals.subtotal,
       userId: identity.userId ?? undefined,
-      restaurantId,
     });
     if (!result.valid) {
       throw new BadRequestException(result.message);
@@ -162,8 +187,8 @@ export class CartService {
     return this.toDto(cart.id);
   }
 
-  async removeCoupon(identity: CartIdentity, restaurantId: string): Promise<CartDto> {
-    const cart = await this.findOrCreateCart(identity, restaurantId);
+  async removeCoupon(identity: CartIdentity): Promise<CartDto> {
+    const cart = await this.findOrCreateCart(identity);
     await this.prisma.cart.update({
       where: { id: cart.id },
       data: { appliedCouponId: null },
@@ -176,8 +201,8 @@ export class CartService {
    * intent only — `OrdersService` re-validates against the live balance and
    * subtotal cap at checkout, so a stale value here can never over-redeem.
    */
-  async setLoyaltyPoints(userId: string, restaurantId: string, points: number): Promise<CartDto> {
-    const cart = await this.findOrCreateCart({ userId, sessionKey: null }, restaurantId);
+  async setLoyaltyPoints(userId: string, points: number): Promise<CartDto> {
+    const cart = await this.findOrCreateCart({ userId, sessionKey: null });
     await this.prisma.cart.update({
       where: { id: cart.id },
       data: { loyaltyPointsToRedeem: Math.max(0, Math.floor(points)) },
@@ -190,51 +215,41 @@ export class CartService {
       where: { sessionKey: dto.sessionKey },
       include: { items: true },
     });
-    if (!guestCart || guestCart.restaurantId !== dto.restaurantId) {
-      // Nothing to merge — just return the user's existing cart.
-      return this.getCart({ userId, sessionKey: null }, dto.restaurantId);
+    if (!guestCart) {
+      return this.getCart({ userId, sessionKey: null });
     }
 
-    const userCart = await this.findOrCreateCart({ userId, sessionKey: null }, dto.restaurantId);
+    const userCart = await this.findOrCreateCart({ userId, sessionKey: null });
 
     await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.cartItem.findMany({
-        where: { cartId: userCart.id },
-      });
-      const existingByFingerprint = new Map<string, CartItem>();
-      for (const it of existing) {
-        const key = `${it.menuItemId}|${modifierFingerprint(
-          it.modifierSnapshot as unknown as ModifierSnapshotEntry[],
-        )}`;
-        existingByFingerprint.set(key, it);
-      }
-
       for (const guestItem of guestCart.items) {
-        const fingerprint = modifierFingerprint(
-          guestItem.modifierSnapshot as unknown as ModifierSnapshotEntry[],
-        );
-        const key = `${guestItem.menuItemId}|${fingerprint}`;
-        const match = existingByFingerprint.get(key);
-        if (match) {
-          await tx.cartItem.update({
-            where: { id: match.id },
-            data: { quantity: match.quantity + guestItem.quantity },
-          });
-        } else {
-          await tx.cartItem.create({
-            data: {
+        const fingerprint =
+          guestItem.modifierFingerprint ??
+          modifierFingerprint(guestItem.modifierSnapshot as unknown as ModifierSnapshotEntry[]);
+
+        await tx.cartItem.upsert({
+          where: {
+            cartId_menuItemId_modifierFingerprint: {
               cartId: userCart.id,
               menuItemId: guestItem.menuItemId,
-              quantity: guestItem.quantity,
-              unitPrice: guestItem.unitPrice,
-              modifierSnapshot: guestItem.modifierSnapshot as Prisma.InputJsonValue,
-              notes: guestItem.notes,
+              modifierFingerprint: fingerprint,
             },
-          });
-        }
+          },
+          create: {
+            cartId: userCart.id,
+            menuItemId: guestItem.menuItemId,
+            quantity: guestItem.quantity,
+            unitPrice: guestItem.unitPrice,
+            modifierSnapshot: guestItem.modifierSnapshot as Prisma.InputJsonValue,
+            modifierFingerprint: fingerprint,
+            notes: guestItem.notes,
+          },
+          update: {
+            quantity: { increment: guestItem.quantity },
+          },
+        });
       }
 
-      // Move the coupon over if user's cart didn't already have one.
       if (!userCart.appliedCouponId && guestCart.appliedCouponId) {
         await tx.cart.update({
           where: { id: userCart.id },
@@ -250,15 +265,13 @@ export class CartService {
 
   // ---- Helpers -----------------------------------------------------------
 
-  private async findOrCreateCart(identity: CartIdentity, restaurantId: string): Promise<Cart> {
+  private async findOrCreateCart(identity: CartIdentity): Promise<Cart> {
     if (identity.userId) {
       const existing = await this.prisma.cart.findFirst({
-        where: { userId: identity.userId, restaurantId },
+        where: { userId: identity.userId },
       });
       if (existing) return existing;
-      return this.prisma.cart.create({
-        data: { userId: identity.userId, restaurantId },
-      });
+      return this.prisma.cart.create({ data: { userId: identity.userId } });
     }
 
     if (!identity.sessionKey) {
@@ -268,17 +281,8 @@ export class CartService {
     const existing = await this.prisma.cart.findUnique({
       where: { sessionKey: identity.sessionKey },
     });
-    if (existing) {
-      if (existing.restaurantId !== restaurantId) {
-        // Single guest cart per session key; rebinding to a new restaurant
-        // means starting over.
-        throw new ConflictException('Session is bound to a different restaurant cart');
-      }
-      return existing;
-    }
-    return this.prisma.cart.create({
-      data: { sessionKey: identity.sessionKey, restaurantId },
-    });
+    if (existing) return existing;
+    return this.prisma.cart.create({ data: { sessionKey: identity.sessionKey } });
   }
 
   private assertCartOwnership(cart: Cart, identity: CartIdentity): void {
@@ -305,12 +309,9 @@ export class CartService {
       },
     });
 
-    const restaurant = await this.prisma.restaurant.findUniqueOrThrow({
-      where: { id: cart.restaurantId },
-      select: { currency: true },
-    });
+    const restaurant = await this.prisma.restaurant.findFirst({ select: { currency: true } });
+    const currency = restaurant?.currency ?? 'USD';
 
-    // Map cart items to DTOs with line totals.
     const menuItemIds = cart.items.map((it) => it.menuItemId);
     const menuItems = menuItemIds.length
       ? await this.prisma.menuItem.findMany({
@@ -340,7 +341,6 @@ export class CartService {
         code: cart.appliedCoupon.code,
         subtotal,
         userId: cart.userId ?? undefined,
-        restaurantId: cart.restaurantId,
       });
       if (result.valid) {
         discountAmount = toDecimal(result.discountAmount);
@@ -350,7 +350,6 @@ export class CartService {
           discountAmount: result.discountAmount,
         };
       } else {
-        // Coupon went stale — drop it silently so cart stays usable.
         await this.prisma.cart.update({
           where: { id: cart.id },
           data: { appliedCouponId: null },
@@ -365,10 +364,9 @@ export class CartService {
 
     return {
       id: cart.id,
-      restaurantId: cart.restaurantId,
       userId: cart.userId,
       sessionKey: cart.sessionKey,
-      currency: restaurant.currency,
+      currency,
       items: itemDtos,
       appliedCoupon: appliedCouponDto,
       loyaltyPointsToRedeem: cart.loyaltyPointsToRedeem,

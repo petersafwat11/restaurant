@@ -32,11 +32,16 @@ export class AnalyticsService {
     return this.redisService.client;
   }
 
-  async overview(q: AnalyticsBaseQuery): Promise<AnalyticsOverviewDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
+  private async requireRestaurant() {
+    const restaurant = await this.prisma.restaurant.findFirst();
     if (!restaurant) throw new NotFoundException('Restaurant not found');
+    return restaurant;
+  }
 
-    const cacheKey = `analytics:overview:${q.restaurantId}:${q.period}`;
+  async overview(q: AnalyticsBaseQuery): Promise<AnalyticsOverviewDto> {
+    const restaurant = await this.requireRestaurant();
+
+    const cacheKey = `analytics:overview:${q.period}`;
     if (q.period !== 'custom') {
       const hit = await this.redis.get(cacheKey);
       if (hit) return JSON.parse(hit) as AnalyticsOverviewDto;
@@ -45,20 +50,15 @@ export class AnalyticsService {
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const [cur, prev] = await Promise.all([
-      this.aggregateForRange(q.restaurantId, range.from, range.to),
-      this.aggregateForRange(q.restaurantId, range.prevFrom, range.prevTo),
+      this.aggregateForRange(range.from, range.to),
+      this.aggregateForRange(range.prevFrom, range.prevTo),
     ]);
 
-    const newCustomerCount = await this.countNewCustomers(q.restaurantId, range.from, range.to);
-    const prevNewCustomers = await this.countNewCustomers(
-      q.restaurantId,
-      range.prevFrom,
-      range.prevTo,
-    );
+    const newCustomerCount = await this.countNewCustomers(range.from, range.to);
+    const prevNewCustomers = await this.countNewCustomers(range.prevFrom, range.prevTo);
 
     const liveOrdersCount = await this.prisma.order.count({
       where: {
-        restaurantId: q.restaurantId,
         status: { in: ['CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY'] },
       },
     });
@@ -87,8 +87,7 @@ export class AnalyticsService {
   }
 
   async revenueTimeseries(q: RevenueTimeseriesQuery): Promise<RevenueTimeseriesPointDto[]> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
     const granularity =
       q.granularity ?? (q.period === 'today' ? 'hour' : q.period === '7d' ? 'day' : 'day');
@@ -111,8 +110,7 @@ export class AnalyticsService {
              SUM("grandTotal") AS revenue,
              COUNT(*)::bigint AS orders
       FROM "Order"
-      WHERE "restaurantId" = ${q.restaurantId}
-        AND "createdAt" >= ${range.from}
+      WHERE "createdAt" >= ${range.from}
         AND "createdAt" < ${range.to}
         AND "status" = ANY(${COMPLETED_STATUSES}::text[]::"OrderStatus"[])
       GROUP BY 1
@@ -126,15 +124,13 @@ export class AnalyticsService {
   }
 
   async topItems(q: TopItemsQuery): Promise<TopItemDto[]> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const grouped = await this.prisma.orderItem.groupBy({
       by: ['menuItemId'],
       where: {
         order: {
-          restaurantId: q.restaurantId,
           status: { in: COMPLETED_STATUSES },
           createdAt: { gte: range.from, lt: range.to },
         },
@@ -159,14 +155,12 @@ export class AnalyticsService {
   }
 
   async ordersByStatus(q: AnalyticsBaseQuery): Promise<OrdersByStatusDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const rows = await this.prisma.order.groupBy({
       by: ['status'],
       where: {
-        restaurantId: q.restaurantId,
         createdAt: { gte: range.from, lt: range.to },
       },
       _count: true,
@@ -175,15 +169,13 @@ export class AnalyticsService {
   }
 
   async paymentMethods(q: AnalyticsBaseQuery): Promise<PaymentMethodsBreakdownDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const rows = await this.prisma.payment.groupBy({
       by: ['method'],
       where: {
         order: {
-          restaurantId: q.restaurantId,
           createdAt: { gte: range.from, lt: range.to },
         },
         status: 'PAID',
@@ -199,8 +191,7 @@ export class AnalyticsService {
   }
 
   async salesByHour(q: AnalyticsBaseQuery): Promise<SalesByHourDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const rows = await this.prisma.$queryRaw<
@@ -211,8 +202,7 @@ export class AnalyticsService {
              SUM("grandTotal") AS revenue,
              COUNT(*)::bigint AS orders
       FROM "Order"
-      WHERE "restaurantId" = ${q.restaurantId}
-        AND "createdAt" >= ${range.from}
+      WHERE "createdAt" >= ${range.from}
         AND "createdAt" < ${range.to}
         AND "status" = ANY(${COMPLETED_STATUSES}::text[]::"OrderStatus"[])
       GROUP BY 1, 2
@@ -227,8 +217,7 @@ export class AnalyticsService {
   }
 
   async salesByDayOfWeek(q: AnalyticsBaseQuery): Promise<SalesByDayOfWeekDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
     const rows = await this.prisma.$queryRaw<
@@ -238,8 +227,7 @@ export class AnalyticsService {
              SUM("grandTotal") AS revenue,
              COUNT(*)::bigint AS orders
       FROM "Order"
-      WHERE "restaurantId" = ${q.restaurantId}
-        AND "createdAt" >= ${range.from}
+      WHERE "createdAt" >= ${range.from}
         AND "createdAt" < ${range.to}
         AND "status" = ANY(${COMPLETED_STATUSES}::text[]::"OrderStatus"[])
       GROUP BY 1
@@ -256,8 +244,7 @@ export class AnalyticsService {
     // Pragmatic cohort retention: month-by-month for users who first ordered
     // during the cohort month, returning their repeat-order presence per
     // subsequent month for 6 periods. Only one cohort returned when specified.
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: q.restaurantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
+    await this.requireRestaurant();
 
     const rows = await this.prisma.$queryRaw<
       { cohort: string; period_index: number; retained: bigint; cohort_size: bigint }[]
@@ -265,13 +252,13 @@ export class AnalyticsService {
       WITH firsts AS (
         SELECT "userId", MIN(date_trunc('month', "createdAt")) AS cohort
         FROM "Order"
-        WHERE "restaurantId" = ${q.restaurantId} AND "userId" IS NOT NULL
+        WHERE "userId" IS NOT NULL
         GROUP BY "userId"
       ),
       orders_per_month AS (
         SELECT o."userId", date_trunc('month', o."createdAt") AS month
         FROM "Order" o
-        WHERE o."restaurantId" = ${q.restaurantId} AND o."userId" IS NOT NULL
+        WHERE o."userId" IS NOT NULL
         GROUP BY 1, 2
       ),
       cohort_sizes AS (
@@ -303,9 +290,9 @@ export class AnalyticsService {
 
   // ---- Internal helpers --------------------------------------------------
 
-  private async aggregateForRange(restaurantId: string, from: Date, to: Date) {
+  private async aggregateForRange(from: Date, to: Date) {
     const all = await this.prisma.order.findMany({
-      where: { restaurantId, createdAt: { gte: from, lt: to } },
+      where: { createdAt: { gte: from, lt: to } },
       select: { id: true, status: true, grandTotal: true, userId: true },
     });
     const completed = all.filter((o) => COMPLETED_STATUSES.includes(o.status));
@@ -342,7 +329,6 @@ export class AnalyticsService {
       WHERE c.status = 'CONFIRMED'
         AND c."createdAt" >= ${from}
         AND c."createdAt" < ${to}
-        AND c."orderId" IN (SELECT id FROM "Order" WHERE "restaurantId" = ${restaurantId})
     `;
     const avgPrepMinutes = prep[0]?.avg_minutes ?? null;
 
@@ -357,14 +343,14 @@ export class AnalyticsService {
     };
   }
 
-  private async countNewCustomers(restaurantId: string, from: Date, to: Date): Promise<number> {
-    // A "new customer" for this restaurant in the window is a user whose first
-    // order at this restaurant falls inside [from, to).
+  private async countNewCustomers(from: Date, to: Date): Promise<number> {
+    // A "new customer" in the window is a user whose first order falls inside
+    // [from, to).
     const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*)::bigint AS count FROM (
         SELECT "userId", MIN("createdAt") AS first_at
         FROM "Order"
-        WHERE "restaurantId" = ${restaurantId} AND "userId" IS NOT NULL
+        WHERE "userId" IS NOT NULL
         GROUP BY "userId"
       ) firsts
       WHERE first_at >= ${from} AND first_at < ${to}
@@ -375,28 +361,26 @@ export class AnalyticsService {
   // ---- Rollups -----------------------------------------------------------
 
   /**
-   * Recompute the daily metric row for a given restaurant + date. Idempotent.
+   * Recompute the daily metric row for a given date. Idempotent.
    * Date is interpreted as a calendar day in the restaurant timezone.
    */
-  async rollupDay(restaurantId: string, date: Date): Promise<void> {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
+  async rollupDay(date: Date): Promise<void> {
+    const restaurant = await this.prisma.restaurant.findFirst();
     if (!restaurant) return;
     const dayStart = startOfDayInTz(date, restaurant.timezone);
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
 
-    const agg = await this.aggregateForRange(restaurantId, dayStart, dayEnd);
-    const newCustomerCount = await this.countNewCustomers(restaurantId, dayStart, dayEnd);
+    const agg = await this.aggregateForRange(dayStart, dayEnd);
+    const newCustomerCount = await this.countNewCustomers(dayStart, dayEnd);
 
     const refundedCount = await this.prisma.order.count({
       where: {
-        restaurantId,
         status: 'REFUNDED',
         createdAt: { gte: dayStart, lt: dayEnd },
       },
     });
     const cancelledCount = await this.prisma.order.count({
       where: {
-        restaurantId,
         status: 'CANCELLED',
         createdAt: { gte: dayStart, lt: dayEnd },
       },
@@ -404,7 +388,7 @@ export class AnalyticsService {
 
     const dayDate = new Date(Date.UTC(dayStart.getUTCFullYear(), dayStart.getUTCMonth(), dayStart.getUTCDate()));
     await this.prisma.dailyMetric.upsert({
-      where: { restaurantId_date: { restaurantId, date: dayDate } },
+      where: { date: dayDate },
       update: {
         revenue: new Prisma.Decimal(agg.revenue),
         orderCount: agg.orderCount,
@@ -416,7 +400,6 @@ export class AnalyticsService {
         avgPrepMinutes: agg.avgPrepMinutes,
       },
       create: {
-        restaurantId,
         date: dayDate,
         revenue: new Prisma.Decimal(agg.revenue),
         orderCount: agg.orderCount,

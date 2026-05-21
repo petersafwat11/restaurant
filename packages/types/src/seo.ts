@@ -17,6 +17,5 @@ export type SeoMetaDto = z.infer<typeof SeoMetaSchema>;
 
 export const SeoMetaQuerySchema = z.object({
   path: z.string().default('/'),
-  restaurantId: z.string().optional(),
 });
 export type SeoMetaQuery = z.infer<typeof SeoMetaQuerySchema>;

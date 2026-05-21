@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LocaleSchema = z.enum(['en', 'ar']);
+export const LocaleSchema = z.enum(['en', 'ar', 'pl']);
 export type LocaleCode = z.infer<typeof LocaleSchema>;
 
 export const I18nMessagesQuerySchema = z.object({

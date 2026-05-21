@@ -1,0 +1,190 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Restaurant profile
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [active] [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Reviews" [level=1] [ref=e2216]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "Search (Cmd+K)" [ref=e1697] [cursor=pointer]:
+          - img [ref=e1698]
+          - generic [ref=e1701]: Search orders, customers, items…
+          - generic [ref=e1702]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e1703] [cursor=pointer]:
+          - img [ref=e1704]
+        - button "Account" [ref=e1708] [cursor=pointer]: OO
+      - main [ref=e212]:
+        - generic [ref=e2220]:
+          - tablist [ref=e2221]:
+            - tab "All" [selected] [ref=e2222] [cursor=pointer]:
+              - generic [ref=e2223]: All
+            - tab "Published" [ref=e2224] [cursor=pointer]:
+              - generic [ref=e2225]: Published
+            - tab "Hidden" [ref=e2226] [cursor=pointer]:
+              - generic [ref=e2227]: Hidden
+            - tab "Flagged" [ref=e2228] [cursor=pointer]:
+              - generic [ref=e2229]: Flagged
+          - generic [ref=e2230]:
+            - generic [ref=e2231]: "Rating:"
+            - button "All" [ref=e2232] [cursor=pointer]
+            - button "5★" [ref=e2233] [cursor=pointer]
+            - button "4★" [ref=e2234] [cursor=pointer]
+            - button "3★" [ref=e2235] [cursor=pointer]
+            - button "2★" [ref=e2236] [cursor=pointer]
+            - button "1★" [ref=e2237] [cursor=pointer]
+        - table [ref=e2240]:
+          - rowgroup [ref=e2241]:
+            - row "Rating Customer Comment Status Reply Posted" [ref=e2242]:
+              - columnheader "Rating" [ref=e2243]:
+                - generic [ref=e2244]: Rating
+              - columnheader "Customer" [ref=e2245]:
+                - generic [ref=e2246]: Customer
+              - columnheader "Comment" [ref=e2247]:
+                - generic [ref=e2248]: Comment
+              - columnheader "Status" [ref=e2249]:
+                - generic [ref=e2250]: Status
+              - columnheader "Reply" [ref=e2251]:
+                - generic [ref=e2252]: Reply
+              - columnheader "Posted" [ref=e2253]:
+                - generic [ref=e2254]: Posted
+          - rowgroup [ref=e2255]:
+            - row "4 of 5 stars Anonymous Tasty, would order again. PUBLISHED — 3d ago" [ref=e2256] [cursor=pointer]:
+              - cell "4 of 5 stars" [ref=e2257]:
+                - generic "4 of 5 stars" [ref=e2258]:
+                  - img [ref=e2259]
+                  - img [ref=e2261]
+                  - img [ref=e2263]
+                  - img [ref=e2265]
+                  - img [ref=e2267]
+              - cell "Anonymous" [ref=e2269]
+              - cell "Tasty, would order again." [ref=e2270]:
+                - generic [ref=e2271]: Tasty, would order again.
+              - cell "PUBLISHED" [ref=e2272]:
+                - generic [ref=e2273]: PUBLISHED
+              - cell "—" [ref=e2274]
+              - cell "3d ago" [ref=e2275]:
+                - time [ref=e2276]: 3d ago
+            - row "4 of 5 stars Anonymous Tasty, would order again. PUBLISHED — 3d ago" [ref=e2277] [cursor=pointer]:
+              - cell "4 of 5 stars" [ref=e2278]:
+                - generic "4 of 5 stars" [ref=e2279]:
+                  - img [ref=e2280]
+                  - img [ref=e2282]
+                  - img [ref=e2284]
+                  - img [ref=e2286]
+                  - img [ref=e2288]
+              - cell "Anonymous" [ref=e2290]
+              - cell "Tasty, would order again." [ref=e2291]:
+                - generic [ref=e2292]: Tasty, would order again.
+              - cell "PUBLISHED" [ref=e2293]:
+                - generic [ref=e2294]: PUBLISHED
+              - cell "—" [ref=e2295]
+              - cell "3d ago" [ref=e2296]:
+                - time [ref=e2297]: 3d ago
+            - row "5 of 5 stars Anonymous Tasty, would order again. PUBLISHED — 3d ago" [ref=e2298] [cursor=pointer]:
+              - cell "5 of 5 stars" [ref=e2299]:
+                - generic "5 of 5 stars" [ref=e2300]:
+                  - img [ref=e2301]
+                  - img [ref=e2303]
+                  - img [ref=e2305]
+                  - img [ref=e2307]
+                  - img [ref=e2309]
+              - cell "Anonymous" [ref=e2311]
+              - cell "Tasty, would order again." [ref=e2312]:
+                - generic [ref=e2313]: Tasty, would order again.
+              - cell "PUBLISHED" [ref=e2314]:
+                - generic [ref=e2315]: PUBLISHED
+              - cell "—" [ref=e2316]
+              - cell "3d ago" [ref=e2317]:
+                - time [ref=e2318]: 3d ago

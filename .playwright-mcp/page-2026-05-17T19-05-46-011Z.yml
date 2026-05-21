@@ -1,0 +1,426 @@
+- generic [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Szef Donald home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]:
+            - generic [ref=e10]: SD
+            - generic [ref=e11]: EST · 2014
+          - generic [ref=e12]: Szef Donald
+      - navigation "Primary" [ref=e13]:
+        - link "Menu" [ref=e14] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e16] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e17] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e18]:
+        - group "Language" [ref=e20]:
+          - button "PL" [active] [pressed] [ref=e21] [cursor=pointer]
+          - button "EN" [ref=e22] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+        - link "Order now" [ref=e28] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e29]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Kebab · Falafel · Tacos · Since 2014
+        - heading "Real kebab. Made daily from scratch." [level=1] [ref=e35]:
+          - text: Real kebab.
+          - emphasis [ref=e36]: Made daily
+          - text: from scratch.
+        - paragraph [ref=e37]: Hand-rolled falafel, marinated overnight. Bread baked through the day. Take-away or eat in — every order is built to order.
+        - generic [ref=e38]:
+          - link "View the menu" [ref=e39] [cursor=pointer]:
+            - /url: /menu
+            - text: View the menu
+            - img [ref=e40]
+          - link "Order now" [ref=e42] [cursor=pointer]:
+            - /url: /menu
+        - generic [ref=e43]:
+          - img "4.8 out of 5 stars" [ref=e44]:
+            - img [ref=e45]
+            - img [ref=e47]
+            - img [ref=e49]
+            - img [ref=e51]
+            - generic [ref=e53]:
+              - img [ref=e54]
+              - img [ref=e57]
+          - generic [ref=e59]: "4.8"
+          - generic [ref=e61]: Based on 1,247 Google reviews
+      - generic [ref=e62]:
+        - img "Overhead shot of a freshly wrapped kebab on warm cream paper, lit from above" [ref=e64]
+        - generic [ref=e69]:
+          - generic [ref=e70]: Open now
+          - generic [ref=e71]: Closes at 22:00
+        - generic [ref=e72]:
+          - img [ref=e74]:
+            - generic [ref=e77]: SD
+            - generic [ref=e78]: EST · 2014
+          - generic [ref=e79]:
+            - generic [ref=e80]: Szef Donald
+            - generic [ref=e81]: Warszawa Centrum
+    - region "What we serve" [ref=e82]:
+      - generic [ref=e83]:
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e86]: Explore
+            - heading "What we serve" [level=2] [ref=e87]
+          - link "View full menu" [ref=e88] [cursor=pointer]:
+            - /url: /menu
+            - generic [ref=e89]: View full menu
+            - img [ref=e90]
+        - generic [ref=e92]:
+          - link "Kebab category Kebab 18 items" [ref=e93] [cursor=pointer]:
+            - /url: /menu#kebab
+            - img "Kebab category" [ref=e94]
+            - generic [ref=e96]:
+              - generic [ref=e97]: Kebab
+              - generic [ref=e98]: 18 items
+          - link "Falafel category Falafel 9 items" [ref=e99] [cursor=pointer]:
+            - /url: /menu#falafel
+            - img "Falafel category" [ref=e100]
+            - generic [ref=e102]:
+              - generic [ref=e103]: Falafel
+              - generic [ref=e104]: 9 items
+          - link "Tacos category Tacos 4 items" [ref=e105] [cursor=pointer]:
+            - /url: /menu#tacos
+            - img "Tacos category" [ref=e106]
+            - generic [ref=e108]:
+              - generic [ref=e109]: Tacos
+              - generic [ref=e110]: 4 items
+          - link "Box & Plates category Box & Plates 8 items" [ref=e111] [cursor=pointer]:
+            - /url: /menu#box
+            - img "Box & Plates category" [ref=e112]
+            - generic [ref=e114]:
+              - generic [ref=e115]: Box & Plates
+              - generic [ref=e116]: 8 items
+          - link "Drinks category Drinks 7 items" [ref=e117] [cursor=pointer]:
+            - /url: /menu#drinks
+            - img "Drinks category" [ref=e118]
+            - generic [ref=e120]:
+              - generic [ref=e121]: Drinks
+              - generic [ref=e122]: 7 items
+    - region "Our customers' favourites" [ref=e123]:
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - generic [ref=e127]: Most loved
+            - heading "Our customers' favourites" [level=2] [ref=e128]
+            - paragraph [ref=e129]: The dishes people order over and over.
+          - link "See full menu" [ref=e130] [cursor=pointer]:
+            - /url: /menu
+            - generic [ref=e131]: See full menu
+            - img [ref=e132]
+        - generic [ref=e134]:
+          - link "Kebab tortilla wrap on cream paper Kebab Tortilla Średni Beef + lamb mix, fresh salad, tahini sauce in a warm tortilla. Our most-ordered. 24,00 zł Add Kebab Tortilla Średni to cart" [ref=e135] [cursor=pointer]:
+            - /url: /menu#kebab-tortilla-srodni
+            - img "Kebab tortilla wrap on cream paper" [ref=e137]
+            - generic [ref=e138]:
+              - heading "Kebab Tortilla Średni" [level=3] [ref=e140]
+              - paragraph [ref=e141]: Beef + lamb mix, fresh salad, tahini sauce in a warm tortilla. Our most-ordered.
+              - generic [ref=e142]:
+                - generic [ref=e143]: 24,00 zł
+                - button "Add Kebab Tortilla Średni to cart" [ref=e144]:
+                  - img [ref=e145]
+          - link "Falafel pita with hummus V Vegan Falafel Pita Duży Eight hand-rolled falafel, hummus, pickled turnips, parsley. 23,00 zł Add Falafel Pita Duży to cart" [ref=e146] [cursor=pointer]:
+            - /url: /menu#falafel-pita-duzy
+            - img "Falafel pita with hummus" [ref=e148]
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - generic "V" [ref=e151]:
+                  - img [ref=e152]
+                  - text: V
+                - generic "Vegan" [ref=e155]:
+                  - img [ref=e156]
+                  - text: Vegan
+              - heading "Falafel Pita Duży" [level=3] [ref=e159]
+              - paragraph [ref=e160]: Eight hand-rolled falafel, hummus, pickled turnips, parsley.
+              - generic [ref=e161]:
+                - generic [ref=e162]: 23,00 zł
+                - button "Add Falafel Pita Duży to cart" [ref=e163]:
+                  - img [ref=e164]
+          - link "Kapsalon with kebab and melted cheese Featured Kapsalon Duży The Rotterdam classic. Fries, kebab, melted cheese, salad, sauce. Built for two. 43,00 zł Add Kapsalon Duży to cart" [ref=e165] [cursor=pointer]:
+            - /url: /menu#kapsalon-duzy
+            - img "Kapsalon with kebab and melted cheese" [ref=e167]
+            - generic [ref=e168]:
+              - generic "Featured" [ref=e170]:
+                - img [ref=e171]
+                - text: Featured
+              - heading "Kapsalon Duży" [level=3] [ref=e173]
+              - paragraph [ref=e174]: The Rotterdam classic. Fries, kebab, melted cheese, salad, sauce. Built for two.
+              - generic [ref=e175]:
+                - generic [ref=e176]: 43,00 zł
+                - button "Add Kapsalon Duży to cart" [ref=e177]:
+                  - img [ref=e178]
+          - link "Three soft tacos Spicy Tacos x3 Three soft tacos, your choice of kebab or falafel, salsa. 29,00 zł Add Tacos x3 to cart" [ref=e179] [cursor=pointer]:
+            - /url: /menu#tacos-x3
+            - img "Three soft tacos" [ref=e181]
+            - generic [ref=e182]:
+              - generic "Spicy" [ref=e184]:
+                - img [ref=e185]
+                - text: Spicy
+              - heading "Tacos x3" [level=3] [ref=e187]
+              - paragraph [ref=e188]: Three soft tacos, your choice of kebab or falafel, salsa.
+              - generic [ref=e189]:
+                - generic [ref=e190]: 29,00 zł
+                - button "Add Tacos x3 to cart" [ref=e191]:
+                  - img [ref=e192]
+          - link "Box of crispy chicken strips and fries Box Strips Mega Crispy chicken strips, fries, slaw, two sauces. 39,00 zł Add Box Strips Mega to cart" [ref=e193] [cursor=pointer]:
+            - /url: /menu#box-strips-mega
+            - img "Box of crispy chicken strips and fries" [ref=e195]
+            - generic [ref=e196]:
+              - heading "Box Strips Mega" [level=3] [ref=e198]
+              - paragraph [ref=e199]: Crispy chicken strips, fries, slaw, two sauces.
+              - generic [ref=e200]:
+                - generic [ref=e201]: 39,00 zł
+                - button "Add Box Strips Mega to cart" [ref=e202]:
+                  - img [ref=e203]
+          - link "Kebab salad bowl with greens and pomegranate GF Sałatka Kebab Duży No bread — just greens, kebab meat, tahini, pomegranate. 32,00 zł Add Sałatka Kebab Duży to cart" [ref=e204] [cursor=pointer]:
+            - /url: /menu#salatka-kebab-duzy
+            - img "Kebab salad bowl with greens and pomegranate" [ref=e206]
+            - generic [ref=e207]:
+              - generic "GF" [ref=e209]:
+                - img [ref=e210]
+                - text: GF
+              - heading "Sałatka Kebab Duży" [level=3] [ref=e221]
+              - paragraph [ref=e222]: No bread — just greens, kebab meat, tahini, pomegranate.
+              - generic [ref=e223]:
+                - generic [ref=e224]: 32,00 zł
+                - button "Add Sałatka Kebab Duży to cart" [ref=e225]:
+                  - img [ref=e226]
+        - link "View the full menu" [ref=e228] [cursor=pointer]:
+          - /url: /menu
+          - text: View the full menu
+          - img [ref=e229]
+    - region "Kebab the way it should be." [ref=e231]:
+      - generic [ref=e233]:
+        - generic [ref=e234]:
+          - generic [ref=e235]: Our story
+          - heading "Kebab the way it should be." [level=2] [ref=e236]:
+            - text: Kebab the way
+            - text: it should be.
+          - paragraph [ref=e237]: "We opened Szef Donald in 2014 with one rule: nothing comes out of a freezer. Bread is baked through the day. Falafel is rolled by hand every morning. Meat is marinated for eighteen hours before it touches the grill."
+          - paragraph [ref=e238]: We're a small team — three cooks and a counter — and we keep it that way on purpose. Every wrap is made by someone who's been here long enough to care.
+          - link "Read our full story" [ref=e239] [cursor=pointer]:
+            - /url: /about
+            - generic [ref=e240]: Read our full story
+            - img [ref=e241]
+        - generic [ref=e243]:
+          - img "Cook turning meat on the grill, warm light" [ref=e245]
+          - generic [ref=e246]:
+            - generic [ref=e247]:
+              - generic [ref=e248]: 11 years
+              - generic [ref=e249]: Open since 2014
+            - generic [ref=e251]:
+              - generic [ref=e252]: ~1,200 /wk
+              - generic [ref=e253]: Wraps in high season
+    - region "Open seven days." [ref=e254]:
+      - generic [ref=e256]:
+        - generic [ref=e257]:
+          - generic [ref=e259]:
+            - generic [ref=e260]: Find us
+            - heading "Open seven days." [level=2] [ref=e261]
+          - generic [ref=e262]:
+            - generic [ref=e263]: Marszałkowska 102
+            - generic [ref=e264]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e265] [cursor=pointer]:
+              - /url: tel:+48225550123
+          - generic [ref=e266]:
+            - link "Get directions" [ref=e267] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e268]
+              - text: Get directions
+            - link "Call us" [ref=e271] [cursor=pointer]:
+              - /url: tel:+48225550123
+              - img [ref=e272]
+              - text: Call us
+            - button "Share location" [ref=e274] [cursor=pointer]:
+              - img [ref=e275]
+              - text: Share location
+          - table [ref=e281]:
+            - rowgroup [ref=e282]:
+              - row "Mon 11:00–22:00" [ref=e283]:
+                - rowheader "Mon" [ref=e284]
+                - cell "11:00–22:00" [ref=e285]
+              - row "Tue 11:00–22:00" [ref=e286]:
+                - rowheader "Tue" [ref=e287]
+                - cell "11:00–22:00" [ref=e288]
+              - row "Wed 11:00–22:00" [ref=e289]:
+                - rowheader "Wed" [ref=e290]
+                - cell "11:00–22:00" [ref=e291]
+              - row "Thu 11:00–22:00" [ref=e292]:
+                - rowheader "Thu" [ref=e293]
+                - cell "11:00–22:00" [ref=e294]
+              - row "Fri 11:00–23:00" [ref=e295]:
+                - rowheader "Fri" [ref=e296]
+                - cell "11:00–23:00" [ref=e297]
+              - row "Sat 12:00–23:00" [ref=e298]:
+                - rowheader "Sat" [ref=e299]
+                - cell "12:00–23:00" [ref=e300]
+              - row "Sun 12:00–21:00" [ref=e301]:
+                - rowheader "Sun" [ref=e302]
+                - cell "12:00–21:00" [ref=e303]
+        - generic [ref=e304]:
+          - img "Map showing Szef Donald on Marszałkowska 102, Warsaw" [ref=e305]:
+            - img [ref=e306]
+            - img [ref=e313]
+            - generic [ref=e317]: Marszałkowska 102
+          - link "View larger map" [ref=e319] [cursor=pointer]:
+            - /url: "#"
+            - text: View larger map
+            - img [ref=e320]
+    - region "Trusted by thousands." [ref=e323]:
+      - generic [ref=e324]:
+        - generic [ref=e326]:
+          - generic [ref=e327]: Reviews
+          - heading "Trusted by thousands." [level=2] [ref=e328]
+          - paragraph [ref=e329]: 4.8 average rating across 1,247 reviews on Google.
+        - generic [ref=e330]:
+          - article [ref=e331]:
+            - img "5 out of 5 stars" [ref=e332]:
+              - img [ref=e333]
+              - img [ref=e335]
+              - img [ref=e337]
+              - img [ref=e339]
+              - img [ref=e341]
+            - paragraph [ref=e343]: “Best kebab in Warsaw, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.”
+            - generic [ref=e344]:
+              - generic [ref=e345]: K
+              - generic [ref=e346]:
+                - generic [ref=e347]: Kasia W.
+                - generic [ref=e348]: Local guide · 42 reviews
+              - generic [ref=e349]: Google
+          - article [ref=e350]:
+            - img "5 out of 5 stars" [ref=e351]:
+              - img [ref=e352]
+              - img [ref=e354]
+              - img [ref=e356]
+              - img [ref=e358]
+              - img [ref=e360]
+            - paragraph [ref=e362]: “Falafel pita that actually tastes like it should — crispy outside, soft inside, properly spiced. My go-to vegetarian lunch.”
+            - generic [ref=e363]:
+              - generic [ref=e364]: T
+              - generic [ref=e365]:
+                - generic [ref=e366]: Tomasz K.
+                - generic [ref=e367]: 12 reviews
+              - generic [ref=e368]: Google
+          - article [ref=e369]:
+            - img "5 out of 5 stars" [ref=e370]:
+              - img [ref=e371]
+              - img [ref=e373]
+              - img [ref=e375]
+              - img [ref=e377]
+              - img [ref=e379]
+            - paragraph [ref=e381]: “The kapsalon is dangerous. In a good way.”
+            - generic [ref=e382]:
+              - generic [ref=e383]: A
+              - generic [ref=e384]:
+                - generic [ref=e385]: Anna M.
+                - generic [ref=e386]: 5 reviews
+              - generic [ref=e387]: Google
+        - link "Read all reviews" [ref=e389] [cursor=pointer]:
+          - /url: "#"
+          - text: Read all reviews
+          - img [ref=e390]
+    - region "Get a free baklava on your first order." [ref=e393]:
+      - generic [ref=e394]:
+        - generic [ref=e396]:
+          - generic [ref=e397]: Stay in touch
+          - heading "Get a free baklava on your first order." [level=2] [ref=e398]
+          - paragraph [ref=e399]: Join the list — occasional emails, never spam. Unsubscribe whenever.
+        - generic [ref=e401]:
+          - textbox "Email address" [ref=e402]:
+            - /placeholder: Your email
+          - button "Subscribe" [ref=e403] [cursor=pointer]
+  - contentinfo [ref=e404]:
+    - generic [ref=e405]:
+      - generic [ref=e406]:
+        - generic [ref=e408]:
+          - generic [ref=e409]:
+            - img [ref=e410]:
+              - generic [ref=e413]: SD
+              - generic [ref=e414]: EST · 2014
+            - generic [ref=e415]: Szef Donald
+          - paragraph [ref=e416]: Kebab the way it should be.
+          - generic [ref=e417]:
+            - link "Instagram" [ref=e418] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e419]
+            - link "Facebook" [ref=e422] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e423]
+        - generic [ref=e425]:
+          - heading "Menu" [level=3] [ref=e426]
+          - generic [ref=e427]:
+            - link "Kebab" [ref=e428] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e429] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e430] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e431] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e432] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e433] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e434]:
+          - heading "Visit" [level=3] [ref=e435]
+          - generic [ref=e436]:
+            - generic [ref=e437]:
+              - generic [ref=e438]: Marszałkowska 102
+              - generic [ref=e439]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e440] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e442]:
+              - generic [ref=e443]:
+                - generic [ref=e444]: Sun
+                - generic [ref=e445]: 12:00–21:00
+              - generic [ref=e446]:
+                - generic [ref=e447]: Mon–Thu
+                - generic [ref=e448]: 11:00–22:00
+              - generic [ref=e449]:
+                - generic [ref=e450]: Fri
+                - generic [ref=e451]: 11:00–23:00
+              - generic [ref=e452]:
+                - generic [ref=e453]: Sat
+                - generic [ref=e454]: 12:00–23:00
+        - generic [ref=e455]:
+          - heading "Company" [level=3] [ref=e456]
+          - generic [ref=e457]:
+            - link "About" [ref=e458] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e459] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e460] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e461] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e462]:
+        - generic [ref=e463]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e464]:
+          - link "Privacy" [ref=e465] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e466] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e467] [cursor=pointer]:
+            - /url: "#"
+        - group "Language" [ref=e468]:
+          - button "PL" [ref=e469] [cursor=pointer]
+          - button "EN" [pressed] [ref=e470] [cursor=pointer]
+  - region "Notifications alt+T"
+  - status [ref=e471]:
+    - generic [ref=e472]:
+      - img [ref=e474]
+      - generic [ref=e476]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e477] [cursor=pointer]:
+          - img [ref=e478]
+  - alert [ref=e481]

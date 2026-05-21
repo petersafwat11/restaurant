@@ -1,0 +1,715 @@
+- generic:
+  - link:
+    - /url: "#main"
+    - text: Skip to content
+  - banner:
+    - generic:
+      - link:
+        - /url: /
+        - generic:
+          - img:
+            - generic: SD
+            - generic: EST · 2014
+          - generic: Szef Donald
+      - navigation:
+        - link:
+          - /url: /menu
+          - text: Menu
+        - link:
+          - /url: /about
+          - text: About
+        - link:
+          - /url: /locations
+          - text: Locations
+        - link:
+          - /url: /contact
+          - text: Contact
+      - generic:
+        - generic:
+          - group:
+            - button: PL
+            - button [pressed]: EN
+        - button:
+          - img
+          - generic: "1"
+        - generic:
+          - link:
+            - /url: /menu
+            - text: Order now
+  - main:
+    - generic:
+      - text: Menu
+      - heading [level=1]: Built fresh, made to order.
+      - paragraph: 29 dishes across 6 categories. Filter or search to find your usual.
+    - generic:
+      - generic:
+        - generic:
+          - img
+          - searchbox
+        - group:
+          - button [pressed]:
+            - generic: All
+          - button:
+            - img
+            - generic: Vegetarian
+          - button:
+            - img
+            - generic: Vegan
+          - button:
+            - img
+            - generic: Gluten-free
+          - button:
+            - img
+            - generic: Spicy
+    - generic:
+      - generic:
+        - tablist:
+          - tab:
+            - generic: All
+            - generic: "29"
+          - tab [selected]:
+            - generic: Starters
+            - generic: "4"
+          - tab:
+            - generic: Mains
+            - generic: "5"
+          - tab:
+            - generic: Pizzas
+            - generic: "4"
+          - tab:
+            - generic: Burgers
+            - generic: "4"
+          - tab:
+            - generic: Desserts
+            - generic: "4"
+          - tab:
+            - generic: Drinks
+            - generic: "8"
+    - generic:
+      - region:
+        - generic:
+          - heading [level=2]: Starters
+          - generic: 4 items · Small plates to begin your meal.
+        - generic:
+          - link:
+            - /url: /menu#zurek
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Żurek
+              - paragraph: Traditional sour rye soup with sausage and egg.
+              - generic:
+                - generic: 22,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#pierogi-russkie
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Pierogi Ruskie
+              - paragraph: Dumplings filled with potato and cottage cheese.
+              - generic:
+                - generic: 28,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#bruschetta
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Vegan
+              - heading [level=3]: Bruschetta
+              - paragraph: Toasted bread with tomato, basil and olive oil.
+              - generic:
+                - generic: 18,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#tatar
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Tatar wołowy
+              - paragraph: Hand-chopped beef tartare with onion and pickles.
+              - generic:
+                - generic: 39,00 zł
+                - button:
+                  - img
+      - region:
+        - generic:
+          - heading [level=2]: Mains
+          - generic: 5 items · Hearty main dishes.
+        - generic:
+          - link:
+            - /url: /menu#kotlet-schabowy
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Featured
+              - heading [level=3]: Kotlet Schabowy
+              - paragraph: Breaded pork cutlet served with mashed potatoes and cabbage.
+              - generic:
+                - generic: 48,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#golabki
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Gołąbki
+              - paragraph: Cabbage rolls in tomato sauce.
+              - generic:
+                - generic: 42,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#grilled-salmon
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: GF
+              - heading [level=3]: Grilled Salmon
+              - paragraph: Atlantic salmon with seasonal vegetables.
+              - generic:
+                - generic: 62,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#risotto-funghi
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Risotto Funghi
+              - paragraph: Arborio rice with wild mushrooms and parmesan.
+              - generic:
+                - generic: 45,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#lamb-shank
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Braised Lamb Shank
+              - paragraph: Slow-cooked lamb shank with root vegetables.
+              - generic:
+                - generic: 65,00 zł
+                - button:
+                  - img
+      - region:
+        - generic:
+          - heading [level=2]: Pizzas
+          - generic: 4 items · Wood-fired Neapolitan-style pizzas.
+        - generic:
+          - link:
+            - /url: /menu#margherita
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+                - generic:
+                  - img
+                  - text: Featured
+              - heading [level=3]: Margherita
+              - paragraph: San Marzano tomato, mozzarella, basil.
+              - generic:
+                - generic: 35,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#pepperoni
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Spicy
+              - heading [level=3]: Pepperoni
+              - paragraph: Tomato, mozzarella, spicy pepperoni.
+              - generic:
+                - generic: 42,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#quattro-formaggi
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Quattro Formaggi
+              - paragraph: Mozzarella, gorgonzola, parmesan and goat cheese.
+              - generic:
+                - generic: 48,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#diavola
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Spicy
+              - heading [level=3]: Diavola
+              - paragraph: Hot salami, chili, mozzarella.
+              - generic:
+                - generic: 44,00 zł
+                - button:
+                  - img
+      - region:
+        - generic:
+          - heading [level=2]: Burgers
+          - generic: 4 items · Hand-formed Polish beef patties.
+        - generic:
+          - link:
+            - /url: /menu#classic-burger
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Featured
+              - heading [level=3]: Classic Burger
+              - paragraph: Beef patty, cheddar, lettuce, tomato, house sauce.
+              - generic:
+                - generic: 38,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#bbq-burger
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: BBQ Burger
+              - paragraph: Beef patty, smoked cheddar, onion rings, BBQ sauce.
+              - generic:
+                - generic: 44,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#veggie-burger
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Veggie Burger
+              - paragraph: Black-bean patty, avocado, sprouts.
+              - generic:
+                - generic: 36,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#chicken-burger
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Chicken Burger
+              - paragraph: Buttermilk-fried chicken, slaw, pickles.
+              - generic:
+                - generic: 40,00 zł
+                - button:
+                  - img
+      - region:
+        - generic:
+          - heading [level=2]: Desserts
+          - generic: 4 items · Sweet endings.
+        - generic:
+          - link:
+            - /url: /menu#sernik
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Sernik
+              - paragraph: Polish cheesecake with raisins.
+              - generic:
+                - generic: 18,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#szarlotka
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Szarlotka
+              - paragraph: Warm apple pie with vanilla ice cream.
+              - generic:
+                - generic: 20,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#tiramisu
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Tiramisu
+              - paragraph: Layered mascarpone and coffee dessert.
+              - generic:
+                - generic: 22,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#lava-cake
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: V
+              - heading [level=3]: Chocolate Lava Cake
+              - paragraph: Molten chocolate cake with vanilla ice cream.
+              - generic:
+                - generic: 24,00 zł
+                - button:
+                  - img
+      - region:
+        - generic:
+          - heading [level=2]: Drinks
+          - generic: 8 items · Soft drinks, juices, beer and coffee.
+        - generic:
+          - link:
+            - /url: /menu#still-water
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Vegan
+                - generic:
+                  - img
+                  - text: GF
+              - heading [level=3]: Still Water
+              - paragraph: 330ml bottle.
+              - generic:
+                - generic: 8,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#sparkling-water
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Vegan
+              - heading [level=3]: Sparkling Water
+              - paragraph: 330ml bottle.
+              - generic:
+                - generic: 8,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#cola
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Cola
+              - paragraph: Chilled cola, 330ml.
+              - generic:
+                - generic: 10,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#orange-juice
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Vegan
+              - heading [level=3]: Fresh Orange Juice
+              - paragraph: Squeezed to order, 300ml.
+              - generic:
+                - generic: 14,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#tyskie
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Tyskie
+              - paragraph: Polish lager on tap, 500ml.
+              - generic:
+                - generic: 13,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#espresso
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Espresso
+              - paragraph: Single shot.
+              - generic:
+                - generic: 9,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#cappuccino
+            - generic:
+              - generic: ◍
+            - generic:
+              - heading [level=3]: Cappuccino
+              - paragraph: Espresso with steamed milk.
+              - generic:
+                - generic: 12,00 zł
+                - button:
+                  - img
+          - link:
+            - /url: /menu#lemonade
+            - generic:
+              - generic: ◍
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Vegan
+              - heading [level=3]: House Lemonade
+              - paragraph: Lemon, mint, ginger.
+              - generic:
+                - generic: 15,00 zł
+                - button:
+                  - img
+  - button:
+    - img
+    - generic: View cart
+    - generic: "1"
+    - generic: 22,00 zł
+  - status: Cart updated — 1 item.
+  - contentinfo:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - img:
+                - generic: SD
+                - generic: EST · 2014
+              - generic: Szef Donald
+            - paragraph: Kebab the way it should be.
+            - generic:
+              - link:
+                - /url: "#"
+                - img
+              - link:
+                - /url: "#"
+                - img
+        - generic:
+          - heading [level=3]: Menu
+          - generic:
+            - link:
+              - /url: /menu#kebab
+              - text: Kebab
+            - link:
+              - /url: /menu#falafel
+              - text: Falafel
+            - link:
+              - /url: /menu#tacos
+              - text: Tacos
+            - link:
+              - /url: /menu#box
+              - text: Box & Plates
+            - link:
+              - /url: /menu#drinks
+              - text: Drinks
+            - link:
+              - /url: /menu
+              - text: View full menu →
+        - generic:
+          - heading [level=3]: Visit
+          - generic:
+            - generic:
+              - generic: Marszałkowska 102
+              - generic: 00-026 Warszawa, Poland
+            - link:
+              - /url: tel:+48225550123
+              - text: +48 22 555 01 23
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Sun
+                  - generic: 12:00–21:00
+                - generic:
+                  - generic: Mon–Thu
+                  - generic: 11:00–22:00
+                - generic:
+                  - generic: Fri
+                  - generic: 11:00–23:00
+                - generic:
+                  - generic: Sat
+                  - generic: 12:00–23:00
+        - generic:
+          - heading [level=3]: Company
+          - generic:
+            - link:
+              - /url: /about
+              - text: About
+            - link:
+              - /url: /contact
+              - text: Contact
+            - link:
+              - /url: /account/loyalty
+              - text: Loyalty
+            - link:
+              - /url: /account/referrals
+              - text: Referrals
+      - generic:
+        - generic: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic:
+          - link:
+            - /url: "#"
+            - text: Privacy
+          - link:
+            - /url: "#"
+            - text: Terms
+          - link:
+            - /url: "#"
+            - text: Cookies
+        - group:
+          - button: PL
+          - button [pressed]: EN
+  - region "Notifications alt+T"
+  - dialog [ref=e676]:
+    - generic [ref=e677]:
+      - generic [ref=e678]:
+        - generic [ref=e679]:
+          - navigation [ref=e680]:
+            - button [disabled] [ref=e681]:
+              - img [ref=e682]
+            - button [ref=e684] [cursor=pointer]:
+              - img [ref=e685]
+            - generic [ref=e687]: 1 of 5 errors
+            - generic [ref=e688]:
+              - text: Next.js (15.1.3) is outdated
+              - link [ref=e690] [cursor=pointer]:
+                - /url: https://nextjs.org/docs/messages/version-staleness
+                - text: (learn more)
+          - button [ref=e691] [cursor=pointer]:
+            - img [ref=e693]
+        - generic [ref=e696]:
+          - heading [level=1] [ref=e697]: Console Error
+          - generic [ref=e698]:
+            - button [ref=e699] [cursor=pointer]:
+              - img [ref=e700]
+            - link [ref=e703] [cursor=pointer]:
+              - /url: https://nextjs.org/docs/app/building-your-application/configuring/debugging#server-side-code
+              - img [ref=e704]
+        - paragraph [ref=e707]: "`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users. If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component. For more information, see https://radix-ui.com/primitives/docs/components/dialog"
+      - button [ref=e709] [cursor=pointer]: Show ignored frames
+  - alert
+  - dialog [ref=e711]:
+    - button "Close" [active] [ref=e712] [cursor=pointer]:
+      - img [ref=e713]
+    - button "Close" [ref=e717] [cursor=pointer]:
+      - img [ref=e718]
+    - generic [ref=e721]:
+      - img "Classic Burger" [ref=e723]
+      - generic [ref=e724]:
+        - generic [ref=e725]:
+          - generic [ref=e727]:
+            - img [ref=e728]
+            - text: Featured
+          - heading "Classic Burger" [level=2] [ref=e730]
+          - generic [ref=e731]:
+            - generic [ref=e732]: ·
+            - generic [ref=e733]: 12 min
+          - generic [ref=e734]: 38,00 zł
+          - paragraph [ref=e735]: Beef patty, cheddar, lettuce, tomato, house sauce.
+        - group [ref=e736]:
+          - generic [ref=e739]: Add-ons
+          - generic [ref=e740]: Optional · up to 3
+          - generic [ref=e741]:
+            - generic [ref=e742] [cursor=pointer]:
+              - generic [ref=e744]: Avocado
+              - generic [ref=e745]: +5,00 zł
+              - checkbox "Avocado +5,00 zł" [ref=e746]
+            - generic [ref=e747] [cursor=pointer]:
+              - generic [ref=e749]: Bacon
+              - generic [ref=e750]: +6,00 zł
+              - checkbox "Bacon +6,00 zł" [ref=e751]
+            - generic [ref=e752] [cursor=pointer]:
+              - generic [ref=e754]: Egg
+              - generic [ref=e755]: +4,00 zł
+              - checkbox "Egg +4,00 zł" [ref=e756]
+        - group [ref=e757]:
+          - generic [ref=e758]:
+            - generic [ref=e760]: Doneness
+            - generic [ref=e761]: Required
+          - generic [ref=e762]: Choose one
+          - generic [ref=e763]:
+            - generic [ref=e764] [cursor=pointer]:
+              - generic [ref=e767]: Medium
+              - radio "Medium" [checked] [ref=e768]
+            - generic [ref=e769] [cursor=pointer]:
+              - generic [ref=e771]: Medium-rare
+              - radio "Medium-rare" [ref=e772]
+            - generic [ref=e773] [cursor=pointer]:
+              - generic [ref=e775]: Well done
+              - radio "Well done" [ref=e776]
+        - generic [ref=e777]:
+          - generic [ref=e778]: Special instructions
+          - textbox "Special instructions" [ref=e779]:
+            - /placeholder: Anything we should know? (no onions, extra sauce…)
+          - generic [ref=e780]: 0/200
+        - generic [ref=e781]:
+          - generic [ref=e782]: Quantity
+          - group "Quantity" [ref=e783]:
+            - button "Decrease quantity" [disabled] [ref=e784]:
+              - img [ref=e785]
+            - generic [ref=e786]: "1"
+            - button "Increase quantity" [ref=e787] [cursor=pointer]:
+              - img [ref=e788]
+    - generic [ref=e790]:
+      - generic [ref=e791]:
+        - generic [ref=e792]: Total
+        - generic [ref=e793]: 38,00 zł
+      - button "Add to cart" [ref=e794] [cursor=pointer]:
+        - text: Add to cart
+        - img [ref=e795]

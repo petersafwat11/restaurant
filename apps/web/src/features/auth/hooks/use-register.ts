@@ -11,12 +11,8 @@ export function useRegister(): UseMutationResult<AuthResponseDto, ApiError, Regi
   const setSession = useAuthStore((s) => s.setSession);
   return useMutation<AuthResponseDto, ApiError, RegisterDto>({
     mutationFn: (input) => getApiClient().auth.register(input),
-    onSuccess: async (res) => {
-      await setSession({
-        accessToken: res.accessToken,
-        refreshToken: res.refreshToken,
-        user: res.user,
-      });
+    onSuccess: (res) => {
+      setSession({ user: res.user });
       notify('success', 'Account created — check your email to verify');
     },
     onError: (err) => notify('error', err.message),

@@ -60,7 +60,10 @@ export class StaffService {
     }));
   }
 
-  async invite(actor: Actor, dto: InviteStaffDto): Promise<{ token: string; expiresAt: string }> {
+  async invite(
+    actor: Actor,
+    dto: InviteStaffDto,
+  ): Promise<{ id: string; token: string; expiresAt: string }> {
     this.assertCanManage(actor, dto.roleKey);
 
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
@@ -70,18 +73,21 @@ export class StaffService {
     const tokenHash = sha256(token);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000);
 
-    await this.prisma.staffInvite.create({
+    const invite = await this.prisma.staffInvite.create({
       data: {
         email: dto.email,
         roleKey: dto.roleKey,
-        restaurantId: dto.restaurantId ?? null,
         tokenHash,
         invitedByUserId: actor.userId,
         expiresAt,
       },
     });
 
-    return { token, expiresAt: expiresAt.toISOString() };
+    return {
+      id: invite.id,
+      token,
+      expiresAt: expiresAt.toISOString(),
+    };
   }
 
   async acceptInvite(dto: AcceptStaffInviteDto): Promise<{ userId: string }> {

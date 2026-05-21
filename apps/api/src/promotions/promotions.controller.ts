@@ -11,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  type BulkGenerateCouponsDto,
+  BulkGenerateCouponsSchema,
   type CreateCouponDto,
   CreateCouponSchema,
   type CreatePromotionDto,
@@ -20,6 +22,7 @@ import {
   type ValidateCouponDto,
   ValidateCouponSchema,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -32,8 +35,27 @@ export class PromotionsController {
 
   @Get('promotions')
   @Permissions('promotion:read')
-  list(@Query('active') active?: string) {
-    return this.promotions.list(active === 'true');
+  list(
+    @Query('active') active?: string,
+    @Query('includeArchived') includeArchived?: string,
+  ) {
+    return this.promotions.list(active === 'true', includeArchived === 'true');
+  }
+
+  @Post('promotions/:id/archive')
+  @HttpCode(200)
+  @Permissions('promotion:archive')
+  @AuditAction('promotion:write', 'promotion')
+  archive(@Param('id') id: string) {
+    return this.promotions.archive(id);
+  }
+
+  @Post('promotions/:id/unarchive')
+  @HttpCode(200)
+  @Permissions('promotion:archive')
+  @AuditAction('promotion:write', 'promotion')
+  unarchive(@Param('id') id: string) {
+    return this.promotions.unarchive(id);
   }
 
   @Get('promotions/:id')
@@ -44,6 +66,7 @@ export class PromotionsController {
 
   @Post('promotions')
   @Permissions('promotion:write')
+  @AuditAction('promotion:write', 'promotion')
   create(
     @Body(new ZodValidationPipe(CreatePromotionSchema)) dto: CreatePromotionDto,
   ) {
@@ -52,6 +75,7 @@ export class PromotionsController {
 
   @Patch('promotions/:id')
   @Permissions('promotion:write')
+  @AuditAction('promotion:write', 'promotion')
   update(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdatePromotionSchema)) dto: UpdatePromotionDto,
@@ -62,9 +86,10 @@ export class PromotionsController {
   @Delete('promotions/:id')
   @HttpCode(200)
   @Permissions('promotion:write')
+  @AuditAction('promotion:delete', 'promotion')
   async remove(@Param('id') id: string) {
-    await this.promotions.remove(id);
-    return { success: true as const };
+    const removed = await this.promotions.remove(id);
+    return { success: true as const, ...removed };
   }
 
   @Get('promotions/:id/coupons')
@@ -80,6 +105,15 @@ export class PromotionsController {
     @Body(new ZodValidationPipe(CreateCouponSchema)) dto: CreateCouponDto,
   ) {
     return this.promotions.createCoupon(id, dto);
+  }
+
+  @Post('promotions/:id/coupons/bulk')
+  @Permissions('promotion:write')
+  bulkGenerateCoupons(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(BulkGenerateCouponsSchema)) dto: BulkGenerateCouponsDto,
+  ) {
+    return this.promotions.bulkGenerateCoupons(id, dto);
   }
 
   @Delete('coupons/:id')

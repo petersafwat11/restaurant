@@ -24,7 +24,7 @@ import type {
   PaymentStatus,
   RefundDto,
 } from '@repo/types';
-import { Decimal, addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils';
+import { Decimal, addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils/money';
 import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { OrdersService } from '../orders/orders.service';

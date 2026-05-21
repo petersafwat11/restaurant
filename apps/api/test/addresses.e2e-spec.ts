@@ -39,7 +39,12 @@ describe('addresses (e2e)', () => {
   }
 
   function sampleAddress() {
-    return { line1: '1 Test St', city: 'Test City', country: 'US' };
+    return {
+      line1: '1 Test St',
+      city: 'Test City',
+      country: 'US',
+      geoPoint: { lat: 52.2297, lng: 21.0122 },
+    };
   }
 
   it('creates and lists own addresses', async () => {
@@ -87,4 +92,5 @@ describe('addresses (e2e)', () => {
     expect(byId[a.id]).toBe(false);
     expect(byId[b.id]).toBe(true);
   });
+
 });

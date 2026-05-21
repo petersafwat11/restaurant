@@ -36,9 +36,6 @@ interface OptionalUser {
   permissions?: string[];
 }
 
-// Module-scoped helper: same as @CurrentUser but doesn't throw when missing —
-// public routes that *optionally* recognize the caller need this. Declared
-// before the @Controller class so decorators see it at evaluation time.
 const CurrentUserOptional = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): OptionalUser | null => {
     const req = ctx.switchToHttp().getRequest<{ user?: OptionalUser }>();
@@ -55,26 +52,20 @@ export class CartController {
   @Get()
   get(
     @CurrentUserOptional() user: OptionalUser | null,
-    @Query('restaurantId') restaurantId: string,
     @Query('sessionKey') sessionKey: string | undefined,
   ) {
-    return this.cart.getCart(
-      { userId: user?.id ?? null, sessionKey: sessionKey ?? null },
-      restaurantId,
-    );
+    return this.cart.getCart({ userId: user?.id ?? null, sessionKey: sessionKey ?? null });
   }
 
   @Public()
   @Post('items')
   addItem(
     @CurrentUserOptional() user: OptionalUser | null,
-    @Query('restaurantId') restaurantId: string,
     @Query('sessionKey') sessionKey: string | undefined,
     @Body(new ZodValidationPipe(AddCartItemSchema)) dto: AddCartItemDto,
   ) {
     return this.cart.addItem(
       { userId: user?.id ?? null, sessionKey: sessionKey ?? null },
-      restaurantId,
       dto,
     );
   }
@@ -113,13 +104,9 @@ export class CartController {
   @HttpCode(200)
   clear(
     @CurrentUserOptional() user: OptionalUser | null,
-    @Query('restaurantId') restaurantId: string,
     @Query('sessionKey') sessionKey: string | undefined,
   ) {
-    return this.cart.clearCart(
-      { userId: user?.id ?? null, sessionKey: sessionKey ?? null },
-      restaurantId,
-    );
+    return this.cart.clearCart({ userId: user?.id ?? null, sessionKey: sessionKey ?? null });
   }
 
   @Post('merge')
@@ -130,28 +117,23 @@ export class CartController {
     return this.cart.mergeOnLogin(user.id, dto);
   }
 
-  // Auth-only: loyalty redemption requires a known account. The stored value
-  // is intent — checkout re-validates against the live balance.
   @Patch('loyalty')
   setLoyalty(
     @CurrentUser() user: RequestUser,
-    @Query('restaurantId') restaurantId: string,
     @Body(new ZodValidationPipe(SetCartLoyaltySchema)) dto: SetCartLoyaltyDto,
   ) {
-    return this.cart.setLoyaltyPoints(user.id, restaurantId, dto.points);
+    return this.cart.setLoyaltyPoints(user.id, dto.points);
   }
 
   @Public()
   @Post('coupon')
   applyCoupon(
     @CurrentUserOptional() user: OptionalUser | null,
-    @Query('restaurantId') restaurantId: string,
     @Query('sessionKey') sessionKey: string | undefined,
     @Body(new ZodValidationPipe(ApplyCouponSchema)) dto: ApplyCouponDto,
   ) {
     return this.cart.applyCoupon(
       { userId: user?.id ?? null, sessionKey: sessionKey ?? null },
-      restaurantId,
       dto,
     );
   }
@@ -160,12 +142,8 @@ export class CartController {
   @Delete('coupon')
   removeCoupon(
     @CurrentUserOptional() user: OptionalUser | null,
-    @Query('restaurantId') restaurantId: string,
     @Query('sessionKey') sessionKey: string | undefined,
   ) {
-    return this.cart.removeCoupon(
-      { userId: user?.id ?? null, sessionKey: sessionKey ?? null },
-      restaurantId,
-    );
+    return this.cart.removeCoupon({ userId: user?.id ?? null, sessionKey: sessionKey ?? null });
   }
 }

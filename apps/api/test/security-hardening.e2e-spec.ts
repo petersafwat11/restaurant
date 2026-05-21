@@ -1,7 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { LoyaltyService } from '../src/loyalty/loyalty.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 /**
  * Cross-cutting hardening assertions for the launch security review
@@ -13,7 +13,6 @@ describe('security hardening (e2e)', () => {
   let ownerToken: string;
   let userToken: string;
   let userId: string;
-  let restaurantId: string;
   let itemId: string;
 
   beforeAll(async () => {
@@ -28,24 +27,12 @@ describe('security hardening (e2e)', () => {
     await resetMenuDb(app);
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
+    await ensureRestaurant(app);
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'sec-e2e',
-        name: 'Sec E2E',
-        phone: '+48 22 555 0012',
-        email: 'sec@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const item = await inject(
@@ -95,14 +82,14 @@ describe('security hardening (e2e)', () => {
   it('C3: POST /orders requires an Idempotency-Key', async () => {
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
     );
     expect(res.statusCode).toBe(400);
@@ -114,21 +101,21 @@ describe('security hardening (e2e)', () => {
 
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
     // Ask to redeem far more than the 100-pt balance.
     await inject(
       'PATCH',
-      `/api/v1/cart/loyalty?restaurantId=${restaurantId}`,
+      `/api/v1/cart/loyalty`,
       { points: 999999 },
       userToken,
     );
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0' },
       userToken,
       { 'Idempotency-Key': 'sec-loyalty-cap' },
     );

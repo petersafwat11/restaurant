@@ -69,7 +69,7 @@ export class PaymentsController {
   @Permissions('payment:refund')
   // idFrom='paymentId' → RefundDto.paymentId, so the audit row points at the
   // payment (resourceType), not the refund id.
-  @AuditAction('order:refund', 'payment', 'paymentId')
+  @AuditAction('order:refund', 'payment', { idFrom: 'paymentId' })
   refund(
     @CurrentUserOptional() user: OptionalUser | null,
     @Param('paymentId') paymentId: string,

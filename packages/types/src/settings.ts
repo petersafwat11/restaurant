@@ -9,14 +9,25 @@ export const PolygonSchema = z.object({
 });
 export type PolygonGeoJson = z.infer<typeof PolygonSchema>;
 
+// Zones are pure coverage geometry. The restaurant-wide `defaultDeliveryFee`
+// and `minOrderAmount` apply to all zones — a "do we deliver here, yes/no"
+// model that matches how small restaurants actually price delivery.
 export const DeliveryZoneSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(120),
-  fee: MoneyStringSchema,
-  minOrderAmount: MoneyStringSchema.optional(),
   polygon: PolygonSchema,
 });
 export type DeliveryZoneDto = z.infer<typeof DeliveryZoneSchema>;
+
+/** Public read shape — same as DeliveryZoneDto for now, kept separate so we
+ * can evolve internal fields (e.g. priorities) without leaking them. */
+export const PublicDeliveryZoneSchema = DeliveryZoneSchema;
+export type PublicDeliveryZoneDto = z.infer<typeof PublicDeliveryZoneSchema>;
+
+export const PublicDeliveryZonesResponseSchema = z.object({
+  zones: z.array(PublicDeliveryZoneSchema),
+});
+export type PublicDeliveryZonesResponseDto = z.infer<typeof PublicDeliveryZonesResponseSchema>;
 
 export const HolidaySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -36,7 +47,6 @@ export const HolidaySchema = z.object({
 export type HolidayDto = z.infer<typeof HolidaySchema>;
 
 export const RestaurantSettingsSchema = z.object({
-  restaurantId: z.string(),
   taxRate: MoneyStringSchema,
   defaultDeliveryFee: MoneyStringSchema,
   minOrderAmount: MoneyStringSchema,
@@ -70,7 +80,5 @@ export type DeliveryZoneCheckQuery = z.infer<typeof DeliveryZoneCheckQuerySchema
 export const DeliveryZoneCheckResponseSchema = z.object({
   matched: z.boolean(),
   zone: DeliveryZoneSchema.nullable(),
-  fee: MoneyStringSchema.nullable(),
-  minOrderAmount: MoneyStringSchema.nullable(),
 });
 export type DeliveryZoneCheckResponseDto = z.infer<typeof DeliveryZoneCheckResponseSchema>;

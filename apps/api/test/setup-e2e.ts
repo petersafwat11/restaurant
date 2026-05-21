@@ -48,19 +48,38 @@ export async function resetDb(app: NestFastifyApplication): Promise<void> {
 }
 
 /**
+ * Ensure the single Restaurant row exists for tests. Upserts by slug so it's
+ * safe to call after `resetMenuDb` (which nukes the table). Returns nothing —
+ * single-restaurant means no id is needed at the call site.
+ */
+export async function ensureRestaurant(app: NestFastifyApplication): Promise<void> {
+  const prisma = app.get(PrismaService);
+  await prisma.restaurant.upsert({
+    where: { slug: 'e2e-restaurant' },
+    update: {},
+    create: {
+      slug: 'e2e-restaurant',
+      name: 'E2E Restaurant',
+      phone: '+48 22 555 0000',
+      email: 'e2e@test.local',
+      address: { line1: 'ul. Test 1', city: 'Warsaw', country: 'PL' },
+    },
+  });
+}
+
+/**
  * Sprint 2/3: wipe restaurant + menu + cart + order + promotion tables so each
  * test starts clean. `onDelete: Cascade` covers child rows; we nuke parents.
  */
 export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   const prisma = app.get(PrismaService);
   await prisma.webhookEvent.deleteMany();
-  // Sprint 11 — loyalty / favorites / referral (user-scoped; explicit so a
-  // menu-only reset between tests doesn't leak ledger/favorite rows).
+  // Sprint 11 — loyalty / referral (user-scoped; explicit so a menu-only
+  // reset between tests doesn't leak ledger rows).
   await prisma.loyaltyTransaction.deleteMany();
   await prisma.loyaltyAccount.deleteMany();
   await prisma.referral.deleteMany();
   await prisma.referralCode.deleteMany();
-  await prisma.favorite.deleteMany();
   await prisma.featureFlag.deleteMany();
   await prisma.refund.deleteMany();
   await prisma.payment.deleteMany();
@@ -87,7 +106,10 @@ export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   await prisma.dailyMetric.deleteMany();
   await prisma.export.deleteMany();
   await prisma.auditLog.deleteMany();
+  await prisma.contactNote.deleteMany();
   await prisma.contactMessage.deleteMany();
+  await prisma.userTag.deleteMany();
+  await prisma.customerTag.deleteMany();
 }
 
 const ALL_PERMISSIONS = [
@@ -104,8 +126,12 @@ const ALL_PERMISSIONS = [
   'customer:read',
   'customer:write',
   'customer:notes',
+  'customer:tag',
+  'customer:email',
   'promotion:read',
   'promotion:write',
+  'promotion:archive',
+  'promotion:bulk_coupons',
   'reservation:read',
   'reservation:write',
   'review:read',
@@ -124,6 +150,8 @@ const ALL_PERMISSIONS = [
   'report:export',
   'audit:read',
   'contact:read',
+  'contact:reply',
+  'contact:notes',
   'flags:write',
 ];
 

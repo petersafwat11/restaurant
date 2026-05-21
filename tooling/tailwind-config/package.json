@@ -7,6 +7,7 @@
 	"types": "./tailwind.preset.ts",
 	"files": ["tailwind.preset.ts", "postcss.config.js"],
 	"dependencies": {
-		"tailwindcss": "3.4.17"
+		"tailwindcss": "3.4.17",
+		"tailwindcss-animate": "1.0.7"
 	}
 }

@@ -13,7 +13,6 @@ function orderStub(status: OrderDto['status']): OrderDto {
     id: 'ord_1',
     orderNumber: 'R-2026-000001',
     userId: 'usr_1',
-    restaurantId: 'rest_1',
     type: 'PICKUP',
     status,
     subtotal: '10.00',
@@ -56,7 +55,7 @@ describe('useAdvanceKitchenTicket', () => {
       }),
     );
 
-    const { result } = renderHookWithProviders(() => useAdvanceKitchenTicket('rest_1'));
+    const { result } = renderHookWithProviders(() => useAdvanceKitchenTicket());
     result.current.mutate({ orderId: 'ord_1', current: 'CONFIRMED' });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -65,7 +64,7 @@ describe('useAdvanceKitchenTicket', () => {
   });
 
   it('errors without calling the API when the ticket has no next step', async () => {
-    const { result } = renderHookWithProviders(() => useAdvanceKitchenTicket('rest_1'));
+    const { result } = renderHookWithProviders(() => useAdvanceKitchenTicket());
     result.current.mutate({ orderId: 'ord_1', current: 'READY' });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

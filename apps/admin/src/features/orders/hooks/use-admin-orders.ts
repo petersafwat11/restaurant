@@ -11,13 +11,12 @@ export type AdminOrderFilters = Omit<OrderListQuery, 'cursor'>;
 /**
  * Restaurant-wide orders list with server-side filtering (status, type, date
  * range, search). Backed by the dual-mode `GET /orders` — staff with
- * `order:read` + `restaurantId` get the admin list.
+ * `order:read` get the admin list.
  */
 export function useAdminOrders(filters: AdminOrderFilters): UseQueryResult<OrderListDto> {
   return useQuery<OrderListDto>({
     queryKey: orderQueryKeys.adminList(filters),
     queryFn: () => getApiClient().orders.list(filters),
-    enabled: Boolean(filters.restaurantId),
   });
 }
 
@@ -29,6 +28,5 @@ export function useAdminOrdersInfinite(filters: AdminOrderFilters) {
       getApiClient().orders.list({ ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last: OrderListDto) => last.nextCursor ?? undefined,
-    enabled: Boolean(filters.restaurantId),
   });
 }

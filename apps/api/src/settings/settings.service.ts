@@ -17,15 +17,23 @@ export class SettingsService {
     private readonly zones: DeliveryZoneService,
   ) {}
 
-  async get(restaurantId: string): Promise<RestaurantSettingsDto> {
-    const r = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
+  private async requireRestaurant() {
+    const r = await this.prisma.restaurant.findFirst();
     if (!r) throw new NotFoundException('Restaurant not found');
+    return r;
+  }
+
+  async get(): Promise<RestaurantSettingsDto> {
+    const r = await this.requireRestaurant();
     return {
-      restaurantId: r.id,
       taxRate: r.taxRate.toString(),
       defaultDeliveryFee: r.defaultDeliveryFee.toFixed(2),
       minOrderAmount: r.minOrderAmount.toFixed(2),
-      deliveryZones: (r.deliveryZones as unknown as DeliveryZoneDto[]) ?? [],
+      deliveryZones: ((r.deliveryZones as unknown as DeliveryZoneDto[]) ?? []).map((z) => ({
+        id: z.id,
+        name: z.name,
+        polygon: z.polygon,
+      })),
       holidayDates: (r.holidayDates as unknown as HolidayDto[]) ?? [],
       reservationSlotMinutes: r.reservationSlotMinutes,
       reservationBufferMinutes: r.reservationBufferMinutes,
@@ -34,10 +42,8 @@ export class SettingsService {
     };
   }
 
-  async update(
-    restaurantId: string,
-    dto: UpdateRestaurantSettingsDto,
-  ): Promise<RestaurantSettingsDto> {
+  async update(dto: UpdateRestaurantSettingsDto): Promise<RestaurantSettingsDto> {
+    const r = await this.requireRestaurant();
     const data: Prisma.RestaurantUpdateInput = {};
     if (dto.taxRate !== undefined) data.taxRate = new Prisma.Decimal(dto.taxRate);
     if (dto.defaultDeliveryFee !== undefined) {
@@ -55,44 +61,40 @@ export class SettingsService {
     if (dto.reservationBufferMinutes !== undefined) {
       data.reservationBufferMinutes = dto.reservationBufferMinutes;
     }
-    await this.prisma.restaurant.update({ where: { id: restaurantId }, data });
-    return this.get(restaurantId);
+    await this.prisma.restaurant.update({ where: { id: r.id }, data });
+    return this.get();
   }
 
-  async addHoliday(restaurantId: string, holiday: HolidayDto): Promise<RestaurantSettingsDto> {
-    const r = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
-    if (!r) throw new NotFoundException('Restaurant not found');
+  async addHoliday(holiday: HolidayDto): Promise<RestaurantSettingsDto> {
+    const r = await this.requireRestaurant();
     const list = ((r.holidayDates as unknown as HolidayDto[]) ?? []).filter(
       (h) => h.date !== holiday.date,
     );
     list.push(holiday);
     await this.prisma.restaurant.update({
-      where: { id: restaurantId },
+      where: { id: r.id },
       data: { holidayDates: list as unknown as Prisma.InputJsonValue },
     });
-    return this.get(restaurantId);
+    return this.get();
   }
 
-  async removeHoliday(restaurantId: string, date: string): Promise<RestaurantSettingsDto> {
-    const r = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
-    if (!r) throw new NotFoundException('Restaurant not found');
+  async removeHoliday(date: string): Promise<RestaurantSettingsDto> {
+    const r = await this.requireRestaurant();
     const list = ((r.holidayDates as unknown as HolidayDto[]) ?? []).filter(
       (h) => h.date !== date,
     );
     await this.prisma.restaurant.update({
-      where: { id: restaurantId },
+      where: { id: r.id },
       data: { holidayDates: list as unknown as Prisma.InputJsonValue },
     });
-    return this.get(restaurantId);
+    return this.get();
   }
 
   async checkDeliveryZone(
-    restaurantId: string,
     lat: number,
     lng: number,
   ): Promise<DeliveryZoneCheckResponseDto> {
-    const r = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
-    if (!r) throw new NotFoundException('Restaurant not found');
+    const r = await this.requireRestaurant();
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       throw new BadRequestException('Invalid coordinates');
     }
@@ -100,9 +102,16 @@ export class SettingsService {
     const zone = this.zones.findZone(zones, lat, lng);
     return {
       matched: zone !== null,
-      zone,
-      fee: zone?.fee ?? null,
-      minOrderAmount: zone?.minOrderAmount ?? null,
+      zone: zone ? { id: zone.id, name: zone.name, polygon: zone.polygon } : null,
     };
+  }
+
+  async getPublicDeliveryZones(): Promise<DeliveryZoneDto[]> {
+    const r = await this.prisma.restaurant.findFirst({ select: { deliveryZones: true } });
+    if (!r) throw new NotFoundException('Restaurant not found');
+    const zones = (r.deliveryZones as unknown as DeliveryZoneDto[]) ?? [];
+    // Strip legacy fields (fee, minOrderAmount) that may linger in JSON from
+    // older saves — slim schema is { id, name, polygon }.
+    return zones.map((z) => ({ id: z.id, name: z.name, polygon: z.polygon }));
   }
 }

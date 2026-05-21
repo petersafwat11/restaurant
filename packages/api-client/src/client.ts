@@ -8,6 +8,8 @@ import {
   AddCartItemSchema,
   type AddMenuItemImageDto,
   AddMenuItemImageSchema,
+  type AddOrderNoteDto,
+  AddOrderNoteSchema,
   type AddressDto,
   AddressListSchema,
   AddressSchema,
@@ -40,12 +42,23 @@ import {
   ContactMessageListQuerySchema,
   ContactMessageListSchema,
   ContactMessageSchema,
+  type ContactNoteDto,
+  ContactNoteListSchema,
+  ContactNoteSchema,
+  type ContactReplyDto,
+  ContactReplySchema,
+  type BulkGenerateCouponsDto,
+  type BulkGenerateCouponsResponseDto,
+  BulkGenerateCouponsResponseSchema,
+  BulkGenerateCouponsSchema,
   type CouponDto,
   CouponListSchema,
   type CreateAddressDto,
   CreateAddressSchema,
   type CreateContactMessageDto,
   CreateContactMessageSchema,
+  type CreateContactNoteDto,
+  CreateContactNoteSchema,
   type CreateCouponDto,
   CreateCouponSchema,
   type CreateCustomerNoteDto,
@@ -70,19 +83,32 @@ import {
   CreateRefundSchema,
   type CreateReservationDto,
   CreateReservationSchema,
-  type CreateRestaurantDto,
-  CreateRestaurantSchema,
   type CreateReviewDto,
   CreateReviewSchema,
   type CreateTableDto,
   CreateTableSchema,
+  type BroadcastEmailDto,
+  type BroadcastEmailResponseDto,
+  BroadcastEmailResponseSchema,
+  BroadcastEmailSchema,
+  type BulkTagCustomersDto,
+  type BulkTagCustomersResponseDto,
+  BulkTagCustomersResponseSchema,
+  BulkTagCustomersSchema,
+  type CreateCustomerTagDto,
+  CreateCustomerTagSchema,
   type CustomerDetailDto,
   CustomerDetailSchema,
+  type CustomerExportQuery,
+  CustomerExportQuerySchema,
   type CustomerListDto,
   type CustomerListQuery,
   CustomerListQuerySchema,
   CustomerListSchema,
   CustomerNoteSchema,
+  type CustomerTagDto,
+  CustomerTagListSchema,
+  CustomerTagSchema,
   type CustomerRetentionDto,
   type CustomerRetentionQuery,
   CustomerRetentionQuerySchema,
@@ -91,17 +117,11 @@ import {
   DeliveryZoneCheckQuerySchema,
   type DeliveryZoneCheckResponseDto,
   DeliveryZoneCheckResponseSchema,
+  type PublicDeliveryZonesResponseDto,
+  PublicDeliveryZonesResponseSchema,
   type ExportDto,
   ExportListSchema,
   ExportSchema,
-  type FavoriteDto,
-  type FavoriteIdsDto,
-  FavoriteIdsSchema,
-  type FavoriteListDto,
-  type FavoriteListQuery,
-  FavoriteListQuerySchema,
-  FavoriteListSchema,
-  FavoriteSchema,
   type FeatureFlagAdminDto,
   FeatureFlagAdminSchema,
   type FeatureFlagListDto,
@@ -161,6 +181,8 @@ import {
   type OperatingHoursDto,
   OperatingHoursListSchema,
   type OrderDto,
+  type OrderExportQuery,
+  OrderExportQuerySchema,
   type OrderListDto,
   type OrderListQuery,
   OrderListQuerySchema,
@@ -217,7 +239,6 @@ import {
   ResetPasswordSchema,
   type RestaurantAdminDto,
   RestaurantAdminSchema,
-  RestaurantListSchema,
   type RestaurantPublicDto,
   RestaurantPublicSchema,
   type RestaurantSettingsDto,
@@ -231,6 +252,7 @@ import {
   type ReviewListQuery,
   ReviewListQuerySchema,
   ReviewListSchema,
+  type ReviewModerationDto,
   ReviewModerationSchema,
   ReviewSchema,
   type ReviewSummaryDto,
@@ -239,6 +261,8 @@ import {
   SalesByDayOfWeekSchema,
   type SalesByHourDto,
   SalesByHourSchema,
+  type MoveReservationDto,
+  MoveReservationSchema,
   type SeatReservationDto,
   SeatReservationSchema,
   type SeoMetaDto,
@@ -323,6 +347,13 @@ export interface ApiClientOptions {
    * The default implementation returns null (no auto-refresh).
    */
   refreshAccessToken?: () => Promise<string | null>;
+  /**
+   * Audience tag for cookie-based clients. When set, every request includes
+   * the `X-App-Audience` header so the API can choose the right cookie
+   * (`web_at` vs `admin_at`). Header-based clients (mobile) leave this unset
+   * and use `getAccessToken` + `refreshAccessToken` instead.
+   */
+  audience?: 'web' | 'admin' | 'mobile';
   fetch?: typeof fetch;
 }
 
@@ -344,6 +375,11 @@ export function createApiClient(opts: ApiClientOptions) {
   const fetchImpl = opts.fetch ?? globalThis.fetch;
   if (!fetchImpl) throw new Error('No fetch implementation available');
 
+  // Cookie-based audiences never retry on 401 — the API handles refresh
+  // server-side via the sliding interceptor. Header-based clients (mobile,
+  // anything providing getAccessToken) still retry via refreshAccessToken.
+  const isCookieClient = opts.audience === 'web' || opts.audience === 'admin';
+
   async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const url = buildUrl(opts.baseUrl, path, options.query);
     const headers: Record<string, string> = {
@@ -353,6 +389,10 @@ export function createApiClient(opts: ApiClientOptions) {
     if (options.auth !== false && opts.getAccessToken) {
       const token = await opts.getAccessToken();
       if (token) headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (opts.audience) {
+      headers['X-App-Audience'] = opts.audience;
     }
 
     if (options.headers) {
@@ -370,7 +410,12 @@ export function createApiClient(opts: ApiClientOptions) {
 
     const res = await fetchImpl(url, init);
 
-    if (res.status === 401 && !options.skipRefresh && opts.refreshAccessToken) {
+    if (
+      res.status === 401 &&
+      !options.skipRefresh &&
+      !isCookieClient &&
+      opts.refreshAccessToken
+    ) {
       const newToken = await opts.refreshAccessToken();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
@@ -396,6 +441,55 @@ export function createApiClient(opts: ApiClientOptions) {
     }
 
     return handleResponse<T>(res, options.responseSchema);
+  }
+
+  async function downloadFile(
+    path: string,
+    options: {
+      query?: Record<string, string | number | boolean | undefined>;
+    } = {},
+  ): Promise<{ blob: Blob; filename: string; contentType: string }> {
+    const url = buildUrl(opts.baseUrl, path, options.query);
+    const headers: Record<string, string> = {};
+
+    if (opts.getAccessToken) {
+      const token = await opts.getAccessToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (opts.audience) {
+      headers['X-App-Audience'] = opts.audience;
+    }
+
+    const init: RequestInit = { method: 'GET', headers, credentials: 'include' };
+    let res = await fetchImpl(url, init);
+
+    if (res.status === 401 && !isCookieClient && opts.refreshAccessToken) {
+      const newToken = await opts.refreshAccessToken();
+      if (newToken) {
+        headers.Authorization = `Bearer ${newToken}`;
+        res = await fetchImpl(url, { ...init, headers });
+      } else if (opts.onUnauthorized) {
+        await opts.onUnauthorized();
+      }
+    } else if (res.status === 401 && opts.onUnauthorized) {
+      await opts.onUnauthorized();
+    }
+
+    if (!res.ok) {
+      let body: unknown;
+      try {
+        body = await res.json();
+      } catch {
+        body = { message: await res.text().catch(() => '') };
+      }
+      throw ApiError.fromResponse(res.status, body);
+    }
+
+    const contentType = res.headers.get('Content-Type') ?? 'application/octet-stream';
+    const filename = parseContentDispositionFilename(res.headers.get('Content-Disposition'));
+    const blob = await res.blob();
+    return { blob, filename: filename ?? 'download', contentType };
   }
 
   // ---- auth -------------------------------------------------------------
@@ -516,40 +610,33 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
-  // ---- restaurants ------------------------------------------------------
-  const restaurants = {
-    list: (): Promise<RestaurantPublicDto[]> =>
-      request('/restaurants', {
-        method: 'GET',
-        auth: false,
-        responseSchema: RestaurantListSchema,
-      }),
-    bySlug: (slug: string): Promise<RestaurantPublicDto> =>
-      request(`/restaurants/${encodeURIComponent(slug)}`, {
+  // ---- restaurant (singleton) ------------------------------------------
+  const restaurant = {
+    get: (): Promise<RestaurantPublicDto> =>
+      request('/restaurant', {
         method: 'GET',
         auth: false,
         responseSchema: RestaurantPublicSchema,
       }),
-    create: (input: CreateRestaurantDto): Promise<RestaurantAdminDto> =>
-      request('/restaurants', {
-        method: 'POST',
-        body: CreateRestaurantSchema.parse(input),
+    getAdmin: (): Promise<RestaurantAdminDto> =>
+      request('/restaurant/admin', {
+        method: 'GET',
         responseSchema: RestaurantAdminSchema,
       }),
-    update: (id: string, input: UpdateRestaurantDto): Promise<RestaurantAdminDto> =>
-      request(`/restaurants/${encodeURIComponent(id)}`, {
+    update: (input: UpdateRestaurantDto): Promise<RestaurantAdminDto> =>
+      request('/restaurant', {
         method: 'PATCH',
         body: UpdateRestaurantSchema.parse(input),
         responseSchema: RestaurantAdminSchema,
       }),
-    getHours: (id: string): Promise<OperatingHoursDto[]> =>
-      request(`/restaurants/${encodeURIComponent(id)}/hours`, {
+    getHours: (): Promise<OperatingHoursDto[]> =>
+      request('/restaurant/hours', {
         method: 'GET',
         auth: false,
         responseSchema: OperatingHoursListSchema,
       }),
-    updateHours: (id: string, input: UpdateOperatingHoursDto): Promise<OperatingHoursDto[]> =>
-      request(`/restaurants/${encodeURIComponent(id)}/hours`, {
+    updateHours: (input: UpdateOperatingHoursDto): Promise<OperatingHoursDto[]> =>
+      request('/restaurant/hours', {
         method: 'PUT',
         body: UpdateOperatingHoursSchema.parse(input),
         responseSchema: OperatingHoursListSchema,
@@ -559,19 +646,15 @@ export function createApiClient(opts: ApiClientOptions) {
   // ---- menu -------------------------------------------------------------
   const okSchema = z.object({ success: z.literal(true) });
   const menu = {
-    getTree: (restaurantId: string): Promise<MenuTreeDto> =>
-      request(`/restaurants/${encodeURIComponent(restaurantId)}/menu`, {
+    getTree: (): Promise<MenuTreeDto> =>
+      request('/menu', {
         method: 'GET',
         auth: false,
         responseSchema: MenuTreeSchema,
       }),
-    getItem: (
-      restaurantId: string,
-      categorySlug: string,
-      itemSlug: string,
-    ): Promise<MenuItemDetailDto> =>
+    getItem: (categorySlug: string, itemSlug: string): Promise<MenuItemDetailDto> =>
       request(
-        `/restaurants/${encodeURIComponent(restaurantId)}/menu/categories/${encodeURIComponent(categorySlug)}/items/${encodeURIComponent(itemSlug)}`,
+        `/menu/categories/${encodeURIComponent(categorySlug)}/items/${encodeURIComponent(itemSlug)}`,
         { method: 'GET', auth: false, responseSchema: MenuItemDetailSchema },
       ),
 
@@ -703,21 +786,21 @@ export function createApiClient(opts: ApiClientOptions) {
 
   // ---- cart -------------------------------------------------------------
   const cart = {
-    get: (params: { restaurantId: string; sessionKey?: string }): Promise<CartDto> =>
+    get: (params: { sessionKey?: string } = {}): Promise<CartDto> =>
       request('/cart', {
         method: 'GET',
         auth: false,
-        query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
+        query: { sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
     addItem: (
-      params: { restaurantId: string; sessionKey?: string },
+      params: { sessionKey?: string },
       input: AddCartItemDto,
     ): Promise<CartDto> =>
       request('/cart/items', {
         method: 'POST',
         auth: false,
-        query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
+        query: { sessionKey: params.sessionKey },
         body: AddCartItemSchema.parse(input),
         responseSchema: CartSchema,
       }),
@@ -740,11 +823,11 @@ export function createApiClient(opts: ApiClientOptions) {
         query: { sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
-    clear: (params: { restaurantId: string; sessionKey?: string }): Promise<CartDto> =>
+    clear: (params: { sessionKey?: string } = {}): Promise<CartDto> =>
       request('/cart', {
         method: 'DELETE',
         auth: false,
-        query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
+        query: { sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
     merge: (input: MergeCartDto): Promise<CartDto> =>
@@ -754,27 +837,26 @@ export function createApiClient(opts: ApiClientOptions) {
         responseSchema: CartSchema,
       }),
     applyCoupon: (
-      params: { restaurantId: string; sessionKey?: string },
+      params: { sessionKey?: string },
       input: ApplyCouponDto,
     ): Promise<CartDto> =>
       request('/cart/coupon', {
         method: 'POST',
         auth: false,
-        query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
+        query: { sessionKey: params.sessionKey },
         body: ApplyCouponSchema.parse(input),
         responseSchema: CartSchema,
       }),
-    removeCoupon: (params: { restaurantId: string; sessionKey?: string }): Promise<CartDto> =>
+    removeCoupon: (params: { sessionKey?: string } = {}): Promise<CartDto> =>
       request('/cart/coupon', {
         method: 'DELETE',
         auth: false,
-        query: { restaurantId: params.restaurantId, sessionKey: params.sessionKey },
+        query: { sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
-    setLoyalty: (params: { restaurantId: string }, input: SetCartLoyaltyDto): Promise<CartDto> =>
+    setLoyalty: (input: SetCartLoyaltyDto): Promise<CartDto> =>
       request('/cart/loyalty', {
         method: 'PATCH',
-        query: { restaurantId: params.restaurantId },
         body: SetCartLoyaltySchema.parse(input),
         responseSchema: CartSchema,
       }),
@@ -806,10 +888,30 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: OrderSchema,
       }),
+    // Public — accepts a signed HMAC token (no auth header required).
+    // Returns the full OrderDto so the guest checkout-success page can
+    // re-hydrate on refresh.
+    getByToken: (token: string): Promise<OrderDto> =>
+      request(`/orders/by-token?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        auth: false,
+        responseSchema: OrderSchema,
+      }),
     getTracking: (id: string): Promise<OrderTrackingDto> =>
       request(`/orders/${encodeURIComponent(id)}/tracking`, {
         method: 'GET',
         responseSchema: OrderTrackingSchema,
+      }),
+    // Public — accepts a signed HMAC token (no auth header required).
+    getTrackingByToken: (token: string): Promise<OrderTrackingDto> =>
+      request(`/orders/track?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        auth: false,
+        responseSchema: OrderTrackingSchema,
+      }),
+    issueTrackingToken: (id: string): Promise<{ token: string }> =>
+      request(`/orders/${encodeURIComponent(id)}/tracking-token`, {
+        method: 'GET',
       }),
     updateStatus: (id: string, input: UpdateOrderStatusDto): Promise<OrderDto> =>
       request(`/orders/${encodeURIComponent(id)}/status`, {
@@ -817,25 +919,52 @@ export function createApiClient(opts: ApiClientOptions) {
         body: UpdateOrderStatusSchema.parse(input),
         responseSchema: OrderSchema,
       }),
+    addNote: (id: string, input: AddOrderNoteDto): Promise<OrderDto> =>
+      request(`/orders/${encodeURIComponent(id)}/notes`, {
+        method: 'POST',
+        body: AddOrderNoteSchema.parse(input),
+        responseSchema: OrderSchema,
+      }),
+    export: (
+      query: OrderExportQuery,
+    ): Promise<{ blob: Blob; filename: string; contentType: string }> =>
+      downloadFile('/orders/export', {
+        query: OrderExportQuerySchema.parse(query) as Record<
+          string,
+          string | number | boolean | undefined
+        >,
+      }),
   };
 
   // ---- kitchen ----------------------------------------------------------
   const kitchen = {
-    tickets: (restaurantId: string): Promise<KitchenTicketDto[]> =>
+    tickets: (): Promise<KitchenTicketDto[]> =>
       request('/kitchen/tickets', {
         method: 'GET',
-        query: { restaurantId },
         responseSchema: KitchenTicketsListSchema,
       }),
   };
 
   // ---- promotions -------------------------------------------------------
   const promotions = {
-    list: (active?: boolean): Promise<PromotionDto[]> =>
+    list: (active?: boolean, includeArchived?: boolean): Promise<PromotionDto[]> =>
       request('/promotions', {
         method: 'GET',
-        query: active === undefined ? undefined : { active: String(active) },
+        query: {
+          ...(active === undefined ? {} : { active: String(active) }),
+          ...(includeArchived ? { includeArchived: 'true' } : {}),
+        },
         responseSchema: PromotionListSchema,
+      }),
+    archive: (id: string): Promise<PromotionDto> =>
+      request(`/promotions/${encodeURIComponent(id)}/archive`, {
+        method: 'POST',
+        responseSchema: PromotionSchema,
+      }),
+    unarchive: (id: string): Promise<PromotionDto> =>
+      request(`/promotions/${encodeURIComponent(id)}/unarchive`, {
+        method: 'POST',
+        responseSchema: PromotionSchema,
       }),
     getById: (id: string): Promise<PromotionDto> =>
       request(`/promotions/${encodeURIComponent(id)}`, {
@@ -876,6 +1005,15 @@ export function createApiClient(opts: ApiClientOptions) {
           perUserLimit: z.number().int().nullable(),
           redemptionsCount: z.number().int(),
         }),
+      }),
+    bulkGenerateCoupons: (
+      promotionId: string,
+      input: BulkGenerateCouponsDto,
+    ): Promise<BulkGenerateCouponsResponseDto> =>
+      request(`/promotions/${encodeURIComponent(promotionId)}/coupons/bulk`, {
+        method: 'POST',
+        body: BulkGenerateCouponsSchema.parse(input),
+        responseSchema: BulkGenerateCouponsResponseSchema,
       }),
   };
 
@@ -979,6 +1117,12 @@ export function createApiClient(opts: ApiClientOptions) {
         body: SeatReservationSchema.parse(input),
         responseSchema: ReservationSchema,
       }),
+    move: (id: string, input: MoveReservationDto): Promise<ReservationDto> =>
+      request(`/reservations/${encodeURIComponent(id)}/move`, {
+        method: 'POST',
+        body: MoveReservationSchema.parse(input),
+        responseSchema: ReservationSchema,
+      }),
     complete: (id: string): Promise<ReservationDto> =>
       request(`/reservations/${encodeURIComponent(id)}/complete`, {
         method: 'POST',
@@ -990,14 +1134,14 @@ export function createApiClient(opts: ApiClientOptions) {
         responseSchema: ReservationSchema,
       }),
     tables: {
-      list: (restaurantId: string): Promise<TableDto[]> =>
-        request(`/restaurants/${encodeURIComponent(restaurantId)}/tables`, {
+      list: (): Promise<TableDto[]> =>
+        request('/tables', {
           method: 'GET',
           auth: false,
           responseSchema: TableListSchema,
         }),
-      create: (restaurantId: string, input: CreateTableDto): Promise<TableDto> =>
-        request(`/restaurants/${encodeURIComponent(restaurantId)}/tables`, {
+      create: (input: CreateTableDto): Promise<TableDto> =>
+        request('/tables', {
           method: 'POST',
           body: CreateTableSchema.parse(input),
           responseSchema: TableSchema,
@@ -1029,8 +1173,8 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: ReviewListSchema,
       }),
-    forRestaurant: (restaurantId: string, q?: ReviewListQuery): Promise<ReviewListDto> =>
-      request(`/restaurants/${encodeURIComponent(restaurantId)}/reviews`, {
+    list: (q?: ReviewListQuery): Promise<ReviewListDto> =>
+      request('/reviews', {
         method: 'GET',
         auth: false,
         query: q
@@ -1052,15 +1196,31 @@ export function createApiClient(opts: ApiClientOptions) {
           : undefined,
         responseSchema: ReviewListSchema,
       }),
-    moderate: (id: string, isVisible: boolean): Promise<ReviewDto> =>
+    moderate: (id: string, input: ReviewModerationDto): Promise<ReviewDto> =>
       request(`/admin/reviews/${encodeURIComponent(id)}`, {
         method: 'PATCH',
-        body: ReviewModerationSchema.parse({ isVisible }),
+        body: ReviewModerationSchema.parse(input),
+        responseSchema: ReviewSchema,
+      }),
+    publish: (id: string): Promise<ReviewDto> =>
+      request(`/admin/reviews/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: ReviewModerationSchema.parse({ moderationStatus: 'PUBLISHED' }),
         responseSchema: ReviewSchema,
       }),
     hide: (id: string): Promise<ReviewDto> =>
       request(`/admin/reviews/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
+        method: 'PATCH',
+        body: ReviewModerationSchema.parse({ moderationStatus: 'HIDDEN' }),
+        responseSchema: ReviewSchema,
+      }),
+    flag: (id: string, reason?: string): Promise<ReviewDto> =>
+      request(`/admin/reviews/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: ReviewModerationSchema.parse({
+          moderationStatus: 'FLAGGED',
+          flagReason: reason ?? null,
+        }),
         responseSchema: ReviewSchema,
       }),
     reply: (id: string, input: OwnerReplyDto): Promise<ReviewDto> =>
@@ -1069,8 +1229,8 @@ export function createApiClient(opts: ApiClientOptions) {
         body: OwnerReplySchema.parse(input),
         responseSchema: ReviewSchema,
       }),
-    summary: (restaurantId: string): Promise<ReviewSummaryDto> =>
-      request(`/restaurants/${encodeURIComponent(restaurantId)}/reviews/summary`, {
+    summary: (): Promise<ReviewSummaryDto> =>
+      request('/reviews/summary', {
         method: 'GET',
         auth: false,
         responseSchema: ReviewSummarySchema,
@@ -1151,36 +1311,6 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
-  // ---- favorites -------------------------------------------------------
-  const favorites = {
-    list: (q?: FavoriteListQuery): Promise<FavoriteListDto> =>
-      request('/favorites', {
-        method: 'GET',
-        query: q
-          ? (FavoriteListQuerySchema.parse(q) as Record<
-              string,
-              string | number | boolean | undefined
-            >)
-          : undefined,
-        responseSchema: FavoriteListSchema,
-      }),
-    ids: (): Promise<FavoriteIdsDto> =>
-      request('/favorites/ids', {
-        method: 'GET',
-        responseSchema: FavoriteIdsSchema,
-      }),
-    add: (menuItemId: string): Promise<FavoriteDto> =>
-      request(`/favorites/${encodeURIComponent(menuItemId)}`, {
-        method: 'PUT',
-        responseSchema: FavoriteSchema,
-      }),
-    remove: (menuItemId: string): Promise<{ removed: boolean }> =>
-      request(`/favorites/${encodeURIComponent(menuItemId)}`, {
-        method: 'DELETE',
-        responseSchema: z.object({ removed: z.boolean() }),
-      }),
-  };
-
   // ---- referrals -------------------------------------------------------
   const referrals = {
     me: (): Promise<ReferralMeDto> =>
@@ -1203,7 +1333,7 @@ export function createApiClient(opts: ApiClientOptions) {
 
   // ---- i18n ------------------------------------------------------------
   const i18n = {
-    messages: (locale?: 'en' | 'ar'): Promise<I18nMessagesDto> =>
+    messages: (locale?: 'en' | 'ar' | 'pl'): Promise<I18nMessagesDto> =>
       request('/i18n/messages', {
         method: 'GET',
         auth: false,
@@ -1281,6 +1411,23 @@ export function createApiClient(opts: ApiClientOptions) {
         body: UpdateContactMessageSchema.parse(input),
         responseSchema: ContactMessageSchema,
       }),
+    listNotes: (id: string): Promise<ContactNoteDto[]> =>
+      request(`/admin/contact/${encodeURIComponent(id)}/notes`, {
+        method: 'GET',
+        responseSchema: ContactNoteListSchema,
+      }),
+    addNote: (id: string, input: CreateContactNoteDto): Promise<ContactNoteDto> =>
+      request(`/admin/contact/${encodeURIComponent(id)}/notes`, {
+        method: 'POST',
+        body: CreateContactNoteSchema.parse(input),
+        responseSchema: ContactNoteSchema,
+      }),
+    reply: (id: string, input: ContactReplyDto): Promise<ContactNoteDto> =>
+      request(`/admin/contact/${encodeURIComponent(id)}/reply`, {
+        method: 'POST',
+        body: ContactReplySchema.parse(input),
+        responseSchema: ContactNoteSchema,
+      }),
   };
 
   // ---- seo -------------------------------------------------------------
@@ -1333,6 +1480,43 @@ export function createApiClient(opts: ApiClientOptions) {
         body: CreateCustomerNoteSchema.parse(input),
         responseSchema: CustomerNoteSchema,
       }),
+    listTags: (): Promise<CustomerTagDto[]> =>
+      request('/admin/customers/tags/all', {
+        method: 'GET',
+        responseSchema: CustomerTagListSchema,
+      }),
+    createTag: (input: CreateCustomerTagDto): Promise<CustomerTagDto> =>
+      request('/admin/customers/tags', {
+        method: 'POST',
+        body: CreateCustomerTagSchema.parse(input),
+        responseSchema: CustomerTagSchema,
+      }),
+    deleteTag: (tagId: string): Promise<{ success: true }> =>
+      request(`/admin/customers/tags/${encodeURIComponent(tagId)}`, {
+        method: 'DELETE',
+        responseSchema: z.object({ success: z.literal(true) }),
+      }),
+    bulkTag: (input: BulkTagCustomersDto): Promise<BulkTagCustomersResponseDto> =>
+      request('/admin/customers/bulk/tags', {
+        method: 'POST',
+        body: BulkTagCustomersSchema.parse(input),
+        responseSchema: BulkTagCustomersResponseSchema,
+      }),
+    broadcastEmail: (input: BroadcastEmailDto): Promise<BroadcastEmailResponseDto> =>
+      request('/admin/customers/bulk/email', {
+        method: 'POST',
+        body: BroadcastEmailSchema.parse(input),
+        responseSchema: BroadcastEmailResponseSchema,
+      }),
+    export: (
+      query: CustomerExportQuery,
+    ): Promise<{ blob: Blob; filename: string; contentType: string }> =>
+      downloadFile('/admin/customers/export', {
+        query: CustomerExportQuerySchema.parse(query) as Record<
+          string,
+          string | number | boolean | undefined
+        >,
+      }),
   };
 
   // ---- staff -----------------------------------------------------------
@@ -1378,39 +1562,30 @@ export function createApiClient(opts: ApiClientOptions) {
 
   // ---- settings --------------------------------------------------------
   const settings = {
-    get: (restaurantId: string): Promise<RestaurantSettingsDto> =>
-      request(`/admin/restaurants/${encodeURIComponent(restaurantId)}/settings`, {
+    get: (): Promise<RestaurantSettingsDto> =>
+      request('/admin/restaurant/settings', {
         method: 'GET',
         responseSchema: RestaurantSettingsSchema,
       }),
-    update: (
-      restaurantId: string,
-      input: UpdateRestaurantSettingsDto,
-    ): Promise<RestaurantSettingsDto> =>
-      request(`/admin/restaurants/${encodeURIComponent(restaurantId)}/settings`, {
+    update: (input: UpdateRestaurantSettingsDto): Promise<RestaurantSettingsDto> =>
+      request('/admin/restaurant/settings', {
         method: 'PATCH',
         body: UpdateRestaurantSettingsSchema.parse(input),
         responseSchema: RestaurantSettingsSchema,
       }),
-    addHoliday: (restaurantId: string, input: HolidayDto): Promise<RestaurantSettingsDto> =>
-      request(`/admin/restaurants/${encodeURIComponent(restaurantId)}/holidays`, {
+    addHoliday: (input: HolidayDto): Promise<RestaurantSettingsDto> =>
+      request('/admin/restaurant/holidays', {
         method: 'POST',
         body: HolidaySchema.parse(input),
         responseSchema: RestaurantSettingsSchema,
       }),
-    removeHoliday: (restaurantId: string, date: string): Promise<RestaurantSettingsDto> =>
-      request(
-        `/admin/restaurants/${encodeURIComponent(restaurantId)}/holidays/${encodeURIComponent(date)}`,
-        {
-          method: 'DELETE',
-          responseSchema: RestaurantSettingsSchema,
-        },
-      ),
-    checkDeliveryZone: (
-      restaurantId: string,
-      q: DeliveryZoneCheckQuery,
-    ): Promise<DeliveryZoneCheckResponseDto> =>
-      request(`/admin/restaurants/${encodeURIComponent(restaurantId)}/delivery-zones/check`, {
+    removeHoliday: (date: string): Promise<RestaurantSettingsDto> =>
+      request(`/admin/restaurant/holidays/${encodeURIComponent(date)}`, {
+        method: 'DELETE',
+        responseSchema: RestaurantSettingsSchema,
+      }),
+    checkDeliveryZone: (q: DeliveryZoneCheckQuery): Promise<DeliveryZoneCheckResponseDto> =>
+      request('/admin/restaurant/delivery-zones/check', {
         method: 'GET',
         auth: false,
         query: DeliveryZoneCheckQuerySchema.parse(q) as Record<
@@ -1418,6 +1593,17 @@ export function createApiClient(opts: ApiClientOptions) {
           string | number | boolean | undefined
         >,
         responseSchema: DeliveryZoneCheckResponseSchema,
+      }),
+    /**
+     * Public list of zone polygons — used by the customer map picker to render
+     * the coverage area. Excludes the fee/min-order config (those live on the
+     * restaurant settings root).
+     */
+    getDeliveryZones: (): Promise<PublicDeliveryZonesResponseDto> =>
+      request('/admin/restaurant/delivery-zones', {
+        method: 'GET',
+        auth: false,
+        responseSchema: PublicDeliveryZonesResponseSchema,
       }),
   };
 
@@ -1515,8 +1701,10 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'GET',
         responseSchema: ExportSchema,
       }),
-    downloadUrl: (id: string): string =>
-      `${opts.baseUrl.replace(/\/+$/, '')}/reports/exports/${encodeURIComponent(id)}/download`,
+    download: (
+      id: string,
+    ): Promise<{ blob: Blob; filename: string; contentType: string }> =>
+      downloadFile(`/reports/exports/${encodeURIComponent(id)}/download`),
   };
 
   // ---- audit-log ------------------------------------------------------
@@ -1538,7 +1726,7 @@ export function createApiClient(opts: ApiClientOptions) {
     auth,
     users,
     addresses,
-    restaurants,
+    restaurant,
     menu,
     uploads,
     cart,
@@ -1551,7 +1739,6 @@ export function createApiClient(opts: ApiClientOptions) {
     reviews,
     notifications,
     loyalty,
-    favorites,
     referrals,
     i18n,
     featureFlags,
@@ -1593,6 +1780,20 @@ async function handleResponse<T>(res: Response, schema?: z.ZodType<unknown>): Pr
     return parsed.data as T;
   }
   return data as T;
+}
+
+function parseContentDispositionFilename(header: string | null): string | null {
+  if (!header) return null;
+  const star = /filename\*\s*=\s*([^']*)'[^']*'([^;]+)/i.exec(header);
+  if (star?.[2]) {
+    try {
+      return decodeURIComponent(star[2].trim());
+    } catch {
+      return star[2].trim();
+    }
+  }
+  const plain = /filename\s*=\s*"?([^";]+)"?/i.exec(header);
+  return plain?.[1] ? plain[1].trim() : null;
 }
 
 function buildUrl(

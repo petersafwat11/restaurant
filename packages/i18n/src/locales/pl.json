@@ -1,0 +1,178 @@
+{
+  "common": {
+    "appName": "Restauracja",
+    "ok": "OK",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "search": "Szukaj",
+    "loading": "Ładowanie…",
+    "retry": "Spróbuj ponownie",
+    "close": "Zamknij",
+    "yes": "Tak",
+    "no": "Nie",
+    "currency": "Waluta",
+    "language": "Język"
+  },
+  "auth": {
+    "login": "Zaloguj się",
+    "register": "Załóż konto",
+    "logout": "Wyloguj",
+    "email": "E-mail",
+    "password": "Hasło",
+    "forgotPassword": "Nie pamiętasz hasła?",
+    "resetPassword": "Zresetuj hasło",
+    "verifyEmail": "Potwierdź swój e-mail",
+    "otpSent": "Wysłaliśmy kod na {target}",
+    "welcomeBack": "Witaj ponownie, {name}",
+    "referralCodeLabel": "Kod polecający (opcjonalnie)"
+  },
+  "validation": {
+    "required": "To pole jest wymagane",
+    "invalidEmail": "Podaj poprawny adres e-mail",
+    "passwordTooShort": "Hasło musi mieć co najmniej {min} znaków",
+    "passwordWeak": "Hasło musi zawierać wielką, małą literę i cyfrę",
+    "invalidPhone": "Podaj poprawny numer telefonu",
+    "tooLong": "Maksymalnie {max} znaków"
+  },
+  "menu": {
+    "title": "Menu",
+    "categories": "Kategorie",
+    "featured": "Polecane",
+    "allItems": "Wszystkie pozycje",
+    "addToCart": "Dodaj do koszyka",
+    "outOfStock": "Brak w magazynie",
+    "calories": "{count} kcal",
+    "vegetarian": "Wegetariańskie",
+    "vegan": "Wegańskie",
+    "glutenFree": "Bezglutenowe",
+    "noResults": "Brak pozycji pasujących do filtrów"
+  },
+  "cart": {
+    "title": "Twój koszyk",
+    "empty": "Twój koszyk jest pusty",
+    "subtotal": "Suma częściowa",
+    "discount": "Rabat",
+    "estimatedTotal": "Przewidywana suma",
+    "applyCoupon": "Zastosuj kupon",
+    "couponApplied": "Zastosowano kupon {code}",
+    "remove": "Usuń",
+    "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+    "checkout": "Do kasy"
+  },
+  "checkout": {
+    "title": "Zamówienie",
+    "orderType": "Typ zamówienia",
+    "delivery": "Dostawa",
+    "pickup": "Odbiór",
+    "dineIn": "Na miejscu",
+    "deliveryAddress": "Adres dostawy",
+    "pickupTime": "Czas odbioru",
+    "payment": "Płatność",
+    "tip": "Napiwek",
+    "reviewOrder": "Sprawdź zamówienie",
+    "placeOrder": "Złóż zamówienie",
+    "tax": "Podatek",
+    "deliveryFee": "Koszt dostawy",
+    "grandTotal": "Razem"
+  },
+  "order": {
+    "title": "Zamówienie {number}",
+    "history": "Historia zamówień",
+    "trackOrder": "Śledź zamówienie",
+    "reorder": "Zamów ponownie",
+    "estimatedArrival": "Przewidywany czas",
+    "placedOn": "Złożono {date}",
+    "status": {
+      "PENDING": "Oczekujące",
+      "CONFIRMED": "Potwierdzone",
+      "PREPARING": "Przygotowywane",
+      "READY": "Gotowe",
+      "OUT_FOR_DELIVERY": "W dostawie",
+      "DELIVERED": "Dostarczone",
+      "COMPLETED": "Zakończone",
+      "CANCELLED": "Anulowane",
+      "REFUNDED": "Zwrócone"
+    },
+    "notify": {
+      "placed": "Zamówienie {number} złożone — damy znać, gdy zostanie potwierdzone.",
+      "confirmed": "Zamówienie {number} potwierdzone i przygotowywane.",
+      "ready": "Zamówienie {number} gotowe.",
+      "outForDelivery": "Zamówienie {number} jest w drodze.",
+      "delivered": "Zamówienie {number} dostarczone. Smacznego!",
+      "cancelled": "Zamówienie {number} zostało anulowane.",
+      "refunded": "Zamówienie {number} zostało zwrócone."
+    }
+  },
+  "account": {
+    "title": "Konto",
+    "profile": "Profil",
+    "addresses": "Adresy",
+    "paymentMethods": "Metody płatności",
+    "loyalty": "Lojalność",
+    "referrals": "Polecenia",
+    "notifications": "Powiadomienia",
+    "preferences": "Preferencje"
+  },
+  "loyalty": {
+    "title": "Lojalność",
+    "balance": "{points, plural, one {# punkt} few {# punkty} many {# punktów} other {# punktów}}",
+    "tier": "Poziom {tier}",
+    "tierProgress": "{points} punktów do {tier}",
+    "redeem": "Wymień punkty",
+    "redeemDiscount": "Wymień {points} punktów na {amount}",
+    "earned": "Zdobyłeś {points} punktów",
+    "history": "Historia punktów",
+    "tiers": {
+      "bronze": "Brąz",
+      "silver": "Srebro",
+      "gold": "Złoto",
+      "platinum": "Platyna"
+    }
+  },
+  "reviews": {
+    "title": "Recenzje",
+    "writeReview": "Napisz recenzję",
+    "rating": "Ocena",
+    "comment": "Komentarz",
+    "submit": "Wyślij recenzję",
+    "ownerReply": "Odpowiedź od właściciela",
+    "averageRating": "{average} z 5 ({count, plural, one {# recenzja} few {# recenzje} many {# recenzji} other {# recenzji}})",
+    "thanks": "Dziękujemy za recenzję"
+  },
+  "referral": {
+    "title": "Zaproś znajomych",
+    "yourCode": "Twój kod polecający",
+    "share": "Udostępnij ten link",
+    "howItWorks": "Daj znajomym rabat i zdobądź {points} punktów za każde zamówienie.",
+    "invited": "Zaprosiłeś {count, plural, one {# znajomego} few {# znajomych} many {# znajomych} other {# znajomych}}",
+    "completed": "Ukończone: {count}"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "empty": "Brak powiadomień",
+    "markAllRead": "Oznacz wszystkie jako przeczytane",
+    "unreadCount": "{count, plural, one {# nieprzeczytane} few {# nieprzeczytane} many {# nieprzeczytanych} other {# nieprzeczytanych}}"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "network": "Błąd sieci. Sprawdź połączenie.",
+    "unauthorized": "Zaloguj się, aby kontynuować.",
+    "forbidden": "Nie masz uprawnień do tej akcji.",
+    "notFound": "Nie znaleziono.",
+    "rateLimited": "Zbyt wiele zapytań. Zwolnij.",
+    "couponInvalid": "Ten kupon nie jest poprawny.",
+    "outOfStock": "Niektóre pozycje nie są już dostępne."
+  },
+  "marketing": {
+    "heroCta": "Zamów teraz",
+    "specials": "Dzisiejsze polecane",
+    "ourStory": "Nasza historia",
+    "locations": "Lokalizacje",
+    "contactUs": "Skontaktuj się z nami",
+    "reserveTable": "Zarezerwuj stolik"
+  }
+}

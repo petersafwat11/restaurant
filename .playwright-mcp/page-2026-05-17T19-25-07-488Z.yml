@@ -1,0 +1,540 @@
+- generic [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Szef Donald home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]:
+            - generic [ref=e10]: SD
+            - generic [ref=e11]: EST · 2014
+          - generic [ref=e12]: Szef Donald
+      - navigation "Primary" [ref=e13]:
+        - link "Menu" [ref=e14] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e16] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e17] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e18]:
+        - group "Language" [ref=e20]:
+          - button "PL" [ref=e21] [cursor=pointer]
+          - button "EN" [pressed] [ref=e22] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+        - link "Order now" [ref=e28] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e29]:
+    - generic [ref=e30]:
+      - text: Menu
+      - heading "Built fresh, made to order." [level=1] [ref=e100]
+      - paragraph [ref=e101]: 29 dishes across 6 categories. Filter or search to find your usual.
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - img
+        - searchbox "Search" [ref=e105]
+      - group "Dietary filters" [ref=e106]:
+        - button "All" [pressed] [ref=e107] [cursor=pointer]:
+          - generic [ref=e108]: All
+        - button "Vegetarian" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+          - generic [ref=e113]: Vegetarian
+        - button "Vegan" [ref=e114] [cursor=pointer]:
+          - img [ref=e115]
+          - generic [ref=e118]: Vegan
+        - button "Gluten-free" [ref=e119] [cursor=pointer]:
+          - img [ref=e120]
+          - generic [ref=e131]: Gluten-free
+        - button "Spicy" [ref=e132] [cursor=pointer]:
+          - img [ref=e133]
+          - generic [ref=e135]: Spicy
+    - tablist "Menu categories" [ref=e138]:
+      - tab "All 29" [ref=e139] [cursor=pointer]:
+        - generic [ref=e140]: All
+        - generic [ref=e141]: "29"
+      - tab "Starters 4" [selected] [ref=e142] [cursor=pointer]:
+        - generic [ref=e143]: Starters
+        - generic [ref=e144]: "4"
+      - tab "Mains 5" [ref=e145] [cursor=pointer]:
+        - generic [ref=e146]: Mains
+        - generic [ref=e147]: "5"
+      - tab "Pizzas 4" [ref=e148] [cursor=pointer]:
+        - generic [ref=e149]: Pizzas
+        - generic [ref=e150]: "4"
+      - tab "Burgers 4" [ref=e151] [cursor=pointer]:
+        - generic [ref=e152]: Burgers
+        - generic [ref=e153]: "4"
+      - tab "Desserts 4" [ref=e154] [cursor=pointer]:
+        - generic [ref=e155]: Desserts
+        - generic [ref=e156]: "4"
+      - tab "Drinks 8" [ref=e157] [cursor=pointer]:
+        - generic [ref=e158]: Drinks
+        - generic [ref=e159]: "8"
+    - generic [ref=e160]:
+      - region "Starters" [ref=e161]:
+        - generic [ref=e162]:
+          - heading "Starters" [level=2] [ref=e163]
+          - generic [ref=e164]: 4 items · Small plates to begin your meal.
+        - generic [ref=e165]:
+          - link "Żurek Traditional sour rye soup with sausage and egg. 22,00 zł Add Żurek to cart" [ref=e166] [cursor=pointer]:
+            - /url: /menu#zurek
+            - generic [ref=e168]: ◍
+            - generic [ref=e169]:
+              - heading "Żurek" [level=3] [ref=e171]
+              - paragraph [ref=e172]: Traditional sour rye soup with sausage and egg.
+              - generic [ref=e173]:
+                - generic [ref=e174]: 22,00 zł
+                - button "Add Żurek to cart" [active] [ref=e175]:
+                  - img [ref=e176]
+          - link "V Pierogi Ruskie Dumplings filled with potato and cottage cheese. 28,00 zł Add Pierogi Ruskie to cart" [ref=e177] [cursor=pointer]:
+            - /url: /menu#pierogi-russkie
+            - generic [ref=e179]: ◍
+            - generic [ref=e180]:
+              - generic "V" [ref=e182]:
+                - img [ref=e183]
+                - text: V
+              - heading "Pierogi Ruskie" [level=3] [ref=e186]
+              - paragraph [ref=e187]: Dumplings filled with potato and cottage cheese.
+              - generic [ref=e188]:
+                - generic [ref=e189]: 28,00 zł
+                - button "Add Pierogi Ruskie to cart" [ref=e190]:
+                  - img [ref=e191]
+          - link "Vegan Bruschetta Toasted bread with tomato, basil and olive oil. 18,00 zł Add Bruschetta to cart" [ref=e192] [cursor=pointer]:
+            - /url: /menu#bruschetta
+            - generic [ref=e194]: ◍
+            - generic [ref=e195]:
+              - generic "Vegan" [ref=e197]:
+                - img [ref=e198]
+                - text: Vegan
+              - heading "Bruschetta" [level=3] [ref=e201]
+              - paragraph [ref=e202]: Toasted bread with tomato, basil and olive oil.
+              - generic [ref=e203]:
+                - generic [ref=e204]: 18,00 zł
+                - button "Add Bruschetta to cart" [ref=e205]:
+                  - img [ref=e206]
+          - link "Tatar wołowy Hand-chopped beef tartare with onion and pickles. 39,00 zł Add Tatar wołowy to cart" [ref=e207] [cursor=pointer]:
+            - /url: /menu#tatar
+            - generic [ref=e209]: ◍
+            - generic [ref=e210]:
+              - heading "Tatar wołowy" [level=3] [ref=e212]
+              - paragraph [ref=e213]: Hand-chopped beef tartare with onion and pickles.
+              - generic [ref=e214]:
+                - generic [ref=e215]: 39,00 zł
+                - button "Add Tatar wołowy to cart" [ref=e216]:
+                  - img [ref=e217]
+      - region "Mains" [ref=e218]:
+        - generic [ref=e219]:
+          - heading "Mains" [level=2] [ref=e220]
+          - generic [ref=e221]: 5 items · Hearty main dishes.
+        - generic [ref=e222]:
+          - link "Featured Kotlet Schabowy Breaded pork cutlet served with mashed potatoes and cabbage. 48,00 zł Add Kotlet Schabowy to cart" [ref=e223] [cursor=pointer]:
+            - /url: /menu#kotlet-schabowy
+            - generic [ref=e225]: ◍
+            - generic [ref=e226]:
+              - generic "Featured" [ref=e228]:
+                - img [ref=e229]
+                - text: Featured
+              - heading "Kotlet Schabowy" [level=3] [ref=e231]
+              - paragraph [ref=e232]: Breaded pork cutlet served with mashed potatoes and cabbage.
+              - generic [ref=e233]:
+                - generic [ref=e234]: 48,00 zł
+                - button "Add Kotlet Schabowy to cart" [ref=e235]:
+                  - img [ref=e236]
+          - link "Gołąbki Cabbage rolls in tomato sauce. 42,00 zł Add Gołąbki to cart" [ref=e237] [cursor=pointer]:
+            - /url: /menu#golabki
+            - generic [ref=e239]: ◍
+            - generic [ref=e240]:
+              - heading "Gołąbki" [level=3] [ref=e242]
+              - paragraph [ref=e243]: Cabbage rolls in tomato sauce.
+              - generic [ref=e244]:
+                - generic [ref=e245]: 42,00 zł
+                - button "Add Gołąbki to cart" [ref=e246]:
+                  - img [ref=e247]
+          - link "GF Grilled Salmon Atlantic salmon with seasonal vegetables. 62,00 zł Add Grilled Salmon to cart" [ref=e248] [cursor=pointer]:
+            - /url: /menu#grilled-salmon
+            - generic [ref=e250]: ◍
+            - generic [ref=e251]:
+              - generic "GF" [ref=e253]:
+                - img [ref=e254]
+                - text: GF
+              - heading "Grilled Salmon" [level=3] [ref=e265]
+              - paragraph [ref=e266]: Atlantic salmon with seasonal vegetables.
+              - generic [ref=e267]:
+                - generic [ref=e268]: 62,00 zł
+                - button "Add Grilled Salmon to cart" [ref=e269]:
+                  - img [ref=e270]
+          - link "V Risotto Funghi Arborio rice with wild mushrooms and parmesan. 45,00 zł Add Risotto Funghi to cart" [ref=e271] [cursor=pointer]:
+            - /url: /menu#risotto-funghi
+            - generic [ref=e273]: ◍
+            - generic [ref=e274]:
+              - generic "V" [ref=e276]:
+                - img [ref=e277]
+                - text: V
+              - heading "Risotto Funghi" [level=3] [ref=e280]
+              - paragraph [ref=e281]: Arborio rice with wild mushrooms and parmesan.
+              - generic [ref=e282]:
+                - generic [ref=e283]: 45,00 zł
+                - button "Add Risotto Funghi to cart" [ref=e284]:
+                  - img [ref=e285]
+          - link "Braised Lamb Shank Slow-cooked lamb shank with root vegetables. 65,00 zł Add Braised Lamb Shank to cart" [ref=e286] [cursor=pointer]:
+            - /url: /menu#lamb-shank
+            - generic [ref=e288]: ◍
+            - generic [ref=e289]:
+              - heading "Braised Lamb Shank" [level=3] [ref=e291]
+              - paragraph [ref=e292]: Slow-cooked lamb shank with root vegetables.
+              - generic [ref=e293]:
+                - generic [ref=e294]: 65,00 zł
+                - button "Add Braised Lamb Shank to cart" [ref=e295]:
+                  - img [ref=e296]
+      - region "Pizzas" [ref=e297]:
+        - generic [ref=e298]:
+          - heading "Pizzas" [level=2] [ref=e299]
+          - generic [ref=e300]: 4 items · Wood-fired Neapolitan-style pizzas.
+        - generic [ref=e301]:
+          - link "V Featured Margherita San Marzano tomato, mozzarella, basil. 35,00 zł Add Margherita to cart" [ref=e302] [cursor=pointer]:
+            - /url: /menu#margherita
+            - generic [ref=e304]: ◍
+            - generic [ref=e305]:
+              - generic [ref=e306]:
+                - generic "V" [ref=e307]:
+                  - img [ref=e308]
+                  - text: V
+                - generic "Featured" [ref=e311]:
+                  - img [ref=e312]
+                  - text: Featured
+              - heading "Margherita" [level=3] [ref=e314]
+              - paragraph [ref=e315]: San Marzano tomato, mozzarella, basil.
+              - generic [ref=e316]:
+                - generic [ref=e317]: 35,00 zł
+                - button "Add Margherita to cart" [ref=e318]:
+                  - img [ref=e319]
+          - link "Spicy Pepperoni Tomato, mozzarella, spicy pepperoni. 42,00 zł Add Pepperoni to cart" [ref=e320] [cursor=pointer]:
+            - /url: /menu#pepperoni
+            - generic [ref=e322]: ◍
+            - generic [ref=e323]:
+              - generic "Spicy" [ref=e325]:
+                - img [ref=e326]
+                - text: Spicy
+              - heading "Pepperoni" [level=3] [ref=e328]
+              - paragraph [ref=e329]: Tomato, mozzarella, spicy pepperoni.
+              - generic [ref=e330]:
+                - generic [ref=e331]: 42,00 zł
+                - button "Add Pepperoni to cart" [ref=e332]:
+                  - img [ref=e333]
+          - link "V Quattro Formaggi Mozzarella, gorgonzola, parmesan and goat cheese. 48,00 zł Add Quattro Formaggi to cart" [ref=e334] [cursor=pointer]:
+            - /url: /menu#quattro-formaggi
+            - generic [ref=e336]: ◍
+            - generic [ref=e337]:
+              - generic "V" [ref=e339]:
+                - img [ref=e340]
+                - text: V
+              - heading "Quattro Formaggi" [level=3] [ref=e343]
+              - paragraph [ref=e344]: Mozzarella, gorgonzola, parmesan and goat cheese.
+              - generic [ref=e345]:
+                - generic [ref=e346]: 48,00 zł
+                - button "Add Quattro Formaggi to cart" [ref=e347]:
+                  - img [ref=e348]
+          - link "Spicy Diavola Hot salami, chili, mozzarella. 44,00 zł Add Diavola to cart" [ref=e349] [cursor=pointer]:
+            - /url: /menu#diavola
+            - generic [ref=e351]: ◍
+            - generic [ref=e352]:
+              - generic "Spicy" [ref=e354]:
+                - img [ref=e355]
+                - text: Spicy
+              - heading "Diavola" [level=3] [ref=e357]
+              - paragraph [ref=e358]: Hot salami, chili, mozzarella.
+              - generic [ref=e359]:
+                - generic [ref=e360]: 44,00 zł
+                - button "Add Diavola to cart" [ref=e361]:
+                  - img [ref=e362]
+      - region "Burgers" [ref=e363]:
+        - generic [ref=e364]:
+          - heading "Burgers" [level=2] [ref=e365]
+          - generic [ref=e366]: 4 items · Hand-formed Polish beef patties.
+        - generic [ref=e367]:
+          - link "Featured Classic Burger Beef patty, cheddar, lettuce, tomato, house sauce. 38,00 zł Add Classic Burger to cart" [ref=e368] [cursor=pointer]:
+            - /url: /menu#classic-burger
+            - generic [ref=e370]: ◍
+            - generic [ref=e371]:
+              - generic "Featured" [ref=e373]:
+                - img [ref=e374]
+                - text: Featured
+              - heading "Classic Burger" [level=3] [ref=e376]
+              - paragraph [ref=e377]: Beef patty, cheddar, lettuce, tomato, house sauce.
+              - generic [ref=e378]:
+                - generic [ref=e379]: 38,00 zł
+                - button "Add Classic Burger to cart" [ref=e380]:
+                  - img [ref=e381]
+          - link "BBQ Burger Beef patty, smoked cheddar, onion rings, BBQ sauce. 44,00 zł Add BBQ Burger to cart" [ref=e382] [cursor=pointer]:
+            - /url: /menu#bbq-burger
+            - generic [ref=e384]: ◍
+            - generic [ref=e385]:
+              - heading "BBQ Burger" [level=3] [ref=e387]
+              - paragraph [ref=e388]: Beef patty, smoked cheddar, onion rings, BBQ sauce.
+              - generic [ref=e389]:
+                - generic [ref=e390]: 44,00 zł
+                - button "Add BBQ Burger to cart" [ref=e391]:
+                  - img [ref=e392]
+          - link "V Veggie Burger Black-bean patty, avocado, sprouts. 36,00 zł Add Veggie Burger to cart" [ref=e393] [cursor=pointer]:
+            - /url: /menu#veggie-burger
+            - generic [ref=e395]: ◍
+            - generic [ref=e396]:
+              - generic "V" [ref=e398]:
+                - img [ref=e399]
+                - text: V
+              - heading "Veggie Burger" [level=3] [ref=e402]
+              - paragraph [ref=e403]: Black-bean patty, avocado, sprouts.
+              - generic [ref=e404]:
+                - generic [ref=e405]: 36,00 zł
+                - button "Add Veggie Burger to cart" [ref=e406]:
+                  - img [ref=e407]
+          - link "Chicken Burger Buttermilk-fried chicken, slaw, pickles. 40,00 zł Add Chicken Burger to cart" [ref=e408] [cursor=pointer]:
+            - /url: /menu#chicken-burger
+            - generic [ref=e410]: ◍
+            - generic [ref=e411]:
+              - heading "Chicken Burger" [level=3] [ref=e413]
+              - paragraph [ref=e414]: Buttermilk-fried chicken, slaw, pickles.
+              - generic [ref=e415]:
+                - generic [ref=e416]: 40,00 zł
+                - button "Add Chicken Burger to cart" [ref=e417]:
+                  - img [ref=e418]
+      - region "Desserts" [ref=e419]:
+        - generic [ref=e420]:
+          - heading "Desserts" [level=2] [ref=e421]
+          - generic [ref=e422]: 4 items · Sweet endings.
+        - generic [ref=e423]:
+          - link "V Sernik Polish cheesecake with raisins. 18,00 zł Add Sernik to cart" [ref=e424] [cursor=pointer]:
+            - /url: /menu#sernik
+            - generic [ref=e426]: ◍
+            - generic [ref=e427]:
+              - generic "V" [ref=e429]:
+                - img [ref=e430]
+                - text: V
+              - heading "Sernik" [level=3] [ref=e433]
+              - paragraph [ref=e434]: Polish cheesecake with raisins.
+              - generic [ref=e435]:
+                - generic [ref=e436]: 18,00 zł
+                - button "Add Sernik to cart" [ref=e437]:
+                  - img [ref=e438]
+          - link "V Szarlotka Warm apple pie with vanilla ice cream. 20,00 zł Add Szarlotka to cart" [ref=e439] [cursor=pointer]:
+            - /url: /menu#szarlotka
+            - generic [ref=e441]: ◍
+            - generic [ref=e442]:
+              - generic "V" [ref=e444]:
+                - img [ref=e445]
+                - text: V
+              - heading "Szarlotka" [level=3] [ref=e448]
+              - paragraph [ref=e449]: Warm apple pie with vanilla ice cream.
+              - generic [ref=e450]:
+                - generic [ref=e451]: 20,00 zł
+                - button "Add Szarlotka to cart" [ref=e452]:
+                  - img [ref=e453]
+          - link "V Tiramisu Layered mascarpone and coffee dessert. 22,00 zł Add Tiramisu to cart" [ref=e454] [cursor=pointer]:
+            - /url: /menu#tiramisu
+            - generic [ref=e456]: ◍
+            - generic [ref=e457]:
+              - generic "V" [ref=e459]:
+                - img [ref=e460]
+                - text: V
+              - heading "Tiramisu" [level=3] [ref=e463]
+              - paragraph [ref=e464]: Layered mascarpone and coffee dessert.
+              - generic [ref=e465]:
+                - generic [ref=e466]: 22,00 zł
+                - button "Add Tiramisu to cart" [ref=e467]:
+                  - img [ref=e468]
+          - link "V Chocolate Lava Cake Molten chocolate cake with vanilla ice cream. 24,00 zł Add Chocolate Lava Cake to cart" [ref=e469] [cursor=pointer]:
+            - /url: /menu#lava-cake
+            - generic [ref=e471]: ◍
+            - generic [ref=e472]:
+              - generic "V" [ref=e474]:
+                - img [ref=e475]
+                - text: V
+              - heading "Chocolate Lava Cake" [level=3] [ref=e478]
+              - paragraph [ref=e479]: Molten chocolate cake with vanilla ice cream.
+              - generic [ref=e480]:
+                - generic [ref=e481]: 24,00 zł
+                - button "Add Chocolate Lava Cake to cart" [ref=e482]:
+                  - img [ref=e483]
+      - region "Drinks" [ref=e484]:
+        - generic [ref=e485]:
+          - heading "Drinks" [level=2] [ref=e486]
+          - generic [ref=e487]: 8 items · Soft drinks, juices, beer and coffee.
+        - generic [ref=e488]:
+          - link "Vegan GF Still Water 330ml bottle. 8,00 zł Add Still Water to cart" [ref=e489] [cursor=pointer]:
+            - /url: /menu#still-water
+            - generic [ref=e491]: ◍
+            - generic [ref=e492]:
+              - generic [ref=e493]:
+                - generic "Vegan" [ref=e494]:
+                  - img [ref=e495]
+                  - text: Vegan
+                - generic "GF" [ref=e498]:
+                  - img [ref=e499]
+                  - text: GF
+              - heading "Still Water" [level=3] [ref=e510]
+              - paragraph [ref=e511]: 330ml bottle.
+              - generic [ref=e512]:
+                - generic [ref=e513]: 8,00 zł
+                - button "Add Still Water to cart" [ref=e514]:
+                  - img [ref=e515]
+          - link "Vegan Sparkling Water 330ml bottle. 8,00 zł Add Sparkling Water to cart" [ref=e516] [cursor=pointer]:
+            - /url: /menu#sparkling-water
+            - generic [ref=e518]: ◍
+            - generic [ref=e519]:
+              - generic "Vegan" [ref=e521]:
+                - img [ref=e522]
+                - text: Vegan
+              - heading "Sparkling Water" [level=3] [ref=e525]
+              - paragraph [ref=e526]: 330ml bottle.
+              - generic [ref=e527]:
+                - generic [ref=e528]: 8,00 zł
+                - button "Add Sparkling Water to cart" [ref=e529]:
+                  - img [ref=e530]
+          - link "Cola Chilled cola, 330ml. 10,00 zł Add Cola to cart" [ref=e531] [cursor=pointer]:
+            - /url: /menu#cola
+            - generic [ref=e533]: ◍
+            - generic [ref=e534]:
+              - heading "Cola" [level=3] [ref=e536]
+              - paragraph [ref=e537]: Chilled cola, 330ml.
+              - generic [ref=e538]:
+                - generic [ref=e539]: 10,00 zł
+                - button "Add Cola to cart" [ref=e540]:
+                  - img [ref=e541]
+          - link "Vegan Fresh Orange Juice Squeezed to order, 300ml. 14,00 zł Add Fresh Orange Juice to cart" [ref=e542] [cursor=pointer]:
+            - /url: /menu#orange-juice
+            - generic [ref=e544]: ◍
+            - generic [ref=e545]:
+              - generic "Vegan" [ref=e547]:
+                - img [ref=e548]
+                - text: Vegan
+              - heading "Fresh Orange Juice" [level=3] [ref=e551]
+              - paragraph [ref=e552]: Squeezed to order, 300ml.
+              - generic [ref=e553]:
+                - generic [ref=e554]: 14,00 zł
+                - button "Add Fresh Orange Juice to cart" [ref=e555]:
+                  - img [ref=e556]
+          - link "Tyskie Polish lager on tap, 500ml. 13,00 zł Add Tyskie to cart" [ref=e557] [cursor=pointer]:
+            - /url: /menu#tyskie
+            - generic [ref=e559]: ◍
+            - generic [ref=e560]:
+              - heading "Tyskie" [level=3] [ref=e562]
+              - paragraph [ref=e563]: Polish lager on tap, 500ml.
+              - generic [ref=e564]:
+                - generic [ref=e565]: 13,00 zł
+                - button "Add Tyskie to cart" [ref=e566]:
+                  - img [ref=e567]
+          - link "Espresso Single shot. 9,00 zł Add Espresso to cart" [ref=e568] [cursor=pointer]:
+            - /url: /menu#espresso
+            - generic [ref=e570]: ◍
+            - generic [ref=e571]:
+              - heading "Espresso" [level=3] [ref=e573]
+              - paragraph [ref=e574]: Single shot.
+              - generic [ref=e575]:
+                - generic [ref=e576]: 9,00 zł
+                - button "Add Espresso to cart" [ref=e577]:
+                  - img [ref=e578]
+          - link "Cappuccino Espresso with steamed milk. 12,00 zł Add Cappuccino to cart" [ref=e579] [cursor=pointer]:
+            - /url: /menu#cappuccino
+            - generic [ref=e581]: ◍
+            - generic [ref=e582]:
+              - heading "Cappuccino" [level=3] [ref=e584]
+              - paragraph [ref=e585]: Espresso with steamed milk.
+              - generic [ref=e586]:
+                - generic [ref=e587]: 12,00 zł
+                - button "Add Cappuccino to cart" [ref=e588]:
+                  - img [ref=e589]
+          - link "Vegan House Lemonade Lemon, mint, ginger. 15,00 zł Add House Lemonade to cart" [ref=e590] [cursor=pointer]:
+            - /url: /menu#lemonade
+            - generic [ref=e592]: ◍
+            - generic [ref=e593]:
+              - generic "Vegan" [ref=e595]:
+                - img [ref=e596]
+                - text: Vegan
+              - heading "House Lemonade" [level=3] [ref=e599]
+              - paragraph [ref=e600]: Lemon, mint, ginger.
+              - generic [ref=e601]:
+                - generic [ref=e602]: 15,00 zł
+                - button "Add House Lemonade to cart" [ref=e603]:
+                  - img [ref=e604]
+  - status [ref=e32]
+  - contentinfo [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]:
+              - generic [ref=e42]: SD
+              - generic [ref=e43]: EST · 2014
+            - generic [ref=e44]: Szef Donald
+          - paragraph [ref=e45]: Kebab the way it should be.
+          - generic [ref=e46]:
+            - link "Instagram" [ref=e47] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e48]
+            - link "Facebook" [ref=e51] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e52]
+        - generic [ref=e54]:
+          - heading "Menu" [level=3] [ref=e55]
+          - generic [ref=e56]:
+            - link "Kebab" [ref=e57] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e58] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e59] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e60] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e61] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e62] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e63]:
+          - heading "Visit" [level=3] [ref=e64]
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]: Marszałkowska 102
+              - generic [ref=e68]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e69] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: Sun
+                - generic [ref=e74]: 12:00–21:00
+              - generic [ref=e75]:
+                - generic [ref=e76]: Mon–Thu
+                - generic [ref=e77]: 11:00–22:00
+              - generic [ref=e78]:
+                - generic [ref=e79]: Fri
+                - generic [ref=e80]: 11:00–23:00
+              - generic [ref=e81]:
+                - generic [ref=e82]: Sat
+                - generic [ref=e83]: 12:00–23:00
+        - generic [ref=e84]:
+          - heading "Company" [level=3] [ref=e85]
+          - generic [ref=e86]:
+            - link "About" [ref=e87] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e88] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e89] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e90] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e91]:
+        - generic [ref=e92]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e93]:
+          - link "Privacy" [ref=e94] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e95] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e96] [cursor=pointer]:
+            - /url: "#"
+        - group "Language" [ref=e97]:
+          - button "PL" [ref=e98] [cursor=pointer]
+          - button "EN" [pressed] [ref=e99] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e605]

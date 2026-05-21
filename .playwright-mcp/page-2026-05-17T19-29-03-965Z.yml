@@ -1,0 +1,297 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Szef Donald home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]:
+            - generic [ref=e10]: SD
+            - generic [ref=e11]: EST · 2014
+          - generic [ref=e12]: Szef Donald
+      - navigation "Primary" [ref=e13]:
+        - link "Menu" [ref=e14] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e16] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e17] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e18]:
+        - group "Language" [ref=e20]:
+          - button "PL" [ref=e21] [cursor=pointer]
+          - button "EN" [pressed] [ref=e22] [cursor=pointer]
+        - button "Cart, 2 items" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - generic [ref=e27]: "2"
+        - link "Order now" [ref=e29] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e30]:
+    - generic [ref=e31]:
+      - link "Back to menu" [ref=e32] [cursor=pointer]:
+        - /url: /menu
+        - img [ref=e33]
+        - text: Back to menu
+      - heading "Almost there." [level=1] [ref=e35]
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - region "How do you want it?" [ref=e38]:
+            - generic [ref=e39]:
+              - generic [ref=e40]: "1"
+              - generic [ref=e42]: How do you want it?
+            - generic [ref=e44]:
+              - radiogroup "Order type" [ref=e45]:
+                - radio "Delivery 5.00 zł 20–40 min" [checked] [ref=e46] [cursor=pointer]:
+                  - img [ref=e48]
+                  - generic [ref=e53]:
+                    - generic [ref=e54]:
+                      - generic [ref=e55]: Delivery
+                      - generic [ref=e56]: 5.00 zł
+                    - generic [ref=e57]: 20–40 min
+                - radio "Pickup No fee Ready in 10–15 min · Marszałkowska 102" [ref=e60] [cursor=pointer]:
+                  - img [ref=e62]
+                  - generic [ref=e65]:
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: Pickup
+                      - generic [ref=e68]: No fee
+                    - generic [ref=e69]: Ready in 10–15 min · Marszałkowska 102
+                - radio "Eat in Order from your table" [ref=e71] [cursor=pointer]:
+                  - img [ref=e73]
+                  - generic [ref=e76]:
+                    - generic [ref=e78]: Eat in
+                    - generic [ref=e79]: Order from your table
+              - button "Continue" [ref=e81] [cursor=pointer]
+          - region "Contact" [ref=e82]:
+            - generic [ref=e83]:
+              - generic [ref=e84]: "2"
+              - generic [ref=e86]: Contact
+              - link "Already a customer? Sign in →" [ref=e88] [cursor=pointer]:
+                - /url: /login
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e93]: Name*
+                - textbox "Name" [ref=e95]:
+                  - /placeholder: Jan Kowalski
+                  - text: Jan Test
+              - generic [ref=e96]:
+                - generic [ref=e98]: Phone*
+                - generic [ref=e99]:
+                  - generic [ref=e100]: "+48"
+                  - textbox "Phone" [ref=e102]:
+                    - /placeholder: 512 345 678
+                    - text: "512345678"
+                - generic [ref=e103]: We'll text you when your order is on the way.
+              - generic [ref=e104]:
+                - generic [ref=e106]: Email*
+                - textbox "Email" [ref=e108]:
+                  - /placeholder: jan@example.com
+                  - text: jan@test.local
+                - generic [ref=e109]: For the receipt and order confirmation.
+              - button "Continue" [ref=e110] [cursor=pointer]
+          - region "Where + When" [ref=e111]:
+            - generic [ref=e112]:
+              - generic [ref=e113]: "3"
+              - generic [ref=e115]: Where + When
+            - generic [ref=e117]:
+              - generic [ref=e119]:
+                - generic [ref=e121]: Street address*
+                - textbox "Street address" [ref=e345]:
+                  - /placeholder: Start typing your street…
+                  - text: Marszałkowska 102
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - generic [ref=e127]: Apt / Floor
+                  - textbox "Apt / Floor" [ref=e129]:
+                    - /placeholder: Apt 5B / Floor 3
+                  - generic [ref=e130]: Optional
+                - generic [ref=e131]:
+                  - generic [ref=e133]: Postal code*
+                  - textbox "Postal code" [ref=e135]:
+                    - /placeholder: 00-026
+                    - text: 00-026
+              - generic [ref=e136]:
+                - generic [ref=e137]: When
+                - radiogroup "delivery time" [ref=e138]:
+                  - generic [ref=e139]:
+                    - radio "ASAP 20–40 min" [checked] [ref=e140] [cursor=pointer]:
+                      - generic [ref=e141]: ASAP
+                      - generic [ref=e142]: 20–40 min
+                    - radio "Schedule Pick a later slot" [ref=e143] [cursor=pointer]:
+                      - generic [ref=e144]: Schedule
+                      - generic [ref=e145]: Pick a later slot
+              - button "Continue" [ref=e146] [cursor=pointer]
+          - region "Anything else? (optional)" [ref=e147]:
+            - generic [ref=e148]:
+              - generic [ref=e149]: "4"
+              - generic [ref=e151]: Anything else? (optional)
+            - generic [ref=e154]:
+              - textbox [ref=e156]:
+                - /placeholder: Special instructions for the kitchen…
+              - generic [ref=e157]: For the kitchen — 500 chars max.
+          - region "Payment" [ref=e158]:
+            - generic [ref=e159]:
+              - generic [ref=e160]: "5"
+              - generic [ref=e162]: Payment
+            - generic [ref=e164]:
+              - radiogroup "Payment method" [ref=e165]:
+                - radio "Card Visa, Mastercard, Amex." [checked] [ref=e166] [cursor=pointer]:
+                  - img [ref=e168]
+                  - generic [ref=e170]:
+                    - generic [ref=e172]: Card
+                    - generic [ref=e173]: Visa, Mastercard, Amex.
+                - radio "BLIK BLIK Enter the 6-digit code from your bank app." [ref=e176] [cursor=pointer]:
+                  - generic [ref=e177]: BLIK
+                  - generic [ref=e178]:
+                    - generic [ref=e180]: BLIK
+                    - generic [ref=e181]: Enter the 6-digit code from your bank app.
+                - radio "Cash on delivery Pay the driver in cash when it arrives." [ref=e183] [cursor=pointer]:
+                  - img [ref=e185]
+                  - generic [ref=e188]:
+                    - generic [ref=e190]: Cash on delivery
+                    - generic [ref=e191]: Pay the driver in cash when it arrives.
+              - button "Continue" [ref=e193] [cursor=pointer]
+          - region "Add a tip for the team? (optional)" [ref=e194]:
+            - generic [ref=e195]:
+              - generic [ref=e196]: "6"
+              - generic [ref=e198]: Add a tip for the team? (optional)
+            - generic [ref=e201]:
+              - radiogroup "Tip" [ref=e202]:
+                - radio "No tip" [checked] [ref=e203] [cursor=pointer]:
+                  - generic [ref=e204]: No tip
+                - radio "5% 2,00 zł" [ref=e205] [cursor=pointer]:
+                  - generic [ref=e206]: 5%
+                  - generic [ref=e207]: 2,00 zł
+                - radio "10% 4,00 zł" [ref=e208] [cursor=pointer]:
+                  - generic [ref=e209]: 10%
+                  - generic [ref=e210]: 4,00 zł
+                - radio "15% 6,00 zł" [ref=e211] [cursor=pointer]:
+                  - generic [ref=e212]: 15%
+                  - generic [ref=e213]: 6,00 zł
+                - button "Other" [ref=e214] [cursor=pointer]
+              - paragraph [ref=e215]: 100% of tips go to the team.
+          - alert [ref=e346]: Order not found
+        - complementary "Order summary" [ref=e217]:
+          - heading "Order summary" [level=3] [ref=e219]
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - generic [ref=e223]: Żurek
+              - generic [ref=e224]:
+                - generic [ref=e225]: × 1
+                - generic [ref=e226]: 22,00 zł
+            - generic [ref=e227]:
+              - generic [ref=e229]: Bruschetta
+              - generic [ref=e230]:
+                - generic [ref=e231]: × 1
+                - generic [ref=e232]: 18,00 zł
+          - button "Have a code?" [ref=e234] [cursor=pointer]
+          - generic [ref=e236]:
+            - generic [ref=e237]:
+              - generic [ref=e238]: Subtotal
+              - generic [ref=e239]: 40,00 zł
+            - generic [ref=e240]:
+              - generic [ref=e241]: Delivery
+              - generic [ref=e242]: 5,00 zł
+            - generic [ref=e244]:
+              - generic [ref=e245]: Total
+              - generic [ref=e246]: 45,00 zł
+          - generic [ref=e248]:
+            - button "Place order · 45.00 zł" [ref=e249] [cursor=pointer]:
+              - text: Place order · 45.00 zł
+              - img [ref=e347]
+            - paragraph [ref=e252]:
+              - text: By placing this order, you agree to our
+              - link "Terms" [ref=e253] [cursor=pointer]:
+                - /url: "#"
+              - text: and
+              - link "Privacy Policy" [ref=e254] [cursor=pointer]:
+                - /url: "#"
+              - text: .
+            - generic [ref=e255]:
+              - img [ref=e256]:
+                - generic [ref=e257]: VISA
+              - img [ref=e258]
+              - img [ref=e262]:
+                - generic [ref=e263]: BLIK
+              - img [ref=e264]:
+                - generic [ref=e266]: Pay
+  - status [ref=e267]: Cart updated — 2 items.
+  - contentinfo [ref=e268]:
+    - generic [ref=e269]:
+      - generic [ref=e270]:
+        - generic [ref=e272]:
+          - generic [ref=e273]:
+            - img [ref=e274]:
+              - generic [ref=e277]: SD
+              - generic [ref=e278]: EST · 2014
+            - generic [ref=e279]: Szef Donald
+          - paragraph [ref=e280]: Kebab the way it should be.
+          - generic [ref=e281]:
+            - link "Instagram" [ref=e282] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e283]
+            - link "Facebook" [ref=e286] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e287]
+        - generic [ref=e289]:
+          - heading "Menu" [level=3] [ref=e290]
+          - generic [ref=e291]:
+            - link "Kebab" [ref=e292] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e293] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e294] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e295] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e296] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e297] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e298]:
+          - heading "Visit" [level=3] [ref=e299]
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - generic [ref=e302]: Marszałkowska 102
+              - generic [ref=e303]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e304] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e306]:
+              - generic [ref=e307]:
+                - generic [ref=e308]: Sun
+                - generic [ref=e309]: 12:00–21:00
+              - generic [ref=e310]:
+                - generic [ref=e311]: Mon–Thu
+                - generic [ref=e312]: 11:00–22:00
+              - generic [ref=e313]:
+                - generic [ref=e314]: Fri
+                - generic [ref=e315]: 11:00–23:00
+              - generic [ref=e316]:
+                - generic [ref=e317]: Sat
+                - generic [ref=e318]: 12:00–23:00
+        - generic [ref=e319]:
+          - heading "Company" [level=3] [ref=e320]
+          - generic [ref=e321]:
+            - link "About" [ref=e322] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e323] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e324] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e325] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e326]:
+        - generic [ref=e327]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e328]:
+          - link "Privacy" [ref=e329] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e330] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e331] [cursor=pointer]:
+            - /url: "#"
+        - group "Language" [ref=e332]:
+          - button "PL" [ref=e333] [cursor=pointer]
+          - button "EN" [pressed] [ref=e334] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e335]

@@ -16,6 +16,7 @@ import {
   CancelReservationSchema,
   CreateReservationSchema,
   CreateTableSchema,
+  MoveReservationSchema,
   ReservationListQuerySchema,
   SeatReservationSchema,
   UpdateReservationSchema,
@@ -26,11 +27,13 @@ import type {
   CancelReservationDto,
   CreateReservationDto,
   CreateTableDto,
+  MoveReservationDto,
   ReservationListQuery,
   SeatReservationDto,
   UpdateReservationDto,
   UpdateTableDto,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -105,6 +108,7 @@ export class ReservationsController {
   }
 
   @Post('reservations/:id/cancel')
+  @AuditAction('reservation:cancel', 'reservation')
   cancel(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,
@@ -118,7 +122,22 @@ export class ReservationsController {
   }
 
   @Permissions('reservation:write')
+  @Post('reservations/:id/move')
+  move(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(MoveReservationSchema)) dto: MoveReservationDto,
+  ) {
+    return this.reservations.move(
+      { userId: user.id, permissions: user.permissions },
+      id,
+      dto,
+    );
+  }
+
+  @Permissions('reservation:write')
   @Post('reservations/:id/seat')
+  @AuditAction('reservation:seat', 'reservation')
   seat(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,
@@ -134,6 +153,7 @@ export class ReservationsController {
 
   @Permissions('reservation:write')
   @Post('reservations/:id/complete')
+  @AuditAction('reservation:complete', 'reservation')
   complete(@CurrentUser() user: RequestUser, @Param('id') id: string) {
     return this.reservations.transition(
       { userId: user.id, permissions: user.permissions },
@@ -144,6 +164,7 @@ export class ReservationsController {
 
   @Permissions('reservation:write')
   @Post('reservations/:id/no-show')
+  @AuditAction('reservation:no_show', 'reservation')
   noShow(@CurrentUser() user: RequestUser, @Param('id') id: string) {
     return this.reservations.transition(
       { userId: user.id, permissions: user.permissions },
@@ -155,18 +176,15 @@ export class ReservationsController {
   // ---- Tables ------------------------------------------------------------
 
   @Public()
-  @Get('restaurants/:id/tables')
-  listTables(@Param('id') id: string) {
-    return this.reservations.listTables(id);
+  @Get('tables')
+  listTables() {
+    return this.reservations.listTables();
   }
 
   @Permissions('reservation:write')
-  @Post('restaurants/:id/tables')
-  createTable(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(CreateTableSchema)) dto: CreateTableDto,
-  ) {
-    return this.reservations.createTable(id, dto);
+  @Post('tables')
+  createTable(@Body(new ZodValidationPipe(CreateTableSchema)) dto: CreateTableDto) {
+    return this.reservations.createTable(dto);
   }
 
   @Permissions('reservation:write')

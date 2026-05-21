@@ -6,7 +6,7 @@ import type { CartDto, UpdateCartItemDto } from '@repo/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartQueryKeys } from '../query-keys';
 
-export function useUpdateCartItem(restaurantId: string) {
+export function useUpdateCartItem() {
   const qc = useQueryClient();
   const sessionKey = useCartStore((s) => s.sessionKey);
   const setCart = useCartStore((s) => s.setCart);
@@ -15,7 +15,7 @@ export function useUpdateCartItem(restaurantId: string) {
     mutationFn: ({ cartItemId, input }) =>
       getApiClient().cart.updateItem(cartItemId, { sessionKey: sessionKey ?? undefined }, input),
     onSuccess: (data) => {
-      qc.setQueryData(cartQueryKeys.byRestaurant(restaurantId), data);
+      qc.setQueryData(cartQueryKeys.current(), data);
       setCart(data);
     },
     onError: (err) => notify('error', err.message),

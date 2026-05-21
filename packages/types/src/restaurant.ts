@@ -9,7 +9,6 @@ const GeoPointSchema = z
 
 const RestaurantAddressSchema = z.object({
   line1: z.string().min(1).max(200),
-  line2: z.string().max(200).nullish(),
   city: z.string().min(1).max(100),
   state: z.string().max(100).nullish(),
   zip: z.string().max(20).nullish(),
@@ -19,7 +18,6 @@ export type RestaurantAddressDto = z.infer<typeof RestaurantAddressSchema>;
 
 export const OperatingHoursSchema = z.object({
   id: z.string(),
-  restaurantId: z.string(),
   dayOfWeek: z.number().int().min(0).max(6),
   opensAt: z.string().regex(/^\d{2}:\d{2}$/), // "09:00"
   closesAt: z.string().regex(/^\d{2}:\d{2}$/), // "23:00"
@@ -40,6 +38,8 @@ export const UpdateOperatingHoursSchema = z.object({
 });
 export type UpdateOperatingHoursDto = z.infer<typeof UpdateOperatingHoursSchema>;
 
+const MoneyStringSchema = z.string().regex(/^-?\d+(\.\d{1,2})?$/);
+
 export const RestaurantPublicSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -53,7 +53,15 @@ export const RestaurantPublicSchema = z.object({
   geoPoint: GeoPointSchema,
   timezone: z.string(),
   currency: z.string(),
+  // Flat delivery economics — exposed publicly so the checkout map picker can
+  // show them without hitting an admin endpoint.
+  defaultDeliveryFee: MoneyStringSchema,
+  minOrderAmount: MoneyStringSchema,
   isActive: z.boolean(),
+  acceptsReservations: z.boolean().default(true),
+  acceptsDelivery: z.boolean().default(true),
+  acceptsPickup: z.boolean().default(true),
+  acceptsDineIn: z.boolean().default(true),
   hours: z.array(OperatingHoursSchema).optional(),
 });
 export type RestaurantPublicDto = z.infer<typeof RestaurantPublicSchema>;
@@ -85,6 +93,10 @@ export type CreateRestaurantDto = z.infer<typeof CreateRestaurantSchema>;
 
 export const UpdateRestaurantSchema = CreateRestaurantSchema.partial().extend({
   isActive: z.boolean().optional(),
+  acceptsReservations: z.boolean().optional(),
+  acceptsDelivery: z.boolean().optional(),
+  acceptsPickup: z.boolean().optional(),
+  acceptsDineIn: z.boolean().optional(),
 });
 export type UpdateRestaurantDto = z.infer<typeof UpdateRestaurantSchema>;
 

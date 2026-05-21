@@ -1,5 +1,6 @@
 'use client';
 
+import { useCartSessionKey } from '@/components/cart-session-provider';
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import { useCartStore } from '@/stores/cart-store';
@@ -8,16 +9,16 @@ import type { ApplyCouponDto, CartDto } from '@repo/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartQueryKeys } from '../query-keys';
 
-export function useApplyCoupon(restaurantId: string) {
+export function useApplyCoupon() {
   const qc = useQueryClient();
   const setCart = useCartStore((s) => s.setCart);
-  const getSessionKey = useCartStore((s) => s.getSessionKey);
+  const sessionKey = useCartSessionKey();
 
   return useMutation<CartDto, ApiError, ApplyCouponDto>({
     mutationFn: (input) =>
-      getApiClient().cart.applyCoupon({ restaurantId, sessionKey: getSessionKey() }, input),
+      getApiClient().cart.applyCoupon({ sessionKey: sessionKey ?? undefined }, input),
     onSuccess: (data) => {
-      qc.setQueryData(cartQueryKeys.byRestaurant(restaurantId), data);
+      qc.setQueryData(cartQueryKeys.current(sessionKey), data);
       setCart(data);
       notify('success', 'Coupon applied');
     },

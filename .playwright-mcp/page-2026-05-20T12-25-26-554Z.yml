@@ -1,0 +1,242 @@
+- generic [ref=e1]:
+  - link "Skip to content" [ref=e43] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e44]:
+    - generic [ref=e45]:
+      - link "Szef Donald home" [ref=e46] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e47]:
+          - img [ref=e48]:
+            - generic [ref=e51]: SD
+            - generic [ref=e52]: EST · 2014
+          - generic [ref=e53]: Szef Donald
+      - navigation "Primary" [ref=e54]:
+        - link "Menu" [ref=e55] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e56] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e57] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e58] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e59]:
+        - group "Language" [ref=e61]:
+          - button "PL" [ref=e62] [cursor=pointer]
+          - button "EN" [pressed] [ref=e63] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e64] [cursor=pointer]:
+          - img [ref=e65]
+        - link "Order now" [ref=e69] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e70]:
+    - generic [ref=e72]:
+      - complementary "Account navigation" [ref=e73]:
+        - link "Profile" [ref=e74] [cursor=pointer]:
+          - /url: /account/profile
+          - img [ref=e75]
+          - generic [ref=e78]: Profile
+        - link "Orders" [active] [ref=e79] [cursor=pointer]:
+          - /url: /account/orders
+          - img [ref=e80]
+          - generic [ref=e83]: Orders
+        - link "Addresses" [ref=e84] [cursor=pointer]:
+          - /url: /account/addresses
+          - img [ref=e85]
+          - generic [ref=e88]: Addresses
+        - link "Favorites" [ref=e89] [cursor=pointer]:
+          - /url: /account/favorites
+          - img [ref=e90]
+          - generic [ref=e92]: Favorites
+        - link "Loyalty" [ref=e93] [cursor=pointer]:
+          - /url: /account/loyalty
+          - img [ref=e94]
+          - generic [ref=e98]: Loyalty
+        - link "Referrals" [ref=e99] [cursor=pointer]:
+          - /url: /account/referrals
+          - img [ref=e100]
+          - generic [ref=e105]: Referrals
+        - link "Reviews" [ref=e106] [cursor=pointer]:
+          - /url: /account/reviews
+          - img [ref=e107]
+          - generic [ref=e109]: Reviews
+        - link "Notifications" [ref=e110] [cursor=pointer]:
+          - /url: /account/notifications
+          - img [ref=e111]
+          - generic [ref=e114]: Notifications
+        - button "Sign out" [ref=e116] [cursor=pointer]:
+          - img [ref=e117]
+          - generic [ref=e120]: Sign out
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - heading "Orders" [level=1] [ref=e212]
+          - paragraph [ref=e213]: Your order history.
+        - list [ref=e214]:
+          - listitem [ref=e215]:
+            - link "R-2026-900000 PENDING Pickup · 1 item · May 17, 2026 23,76 zł" [ref=e216] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmrt005ku5iwjhbbchlp
+              - generic [ref=e217]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]: R-2026-900000
+                  - generic [ref=e220]: PENDING
+                - generic [ref=e221]: Pickup · 1 item · May 17, 2026
+              - generic [ref=e222]:
+                - generic [ref=e223]: 23,76 zł
+                - img [ref=e224]
+          - listitem [ref=e226]:
+            - link "R-2026-900001 CONFIRMED Delivery · 1 item · May 17, 2026 55,52 zł" [ref=e227] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydms1005ou5iw2xomo13p
+              - generic [ref=e228]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]: R-2026-900001
+                  - generic [ref=e231]: CONFIRMED
+                - generic [ref=e232]: Delivery · 1 item · May 17, 2026
+              - generic [ref=e233]:
+                - generic [ref=e234]: 55,52 zł
+                - img [ref=e235]
+          - listitem [ref=e237]:
+            - link "R-2026-900002 PREPARING Eat in · 1 item · May 17, 2026 71,28 zł" [ref=e238] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmsa005vu5iw3dbzkild
+              - generic [ref=e239]:
+                - generic [ref=e240]:
+                  - generic [ref=e241]: R-2026-900002
+                  - generic [ref=e242]: PREPARING
+                - generic [ref=e243]: Eat in · 1 item · May 17, 2026
+              - generic [ref=e244]:
+                - generic [ref=e245]: 71,28 zł
+                - img [ref=e246]
+          - listitem [ref=e248]:
+            - link "R-2026-900003 READY Pickup · 1 item · May 16, 2026 23,76 zł" [ref=e249] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmsi0063u5iwuo7wy4d7
+              - generic [ref=e250]:
+                - generic [ref=e251]:
+                  - generic [ref=e252]: R-2026-900003
+                  - generic [ref=e253]: READY
+                - generic [ref=e254]: Pickup · 1 item · May 16, 2026
+              - generic [ref=e255]:
+                - generic [ref=e256]: 23,76 zł
+                - img [ref=e257]
+          - listitem [ref=e259]:
+            - link "R-2026-900004 DELIVERED Delivery · 1 item · May 15, 2026 55,52 zł" [ref=e260] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmso006cu5iwxy30f4mr
+              - generic [ref=e261]:
+                - generic [ref=e262]:
+                  - generic [ref=e263]: R-2026-900004
+                  - generic [ref=e264]: DELIVERED
+                - generic [ref=e265]: Delivery · 1 item · May 15, 2026
+              - generic [ref=e266]:
+                - generic [ref=e267]: 55,52 zł
+                - img [ref=e268]
+          - listitem [ref=e270]:
+            - link "R-2026-900005 COMPLETED Pickup · 1 item · May 13, 2026 23,76 zł" [ref=e271] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmt0006ou5iwqasigkyf
+              - generic [ref=e272]:
+                - generic [ref=e273]:
+                  - generic [ref=e274]: R-2026-900005
+                  - generic [ref=e275]: COMPLETED
+                - generic [ref=e276]: Pickup · 1 item · May 13, 2026
+              - generic [ref=e277]:
+                - generic [ref=e278]: 23,76 zł
+                - img [ref=e279]
+          - listitem [ref=e281]:
+            - link "R-2026-900006 COMPLETED Eat in · 1 item · May 10, 2026 95,04 zł" [ref=e282] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmtb006yu5iwp94pyttl
+              - generic [ref=e283]:
+                - generic [ref=e284]:
+                  - generic [ref=e285]: R-2026-900006
+                  - generic [ref=e286]: COMPLETED
+                - generic [ref=e287]: Eat in · 1 item · May 10, 2026
+              - generic [ref=e288]:
+                - generic [ref=e289]: 95,04 zł
+                - img [ref=e290]
+          - listitem [ref=e292]:
+            - link "R-2026-900007 CANCELLED Delivery · 1 item · May 8, 2026 55,52 zł" [ref=e293] [cursor=pointer]:
+              - /url: /account/orders/cmp9ydmti0078u5iwfowgvjn4
+              - generic [ref=e294]:
+                - generic [ref=e295]:
+                  - generic [ref=e296]: R-2026-900007
+                  - generic [ref=e297]: CANCELLED
+                - generic [ref=e298]: Delivery · 1 item · May 8, 2026
+              - generic [ref=e299]:
+                - generic [ref=e300]: 55,52 zł
+                - img [ref=e301]
+  - contentinfo [ref=e146]:
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - img [ref=e152]:
+              - generic [ref=e155]: SD
+              - generic [ref=e156]: EST · 2014
+            - generic [ref=e157]: Szef Donald
+          - paragraph [ref=e158]: Kebab the way it should be.
+          - generic [ref=e159]:
+            - link "Instagram" [ref=e160] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e161]
+            - link "Facebook" [ref=e164] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e165]
+        - generic [ref=e167]:
+          - heading "Menu" [level=3] [ref=e168]
+          - generic [ref=e169]:
+            - link "Kebab" [ref=e170] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e171] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e172] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e173] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e174] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e175] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e176]:
+          - heading "Visit" [level=3] [ref=e177]
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: Marszałkowska 102
+              - generic [ref=e181]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e182] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e184]:
+              - generic [ref=e185]:
+                - generic [ref=e186]: Sun
+                - generic [ref=e187]: 12:00–21:00
+              - generic [ref=e188]:
+                - generic [ref=e189]: Mon–Thu
+                - generic [ref=e190]: 11:00–22:00
+              - generic [ref=e191]:
+                - generic [ref=e192]: Fri
+                - generic [ref=e193]: 11:00–23:00
+              - generic [ref=e194]:
+                - generic [ref=e195]: Sat
+                - generic [ref=e196]: 12:00–23:00
+        - generic [ref=e197]:
+          - heading "Company" [level=3] [ref=e198]
+          - generic [ref=e199]:
+            - link "About" [ref=e200] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e201] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e202] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e203] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e204]:
+        - generic [ref=e205]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e206]:
+          - link "Privacy" [ref=e207] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e208] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e209] [cursor=pointer]:
+            - /url: "#"
+  - region "Notifications alt+T"
+  - status [ref=e32]:
+    - generic [ref=e33]:
+      - img [ref=e35]
+      - generic [ref=e37]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e38] [cursor=pointer]:
+          - img [ref=e39]
+  - alert [ref=e42]

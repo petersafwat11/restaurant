@@ -3,33 +3,22 @@
 import type { CartDto } from '@repo/types';
 import { create } from 'zustand';
 
-const SESSION_KEY_STORAGE = 'cart.sessionKey';
-
-function readOrCreateSessionKey(): string {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-  const existing = window.localStorage.getItem(SESSION_KEY_STORAGE);
-  if (existing) return existing;
-  const fresh = crypto.randomUUID();
-  window.localStorage.setItem(SESSION_KEY_STORAGE, fresh);
-  return fresh;
-}
-
-function clearSessionKey(): void {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(SESSION_KEY_STORAGE);
-}
-
+/**
+ * Cart store — holds the canonical CartDto (from the server) plus a small
+ * in-flight mutation counter for "saving…" hints.
+ *
+ * The cart **session key** used to live here (localStorage-backed). It now
+ * lives in a cookie + the <CartSessionProvider> context so SSR can render
+ * the cart count without flicker. See apps/web/src/lib/cart-session.ts and
+ * apps/web/src/components/cart-session-provider.tsx.
+ *
+ * The `mergeCartItems` pure reducer stays here — it's a unit-testable
+ * function that callers (the login flow) use to plan the server-side merge.
+ */
 export interface CartState {
   cart: CartDto | null;
   /** Number of in-flight mutations; lets UIs show a subtle "saving…" hint. */
   pendingMutationCount: number;
-
-  /** Lazily-initialised session key for guest carts. */
-  getSessionKey: () => string;
-  /** Called after merge succeeds to drop the guest session key. */
-  clearSessionKey: () => void;
 
   setCart: (cart: CartDto | null) => void;
   beginMutation: () => void;
@@ -39,9 +28,6 @@ export interface CartState {
 export const useCartStore = create<CartState>((set, get) => ({
   cart: null,
   pendingMutationCount: 0,
-
-  getSessionKey: () => readOrCreateSessionKey(),
-  clearSessionKey,
 
   setCart: (cart) => set({ cart }),
   beginMutation: () => set({ pendingMutationCount: get().pendingMutationCount + 1 }),

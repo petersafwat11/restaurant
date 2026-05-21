@@ -9,19 +9,17 @@ import { useEffect } from 'react';
 import { kitchenQueryKeys } from '../query-keys';
 
 /**
- * KDS data source: initial GET /kitchen/tickets + live patches via
- * `restaurant:{id}:kitchen` socket events.
+ * KDS data source: initial GET /kitchen/tickets + live patches via the global
+ * kitchen socket room.
  */
-export function useKitchenFeed(restaurantId: string): UseQueryResult<KitchenTicketDto[]> {
+export function useKitchenFeed(): UseQueryResult<KitchenTicketDto[]> {
   const qc = useQueryClient();
   const query = useQuery<KitchenTicketDto[]>({
-    queryKey: kitchenQueryKeys.feed(restaurantId),
-    queryFn: () => getApiClient().kitchen.tickets(restaurantId),
-    enabled: Boolean(restaurantId),
+    queryKey: kitchenQueryKeys.feed(),
+    queryFn: () => getApiClient().kitchen.tickets(),
   });
 
   useEffect(() => {
-    if (!restaurantId) return;
     const client = getRealtimeClient();
     let unsubAdded: (() => void) | undefined;
     let unsubRemoved: (() => void) | undefined;
@@ -29,11 +27,11 @@ export function useKitchenFeed(restaurantId: string): UseQueryResult<KitchenTick
 
     (async () => {
       await client.connect();
-      await client.subscribe(ROOMS.restaurantKitchen(restaurantId));
+      await client.subscribe(ROOMS.kitchen);
       if (!mounted) return;
 
       unsubAdded = client.on('kitchen.ticket_added', (event: KitchenTicketEvent) => {
-        qc.setQueryData<KitchenTicketDto[]>(kitchenQueryKeys.feed(restaurantId), (prev) => {
+        qc.setQueryData<KitchenTicketDto[]>(kitchenQueryKeys.feed(), (prev) => {
           if (!prev) return prev;
           if (prev.some((t) => t.orderId === event.orderId)) return prev;
           return [
@@ -41,8 +39,10 @@ export function useKitchenFeed(restaurantId: string): UseQueryResult<KitchenTick
             {
               orderId: event.orderId,
               orderNumber: event.orderNumber,
+              type: event.type,
               status: event.status,
               confirmedAt: new Date().toISOString(),
+              specialRequests: null,
               items: [],
             },
           ];
@@ -50,7 +50,7 @@ export function useKitchenFeed(restaurantId: string): UseQueryResult<KitchenTick
       });
 
       unsubRemoved = client.on('kitchen.ticket_removed', (event: KitchenTicketEvent) => {
-        qc.setQueryData<KitchenTicketDto[]>(kitchenQueryKeys.feed(restaurantId), (prev) => {
+        qc.setQueryData<KitchenTicketDto[]>(kitchenQueryKeys.feed(), (prev) => {
           if (!prev) return prev;
           return prev.filter((t) => t.orderId !== event.orderId);
         });
@@ -61,9 +61,9 @@ export function useKitchenFeed(restaurantId: string): UseQueryResult<KitchenTick
       mounted = false;
       unsubAdded?.();
       unsubRemoved?.();
-      client.unsubscribe(ROOMS.restaurantKitchen(restaurantId)).catch(() => {});
+      client.unsubscribe(ROOMS.kitchen).catch(() => {});
     };
-  }, [restaurantId, qc]);
+  }, [qc]);
 
   return query;
 }

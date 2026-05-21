@@ -36,11 +36,17 @@ export const PERMISSION_KEYS = [
   'payment:refund',
   'kitchen:read',
   'customer:notes',
+  'customer:tag',
+  'customer:email',
   'analytics:read',
   'report:read',
   'report:export',
   'audit:read',
   'contact:read',
+  'contact:reply',
+  'contact:notes',
+  'promotion:archive',
+  'promotion:bulk_coupons',
   'flags:write',
 ] as const;
 

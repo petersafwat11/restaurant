@@ -11,7 +11,6 @@ export type PromotionType = (typeof PROMOTION_TYPES)[number];
 
 export const PromotionSchema = z.object({
   id: z.string(),
-  restaurantId: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   type: z.enum(PROMOTION_TYPES),
@@ -20,11 +19,12 @@ export const PromotionSchema = z.object({
   startsAt: z.string().nullable(),
   endsAt: z.string().nullable(),
   isActive: z.boolean(),
+  isArchived: z.boolean(),
+  archivedAt: z.string().nullable(),
 });
 export type PromotionDto = z.infer<typeof PromotionSchema>;
 
 export const CreatePromotionSchema = z.object({
-  restaurantId: z.string().min(1),
   name: z.string().min(1).max(160),
   description: z.string().max(2000).nullish(),
   type: z.enum(PROMOTION_TYPES),
@@ -58,13 +58,31 @@ export const CreateCouponSchema = z.object({
 });
 export type CreateCouponDto = z.infer<typeof CreateCouponSchema>;
 
+export const BulkGenerateCouponsSchema = z.object({
+  quantity: z.number().int().min(1).max(1000),
+  prefix: z
+    .string()
+    .max(20)
+    .regex(/^[A-Z0-9_-]*$/, 'Prefix must be uppercase A-Z, 0-9, _ or -')
+    .optional(),
+  codeLength: z.number().int().min(4).max(24).default(8),
+  maxRedemptions: z.number().int().min(0).nullish(),
+  perUserLimit: z.number().int().min(0).nullish(),
+});
+export type BulkGenerateCouponsDto = z.infer<typeof BulkGenerateCouponsSchema>;
+
+export const BulkGenerateCouponsResponseSchema = z.object({
+  created: z.number().int().min(0),
+  coupons: z.array(CouponSchema),
+});
+export type BulkGenerateCouponsResponseDto = z.infer<typeof BulkGenerateCouponsResponseSchema>;
+
 // ---- Validation endpoint ---------------------------------------------------
 
 export const ValidateCouponSchema = z.object({
   code: z.string().min(1).max(60),
   subtotal: MoneyStringSchema,
   userId: z.string().min(1).optional(),
-  restaurantId: z.string().min(1),
 });
 export type ValidateCouponDto = z.infer<typeof ValidateCouponSchema>;
 
@@ -75,7 +93,6 @@ export const VALIDATION_FAILURE_REASONS = [
   'MIN_SUBTOTAL_NOT_MET',
   'PER_USER_LIMIT_REACHED',
   'MAX_REDEMPTIONS_REACHED',
-  'WRONG_RESTAURANT',
 ] as const;
 export type ValidationFailureReason = (typeof VALIDATION_FAILURE_REASONS)[number];
 

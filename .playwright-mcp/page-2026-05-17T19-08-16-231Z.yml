@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - link "Szef Donald home" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e6]:
+          - generic [ref=e9]: SD
+          - generic [ref=e10]: EST · 2014
+        - generic [ref=e11]: Szef Donald
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: Welcome back
+        - heading "Sign in to your account" [level=1] [ref=e16]
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e20]: Email*
+          - textbox "Email" [ref=e22]:
+            - /placeholder: jan@example.com
+        - generic [ref=e23]:
+          - generic [ref=e25]: Password*
+          - textbox "Password" [ref=e27]
+        - button "Sign in" [ref=e28] [cursor=pointer]
+        - generic [ref=e29]:
+          - link "Forgot password?" [ref=e30] [cursor=pointer]:
+            - /url: /forgot-password
+          - link "Create account" [ref=e31] [cursor=pointer]:
+            - /url: /register
+  - region "Notifications alt+T"
+  - alert [ref=e32]

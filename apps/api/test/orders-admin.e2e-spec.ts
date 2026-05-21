@@ -1,13 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('orders admin list + detail enrichment (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let aliceToken: string;
   let bobToken: string;
-  let restaurantId: string;
   let itemId: string;
 
   beforeAll(async () => {
@@ -25,24 +24,12 @@ describe('orders admin list + detail enrichment (e2e)', () => {
     aliceToken = await register('alice.e2e@test.local');
     bobToken = await register('bob.e2e@test.local');
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'orders-admin-e2e',
-        name: 'Orders Admin E2E',
-        phone: '+48 22 555 0009',
-        email: 'oadmin@e2e.local',
-        address: { line1: 'ul. 9', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const item = await inject(
@@ -83,7 +70,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
   async function seedCart(token: string) {
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       token,
     );
@@ -98,7 +85,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { restaurantId, type, tipAmount: '0' },
+      { type, tipAmount: '0' },
       token,
       { 'idempotency-key': idem },
     );
@@ -106,14 +93,14 @@ describe('orders admin list + detail enrichment (e2e)', () => {
     return { id: res.json().id, orderNumber: res.json().orderNumber };
   }
 
-  it('staff with order:read + restaurantId list all restaurant orders; customers see only their own', async () => {
+  it('staff with order:read list all orders; customers see only their own', async () => {
     await createOrder(aliceToken, 'PICKUP', 'oa-1');
     await createOrder(aliceToken, 'DINE_IN', 'oa-2');
     await createOrder(bobToken, 'PICKUP', 'oa-3');
 
     const adminList = await inject(
       'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}`,
+      `/api/v1/orders`,
       undefined,
       ownerToken,
     );
@@ -122,15 +109,6 @@ describe('orders admin list + detail enrichment (e2e)', () => {
 
     const aliceOwn = await inject('GET', '/api/v1/orders', undefined, aliceToken);
     expect(aliceOwn.json().items).toHaveLength(2);
-
-    // Customer passing restaurantId can't escalate — filter is ignored, still own.
-    const aliceEscalate = await inject(
-      'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}`,
-      undefined,
-      aliceToken,
-    );
-    expect(aliceEscalate.json().items).toHaveLength(2);
   });
 
   it('filters the admin list by type and search', async () => {
@@ -139,7 +117,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
 
     const byType = await inject(
       'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}&type=DINE_IN`,
+      `/api/v1/orders?type=DINE_IN`,
       undefined,
       ownerToken,
     );
@@ -148,7 +126,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
 
     const bySearch = await inject(
       'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}&search=${encodeURIComponent(a1.orderNumber)}`,
+      `/api/v1/orders?search=${encodeURIComponent(a1.orderNumber)}`,
       undefined,
       ownerToken,
     );
@@ -163,7 +141,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
 
     const page1 = await inject(
       'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}&limit=2`,
+      `/api/v1/orders?limit=2`,
       undefined,
       ownerToken,
     );
@@ -173,7 +151,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
 
     const page2 = await inject(
       'GET',
-      `/api/v1/orders?restaurantId=${restaurantId}&limit=2&cursor=${cursor}`,
+      `/api/v1/orders?limit=2&cursor=${cursor}`,
       undefined,
       ownerToken,
     );

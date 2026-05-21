@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - link "Szef Donald home" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e6]:
+          - generic [ref=e9]: SD
+          - generic [ref=e10]: EST · 2014
+        - generic [ref=e11]: Szef Donald
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: Get started
+        - heading "Create your account" [level=1] [ref=e16]
+        - paragraph [ref=e17]: Faster checkout, saved addresses, loyalty points.
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic [ref=e22]: First name
+            - textbox "First name" [ref=e24]:
+              - /placeholder: Jan
+          - generic [ref=e25]:
+            - generic [ref=e27]: Last name
+            - textbox "Last name" [ref=e29]:
+              - /placeholder: Kowalski
+        - generic [ref=e30]:
+          - generic [ref=e32]: Email*
+          - textbox "Email" [ref=e34]:
+            - /placeholder: jan@example.com
+        - generic [ref=e35]:
+          - generic [ref=e37]: Password*
+          - textbox "Password" [ref=e39]
+          - generic [ref=e40]: At least 10 characters, with a number.
+        - button "Create account" [ref=e41] [cursor=pointer]
+        - paragraph [ref=e42]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e43] [cursor=pointer]:
+            - /url: /login
+  - region "Notifications alt+T"
+  - alert [ref=e44]

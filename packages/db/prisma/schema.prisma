@@ -45,7 +45,6 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   couponRedemptions      CouponRedemption[]
-  favorites              Favorite[]
   referralCode           ReferralCode?
   referralsMade          Referral[]              @relation("ReferralReferrer")
   referredBy             Referral?               @relation("ReferralReferee")
@@ -152,15 +151,15 @@ model PushToken {
 }
 
 model NotificationPreference {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  orderUpdatesPush Boolean  @default(true)
-  orderUpdatesEmail Boolean @default(true)
-  orderUpdatesSms  Boolean  @default(true)
-  promotionsPush   Boolean  @default(false)
-  promotionsEmail  Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  orderUpdatesPush  Boolean  @default(true)
+  orderUpdatesEmail Boolean  @default(true)
+  orderUpdatesSms   Boolean  @default(true)
+  promotionsPush    Boolean  @default(false)
+  promotionsEmail   Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -205,28 +204,20 @@ model Restaurant {
   reservationSlotMinutes   Int      @default(90)
   reservationBufferMinutes Int      @default(15)
   isActive                 Boolean  @default(true)
+  acceptsReservations      Boolean  @default(true)
+  acceptsDelivery          Boolean  @default(true)
+  acceptsPickup            Boolean  @default(true)
+  acceptsDineIn            Boolean  @default(true)
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
-
-  hours        OperatingHours[]
-  menus        MenuCategory[]
-  orders       Order[]
-  reservations Reservation[]
-  tables       Table[]
-  promotions   Promotion[]
 }
 
 model OperatingHours {
-  id           String  @id @default(cuid())
-  restaurantId String
-  dayOfWeek    Int // 0-6
-  opensAt      String // "09:00"
-  closesAt     String // "23:00"
-  isClosed     Boolean @default(false)
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-
-  @@unique([restaurantId, dayOfWeek])
+  id        String  @id @default(cuid())
+  dayOfWeek Int     @unique // 0-6
+  opensAt   String // "09:00"
+  closesAt  String // "23:00"
+  isClosed  Boolean @default(false)
 }
 
 // ---------------------------------------------------------------------------
@@ -234,45 +225,40 @@ model OperatingHours {
 // ---------------------------------------------------------------------------
 
 model MenuCategory {
-  id           String  @id @default(cuid())
-  restaurantId String
-  name         String
-  slug         String
-  description  String?
-  imageUrl     String?
-  position     Int     @default(0)
-  isActive     Boolean @default(true)
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  imageUrl    String?
+  position    Int     @default(0)
+  isActive    Boolean @default(true)
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  items      MenuItem[]
-
-  @@unique([restaurantId, slug])
+  items MenuItem[]
 }
 
 model MenuItem {
-  id            String   @id @default(cuid())
-  categoryId    String
-  name          String
-  slug          String
-  description   String?
-  basePrice     Decimal  @db.Decimal(10, 2)
-  compareAt     Decimal? @db.Decimal(10, 2)
-  calories      Int?
-  prepMinutes   Int?
-  isAvailable   Boolean  @default(true)
-  isFeatured    Boolean  @default(false)
-  isVegetarian  Boolean  @default(false)
-  isVegan       Boolean  @default(false)
-  isGlutenFree  Boolean  @default(false)
-  spiceLevel    Int      @default(0) // 0-3
-  position      Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(cuid())
+  categoryId   String
+  name         String
+  slug         String
+  description  String?
+  basePrice    Decimal  @db.Decimal(10, 2)
+  compareAt    Decimal? @db.Decimal(10, 2)
+  calories     Int?
+  prepMinutes  Int?
+  isAvailable  Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  isVegetarian Boolean  @default(false)
+  isVegan      Boolean  @default(false)
+  isGlutenFree Boolean  @default(false)
+  spiceLevel   Int      @default(0) // 0-3
+  position     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   category       MenuCategory            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   images         MenuItemImage[]
   modifierGroups MenuItemModifierGroup[]
-  favoritedBy    Favorite[]
 
   @@unique([categoryId, slug])
 }
@@ -314,14 +300,13 @@ model MenuItemModifierOption {
 // ---------------------------------------------------------------------------
 
 model Cart {
-  id            String   @id @default(cuid())
-  userId        String? // null = guest cart
-  restaurantId  String
-  sessionKey    String?  @unique // for guest carts
-  appliedCouponId String?
-  loyaltyPointsToRedeem Int @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  userId                String? // null = guest cart
+  sessionKey            String?  @unique // for guest carts
+  appliedCouponId       String?
+  loyaltyPointsToRedeem Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   user          User?      @relation(fields: [userId], references: [id])
   appliedCoupon Coupon?    @relation(fields: [appliedCouponId], references: [id], onDelete: SetNull)
@@ -331,15 +316,22 @@ model Cart {
 }
 
 model CartItem {
-  id               String  @id @default(cuid())
-  cartId           String
-  menuItemId       String
-  quantity         Int     @default(1)
-  unitPrice        Decimal @db.Decimal(10, 2)
-  modifierSnapshot Json // [{ groupId, optionIds, priceDelta }]
-  notes            String?
+  id                  String  @id @default(cuid())
+  cartId              String
+  menuItemId          String
+  quantity            Int     @default(1)
+  unitPrice           Decimal @db.Decimal(10, 2)
+  modifierSnapshot    Json // [{ groupId, optionIds, priceDelta }]
+  /// Stable hash of the modifier selection set — see
+  /// apps/api/src/cart/modifier-validation.ts `modifierFingerprint()`. Lets
+  /// `addItem` dedup against an existing matching line and increment its
+  /// quantity instead of creating a duplicate.
+  modifierFingerprint String  @default("∅")
+  notes               String?
 
   cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, menuItemId, modifierFingerprint])
 }
 
 enum OrderType {
@@ -384,7 +376,6 @@ model Order {
   id                  String      @id @default(cuid())
   orderNumber         String      @unique // human-friendly: R-2026-000123
   userId              String?
-  restaurantId        String
   type                OrderType
   status              OrderStatus @default(PENDING)
   subtotal            Decimal     @db.Decimal(10, 2)
@@ -404,13 +395,12 @@ model Order {
   updatedAt           DateTime    @updatedAt
 
   user         User?              @relation(fields: [userId], references: [id])
-  restaurant   Restaurant         @relation(fields: [restaurantId], references: [id])
   items        OrderItem[]
   statusEvents OrderStatusEvent[]
   payment      Payment?
   review       Review?
 
-  @@index([restaurantId, status, createdAt])
+  @@index([status, createdAt])
   @@index([userId, createdAt])
 }
 
@@ -429,14 +419,22 @@ model OrderItem {
 }
 
 model OrderStatusEvent {
-  id        String      @id @default(cuid())
+  id        String         @id @default(cuid())
   orderId   String
+  kind      OrderEventKind @default(STATUS_CHANGE)
   status    OrderStatus
   byUserId  String?
   note      String?
-  createdAt DateTime    @default(now())
+  createdAt DateTime       @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+enum OrderEventKind {
+  STATUS_CHANGE
+  NOTE
 }
 
 // ---------------------------------------------------------------------------
@@ -515,19 +513,21 @@ model LoyaltyTransaction {
 }
 
 model Promotion {
-  id           String    @id @default(cuid())
-  restaurantId String
-  name         String
-  description  String?
-  type         String // PERCENT, FIXED, BOGO, FREE_DELIVERY
-  value        Decimal?  @db.Decimal(10, 2)
-  minSubtotal  Decimal?  @db.Decimal(10, 2)
-  startsAt     DateTime?
-  endsAt       DateTime?
-  isActive     Boolean   @default(true)
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  type        String // PERCENT, FIXED, BOGO, FREE_DELIVERY
+  value       Decimal?  @db.Decimal(10, 2)
+  minSubtotal Decimal?  @db.Decimal(10, 2)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  isActive    Boolean   @default(true)
+  isArchived  Boolean   @default(false)
+  archivedAt  DateTime?
 
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  coupons    Coupon[]
+  coupons Coupon[]
+
+  @@index([isArchived])
 }
 
 model Coupon {
@@ -537,8 +537,8 @@ model Coupon {
   maxRedemptions Int?
   perUserLimit   Int?   @default(1)
 
-  promotion   Promotion          @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  redemptions CouponRedemption[]
+  promotion      Promotion          @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  redemptions    CouponRedemption[]
   appliedToCarts Cart[]
 }
 
@@ -558,19 +558,16 @@ model CouponRedemption {
 // ---------------------------------------------------------------------------
 
 model Table {
-  id           String @id @default(cuid())
-  restaurantId String
-  name         String
-  capacity     Int
+  id       String @id @default(cuid())
+  name     String
+  capacity Int
 
-  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   reservations Reservation[]
 }
 
 model Reservation {
   id           String   @id @default(cuid())
   userId       String?
-  restaurantId String
   tableId      String?
   guestCount   Int
   startAt      DateTime
@@ -582,11 +579,10 @@ model Reservation {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user       User?      @relation(fields: [userId], references: [id])
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  table      Table?     @relation(fields: [tableId], references: [id])
+  user  User?  @relation(fields: [userId], references: [id])
+  table Table? @relation(fields: [tableId], references: [id])
 
-  @@index([restaurantId, startAt])
+  @@index([startAt])
 }
 
 // ---------------------------------------------------------------------------
@@ -597,7 +593,6 @@ model StaffInvite {
   id              String    @id @default(cuid())
   email           String
   roleKey         String
-  restaurantId    String?
   tokenHash       String    @unique
   invitedByUserId String
   expiresAt       DateTime
@@ -617,35 +612,53 @@ model CustomerNote {
   @@index([userId, createdAt])
 }
 
+model CustomerTag {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  label     String
+  color     String?
+  createdAt DateTime @default(now())
+
+  users UserTag[]
+}
+
+model UserTag {
+  userId    String
+  tagId     String
+  byUserId  String
+  createdAt DateTime @default(now())
+
+  tag CustomerTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
+  @@index([tagId])
+  @@index([userId])
+}
+
 // ---------------------------------------------------------------------------
 // Analytics + Reports + Audit (Sprint 8)
 // ---------------------------------------------------------------------------
 
 model DailyMetric {
-  id                    String   @id @default(cuid())
-  restaurantId          String
-  date                  DateTime @db.Date
-  revenue               Decimal  @default(0) @db.Decimal(12, 2)
-  orderCount            Int      @default(0)
-  newCustomerCount      Int      @default(0)
-  completedOrderCount   Int      @default(0)
-  cancelledOrderCount   Int      @default(0)
-  refundedOrderCount    Int      @default(0)
-  avgPrepMinutes        Float?
-  avgOrderValue         Decimal  @default(0) @db.Decimal(12, 2)
-  paymentMethodBreakdown Json    @default("{}")
-  topItems              Json     @default("[]")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  @@unique([restaurantId, date])
-  @@index([restaurantId, date])
+  id                     String   @id @default(cuid())
+  date                   DateTime @unique @db.Date
+  revenue                Decimal  @default(0) @db.Decimal(12, 2)
+  orderCount             Int      @default(0)
+  newCustomerCount       Int      @default(0)
+  completedOrderCount    Int      @default(0)
+  cancelledOrderCount    Int      @default(0)
+  refundedOrderCount     Int      @default(0)
+  avgPrepMinutes         Float?
+  avgOrderValue          Decimal  @default(0) @db.Decimal(12, 2)
+  paymentMethodBreakdown Json     @default("{}")
+  topItems               Json     @default("[]")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model Export {
   id                String    @id @default(cuid())
   requestedByUserId String
-  restaurantId      String?
   kind              String
   params            Json      @default("{}")
   status            String    @default("queued") // queued | processing | ready | failed
@@ -663,7 +676,6 @@ model Export {
 model AuditLog {
   id           String   @id @default(cuid())
   actorUserId  String
-  restaurantId String?
   action       String
   resourceType String
   resourceId   String
@@ -673,7 +685,6 @@ model AuditLog {
   userAgent    String?
   createdAt    DateTime @default(now())
 
-  @@index([restaurantId, createdAt])
   @@index([actorUserId, createdAt])
   @@index([action, createdAt])
 }
@@ -683,19 +694,23 @@ model AuditLog {
 // ---------------------------------------------------------------------------
 
 model Review {
-  id           String    @id @default(cuid())
-  orderId      String    @unique
-  userId       String
-  rating       Int // 1-5
-  comment      String?
-  isVisible    Boolean   @default(true)
-  ownerReply   String?
-  ownerReplyAt DateTime?
-  createdAt    DateTime  @default(now())
+  id               String    @id @default(cuid())
+  orderId          String    @unique
+  userId           String
+  rating           Int // 1-5
+  comment          String?
+  isVisible        Boolean   @default(true)
+  moderationStatus String    @default("PUBLISHED") // PUBLISHED, HIDDEN, FLAGGED
+  flagReason       String?
+  ownerReply       String?
+  ownerReplyAt     DateTime?
+  createdAt        DateTime  @default(now())
 
   order  Order         @relation(fields: [orderId], references: [id])
   user   User          @relation(fields: [userId], references: [id])
   images ReviewImage[]
+
+  @@index([moderationStatus])
 }
 
 model ReviewImage {
@@ -712,7 +727,6 @@ model ReviewImage {
 
 model ContactMessage {
   id              String    @id @default(cuid())
-  restaurantId    String?
   name            String
   email           String
   subject         String?
@@ -722,26 +736,28 @@ model ContactMessage {
   handledAt       DateTime?
   createdAt       DateTime  @default(now())
 
+  notes ContactNote[]
+
   @@index([status, createdAt])
-  @@index([restaurantId, createdAt])
+  @@index([createdAt])
+}
+
+model ContactNote {
+  id        String   @id @default(cuid())
+  messageId String
+  authorId  String
+  kind      String   @default("NOTE") // NOTE, REPLY
+  body      String
+  createdAt DateTime @default(now())
+
+  message ContactMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId, createdAt])
 }
 
 // ---------------------------------------------------------------------------
-// Sprint 11 — Favorites & Referral
+// Sprint 11 — Referral
 // ---------------------------------------------------------------------------
-
-model Favorite {
-  id         String   @id @default(cuid())
-  userId     String
-  menuItemId String
-  createdAt  DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, menuItemId])
-  @@index([userId, createdAt])
-}
 
 model ReferralCode {
   id        String   @id @default(cuid())

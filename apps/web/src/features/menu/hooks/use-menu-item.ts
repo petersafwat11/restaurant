@@ -6,14 +6,13 @@ import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import { menuQueryKeys } from '../query-keys';
 
 export function useMenuItem(
-  restaurantId: string,
   categorySlug: string,
   itemSlug: string,
 ): UseQueryResult<MenuItemDetailDto> {
   return useQuery<MenuItemDetailDto>({
-    queryKey: menuQueryKeys.item(restaurantId, categorySlug, itemSlug),
-    queryFn: () => getApiClient().menu.getItem(restaurantId, categorySlug, itemSlug),
-    enabled: Boolean(restaurantId && categorySlug && itemSlug),
+    queryKey: menuQueryKeys.item(categorySlug, itemSlug),
+    queryFn: () => getApiClient().menu.getItem(categorySlug, itemSlug),
+    enabled: Boolean(categorySlug && itemSlug),
     staleTime: 5 * 60 * 1000,
   });
 }

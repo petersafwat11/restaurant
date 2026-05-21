@@ -32,7 +32,6 @@ export function useAnalyticsOverview(q: AnalyticsBaseQuery) {
   return useQuery<AnalyticsOverviewDto>({
     queryKey: analyticsKeys.overview(q),
     queryFn: () => getApiClient().analytics.overview(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -40,7 +39,6 @@ export function useRevenueTimeseries(q: RevenueTimeseriesQuery) {
   return useQuery<RevenueTimeseriesPointDto[]>({
     queryKey: analyticsKeys.revenue(q),
     queryFn: () => getApiClient().analytics.revenueTimeseries(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -48,7 +46,6 @@ export function useTopItems(q: TopItemsQuery) {
   return useQuery<TopItemDto[]>({
     queryKey: analyticsKeys.topItems(q),
     queryFn: () => getApiClient().analytics.topItems(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -56,7 +53,6 @@ export function useOrdersByStatus(q: AnalyticsBaseQuery) {
   return useQuery<OrdersByStatusDto>({
     queryKey: analyticsKeys.ordersByStatus(q),
     queryFn: () => getApiClient().analytics.ordersByStatus(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -64,7 +60,6 @@ export function useCustomerRetention(q: CustomerRetentionQuery) {
   return useQuery<CustomerRetentionDto>({
     queryKey: analyticsKeys.retention(q),
     queryFn: () => getApiClient().analytics.customerRetention(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -72,7 +67,6 @@ export function usePaymentMethodsBreakdown(q: AnalyticsBaseQuery) {
   return useQuery<PaymentMethodsBreakdownDto>({
     queryKey: analyticsKeys.payments(q),
     queryFn: () => getApiClient().analytics.paymentMethods(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -80,7 +74,6 @@ export function useSalesByHour(q: AnalyticsBaseQuery) {
   return useQuery<SalesByHourDto>({
     queryKey: analyticsKeys.salesByHour(q),
     queryFn: () => getApiClient().analytics.salesByHour(q),
-    enabled: Boolean(q.restaurantId),
   });
 }
 
@@ -88,6 +81,5 @@ export function useSalesByDayOfWeek(q: AnalyticsBaseQuery) {
   return useQuery<SalesByDayOfWeekDto>({
     queryKey: analyticsKeys.salesByDow(q),
     queryFn: () => getApiClient().analytics.salesByDayOfWeek(q),
-    enabled: Boolean(q.restaurantId),
   });
 }

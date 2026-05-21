@@ -131,7 +131,6 @@ export type SetItemAvailabilityDto = z.infer<typeof SetItemAvailabilitySchema>;
 
 export const MenuCategorySchema = z.object({
   id: z.string(),
-  restaurantId: z.string(),
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable(),
@@ -143,7 +142,6 @@ export const MenuCategorySchema = z.object({
 export type MenuCategoryDto = z.infer<typeof MenuCategorySchema>;
 
 export const CreateMenuCategorySchema = z.object({
-  restaurantId: z.string().min(1),
   name: z.string().min(1).max(120),
   slug: z
     .string()
@@ -163,7 +161,6 @@ export type UpdateMenuCategoryDto = z.infer<typeof UpdateMenuCategorySchema>;
 // ---- Menu tree -------------------------------------------------------------
 
 export const MenuTreeSchema = z.object({
-  restaurantId: z.string(),
   categories: z.array(
     MenuCategorySchema.extend({
       items: z.array(

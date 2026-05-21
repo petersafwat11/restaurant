@@ -1,6 +1,7 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  type AuthResponseDto,
   type ForgotPasswordDto,
   ForgotPasswordSchema,
   type LoginDto,
@@ -18,41 +19,78 @@ import {
   type VerifyOtpDto,
   VerifyOtpSchema,
 } from '@repo/types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import {
+  clearAuthCookies,
+  isCookieAudience,
+  readAudience,
+  readRefreshCookie,
+  setAuthCookies,
+} from '../common/auth/cookies';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { AuthService } from './auth.service';
+import { ENV, type ENV_TYPE } from '../config/config.module';
+import { type AuthIssueResult, AuthService } from './auth.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    @Inject(ENV) private readonly env: ENV_TYPE,
+  ) {}
 
   @Public()
   @Post('register')
   @HttpCode(201)
-  register(@Body(new ZodValidationPipe(RegisterSchema)) dto: RegisterDto) {
-    return this.auth.register(dto);
+  async register(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Body(new ZodValidationPipe(RegisterSchema)) dto: RegisterDto,
+  ): Promise<AuthResponseDto> {
+    const result = await this.auth.register(dto);
+    return this.respondWithTokens(req, reply, result);
   }
 
   @Public()
   @Post('login')
   @HttpCode(200)
-  login(@Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto) {
-    return this.auth.login(dto);
+  async login(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Body(new ZodValidationPipe(LoginSchema)) dto: LoginDto,
+  ): Promise<AuthResponseDto> {
+    const result = await this.auth.login(dto);
+    return this.respondWithTokens(req, reply, result);
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(200)
   refresh(@Body(new ZodValidationPipe(RefreshSchema)) dto: RefreshDto) {
+    // Header-based path (mobile). Web/admin transparently refresh via the
+    // guard + interceptor — they never call this endpoint.
     return this.auth.refresh(dto.refreshToken);
   }
 
+  @Public()
   @Post('logout')
   @HttpCode(200)
-  async logout(@Body() body: { refreshToken?: string }) {
-    await this.auth.logout(body?.refreshToken);
+  async logout(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Body() body: { refreshToken?: string },
+  ) {
+    const audience = readAudience(req);
+    let rt = body?.refreshToken;
+    if (!rt && isCookieAudience(audience)) {
+      rt = readRefreshCookie(req, audience) ?? undefined;
+    }
+    await this.auth.logout(rt);
+    if (isCookieAudience(audience)) {
+      clearAuthCookies(reply, this.env, audience);
+    }
     return { success: true as const };
   }
 
@@ -67,8 +105,13 @@ export class AuthController {
   @Public()
   @Post('verify-otp')
   @HttpCode(200)
-  verifyOtp(@Body(new ZodValidationPipe(VerifyOtpSchema)) dto: VerifyOtpDto) {
-    return this.auth.verifyOtp(dto);
+  async verifyOtp(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Body(new ZodValidationPipe(VerifyOtpSchema)) dto: VerifyOtpDto,
+  ): Promise<AuthResponseDto> {
+    const result = await this.auth.verifyOtp(dto);
+    return this.respondWithTokens(req, reply, result);
   }
 
   @Public()
@@ -98,5 +141,25 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: RequestUser) {
     return this.auth.me(user.id);
+  }
+
+  // ---- helpers ----------------------------------------------------------
+
+  private respondWithTokens(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    result: AuthIssueResult,
+  ): AuthResponseDto {
+    const audience = readAudience(req);
+    if (isCookieAudience(audience)) {
+      setAuthCookies(reply, this.env, audience, {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
+      });
+      return { user: result.user };
+    }
+    // Mobile / header-based — return tokens in body as today.
+    return result;
   }
 }

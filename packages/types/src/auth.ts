@@ -79,6 +79,10 @@ export const AuthTokensSchema = z.object({
 });
 export type AuthTokensDto = z.infer<typeof AuthTokensSchema>;
 
+export const AUTH_AUDIENCES = ['web', 'admin', 'mobile'] as const;
+export type AuthAudience = (typeof AUTH_AUDIENCES)[number];
+export const AUTH_AUDIENCE_HEADER = 'x-app-audience';
+
 export const MeSchema = z.object({
   id: z.string(),
   email: z.string().email(),
@@ -95,9 +99,11 @@ export const MeSchema = z.object({
 export type MeDto = z.infer<typeof MeSchema>;
 
 export const AuthResponseSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-  expiresIn: z.number().int().positive(),
+  // Tokens are only present for header-based clients (mobile). For cookie-based
+  // clients (web/admin), the API sets httpOnly cookies and omits these fields.
+  accessToken: z.string().optional(),
+  refreshToken: z.string().optional(),
+  expiresIn: z.number().int().positive().optional(),
   user: MeSchema,
 });
 export type AuthResponseDto = z.infer<typeof AuthResponseSchema>;

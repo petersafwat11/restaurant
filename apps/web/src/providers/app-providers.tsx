@@ -1,5 +1,6 @@
 'use client';
 
+import { Toaster } from '@/components/toaster';
 import { getApiClient } from '@/lib/api-client';
 import { makeQueryClient } from '@/lib/query-client';
 import { getRealtimeClient } from '@/lib/realtime-client';
@@ -36,5 +37,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <Toaster />
+    </QueryClientProvider>
+  );
 }

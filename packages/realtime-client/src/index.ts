@@ -22,7 +22,14 @@ export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'disconnect
 
 export interface CreateRealtimeClientOptions {
   url: string;
-  getAccessToken: () => string | null | undefined | Promise<string | null | undefined>;
+  /** Header-based auth (mobile). Omit for cookie-based audiences. */
+  getAccessToken?: () => string | null | undefined | Promise<string | null | undefined>;
+  /**
+   * Cookie-based audience. When set, the client uses `withCredentials` so the
+   * browser carries `${audience}_at` on the handshake, and passes the same
+   * value as a query param so the gateway knows which cookie to read.
+   */
+  audience?: 'web' | 'admin' | 'mobile';
   onStatusChange?: (status: ConnectionStatus) => void;
 }
 
@@ -50,9 +57,12 @@ export function createRealtimeClient(opts: CreateRealtimeClientOptions): Realtim
   async function connect(): Promise<void> {
     if (socket?.connected) return;
     setStatus('connecting');
-    const token = await opts.getAccessToken();
+    const isCookieAudience = opts.audience === 'web' || opts.audience === 'admin';
+    const token = isCookieAudience ? null : (await opts.getAccessToken?.()) ?? null;
     socket = io(opts.url, {
-      auth: { token: token ?? '' },
+      auth: token ? { token } : {},
+      query: opts.audience ? { audience: opts.audience } : undefined,
+      withCredentials: isCookieAudience,
       autoConnect: false,
       reconnection: true,
       transports: ['websocket'],

@@ -1,12 +1,14 @@
 import type { Locale } from './locale';
 import ar from './locales/ar.json';
 import en from './locales/en.json';
+import pl from './locales/pl.json';
 
 export type MessageCatalog = typeof en;
 
 const CATALOGS: Record<Locale, Record<string, unknown>> = {
   en: en as Record<string, unknown>,
   ar: ar as Record<string, unknown>,
+  pl: pl as Record<string, unknown>,
 };
 
 export function getMessageCatalog(locale: Locale): Record<string, unknown> {

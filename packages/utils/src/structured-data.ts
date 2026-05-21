@@ -14,7 +14,6 @@ export interface StructuredDataInput {
     image: string | null;
     address: {
       line1?: string;
-      line2?: string | null;
       city?: string;
       state?: string | null;
       zip?: string | null;
@@ -51,7 +50,7 @@ export function buildStructuredData(input: StructuredDataInput): {
     email: r.email,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: [r.address.line1, r.address.line2].filter(Boolean).join(', '),
+      streetAddress: r.address.line1 ?? '',
       addressLocality: r.address.city ?? '',
       addressRegion: r.address.state ?? '',
       postalCode: r.address.zip ?? '',

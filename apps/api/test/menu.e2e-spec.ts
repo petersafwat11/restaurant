@@ -1,12 +1,11 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('menu (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let customerToken: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -22,27 +21,7 @@ describe('menu (e2e)', () => {
     ownerToken = await ensureOwnerToken(app);
     customerToken = await register('customer.e2e@test.local');
 
-    const res = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'test-kitchen-e2e',
-        name: 'Test Kitchen E2E',
-        phone: '+48 22 555 0001',
-        email: 'e2e@test.local',
-        address: {
-          line1: 'ul. Marszałkowska 1',
-          city: 'Warsaw',
-          zip: '00-001',
-          country: 'PL',
-        },
-        timezone: 'Europe/Warsaw',
-        currency: 'PLN',
-      },
-      ownerToken,
-    );
-    expect(res.statusCode).toBe(201);
-    restaurantId = res.json().id;
+    await ensureRestaurant(app);
   });
 
   async function inject(method: string, url: string, body?: unknown, token?: string) {
@@ -67,7 +46,6 @@ describe('menu (e2e)', () => {
       'POST',
       '/api/v1/menu/categories',
       {
-        restaurantId,
         slug: 'starters',
         name: 'Starters',
       },
@@ -89,7 +67,7 @@ describe('menu (e2e)', () => {
     );
     expect(item.statusCode).toBe(201);
 
-    const tree = await inject('GET', `/api/v1/restaurants/${restaurantId}/menu`);
+    const tree = await inject('GET', `/api/v1/menu`);
     expect(tree.statusCode).toBe(200);
     const body = tree.json();
     expect(body.categories).toHaveLength(1);
@@ -102,7 +80,7 @@ describe('menu (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       customerToken,
     );
     expect(res.statusCode).toBe(403);
@@ -112,7 +90,7 @@ describe('menu (e2e)', () => {
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
-      { restaurantId, slug: 'mains', name: 'Mains' },
+      { slug: 'mains', name: 'Mains' },
       ownerToken,
     );
     const categoryId = cat.json().id;
@@ -125,7 +103,7 @@ describe('menu (e2e)', () => {
     const itemId = item.json().id;
 
     // Prime the cache.
-    const before = await inject('GET', `/api/v1/restaurants/${restaurantId}/menu`);
+    const before = await inject('GET', `/api/v1/menu`);
     expect(before.json().categories[0].items[0].basePrice).toBe('48.00');
 
     // Mutate.
@@ -138,7 +116,7 @@ describe('menu (e2e)', () => {
     expect(upd.statusCode).toBe(200);
 
     // Cache should be busted → fresh data.
-    const after = await inject('GET', `/api/v1/restaurants/${restaurantId}/menu`);
+    const after = await inject('GET', `/api/v1/menu`);
     expect(after.json().categories[0].items[0].basePrice).toBe('55.00');
   });
 });

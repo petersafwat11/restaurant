@@ -1,0 +1,203 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Menu
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [active] [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Staff" [level=1] [ref=e1562]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "Invite" [ref=e1563] [cursor=pointer]:
+          - img [ref=e1564]
+          - text: Invite
+      - main [ref=e212]:
+        - table [ref=e1567]:
+          - rowgroup [ref=e1568]:
+            - row "Name Phone Role Status Added" [ref=e1569]:
+              - columnheader "Name" [ref=e1570]:
+                - generic [ref=e1571]: Name
+              - columnheader "Phone" [ref=e1572]:
+                - generic [ref=e1573]: Phone
+              - columnheader "Role" [ref=e1574]:
+                - generic [ref=e1575]: Role
+              - columnheader "Status" [ref=e1576]:
+                - generic [ref=e1577]: Status
+              - columnheader "Added" [ref=e1578]:
+                - generic [ref=e1579]: Added
+              - columnheader [ref=e1580]
+          - rowgroup [ref=e1581]:
+            - row "— owner.e2e@test.local — owner Invited 3d ago Disable" [ref=e1582] [cursor=pointer]:
+              - cell "— owner.e2e@test.local" [ref=e1583]:
+                - generic [ref=e1584]:
+                  - generic [ref=e1585]: —
+                  - generic [ref=e1586]: owner.e2e@test.local
+              - cell "—" [ref=e1587]
+              - cell "owner" [ref=e1588]:
+                - combobox [ref=e1589]:
+                  - option "owner" [selected]
+                  - option "manager"
+                  - option "kitchen"
+                  - option "cashier"
+              - cell "Invited" [ref=e1590]:
+                - generic [ref=e1591]: Invited
+              - cell "3d ago" [ref=e1592]:
+                - time [ref=e1593]: 3d ago
+              - cell "Disable" [ref=e1594]:
+                - button "Disable" [ref=e1595]
+            - row "Cass Staff cashier@local.test — cashier Active 3d ago Disable" [ref=e1596] [cursor=pointer]:
+              - cell "Cass Staff cashier@local.test" [ref=e1597]:
+                - generic [ref=e1598]:
+                  - generic [ref=e1599]: Cass Staff
+                  - generic [ref=e1600]: cashier@local.test
+              - cell "—" [ref=e1601]
+              - cell "cashier" [ref=e1602]:
+                - combobox [ref=e1603]:
+                  - option "owner"
+                  - option "manager"
+                  - option "kitchen"
+                  - option "cashier" [selected]
+              - cell "Active" [ref=e1604]:
+                - generic [ref=e1605]: Active
+              - cell "3d ago" [ref=e1606]:
+                - time [ref=e1607]: 3d ago
+              - cell "Disable" [ref=e1608]:
+                - button "Disable" [ref=e1609]
+            - row "Kim Staff kitchen@local.test — kitchen Active 3d ago Disable" [ref=e1610] [cursor=pointer]:
+              - cell "Kim Staff kitchen@local.test" [ref=e1611]:
+                - generic [ref=e1612]:
+                  - generic [ref=e1613]: Kim Staff
+                  - generic [ref=e1614]: kitchen@local.test
+              - cell "—" [ref=e1615]
+              - cell "kitchen" [ref=e1616]:
+                - combobox [ref=e1617]:
+                  - option "owner"
+                  - option "manager"
+                  - option "kitchen" [selected]
+                  - option "cashier"
+              - cell "Active" [ref=e1618]:
+                - generic [ref=e1619]: Active
+              - cell "3d ago" [ref=e1620]:
+                - time [ref=e1621]: 3d ago
+              - cell "Disable" [ref=e1622]:
+                - button "Disable" [ref=e1623]
+            - row "Maxi Staff manager@local.test — manager Active 3d ago Disable" [ref=e1624] [cursor=pointer]:
+              - cell "Maxi Staff manager@local.test" [ref=e1625]:
+                - generic [ref=e1626]:
+                  - generic [ref=e1627]: Maxi Staff
+                  - generic [ref=e1628]: manager@local.test
+              - cell "—" [ref=e1629]
+              - cell "manager" [ref=e1630]:
+                - combobox [ref=e1631]:
+                  - option "owner"
+                  - option "manager" [selected]
+                  - option "kitchen"
+                  - option "cashier"
+              - cell "Active" [ref=e1632]:
+                - generic [ref=e1633]: Active
+              - cell "3d ago" [ref=e1634]:
+                - time [ref=e1635]: 3d ago
+              - cell "Disable" [ref=e1636]:
+                - button "Disable" [ref=e1637]
+            - row "Olive Owner owner@local.test — owner Active 6d ago" [ref=e1638] [cursor=pointer]:
+              - cell "Olive Owner owner@local.test" [ref=e1639]:
+                - generic [ref=e1640]:
+                  - generic [ref=e1641]: Olive Owner
+                  - generic [ref=e1642]: owner@local.test
+              - cell "—" [ref=e1643]
+              - cell "owner" [ref=e1644]
+              - cell "Active" [ref=e1645]:
+                - generic [ref=e1646]: Active
+              - cell "6d ago" [ref=e1647]:
+                - time [ref=e1648]: 6d ago
+              - cell [ref=e1649]

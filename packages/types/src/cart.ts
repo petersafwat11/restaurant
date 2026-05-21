@@ -70,7 +70,6 @@ export type CartAppliedCouponDto = z.infer<typeof CartAppliedCouponSchema>;
 
 export const CartSchema = z.object({
   id: z.string(),
-  restaurantId: z.string(),
   userId: z.string().nullable(),
   sessionKey: z.string().nullable(),
   currency: z.string(),
@@ -96,6 +95,5 @@ export type ApplyCouponDto = z.infer<typeof ApplyCouponSchema>;
 
 export const MergeCartSchema = z.object({
   sessionKey: z.string().min(1),
-  restaurantId: z.string().min(1),
 });
 export type MergeCartDto = z.infer<typeof MergeCartSchema>;

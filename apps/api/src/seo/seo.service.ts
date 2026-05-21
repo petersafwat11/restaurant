@@ -25,25 +25,22 @@ export class SeoService {
   }
 
   async structuredData(slug: string): Promise<StructuredDataDto> {
-    const restaurant = await this.prisma.restaurant.findUnique({
-      where: { slug },
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { slug } });
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
+    const menus = await this.prisma.menuCategory.findMany({
+      where: { isActive: true },
+      orderBy: { position: 'asc' },
       include: {
-        menus: {
-          where: { isActive: true },
+        items: {
+          where: { isAvailable: true },
           orderBy: { position: 'asc' },
-          include: {
-            items: {
-              where: { isAvailable: true },
-              orderBy: { position: 'asc' },
-            },
-          },
         },
       },
     });
-    if (!restaurant) throw new NotFoundException('Restaurant not found');
 
     const agg = await this.prisma.review.aggregate({
-      where: { isVisible: true, order: { restaurantId: restaurant.id } },
+      where: { isVisible: true },
       _avg: { rating: true },
       _count: true,
     });
@@ -61,7 +58,6 @@ export class SeoService {
         image: restaurant.coverUrl ?? restaurant.logoUrl,
         address: {
           line1: address?.line1 ?? undefined,
-          line2: address?.line2 ?? undefined,
           city: address?.city ?? undefined,
           state: address?.state ?? undefined,
           zip: address?.zip ?? undefined,
@@ -81,7 +77,7 @@ export class SeoService {
       },
       menu: {
         name: `${restaurant.name} Menu`,
-        sections: restaurant.menus.map((c) => ({
+        sections: menus.map((c) => ({
           name: c.name,
           items: c.items.map((it) => ({
             name: it.name,
@@ -96,14 +92,9 @@ export class SeoService {
 
   async sitemap(): Promise<string> {
     const base = this.baseUrl;
-    const restaurants = await this.prisma.restaurant.findMany({
+    const categories = await this.prisma.menuCategory.findMany({
       where: { isActive: true },
-      include: {
-        menus: {
-          where: { isActive: true },
-          include: { items: { where: { isAvailable: true } } },
-        },
-      },
+      include: { items: { where: { isAvailable: true } } },
     });
 
     const entries: SitemapEntry[] = [
@@ -114,15 +105,13 @@ export class SeoService {
       { loc: `${base}/contact`, changefreq: 'yearly', priority: 0.3 },
       { loc: `${base}/reservations`, changefreq: 'monthly', priority: 0.6 },
     ];
-    for (const r of restaurants) {
-      for (const c of r.menus) {
-        for (const it of c.items) {
-          entries.push({
-            loc: `${base}/menu/${c.slug}/${it.slug}`,
-            changefreq: 'weekly',
-            priority: 0.7,
-          });
-        }
+    for (const c of categories) {
+      for (const it of c.items) {
+        entries.push({
+          loc: `${base}/menu/${c.slug}/${it.slug}`,
+          changefreq: 'weekly',
+          priority: 0.7,
+        });
       }
     }
     return buildSitemap(entries);
@@ -133,12 +122,9 @@ export class SeoService {
   }
 
   async meta(query: SeoMetaQuery): Promise<SeoMetaDto> {
-    const restaurant = query.restaurantId
-      ? await this.prisma.restaurant.findUnique({ where: { id: query.restaurantId } })
-      : await this.prisma.restaurant.findFirst({
-          where: { isActive: true },
-          orderBy: { createdAt: 'asc' },
-        });
+    const restaurant = await this.prisma.restaurant.findFirst({
+      orderBy: { createdAt: 'asc' },
+    });
     const name = restaurant?.name ?? 'Restaurant';
     const path = query.path.startsWith('/') ? query.path : `/${query.path}`;
     const titleByPath: Record<string, string> = {

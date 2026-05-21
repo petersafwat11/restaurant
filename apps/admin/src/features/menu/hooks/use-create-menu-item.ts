@@ -7,12 +7,12 @@ import type { CreateMenuItemDto, MenuItemDto } from '@repo/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { menuQueryKeys } from '../query-keys';
 
-export function useCreateMenuItem(restaurantId: string) {
+export function useCreateMenuItem() {
   const qc = useQueryClient();
   return useMutation<MenuItemDto, ApiError, CreateMenuItemDto>({
     mutationFn: (input) => getApiClient().menu.items.create(input),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: menuQueryKeys.tree(restaurantId) });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
       notify('success', 'Item created');
     },
     onError: (err) => notify('error', err.message),

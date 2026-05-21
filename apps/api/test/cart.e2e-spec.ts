@@ -1,12 +1,11 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('cart (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
   let userToken: string;
-  let restaurantId: string;
   let categoryId: string;
   let burgerId: string;
   let pizzaId: string;
@@ -28,26 +27,12 @@ describe('cart (e2e)', () => {
     ownerToken = await ensureOwnerToken(app);
     userToken = await register('user.e2e@test.local');
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'cart-e2e',
-        name: 'Cart E2E',
-        phone: '+48 22 555 0001',
-        email: 'cart@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    expect(r.statusCode).toBe(201);
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     const cat = await inject(
       'POST',
       '/api/v1/menu/categories',
       {
-        restaurantId,
         slug: 'mains',
         name: 'Mains',
       },
@@ -137,7 +122,7 @@ describe('cart (e2e)', () => {
   it('adds and updates and removes items as an authed user', async () => {
     const add = await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: burgerId, quantity: 2, modifierSelections: [] },
       userToken,
     );
@@ -161,7 +146,7 @@ describe('cart (e2e)', () => {
   it('rejects an item where a required modifier group is missing', async () => {
     const res = await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: pizzaId, quantity: 1, modifierSelections: [] },
       userToken,
     );
@@ -171,7 +156,7 @@ describe('cart (e2e)', () => {
   it('computes unit price from modifier deltas, ignoring any client-sent price', async () => {
     const res = await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       {
         menuItemId: pizzaId,
         quantity: 1,
@@ -189,13 +174,13 @@ describe('cart (e2e)', () => {
     // Guest adds a burger.
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}&sessionKey=${sessionKey}`,
+      `/api/v1/cart/items?sessionKey=${sessionKey}`,
       { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
     );
     // Authed user also adds a burger.
     await inject(
       'POST',
-      `/api/v1/cart/items?restaurantId=${restaurantId}`,
+      `/api/v1/cart/items`,
       { menuItemId: burgerId, quantity: 2, modifierSelections: [] },
       userToken,
     );
@@ -203,11 +188,89 @@ describe('cart (e2e)', () => {
     const merge = await inject(
       'POST',
       '/api/v1/cart/merge',
-      { sessionKey, restaurantId },
+      { sessionKey },
       userToken,
     );
     expect(merge.statusCode).toBe(201);
     expect(merge.json().items).toHaveLength(1);
     expect(merge.json().items[0].quantity).toBe(3);
+  });
+
+  // W3 — server-side cart line dedup (Phase 0.13).
+  describe('cart line dedup', () => {
+    it('adding the same item twice with no modifiers collapses into one line', async () => {
+      const first = await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
+        userToken,
+      );
+      expect(first.statusCode).toBe(201);
+      expect(first.json().items).toHaveLength(1);
+
+      const second = await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        { menuItemId: burgerId, quantity: 2, modifierSelections: [] },
+        userToken,
+      );
+      expect(second.statusCode).toBe(201);
+      expect(second.json().items).toHaveLength(1);
+      expect(second.json().items[0].quantity).toBe(3);
+    });
+
+    it('adding the same item with matching modifiers collapses into one line', async () => {
+      const first = await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        {
+          menuItemId: pizzaId,
+          quantity: 1,
+          modifierSelections: [{ groupId: pizzaSizeGroupId, optionIds: [largeSizeOptionId] }],
+        },
+        userToken,
+      );
+      expect(first.statusCode).toBe(201);
+
+      const second = await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        {
+          menuItemId: pizzaId,
+          quantity: 1,
+          modifierSelections: [{ groupId: pizzaSizeGroupId, optionIds: [largeSizeOptionId] }],
+        },
+        userToken,
+      );
+      expect(second.statusCode).toBe(201);
+      expect(second.json().items).toHaveLength(1);
+      expect(second.json().items[0].quantity).toBe(2);
+      expect(second.json().items[0].unitPrice).toBe('47.00'); // 35 + 12 large
+    });
+
+    it('adding the same item with different modifiers creates a separate line', async () => {
+      await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        {
+          menuItemId: pizzaId,
+          quantity: 1,
+          modifierSelections: [{ groupId: pizzaSizeGroupId, optionIds: [smallSizeOptionId] }],
+        },
+        userToken,
+      );
+      const res = await inject(
+        'POST',
+        `/api/v1/cart/items`,
+        {
+          menuItemId: pizzaId,
+          quantity: 1,
+          modifierSelections: [{ groupId: pizzaSizeGroupId, optionIds: [largeSizeOptionId] }],
+        },
+        userToken,
+      );
+      expect(res.statusCode).toBe(201);
+      expect(res.json().items).toHaveLength(2);
+    });
   });
 });

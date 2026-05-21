@@ -1,12 +1,11 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('promotions (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -20,20 +19,7 @@ describe('promotions (e2e)', () => {
     await resetMenuDb(app);
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
-
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'promo-e2e',
-        name: 'Promo E2E',
-        phone: '+48 22 555 0001',
-        email: 'promo@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
   });
 
   async function inject(method: string, url: string, body?: unknown, token?: string) {
@@ -50,7 +36,6 @@ describe('promotions (e2e)', () => {
       'POST',
       '/api/v1/promotions',
       {
-        restaurantId,
         name: 'Test 10',
         type: 'PERCENT',
         value: '10',
@@ -82,7 +67,6 @@ describe('promotions (e2e)', () => {
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'EXPIRED',
       subtotal: '50.00',
-      restaurantId,
     });
     expect(res.statusCode).toBe(200);
     expect(res.json().valid).toBe(false);
@@ -95,7 +79,6 @@ describe('promotions (e2e)', () => {
     const bogo = await inject('POST', '/api/v1/coupons/validate', {
       code: 'BOGOX',
       subtotal: '80.00',
-      restaurantId,
     });
     expect(bogo.statusCode).toBe(200);
     expect(bogo.json().valid).toBe(false);
@@ -106,7 +89,6 @@ describe('promotions (e2e)', () => {
     const fd = await inject('POST', '/api/v1/coupons/validate', {
       code: 'FREEDELX',
       subtotal: '80.00',
-      restaurantId,
     });
     expect(fd.json().valid).toBe(false);
     expect(fd.json().reason).toBe('PROMOTION_INACTIVE');
@@ -119,7 +101,6 @@ describe('promotions (e2e)', () => {
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'MIN100',
       subtotal: '50.00',
-      restaurantId,
     });
     expect(res.json().valid).toBe(false);
     expect(res.json().reason).toBe('MIN_SUBTOTAL_NOT_MET');
@@ -141,7 +122,6 @@ describe('promotions (e2e)', () => {
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'ONCE',
       subtotal: '50.00',
-      restaurantId,
       userId,
     });
     expect(res.json().valid).toBe(false);
@@ -160,7 +140,6 @@ describe('promotions (e2e)', () => {
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'MAX1',
       subtotal: '50.00',
-      restaurantId,
     });
     expect(res.json().valid).toBe(false);
     expect(res.json().reason).toBe('MAX_REDEMPTIONS_REACHED');
@@ -173,7 +152,6 @@ describe('promotions (e2e)', () => {
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'TENOFF',
       subtotal: '100.00',
-      restaurantId,
     });
     expect(res.json().valid).toBe(true);
     expect(res.json().discountAmount).toBe('10.00');
@@ -189,7 +167,6 @@ describe('promotions (e2e)', () => {
     // we don't need to go through the cart controller for this assertion.
     const cart = await prisma.cart.create({
       data: {
-        restaurantId,
         sessionKey: `cascade-session-${Date.now()}`,
         appliedCouponId: coupon.id,
       },

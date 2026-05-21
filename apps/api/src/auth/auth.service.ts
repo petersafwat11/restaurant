@@ -25,7 +25,6 @@ import {
   QUEUE_SMS,
 } from '@repo/jobs';
 import type {
-  AuthResponseDto,
   AuthTokensDto,
   ForgotPasswordDto,
   LoginDto,
@@ -42,6 +41,15 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { ReferralsService } from '../referrals/referrals.service';
+
+// Internal service result. Always includes tokens; the controller decides
+// whether to surface them in the response body or stash them in cookies.
+export interface AuthIssueResult {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: MeDto;
+}
 
 const OTP_TTL_SECONDS = 5 * 60;
 const VERIFY_EMAIL_TTL_SECONDS = 24 * 60 * 60;
@@ -70,7 +78,7 @@ export class AuthService {
 
   // ---- registration / login ---------------------------------------------
 
-  async register(dto: RegisterDto): Promise<AuthResponseDto> {
+  async register(dto: RegisterDto): Promise<AuthIssueResult> {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email already registered');
 
@@ -110,7 +118,7 @@ export class AuthService {
     return this.issueTokensFor(user);
   }
 
-  async login(dto: LoginDto): Promise<AuthResponseDto> {
+  async login(dto: LoginDto): Promise<AuthIssueResult> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
       include: this.userInclude(),
@@ -145,22 +153,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const record = await this.prisma.refreshToken.findUnique({
-      where: { tokenHash: hashToken(claims.jti) },
+    // Atomic conditional revoke: only succeeds if the row exists, is not yet
+    // revoked, and is not expired. Eliminates the TOCTOU race where multiple
+    // concurrent refresh callers all read `revokedAt: null` and each proceed
+    // to rotate — leaving the cookie pointing at a token the API has revoked,
+    // which then 401s on the next refresh and kicks the user out.
+    const revoke = await this.prisma.refreshToken.updateMany({
+      where: {
+        tokenHash: hashToken(claims.jti),
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      data: { revokedAt: new Date() },
     });
-    if (!record || record.revokedAt || record.expiresAt < new Date()) {
+    if (revoke.count === 0) {
       throw new UnauthorizedException('Refresh token revoked or expired');
     }
 
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: claims.sub },
       include: this.userInclude(),
-    });
-
-    // Rotate: revoke old, issue new
-    await this.prisma.refreshToken.update({
-      where: { id: record.id },
-      data: { revokedAt: new Date() },
     });
 
     const { accessToken, refreshToken: newRefresh, expiresIn } = await this.mintTokens(user);
@@ -184,7 +196,7 @@ export class AuthService {
     });
   }
 
-  async verifyOtp(dto: VerifyOtpDto): Promise<AuthResponseDto> {
+  async verifyOtp(dto: VerifyOtpDto): Promise<AuthIssueResult> {
     const stored = await this.redis.client.get(this.otpKey(dto.phone));
     if (!stored || stored !== hashToken(dto.code)) {
       throw new UnauthorizedException('Invalid or expired OTP');
@@ -318,7 +330,7 @@ export class AuthService {
     return { accessToken, refreshToken, expiresIn: Math.floor(ttlToMs(this.env.JWT_ACCESS_TTL) / 1000) };
   }
 
-  private async issueTokensFor(user: UserWithRoles): Promise<AuthResponseDto> {
+  private async issueTokensFor(user: UserWithRoles): Promise<AuthIssueResult> {
     const tokens = await this.mintTokens(user);
     return { ...tokens, user: this.toMeDto(user) };
   }

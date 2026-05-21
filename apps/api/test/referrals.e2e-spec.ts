@@ -67,7 +67,6 @@ describe('referrals (e2e)', () => {
     await referrals.onOrderStatusChanged({
       orderId: 'order-x',
       orderNumber: 'R-X',
-      restaurantId: 'r1',
       userId: refereeId,
       from: 'PREPARING',
       to: 'COMPLETED',
@@ -84,7 +83,6 @@ describe('referrals (e2e)', () => {
     await referrals.onOrderStatusChanged({
       orderId: 'order-y',
       orderNumber: 'R-Y',
-      restaurantId: 'r1',
       userId: refereeId,
       from: 'PREPARING',
       to: 'DELIVERED',

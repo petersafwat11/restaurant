@@ -11,8 +11,8 @@ export function useLogout(): UseMutationResult<{ success: true }, ApiError, void
   const qc = useQueryClient();
   return useMutation<{ success: true }, ApiError, void>({
     mutationFn: () => getApiClient().auth.logout(),
-    onSuccess: async () => {
-      await clearSession();
+    onSuccess: () => {
+      clearSession();
       qc.clear();
       notify('success', 'Signed out');
     },

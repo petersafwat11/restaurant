@@ -1,3 +1,3 @@
 export const kitchenQueryKeys = {
-  feed: (restaurantId: string) => ['kitchen', restaurantId] as const,
+  feed: () => ['kitchen'] as const,
 };

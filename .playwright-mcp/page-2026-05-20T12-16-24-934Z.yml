@@ -1,0 +1,159 @@
+- generic [ref=e1]:
+  - status [ref=e63]:
+    - generic [ref=e64]:
+      - img [ref=e66]
+      - generic [ref=e68]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+  - alert [ref=e2]: Audit log
+  - generic [ref=e73]:
+    - complementary "Primary" [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]: TK
+        - generic [ref=e77]: Test Kitchen
+      - navigation [ref=e78]:
+        - link "Overview" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Overview
+        - generic [ref=e86]:
+          - generic [ref=e87]: Operate
+          - generic [ref=e88]:
+            - link "Orders" [ref=e89] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e90]
+              - generic [ref=e93]: Orders
+            - link "Kitchen Display" [ref=e94] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e95]
+              - generic [ref=e100]: Kitchen Display
+            - link "Reservations" [ref=e101] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e102]
+              - generic [ref=e104]: Reservations
+        - generic [ref=e105]:
+          - generic [ref=e106]: Catalog
+          - generic [ref=e107]:
+            - link "Menu" [ref=e108] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e109]
+              - generic [ref=e112]: Menu
+            - link "Promotions" [ref=e113] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e114]
+              - generic [ref=e117]: Promotions
+        - generic [ref=e118]:
+          - generic [ref=e119]: People
+          - generic [ref=e120]:
+            - link "Customers" [ref=e121] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e122]
+              - generic [ref=e127]: Customers
+            - link "Reviews" [ref=e128] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e129]
+              - generic [ref=e131]: Reviews
+            - link "Staff" [ref=e132] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e133]
+              - generic [ref=e135]: Staff
+        - generic [ref=e136]:
+          - generic [ref=e137]: Insights
+          - generic [ref=e138]:
+            - link "Reports" [ref=e139] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e140]
+              - generic [ref=e143]: Reports
+            - link "Audit log" [ref=e144] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e145]
+              - generic [ref=e149]: Audit log
+        - generic [ref=e150]:
+          - generic [ref=e151]: Configure
+          - generic [ref=e152]:
+            - link "Restaurant" [ref=e153] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e154]
+              - generic [ref=e157]: Restaurant
+            - link "Contact messages" [active] [ref=e158] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e159]
+              - generic [ref=e162]: Contact messages
+            - link "Settings" [ref=e163] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e164]
+              - generic [ref=e175]: Settings
+      - generic [ref=e176]:
+        - generic [ref=e177]: OO
+        - generic [ref=e178]:
+          - generic [ref=e179]: Olive Owner
+          - generic [ref=e180]: owner
+        - button "Collapse sidebar" [ref=e181] [cursor=pointer]:
+          - img [ref=e182]
+    - generic [ref=e185]:
+      - banner [ref=e186]:
+        - heading "Contact messages" [level=1] [ref=e1206]
+        - button "SD Szef Donald" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: SD
+          - generic [ref=e190]: Szef Donald
+          - img [ref=e191]
+        - button "Search (Cmd+K)" [ref=e1056] [cursor=pointer]:
+          - img [ref=e1057]
+          - generic [ref=e1060]: Search orders, customers, items…
+          - generic [ref=e1061]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e1062] [cursor=pointer]:
+          - img [ref=e1063]
+        - button "Account" [ref=e1067] [cursor=pointer]: OO
+      - main [ref=e212]:
+        - tablist [ref=e1210]:
+          - tab "All 2" [selected] [ref=e1211] [cursor=pointer]:
+            - generic [ref=e1212]: All
+            - generic [ref=e1213]: "2"
+          - tab "new 1" [ref=e1214] [cursor=pointer]:
+            - generic [ref=e1216]: new
+            - generic [ref=e1217]: "1"
+          - tab "read 1" [ref=e1218] [cursor=pointer]:
+            - generic [ref=e1220]: read
+            - generic [ref=e1221]: "1"
+          - tab "archived 0" [ref=e1222] [cursor=pointer]:
+            - generic [ref=e1224]: archived
+            - generic [ref=e1225]: "0"
+        - table [ref=e1228]:
+          - rowgroup [ref=e1229]:
+            - row "Subject From Status Received" [ref=e1230]:
+              - columnheader "Subject" [ref=e1231]:
+                - generic [ref=e1232]: Subject
+              - columnheader "From" [ref=e1233]:
+                - generic [ref=e1234]: From
+              - columnheader "Status" [ref=e1235]:
+                - generic [ref=e1236]: Status
+              - columnheader "Received" [ref=e1237]:
+                - generic [ref=e1238]: Received
+          - rowgroup [ref=e1239]:
+            - row "(no subject) Loved the pizza, thank you! Piotr Kowalski piotr@example.com read 3d ago" [ref=e1240] [cursor=pointer]:
+              - cell "(no subject) Loved the pizza, thank you!" [ref=e1241]:
+                - generic [ref=e1242]:
+                  - generic [ref=e1243]: (no subject)
+                  - generic [ref=e1244]: Loved the pizza, thank you!
+              - cell "Piotr Kowalski piotr@example.com" [ref=e1245]:
+                - generic [ref=e1246]:
+                  - generic [ref=e1247]: Piotr Kowalski
+                  - generic [ref=e1248]: piotr@example.com
+              - cell "read" [ref=e1249]:
+                - generic [ref=e1250]: read
+              - cell "3d ago" [ref=e1252]:
+                - time [ref=e1253]: 3d ago
+            - row "Catering inquiry Do you cater office events for 30 people? Anna Nowak anna@example.com new 3d ago" [ref=e1254] [cursor=pointer]:
+              - cell "Catering inquiry Do you cater office events for 30 people?" [ref=e1255]:
+                - generic [ref=e1256]:
+                  - generic [ref=e1257]: Catering inquiry
+                  - generic [ref=e1258]: Do you cater office events for 30 people?
+              - cell "Anna Nowak anna@example.com" [ref=e1259]:
+                - generic [ref=e1260]:
+                  - generic [ref=e1261]: Anna Nowak
+                  - generic [ref=e1262]: anna@example.com
+              - cell "new" [ref=e1263]:
+                - generic [ref=e1264]: new
+              - cell "3d ago" [ref=e1266]:
+                - time [ref=e1267]: 3d ago

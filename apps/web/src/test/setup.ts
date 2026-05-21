@@ -1,9 +1,15 @@
 // Top-level so it's set before any module under test evaluates its env schema.
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:4000/api/v1';
 
+import { cleanup } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+
+// vitest's `globals: false` config disables @testing-library/react's
+// auto-cleanup, so register it manually. Without this each render() leaks
+// DOM into the next test → spurious "multiple elements found" errors.
+afterEach(() => cleanup());
 
 // Default handlers for Next.js Route Handlers that the auth store hits as
 // side effects. Tests can override with `server.use(...)` if they need to

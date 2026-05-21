@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { OrdersService } from '../orders/orders.service';
@@ -10,7 +10,7 @@ export class KitchenController {
 
   @Get('tickets')
   @Permissions('kitchen:read')
-  tickets(@Query('restaurantId') restaurantId: string) {
-    return this.orders.listKitchenTickets(restaurantId);
+  tickets() {
+    return this.orders.listKitchenTickets();
   }
 }

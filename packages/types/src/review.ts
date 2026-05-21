@@ -9,6 +9,9 @@ export type ReviewImageDto = z.infer<typeof ReviewImageSchema>;
 
 export const MAX_REVIEW_IMAGES = 5;
 
+export const REVIEW_MODERATION_STATUSES = ['PUBLISHED', 'HIDDEN', 'FLAGGED'] as const;
+export type ReviewModerationStatus = (typeof REVIEW_MODERATION_STATUSES)[number];
+
 export const ReviewSchema = z.object({
   id: z.string(),
   orderId: z.string(),
@@ -16,6 +19,8 @@ export const ReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   comment: z.string().nullable(),
   isVisible: z.boolean(),
+  moderationStatus: z.enum(REVIEW_MODERATION_STATUSES),
+  flagReason: z.string().nullable().default(null),
   ownerReply: z.string().nullable().default(null),
   ownerReplyAt: z.string().nullable().default(null),
   createdAt: z.string(),
@@ -30,7 +35,6 @@ export const OwnerReplySchema = z.object({
 export type OwnerReplyDto = z.infer<typeof OwnerReplySchema>;
 
 export const ReviewSummarySchema = z.object({
-  restaurantId: z.string(),
   count: z.number().int(),
   average: z.number(),
   histogram: z.object({
@@ -58,13 +62,15 @@ export const CreateReviewSchema = z.object({
 export type CreateReviewDto = z.infer<typeof CreateReviewSchema>;
 
 export const ReviewModerationSchema = z.object({
-  isVisible: z.boolean(),
+  isVisible: z.boolean().optional(),
+  moderationStatus: z.enum(REVIEW_MODERATION_STATUSES).optional(),
+  flagReason: z.string().max(500).nullish(),
 });
 export type ReviewModerationDto = z.infer<typeof ReviewModerationSchema>;
 
 export const ReviewListQuerySchema = z.object({
-  restaurantId: z.string().optional(),
   isVisible: z.coerce.boolean().optional(),
+  moderationStatus: z.enum(REVIEW_MODERATION_STATUSES).optional(),
   rating: z.coerce.number().int().min(1).max(5).optional(),
   sort: z.enum(['recent', 'rating']).optional().default('recent'),
   cursor: z.string().optional(),

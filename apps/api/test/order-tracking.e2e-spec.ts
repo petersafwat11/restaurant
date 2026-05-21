@@ -1,14 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('order tracking (e2e)', () => {
   let app: NestFastifyApplication;
-  let ownerToken: string;
   let userToken: string;
   let userId: string;
-  let restaurantId: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -21,22 +19,13 @@ describe('order tracking (e2e)', () => {
   beforeEach(async () => {
     await resetMenuDb(app);
     await resetDb(app);
-    ownerToken = await ensureOwnerToken(app);
+    await ensureOwnerToken(app);
+    await ensureRestaurant(app);
 
-    const r = await inject(
-      'POST',
-      '/api/v1/restaurants',
-      {
-        slug: 'tracking-e2e',
-        name: 'Tracking E2E',
-        phone: '+48 22 555 0010',
-        email: 'trk@e2e.local',
-        address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-        geoPoint: { lat: 52.23, lng: 21.01 },
-      },
-      ownerToken,
-    );
-    restaurantId = r.json().id;
+    const prisma = app.get(PrismaService);
+    await prisma.restaurant.updateMany({
+      data: { geoPoint: { lat: 52.23, lng: 21.01 } },
+    });
 
     const reg = await inject('POST', '/api/v1/auth/register', {
       email: 'tracker.e2e@test.local',
@@ -61,7 +50,6 @@ describe('order tracking (e2e)', () => {
       data: {
         orderNumber: `R-TRK-${Math.random().toString(36).slice(2, 9)}`,
         userId,
-        restaurantId,
         type: 'DELIVERY',
         status,
         subtotal: '20.00',
@@ -117,5 +105,73 @@ describe('order tracking (e2e)', () => {
       other.json().accessToken,
     );
     expect(res.statusCode).toBe(404);
+  });
+
+  it('signed-token public tracking: issue → fetch unauthenticated', async () => {
+    const order = await makeOrder('CONFIRMED');
+    const issued = await inject(
+      'GET',
+      `/api/v1/orders/${order.id}/tracking-token`,
+      undefined,
+      userToken,
+    );
+    expect(issued.statusCode).toBe(200);
+    const { token } = issued.json();
+    expect(token).toMatch(/^[\w-]+\.[\w-]+$/);
+
+    // No authorization header — token alone authorizes.
+    const tracking = await inject(
+      'GET',
+      `/api/v1/orders/track?token=${encodeURIComponent(token)}`,
+    );
+    expect(tracking.statusCode).toBe(200);
+    expect(tracking.json().orderId).toBe(order.id);
+  });
+
+  it('signed-token: rejects missing token (400)', async () => {
+    const res = await inject('GET', '/api/v1/orders/track');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('signed-token: rejects tampered token (404)', async () => {
+    const order = await makeOrder('CONFIRMED');
+    const issued = await inject(
+      'GET',
+      `/api/v1/orders/${order.id}/tracking-token`,
+      undefined,
+      userToken,
+    );
+    const { token } = issued.json();
+    // Flip one char in the signature portion.
+    const [payload, sig] = token.split('.');
+    const flipped =
+      sig[0] === 'A' ? `B${sig.slice(1)}` : `A${sig.slice(1)}`;
+    const tampered = `${payload}.${flipped}`;
+    const res = await inject(
+      'GET',
+      `/api/v1/orders/track?token=${encodeURIComponent(tampered)}`,
+    );
+    expect(res.statusCode).toBe(404);
+  });
+
+  it('signed-token: rejects token for a different order', async () => {
+    const orderA = await makeOrder('CONFIRMED');
+    const orderB = await makeOrder('CONFIRMED');
+    const issued = await inject(
+      'GET',
+      `/api/v1/orders/${orderA.id}/tracking-token`,
+      undefined,
+      userToken,
+    );
+    const { token } = issued.json();
+    // Token validates for orderA; if the client URL says orderB, the frontend
+    // catches the mismatch. Server-side, the token still resolves to orderA.
+    const res = await inject(
+      'GET',
+      `/api/v1/orders/track?token=${encodeURIComponent(token)}`,
+    );
+    expect(res.statusCode).toBe(200);
+    expect(res.json().orderId).toBe(orderA.id);
+    expect(res.json().orderId).not.toBe(orderB.id);
   });
 });

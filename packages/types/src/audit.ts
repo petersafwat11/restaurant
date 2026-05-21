@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const AUDIT_ACTIONS = [
   'order:create',
   'order:status_changed',
+  'order:note_added',
   'order:refund',
   'menu:item:write',
   'menu:item:delete',
@@ -26,7 +27,6 @@ export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 export const AuditLogEntrySchema = z.object({
   id: z.string(),
   actorUserId: z.string(),
-  restaurantId: z.string().nullable(),
   action: z.string(),
   resourceType: z.string(),
   resourceId: z.string(),
@@ -45,9 +45,9 @@ export const AuditLogListSchema = z.object({
 export type AuditLogListDto = z.infer<typeof AuditLogListSchema>;
 
 export const AuditLogListQuerySchema = z.object({
-  restaurantId: z.string().optional(),
   actorUserId: z.string().optional(),
   action: z.string().optional(),
+  resourceType: z.string().optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
   cursor: z.string().optional(),

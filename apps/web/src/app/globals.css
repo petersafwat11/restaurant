@@ -1,3 +1,149 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Customer web theme — warm cream + copper signature + serif display.
+ * Locked tokens from docs/design-prompts/web-01-landing.md §1.
+ *
+ * Admin uses a separate :root in apps/admin/src/app/globals.css (dark mint).
+ * @repo/ui primitives never reference hex directly — only the semantic
+ * Tailwind classes that resolve to these vars (bg-surface, text-fg, …).
+ *
+ * Each color is declared as a space-separated RGB triple so Tailwind's
+ * `<alpha-value>` placeholder works (e.g. bg-surface/60, border-border/30).
+ *
+ * Naming note: SD design uses `--text-primary/secondary/tertiary`; we use
+ * the shared preset's `--fg/-muted/-subtle` so primitives stay portable
+ * across both apps.
+ */
+
+@layer base {
+  :root {
+    /* Surfaces */
+    --bg: 242 234 217; /* #F2EAD9 warm cream */
+    --surface: 251 247 238; /* #FBF7EE lighter cream */
+    --surface-elevated: 255 255 255; /* white — drawers, modals, image bg */
+    --surface-warm: 229 212 184; /* #E5D4B8 darker warm beige (newsletter band, sold-out chip bg) */
+
+    /* Borders — espresso at alpha. Declared as the espresso triple; alpha
+       comes from per-utility opacities (border-border/8, border-border-strong/16). */
+    --border: 42 31 24; /* used as rgb(42 31 24 / 0.08) */
+    --border-strong: 42 31 24; /* used as rgb(42 31 24 / 0.16) */
+
+    /* Foreground (espresso) */
+    --fg: 42 31 24; /* #2A1F18 */
+    --fg-muted: 107 93 82; /* #6B5D52 warm taupe */
+    --fg-subtle: 154 142 131; /* #9A8E83 */
+    --fg-disabled: 199 189 179; /* #C7BDB3 */
+    --text-on-accent: 255 255 255; /* white on copper */
+
+    /* Accent — copper (the only loud color) */
+    --accent: 194 65 12; /* #C2410C */
+    --accent-hover: 154 51 10; /* #9A330A */
+
+    /* Semantic state — food-world cues, not tech-world */
+    --positive: 79 123 60; /* #4F7B3C olive (herbs, falafel) */
+    --negative: 185 28 28; /* #B91C1C brick red */
+    --warning: 217 119 6; /* #D97706 amber */
+    --info: 30 64 175; /* #1E40AF deep navy */
+
+    /* Order status palette — warm reinterpretation of the admin map */
+    --status-pending: 154 142 131; /* fg-subtle */
+    --status-confirmed: 30 64 175; /* info navy */
+    --status-preparing: 217 119 6; /* warning amber */
+    --status-ready: 79 123 60; /* positive olive */
+    --status-out-for-delivery: 30 64 175; /* info navy */
+    --status-delivered: 79 123 60; /* positive olive */
+    --status-cancelled: 185 28 28; /* negative brick */
+    --status-refunded: 185 28 28; /* negative brick */
+
+    /* Chart palette (5 series) — warm series, copper-led */
+    --chart-1: 194 65 12;
+    --chart-2: 30 64 175;
+    --chart-3: 79 123 60;
+    --chart-4: 217 119 6;
+    --chart-5: 185 28 28;
+
+    /* Default border alphas — web is lighter-touch than admin */
+    --border-alpha: 0.08;
+    --border-strong-alpha: 0.16;
+  }
+
+  html,
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
+    font-family: var(--font-body, Inter, system-ui, sans-serif);
+  }
+
+  /* Tabular numerals + small-caps style for prices/times */
+  body {
+    font-feature-settings: "tnum" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display family (Fraunces) — applied via .font-display utility from
+     fontFamily.display in tailwind config. Headlines opt in. */
+
+  /* Selection — copper at low alpha */
+  ::selection {
+    background-color: rgb(var(--accent) / 0.2);
+    color: rgb(var(--fg));
+  }
+
+  /* Focus ring — copper, never removed */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Scrollbar — subtle on warm surfaces */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border-strong) / 0.16);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--border-strong) / 0.28);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Skip link — focusable, visually hidden until focused */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  z-index: 1000;
+  padding: 8px 16px;
+  background: rgb(var(--surface));
+  color: rgb(var(--fg));
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.skip-link:focus {
+  top: 8px;
+}

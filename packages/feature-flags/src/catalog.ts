@@ -31,6 +31,11 @@ export const FLAG_CATALOG = {
     description: 'Master soft-launch gate (kill switch)',
     default: false,
   },
+  'payments.stripe_elements': {
+    description:
+      'Render Stripe Elements inline on the customer checkout card form (requires STRIPE_PUBLISHABLE_KEY).',
+    default: false,
+  },
 } as const satisfies Record<string, FlagDefinition>;
 
 export type FeatureFlagKey = keyof typeof FLAG_CATALOG;

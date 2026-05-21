@@ -1,0 +1,107 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "Szef Donald home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]:
+            - generic [ref=e10]: SD
+            - generic [ref=e11]: EST · 2014
+          - generic [ref=e12]: Szef Donald
+      - navigation "Primary" [ref=e13]:
+        - link "Menu" [ref=e14] [cursor=pointer]:
+          - /url: /menu
+        - link "About" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - link "Locations" [ref=e16] [cursor=pointer]:
+          - /url: /locations
+        - link "Contact" [ref=e17] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e18]:
+        - group "Language" [ref=e20]:
+          - button "PL" [ref=e21] [cursor=pointer]
+          - button "EN" [pressed] [ref=e22] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+        - link "Order now" [ref=e28] [cursor=pointer]:
+          - /url: /menu
+  - main [ref=e29]
+  - contentinfo [ref=e34]:
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - img [ref=e40]:
+              - generic [ref=e43]: SD
+              - generic [ref=e44]: EST · 2014
+            - generic [ref=e45]: Szef Donald
+          - paragraph [ref=e46]: Kebab the way it should be.
+          - generic [ref=e47]:
+            - link "Instagram" [ref=e48] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e49]
+            - link "Facebook" [ref=e52] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e53]
+        - generic [ref=e55]:
+          - heading "Menu" [level=3] [ref=e56]
+          - generic [ref=e57]:
+            - link "Kebab" [ref=e58] [cursor=pointer]:
+              - /url: /menu#kebab
+            - link "Falafel" [ref=e59] [cursor=pointer]:
+              - /url: /menu#falafel
+            - link "Tacos" [ref=e60] [cursor=pointer]:
+              - /url: /menu#tacos
+            - link "Box & Plates" [ref=e61] [cursor=pointer]:
+              - /url: /menu#box
+            - link "Drinks" [ref=e62] [cursor=pointer]:
+              - /url: /menu#drinks
+            - link "View full menu →" [ref=e63] [cursor=pointer]:
+              - /url: /menu
+        - generic [ref=e64]:
+          - heading "Visit" [level=3] [ref=e65]
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: Marszałkowska 102
+              - generic [ref=e69]: 00-026 Warszawa, Poland
+            - link "+48 22 555 01 23" [ref=e70] [cursor=pointer]:
+              - /url: tel:+48225550123
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - generic [ref=e74]: Sun
+                - generic [ref=e75]: 12:00–21:00
+              - generic [ref=e76]:
+                - generic [ref=e77]: Mon–Thu
+                - generic [ref=e78]: 11:00–22:00
+              - generic [ref=e79]:
+                - generic [ref=e80]: Fri
+                - generic [ref=e81]: 11:00–23:00
+              - generic [ref=e82]:
+                - generic [ref=e83]: Sat
+                - generic [ref=e84]: 12:00–23:00
+        - generic [ref=e85]:
+          - heading "Company" [level=3] [ref=e86]
+          - generic [ref=e87]:
+            - link "About" [ref=e88] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=e89] [cursor=pointer]:
+              - /url: /contact
+            - link "Loyalty" [ref=e90] [cursor=pointer]:
+              - /url: /account/loyalty
+            - link "Referrals" [ref=e91] [cursor=pointer]:
+              - /url: /account/referrals
+      - generic [ref=e92]:
+        - generic [ref=e93]: © 2026 Szef Donald sp. z o.o. · NIP 1234567890
+        - generic [ref=e94]:
+          - link "Privacy" [ref=e95] [cursor=pointer]:
+            - /url: "#"
+          - link "Terms" [ref=e96] [cursor=pointer]:
+            - /url: "#"
+          - link "Cookies" [ref=e97] [cursor=pointer]:
+            - /url: "#"
+        - group "Language" [ref=e98]:
+          - button "PL" [ref=e99] [cursor=pointer]
+          - button "EN" [pressed] [ref=e100] [cursor=pointer]
+  - region "Notifications alt+T"

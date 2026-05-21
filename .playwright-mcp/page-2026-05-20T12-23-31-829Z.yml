@@ -1,0 +1,561 @@
+- generic [active] [ref=e1]:
+  - status [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - generic [ref=e8]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+  - alert [ref=e13]: Admin
+  - generic [ref=e53]:
+    - complementary "Primary" [ref=e54]:
+      - generic [ref=e55]:
+        - generic [ref=e56]: TK
+        - generic [ref=e57]: Test Kitchen
+      - navigation [ref=e58]:
+        - link "Overview" [ref=e60] [cursor=pointer]:
+          - /url: /
+          - img [ref=e61]
+          - generic [ref=e64]: Overview
+        - generic [ref=e65]:
+          - generic [ref=e66]: Operate
+          - generic [ref=e67]:
+            - link "Orders" [ref=e68] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e70]
+              - generic [ref=e73]: Orders
+            - link "Kitchen Display" [ref=e74] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e75]
+              - generic [ref=e80]: Kitchen Display
+            - link "Reservations" [ref=e81] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e82]
+              - generic [ref=e84]: Reservations
+        - generic [ref=e85]:
+          - generic [ref=e86]: Catalog
+          - generic [ref=e87]:
+            - link "Menu" [ref=e88] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e89]
+              - generic [ref=e92]: Menu
+            - link "Promotions" [ref=e93] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e94]
+              - generic [ref=e97]: Promotions
+        - generic [ref=e98]:
+          - generic [ref=e99]: People
+          - generic [ref=e100]:
+            - link "Customers" [ref=e101] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e102]
+              - generic [ref=e107]: Customers
+            - link "Reviews" [ref=e108] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e109]
+              - generic [ref=e111]: Reviews
+            - link "Staff" [ref=e112] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e113]
+              - generic [ref=e115]: Staff
+        - generic [ref=e116]:
+          - generic [ref=e117]: Insights
+          - generic [ref=e118]:
+            - link "Reports" [ref=e119] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e120]
+              - generic [ref=e123]: Reports
+            - link "Audit log" [ref=e124] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e125]
+              - generic [ref=e129]: Audit log
+        - generic [ref=e130]:
+          - generic [ref=e131]: Configure
+          - generic [ref=e132]:
+            - link "Restaurant" [ref=e133] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e134]
+              - generic [ref=e137]: Restaurant
+            - link "Contact messages" [ref=e138] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e139]
+              - generic [ref=e142]: Contact messages
+            - link "Settings" [ref=e143] [cursor=pointer]:
+              - /url: /settings/hours
+              - img [ref=e144]
+              - generic [ref=e155]: Settings
+      - generic [ref=e156]:
+        - generic [ref=e157]: OO
+        - generic [ref=e158]:
+          - generic [ref=e159]: Olive Owner
+          - generic [ref=e160]: owner
+        - button "Collapse sidebar" [ref=e161] [cursor=pointer]:
+          - img [ref=e162]
+    - generic [ref=e165]:
+      - banner [ref=e166]:
+        - heading "Orders" [level=1] [ref=e167]
+        - button "SD Szef Donald" [ref=e168] [cursor=pointer]:
+          - generic [ref=e169]: SD
+          - generic [ref=e170]: Szef Donald
+          - img [ref=e171]
+        - button "Mute new-order chime" [ref=e173] [cursor=pointer]:
+          - img [ref=e174]
+      - main [ref=e178]:
+        - generic [ref=e182]:
+          - generic [ref=e183]: All caught up
+          - tablist "Status" [ref=e185]:
+            - tab "All 15" [selected] [ref=e186] [cursor=pointer]:
+              - generic [ref=e187]: All
+              - generic [ref=e188]: "15"
+            - tab "Pending 8" [ref=e189] [cursor=pointer]:
+              - generic [ref=e191]: Pending
+              - generic [ref=e192]: "8"
+            - tab "Confirmed 1" [ref=e193] [cursor=pointer]:
+              - generic [ref=e195]: Confirmed
+              - generic [ref=e196]: "1"
+            - tab "Preparing 1" [ref=e197] [cursor=pointer]:
+              - generic [ref=e199]: Preparing
+              - generic [ref=e200]: "1"
+            - tab "Ready 1" [ref=e201] [cursor=pointer]:
+              - generic [ref=e203]: Ready
+              - generic [ref=e204]: "1"
+            - tab "Out for delivery 0" [ref=e205] [cursor=pointer]:
+              - generic [ref=e207]: Out for delivery
+              - generic [ref=e208]: "0"
+            - tab "Delivered 1" [ref=e209] [cursor=pointer]:
+              - generic [ref=e211]: Delivered
+              - generic [ref=e212]: "1"
+            - tab "Cancelled 1" [ref=e213] [cursor=pointer]:
+              - generic [ref=e215]: Cancelled
+              - generic [ref=e216]: "1"
+          - generic [ref=e217]:
+            - button "Type" [ref=e218] [cursor=pointer]:
+              - generic [ref=e219]: Type
+              - img [ref=e220]
+            - button "Payment" [ref=e222] [cursor=pointer]:
+              - generic [ref=e223]: Payment
+              - img [ref=e224]
+            - generic [ref=e226]:
+              - img
+              - 'textbox "Search order #, customer…" [ref=e227]'
+              - generic: /
+            - combobox [ref=e228] [cursor=pointer]:
+              - generic: Newest first
+              - img [ref=e229]
+        - generic [ref=e231]:
+          - table [ref=e233]:
+            - rowgroup [ref=e234]:
+              - 'row "Select all Order # Customer Items Type Status Total Placed Elapsed" [ref=e235]':
+                - columnheader "Select all" [ref=e236]:
+                  - checkbox "Select all" [ref=e237] [cursor=pointer]
+                - 'columnheader "Order #" [ref=e238] [cursor=pointer]':
+                  - generic [ref=e239]:
+                    - text: "Order #"
+                    - img [ref=e240]
+                - columnheader "Customer" [ref=e243] [cursor=pointer]:
+                  - generic [ref=e244]:
+                    - text: Customer
+                    - img [ref=e245]
+                - columnheader "Items" [ref=e248] [cursor=pointer]:
+                  - generic [ref=e249]:
+                    - text: Items
+                    - img [ref=e250]
+                - columnheader "Type" [ref=e253] [cursor=pointer]:
+                  - generic [ref=e254]:
+                    - text: Type
+                    - img [ref=e255]
+                - columnheader "Status" [ref=e258] [cursor=pointer]:
+                  - generic [ref=e259]:
+                    - text: Status
+                    - img [ref=e260]
+                - columnheader "Total" [ref=e263] [cursor=pointer]:
+                  - generic [ref=e264]:
+                    - text: Total
+                    - img [ref=e265]
+                - columnheader "Placed" [ref=e268] [cursor=pointer]:
+                  - generic [ref=e269]:
+                    - text: Placed
+                    - img [ref=e270]
+                - columnheader "Elapsed" [ref=e273] [cursor=pointer]:
+                  - generic [ref=e274]:
+                    - text: Elapsed
+                    - img [ref=e275]
+                - columnheader [ref=e278]
+            - rowgroup [ref=e279]:
+              - row "Select row R-2026-000260 G Guest 2 items DELIVERY Pending 35,64 zł 3h ago — Row actions" [ref=e280] [cursor=pointer]:
+                - cell "Select row" [ref=e281]:
+                  - checkbox "Select row" [ref=e282]
+                - cell "R-2026-000260" [ref=e283]
+                - cell "G Guest" [ref=e284]:
+                  - generic [ref=e285]:
+                    - generic [ref=e286]: G
+                    - generic [ref=e287]: Guest
+                - cell "2 items" [ref=e288]:
+                  - generic [ref=e289]:
+                    - generic [ref=e290]: "2"
+                    - text: items
+                - cell "DELIVERY" [ref=e291]:
+                  - generic [ref=e292]: DELIVERY
+                - cell "Pending" [ref=e293]:
+                  - button "Pending" [ref=e294]:
+                    - generic [ref=e296]: Pending
+                    - img [ref=e297]
+                - cell "35,64 zł" [ref=e299]
+                - cell "3h ago" [ref=e300]:
+                  - time [ref=e302]: 3h ago
+                - cell "—" [ref=e303]
+                - cell "Row actions" [ref=e304]:
+                  - button "Row actions" [ref=e305]:
+                    - img [ref=e306]
+              - row "Select row R-2026-000259 S smoke3-1779046596958@test.local 1 item PICKUP Pending 19,44 zł 3d ago — Row actions" [ref=e310] [cursor=pointer]:
+                - cell "Select row" [ref=e311]:
+                  - checkbox "Select row" [ref=e312]
+                - cell "R-2026-000259" [ref=e313]
+                - cell "S smoke3-1779046596958@test.local" [ref=e314]:
+                  - generic [ref=e315]:
+                    - generic [ref=e316]: S
+                    - generic [ref=e317]: smoke3-1779046596958@test.local
+                - cell "1 item" [ref=e318]:
+                  - generic [ref=e319]:
+                    - generic [ref=e320]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e321]:
+                  - generic [ref=e322]: PICKUP
+                - cell "Pending" [ref=e323]:
+                  - button "Pending" [ref=e324]:
+                    - generic [ref=e326]: Pending
+                    - img [ref=e327]
+                - cell "19,44 zł" [ref=e329]
+                - cell "3d ago" [ref=e330]:
+                  - time [ref=e332]: 3d ago
+                - cell "—" [ref=e333]
+                - cell "Row actions" [ref=e334]:
+                  - button "Row actions" [ref=e335]:
+                    - img [ref=e336]
+              - row "Select row R-2026-000258 S smoke2@test.local 1 item PICKUP Pending 19,44 zł 3d ago — Row actions" [ref=e340] [cursor=pointer]:
+                - cell "Select row" [ref=e341]:
+                  - checkbox "Select row" [ref=e342]
+                - cell "R-2026-000258" [ref=e343]
+                - cell "S smoke2@test.local" [ref=e344]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]: S
+                    - generic [ref=e347]: smoke2@test.local
+                - cell "1 item" [ref=e348]:
+                  - generic [ref=e349]:
+                    - generic [ref=e350]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e351]:
+                  - generic [ref=e352]: PICKUP
+                - cell "Pending" [ref=e353]:
+                  - button "Pending" [ref=e354]:
+                    - generic [ref=e356]: Pending
+                    - img [ref=e357]
+                - cell "19,44 zł" [ref=e359]
+                - cell "3d ago" [ref=e360]:
+                  - time [ref=e362]: 3d ago
+                - cell "—" [ref=e363]
+                - cell "Row actions" [ref=e364]:
+                  - button "Row actions" [ref=e365]:
+                    - img [ref=e366]
+              - row "Select row R-2026-000257 G Guest 1 item DELIVERY Pending 19,44 zł 3d ago — Row actions" [ref=e370] [cursor=pointer]:
+                - cell "Select row" [ref=e371]:
+                  - checkbox "Select row" [ref=e372]
+                - cell "R-2026-000257" [ref=e373]
+                - cell "G Guest" [ref=e374]:
+                  - generic [ref=e375]:
+                    - generic [ref=e376]: G
+                    - generic [ref=e377]: Guest
+                - cell "1 item" [ref=e378]:
+                  - generic [ref=e379]:
+                    - generic [ref=e380]: "1"
+                    - text: item
+                - cell "DELIVERY" [ref=e381]:
+                  - generic [ref=e382]: DELIVERY
+                - cell "Pending" [ref=e383]:
+                  - button "Pending" [ref=e384]:
+                    - generic [ref=e386]: Pending
+                    - img [ref=e387]
+                - cell "19,44 zł" [ref=e389]
+                - cell "3d ago" [ref=e390]:
+                  - time [ref=e392]: 3d ago
+                - cell "—" [ref=e393]
+                - cell "Row actions" [ref=e394]:
+                  - button "Row actions" [ref=e395]:
+                    - img [ref=e396]
+              - row "Select row R-2026-000256 G Guest 1 item PICKUP Pending 23,76 zł 3d ago — Row actions" [ref=e400] [cursor=pointer]:
+                - cell "Select row" [ref=e401]:
+                  - checkbox "Select row" [ref=e402]
+                - cell "R-2026-000256" [ref=e403]
+                - cell "G Guest" [ref=e404]:
+                  - generic [ref=e405]:
+                    - generic [ref=e406]: G
+                    - generic [ref=e407]: Guest
+                - cell "1 item" [ref=e408]:
+                  - generic [ref=e409]:
+                    - generic [ref=e410]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e411]:
+                  - generic [ref=e412]: PICKUP
+                - cell "Pending" [ref=e413]:
+                  - button "Pending" [ref=e414]:
+                    - generic [ref=e416]: Pending
+                    - img [ref=e417]
+                - cell "23,76 zł" [ref=e419]
+                - cell "3d ago" [ref=e420]:
+                  - time [ref=e422]: 3d ago
+                - cell "—" [ref=e423]
+                - cell "Row actions" [ref=e424]:
+                  - button "Row actions" [ref=e425]:
+                    - img [ref=e426]
+              - row "Select row R-2026-000255 G Guest 1 item PICKUP Pending 23,76 zł 3d ago — Row actions" [ref=e430] [cursor=pointer]:
+                - cell "Select row" [ref=e431]:
+                  - checkbox "Select row" [ref=e432]
+                - cell "R-2026-000255" [ref=e433]
+                - cell "G Guest" [ref=e434]:
+                  - generic [ref=e435]:
+                    - generic [ref=e436]: G
+                    - generic [ref=e437]: Guest
+                - cell "1 item" [ref=e438]:
+                  - generic [ref=e439]:
+                    - generic [ref=e440]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e441]:
+                  - generic [ref=e442]: PICKUP
+                - cell "Pending" [ref=e443]:
+                  - button "Pending" [ref=e444]:
+                    - generic [ref=e446]: Pending
+                    - img [ref=e447]
+                - cell "23,76 zł" [ref=e449]
+                - cell "3d ago" [ref=e450]:
+                  - time [ref=e452]: 3d ago
+                - cell "—" [ref=e453]
+                - cell "Row actions" [ref=e454]:
+                  - button "Row actions" [ref=e455]:
+                    - img [ref=e456]
+              - row "Select row R-2026-000254 G Guest 2 items DELIVERY Pending 43,20 zł 3d ago — Row actions" [ref=e460] [cursor=pointer]:
+                - cell "Select row" [ref=e461]:
+                  - checkbox "Select row" [ref=e462]
+                - cell "R-2026-000254" [ref=e463]
+                - cell "G Guest" [ref=e464]:
+                  - generic [ref=e465]:
+                    - generic [ref=e466]: G
+                    - generic [ref=e467]: Guest
+                - cell "2 items" [ref=e468]:
+                  - generic [ref=e469]:
+                    - generic [ref=e470]: "2"
+                    - text: items
+                - cell "DELIVERY" [ref=e471]:
+                  - generic [ref=e472]: DELIVERY
+                - cell "Pending" [ref=e473]:
+                  - button "Pending" [ref=e474]:
+                    - generic [ref=e476]: Pending
+                    - img [ref=e477]
+                - cell "43,20 zł" [ref=e479]
+                - cell "3d ago" [ref=e480]:
+                  - time [ref=e482]: 3d ago
+                - cell "—" [ref=e483]
+                - cell "Row actions" [ref=e484]:
+                  - button "Row actions" [ref=e485]:
+                    - img [ref=e486]
+              - row "Select row R-2026-900000 CC Casey Customer 1 item PICKUP Pending 23,76 zł 3d ago — Row actions" [ref=e490] [cursor=pointer]:
+                - cell "Select row" [ref=e491]:
+                  - checkbox "Select row" [ref=e492]
+                - cell "R-2026-900000" [ref=e493]
+                - cell "CC Casey Customer" [ref=e494]:
+                  - generic [ref=e495]:
+                    - generic [ref=e496]: CC
+                    - generic [ref=e497]: Casey Customer
+                - cell "1 item" [ref=e498]:
+                  - generic [ref=e499]:
+                    - generic [ref=e500]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e501]:
+                  - generic [ref=e502]: PICKUP
+                - cell "Pending" [ref=e503]:
+                  - button "Pending" [ref=e504]:
+                    - generic [ref=e506]: Pending
+                    - img [ref=e507]
+                - cell "23,76 zł" [ref=e509]
+                - cell "3d ago" [ref=e510]:
+                  - time [ref=e512]: 3d ago
+                - cell "—" [ref=e513]
+                - cell "Row actions" [ref=e514]:
+                  - button "Row actions" [ref=e515]:
+                    - img [ref=e516]
+              - row "Select row R-2026-900001 CC Casey Customer 1 item DELIVERY Confirmed 55,52 zł 3d ago 72h 24m Row actions" [ref=e520] [cursor=pointer]:
+                - cell "Select row" [ref=e521]:
+                  - checkbox "Select row" [ref=e522]
+                - cell "R-2026-900001" [ref=e523]
+                - cell "CC Casey Customer" [ref=e524]:
+                  - generic [ref=e525]:
+                    - generic [ref=e526]: CC
+                    - generic [ref=e527]: Casey Customer
+                - cell "1 item" [ref=e528]:
+                  - generic [ref=e529]:
+                    - generic [ref=e530]: "1"
+                    - text: item
+                - cell "DELIVERY" [ref=e531]:
+                  - generic [ref=e532]: DELIVERY
+                - cell "Confirmed" [ref=e533]:
+                  - button "Confirmed" [ref=e534]:
+                    - generic [ref=e536]: Confirmed
+                    - img [ref=e537]
+                - cell "55,52 zł" [ref=e539]
+                - cell "3d ago" [ref=e540]:
+                  - time [ref=e542]: 3d ago
+                - cell "72h 24m" [ref=e543]
+                - cell "Row actions" [ref=e544]:
+                  - button "Row actions" [ref=e545]:
+                    - img [ref=e546]
+              - row "Select row R-2026-900002 CC Casey Customer 1 item DINE-IN Preparing 71,28 zł 3d ago 72h 24m Row actions" [ref=e550] [cursor=pointer]:
+                - cell "Select row" [ref=e551]:
+                  - checkbox "Select row" [ref=e552]
+                - cell "R-2026-900002" [ref=e553]
+                - cell "CC Casey Customer" [ref=e554]:
+                  - generic [ref=e555]:
+                    - generic [ref=e556]: CC
+                    - generic [ref=e557]: Casey Customer
+                - cell "1 item" [ref=e558]:
+                  - generic [ref=e559]:
+                    - generic [ref=e560]: "1"
+                    - text: item
+                - cell "DINE-IN" [ref=e561]:
+                  - generic [ref=e562]: DINE-IN
+                - cell "Preparing" [ref=e563]:
+                  - button "Preparing" [ref=e564]:
+                    - generic [ref=e566]: Preparing
+                    - img [ref=e567]
+                - cell "71,28 zł" [ref=e569]
+                - cell "3d ago" [ref=e570]:
+                  - time [ref=e572]: 3d ago
+                - cell "72h 24m" [ref=e573]
+                - cell "Row actions" [ref=e574]:
+                  - button "Row actions" [ref=e575]:
+                    - img [ref=e576]
+              - row "Select row R-2026-900003 CC Casey Customer 1 item PICKUP Ready 23,76 zł 4d ago 96h 24m Row actions" [ref=e580] [cursor=pointer]:
+                - cell "Select row" [ref=e581]:
+                  - checkbox "Select row" [ref=e582]
+                - cell "R-2026-900003" [ref=e583]
+                - cell "CC Casey Customer" [ref=e584]:
+                  - generic [ref=e585]:
+                    - generic [ref=e586]: CC
+                    - generic [ref=e587]: Casey Customer
+                - cell "1 item" [ref=e588]:
+                  - generic [ref=e589]:
+                    - generic [ref=e590]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e591]:
+                  - generic [ref=e592]: PICKUP
+                - cell "Ready" [ref=e593]:
+                  - button "Ready" [ref=e594]:
+                    - generic [ref=e596]: Ready
+                    - img [ref=e597]
+                - cell "23,76 zł" [ref=e599]
+                - cell "4d ago" [ref=e600]:
+                  - time [ref=e602]: 4d ago
+                - cell "96h 24m" [ref=e603]
+                - cell "Row actions" [ref=e604]:
+                  - button "Row actions" [ref=e605]:
+                    - img [ref=e606]
+              - row "Select row R-2026-900004 CC Casey Customer 1 item DELIVERY Delivered 55,52 zł 5d ago — Row actions" [ref=e610] [cursor=pointer]:
+                - cell "Select row" [ref=e611]:
+                  - checkbox "Select row" [ref=e612]
+                - cell "R-2026-900004" [ref=e613]
+                - cell "CC Casey Customer" [ref=e614]:
+                  - generic [ref=e615]:
+                    - generic [ref=e616]: CC
+                    - generic [ref=e617]: Casey Customer
+                - cell "1 item" [ref=e618]:
+                  - generic [ref=e619]:
+                    - generic [ref=e620]: "1"
+                    - text: item
+                - cell "DELIVERY" [ref=e621]:
+                  - generic [ref=e622]: DELIVERY
+                - cell "Delivered" [ref=e623]:
+                  - button "Delivered" [ref=e624]:
+                    - generic [ref=e626]: Delivered
+                    - img [ref=e627]
+                - cell "55,52 zł" [ref=e629]
+                - cell "5d ago" [ref=e630]:
+                  - time [ref=e632]: 5d ago
+                - cell "—" [ref=e633]
+                - cell "Row actions" [ref=e634]:
+                  - button "Row actions" [ref=e635]:
+                    - img [ref=e636]
+              - row "Select row R-2026-900005 CC Casey Customer 1 item PICKUP Completed 23,76 zł 7d ago — Row actions" [ref=e640] [cursor=pointer]:
+                - cell "Select row" [ref=e641]:
+                  - checkbox "Select row" [ref=e642]
+                - cell "R-2026-900005" [ref=e643]
+                - cell "CC Casey Customer" [ref=e644]:
+                  - generic [ref=e645]:
+                    - generic [ref=e646]: CC
+                    - generic [ref=e647]: Casey Customer
+                - cell "1 item" [ref=e648]:
+                  - generic [ref=e649]:
+                    - generic [ref=e650]: "1"
+                    - text: item
+                - cell "PICKUP" [ref=e651]:
+                  - generic [ref=e652]: PICKUP
+                - cell "Completed" [ref=e653]:
+                  - generic [ref=e656]: Completed
+                - cell "23,76 zł" [ref=e657]
+                - cell "7d ago" [ref=e658]:
+                  - time [ref=e660]: 7d ago
+                - cell "—" [ref=e661]
+                - cell "Row actions" [ref=e662]:
+                  - button "Row actions" [ref=e663]:
+                    - img [ref=e664]
+              - row "Select row R-2026-900006 CC Casey Customer 1 item DINE-IN Completed 95,04 zł 10d ago — Row actions" [ref=e668] [cursor=pointer]:
+                - cell "Select row" [ref=e669]:
+                  - checkbox "Select row" [ref=e670]
+                - cell "R-2026-900006" [ref=e671]
+                - cell "CC Casey Customer" [ref=e672]:
+                  - generic [ref=e673]:
+                    - generic [ref=e674]: CC
+                    - generic [ref=e675]: Casey Customer
+                - cell "1 item" [ref=e676]:
+                  - generic [ref=e677]:
+                    - generic [ref=e678]: "1"
+                    - text: item
+                - cell "DINE-IN" [ref=e679]:
+                  - generic [ref=e680]: DINE-IN
+                - cell "Completed" [ref=e681]:
+                  - generic [ref=e684]: Completed
+                - cell "95,04 zł" [ref=e685]
+                - cell "10d ago" [ref=e686]:
+                  - time [ref=e688]: 10d ago
+                - cell "—" [ref=e689]
+                - cell "Row actions" [ref=e690]:
+                  - button "Row actions" [ref=e691]:
+                    - img [ref=e692]
+              - row "Select row R-2026-900007 CC Casey Customer 1 item DELIVERY Cancelled 55,52 zł 12d ago — Row actions" [ref=e696] [cursor=pointer]:
+                - cell "Select row" [ref=e697]:
+                  - checkbox "Select row" [ref=e698]
+                - cell "R-2026-900007" [ref=e699]
+                - cell "CC Casey Customer" [ref=e700]:
+                  - generic [ref=e701]:
+                    - generic [ref=e702]: CC
+                    - generic [ref=e703]: Casey Customer
+                - cell "1 item" [ref=e704]:
+                  - generic [ref=e705]:
+                    - generic [ref=e706]: "1"
+                    - text: item
+                - cell "DELIVERY" [ref=e707]:
+                  - generic [ref=e708]: DELIVERY
+                - cell "Cancelled" [ref=e709]:
+                  - generic [ref=e712]: Cancelled
+                - cell "55,52 zł" [ref=e713]
+                - cell "12d ago" [ref=e714]:
+                  - time [ref=e716]: 12d ago
+                - cell "—" [ref=e717]
+                - cell "Row actions" [ref=e718]:
+                  - button "Row actions" [ref=e719]:
+                    - img [ref=e720]
+          - generic [ref=e724]:
+            - generic [ref=e725]: Showing 1–15 of 15
+            - generic [ref=e727]:
+              - button "Previous page" [disabled] [ref=e728]:
+                - img [ref=e729]
+              - button "1" [ref=e731] [cursor=pointer]
+              - button "Next page" [disabled] [ref=e732]:
+                - img [ref=e733]

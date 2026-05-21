@@ -113,7 +113,6 @@
     "addresses": "Addresses",
     "paymentMethods": "Payment methods",
     "loyalty": "Loyalty",
-    "favorites": "Favorites",
     "referrals": "Referrals",
     "notifications": "Notifications",
     "preferences": "Preferences"
@@ -143,12 +142,6 @@
     "ownerReply": "Response from the owner",
     "averageRating": "{average} out of 5 ({count, plural, one {# review} other {# reviews}})",
     "thanks": "Thanks for your review"
-  },
-  "favorites": {
-    "title": "Favorites",
-    "empty": "You have no favorites yet",
-    "add": "Add to favorites",
-    "remove": "Remove from favorites"
   },
   "referral": {
     "title": "Invite friends",

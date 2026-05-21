@@ -2,12 +2,11 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Prisma } from '@repo/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('analytics (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
-  let restaurantId: string;
   let userId: string;
 
   beforeAll(async () => {
@@ -24,15 +23,7 @@ describe('analytics (e2e)', () => {
     ownerToken = await ensureOwnerToken(app);
     const prisma = app.get(PrismaService);
     userId = await prisma.user.findFirstOrThrow({ where: { email: 'owner.e2e@test.local' } }).then((u) => u.id);
-
-    const r = await inject('POST', '/api/v1/restaurants', {
-      slug: 'analytics-e2e',
-      name: 'Analytics E2E',
-      phone: '+48 22 555 0003',
-      email: 'a@e2e.local',
-      address: { line1: 'ul. 1', city: 'Warsaw', country: 'PL' },
-    }, ownerToken);
-    restaurantId = r.json().id;
+    await ensureRestaurant(app);
 
     // Seed 3 completed orders.
     for (let i = 0; i < 3; i++) {
@@ -40,7 +31,6 @@ describe('analytics (e2e)', () => {
         data: {
           orderNumber: `R-AE-${i.toString().padStart(3, '0')}`,
           userId,
-          restaurantId,
           type: 'DINE_IN',
           status: 'COMPLETED',
           subtotal: new Prisma.Decimal('100.00'),
@@ -64,7 +54,7 @@ describe('analytics (e2e)', () => {
   it('returns overview KPIs', async () => {
     const res = await inject(
       'GET',
-      `/api/v1/analytics/overview?restaurantId=${restaurantId}&period=today`,
+      `/api/v1/analytics/overview?period=today`,
       undefined,
       ownerToken,
     );
@@ -86,7 +76,6 @@ describe('analytics (e2e)', () => {
         data: {
           orderNumber: `R-AE-CR-${i}`,
           userId,
-          restaurantId,
           type: 'DINE_IN',
           status,
           subtotal: new Prisma.Decimal('10.00'),
@@ -98,7 +87,7 @@ describe('analytics (e2e)', () => {
     }
     const res = await inject(
       'GET',
-      `/api/v1/analytics/overview?restaurantId=${restaurantId}&period=today`,
+      `/api/v1/analytics/overview?period=today`,
       undefined,
       ownerToken,
     );
@@ -119,7 +108,7 @@ describe('analytics (e2e)', () => {
     const token = login.json().accessToken as string;
     const res = await inject(
       'GET',
-      `/api/v1/analytics/overview?restaurantId=${restaurantId}&period=today`,
+      `/api/v1/analytics/overview?period=today`,
       undefined,
       token,
     );
@@ -129,7 +118,7 @@ describe('analytics (e2e)', () => {
   it('returns orders-by-status', async () => {
     const res = await inject(
       'GET',
-      `/api/v1/analytics/orders-by-status?restaurantId=${restaurantId}&period=today`,
+      `/api/v1/analytics/orders-by-status?period=today`,
       undefined,
       ownerToken,
     );

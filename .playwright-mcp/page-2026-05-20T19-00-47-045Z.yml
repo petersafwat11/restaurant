@@ -1,0 +1,148 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e20]:
+    - complementary "Primary" [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: TK
+        - generic [ref=e24]: Test Kitchen
+      - navigation [ref=e25]:
+        - link "Overview" [ref=e27] [cursor=pointer]:
+          - /url: /
+          - img [ref=e28]
+          - generic [ref=e31]: Overview
+        - generic [ref=e32]:
+          - generic [ref=e33]: Operate
+          - generic [ref=e34]:
+            - link "Orders" [ref=e35] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e36]
+              - generic [ref=e39]: Orders
+            - link "Kitchen Display" [ref=e40] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e41]
+              - generic [ref=e46]: Kitchen Display
+            - link "Reservations" [ref=e47] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e48]
+              - generic [ref=e50]: Reservations
+        - generic [ref=e51]:
+          - generic [ref=e52]: Catalog
+          - generic [ref=e53]:
+            - link "Menu" [ref=e54] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e55]
+              - generic [ref=e58]: Menu
+            - link "Promotions" [ref=e59] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e60]
+              - generic [ref=e63]: Promotions
+        - generic [ref=e64]:
+          - generic [ref=e65]: People
+          - generic [ref=e66]:
+            - link "Customers" [ref=e67] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e69]
+              - generic [ref=e74]: Customers
+            - link "Reviews" [ref=e75] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e76]
+              - generic [ref=e78]: Reviews
+            - link "Staff" [ref=e79] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e80]
+              - generic [ref=e82]: Staff
+        - generic [ref=e83]:
+          - generic [ref=e84]: Insights
+          - generic [ref=e85]:
+            - link "Reports" [ref=e86] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e87]
+              - generic [ref=e90]: Reports
+            - link "Audit log" [ref=e91] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e92]
+              - generic [ref=e96]: Audit log
+        - generic [ref=e97]:
+          - generic [ref=e98]: Configure
+          - generic [ref=e99]:
+            - link "Restaurant" [ref=e100] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e101]
+              - generic [ref=e104]: Restaurant
+            - link "Contact messages" [ref=e105] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e106]
+              - generic [ref=e109]: Contact messages
+            - link "Settings" [ref=e110] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e111]
+              - generic [ref=e122]: Settings
+      - generic [ref=e123]:
+        - generic [ref=e124]: OO
+        - generic [ref=e125]:
+          - generic [ref=e126]: Olive Owner
+          - generic [ref=e127]: owner
+        - button "Collapse sidebar" [ref=e128] [cursor=pointer]:
+          - img [ref=e129]
+    - generic [ref=e132]:
+      - banner [ref=e133]:
+        - heading "Customers" [level=1] [ref=e134]
+        - button "TK Select restaurant" [ref=e135] [cursor=pointer]:
+          - generic [ref=e136]: TK
+          - generic [ref=e137]: Select restaurant
+          - img [ref=e138]
+        - button "Search (Cmd+K)" [ref=e140] [cursor=pointer]:
+          - img [ref=e141]
+          - generic [ref=e144]: Search orders, customers, items…
+          - generic [ref=e145]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e146] [cursor=pointer]:
+          - img [ref=e147]
+        - button "Account" [ref=e151] [cursor=pointer]: OO
+      - main [ref=e152]:
+        - generic [ref=e156]:
+          - tablist [ref=e157]:
+            - tab "All" [selected] [ref=e158] [cursor=pointer]:
+              - generic [ref=e159]: All
+            - tab "vip" [ref=e160] [cursor=pointer]:
+              - generic [ref=e161]: vip
+            - tab "frequent" [ref=e162] [cursor=pointer]:
+              - generic [ref=e163]: frequent
+            - tab "dormant" [ref=e164] [cursor=pointer]:
+              - generic [ref=e165]: dormant
+            - tab "new" [ref=e166] [cursor=pointer]:
+              - generic [ref=e167]: new
+            - tab "active" [ref=e168] [cursor=pointer]:
+              - generic [ref=e169]: active
+          - searchbox "Search name, email, phone…" [ref=e170]
+          - button "Export customers" [disabled]:
+            - img
+            - text: Export
+            - img
+        - generic [ref=e172]:
+          - table [ref=e173]:
+            - rowgroup [ref=e174]:
+              - row "Select all Customer Phone Orders Lifetime spend Last order Segment" [ref=e175]:
+                - columnheader "Select all" [ref=e176]:
+                  - checkbox "Select all" [ref=e177] [cursor=pointer]
+                - columnheader "Customer" [ref=e178]:
+                  - generic [ref=e179]: Customer
+                - columnheader "Phone" [ref=e180]:
+                  - generic [ref=e181]: Phone
+                - columnheader "Orders" [ref=e182]:
+                  - generic [ref=e183]: Orders
+                - columnheader "Lifetime spend" [ref=e184]:
+                  - generic [ref=e185]: Lifetime spend
+                - columnheader "Last order" [ref=e186]:
+                  - generic [ref=e187]: Last order
+                - columnheader "Segment" [ref=e188]:
+                  - generic [ref=e189]: Segment
+            - rowgroup
+          - generic [ref=e191]: No customers match these filters.
+  - region "Notifications alt+T"
+  - status [ref=e9]:
+    - generic [ref=e10]:
+      - img [ref=e12]
+      - generic [ref=e14]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+  - alert [ref=e19]

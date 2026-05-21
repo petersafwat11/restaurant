@@ -12,6 +12,7 @@ import {
   type ReviewListDto,
   type ReviewListQuery,
   type ReviewModerationDto,
+  type ReviewModerationStatus,
   type ReviewSummaryDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -75,11 +76,11 @@ export class ReviewsService {
     return toDto(created);
   }
 
-  async listForRestaurant(restaurantId: string, query: ReviewListQuery): Promise<ReviewListDto> {
+  async list(query: ReviewListQuery): Promise<ReviewListDto> {
     const limit = query.limit ?? 20;
     const where: Prisma.ReviewWhereInput = {
       isVisible: true,
-      order: { restaurantId },
+      moderationStatus: 'PUBLISHED',
       ...(query.rating ? { rating: query.rating } : {}),
     };
     const orderBy: Prisma.ReviewOrderByWithRelationInput =
@@ -118,8 +119,8 @@ export class ReviewsService {
   async listAdmin(query: ReviewListQuery): Promise<ReviewListDto> {
     const limit = query.limit ?? 50;
     const where: Prisma.ReviewWhereInput = {
-      ...(query.restaurantId ? { order: { restaurantId: query.restaurantId } } : {}),
       ...(query.isVisible !== undefined ? { isVisible: query.isVisible } : {}),
+      ...(query.moderationStatus ? { moderationStatus: query.moderationStatus } : {}),
       ...(query.rating ? { rating: query.rating } : {}),
     };
     const rows = await this.prisma.review.findMany({
@@ -138,9 +139,19 @@ export class ReviewsService {
   }
 
   async setVisibility(id: string, dto: ReviewModerationDto): Promise<ReviewDto> {
+    const data: Prisma.ReviewUpdateInput = {};
+    if (dto.moderationStatus) {
+      data.moderationStatus = dto.moderationStatus;
+      data.isVisible = dto.moderationStatus === 'PUBLISHED';
+      data.flagReason =
+        dto.moderationStatus === 'FLAGGED' ? (dto.flagReason ?? null) : null;
+    } else if (dto.isVisible !== undefined) {
+      data.isVisible = dto.isVisible;
+      data.moderationStatus = dto.isVisible ? 'PUBLISHED' : 'HIDDEN';
+    }
     const updated = await this.prisma.review.update({
       where: { id },
-      data: { isVisible: dto.isVisible },
+      data,
       include: REVIEW_INCLUDE,
     });
     return toDto(updated);
@@ -158,9 +169,9 @@ export class ReviewsService {
   }
 
   /** Public aggregate for marketing/SEO AggregateRating. Visible reviews only. */
-  async getSummary(restaurantId: string): Promise<ReviewSummaryDto> {
+  async getSummary(): Promise<ReviewSummaryDto> {
     const rows = await this.prisma.review.findMany({
-      where: { isVisible: true, order: { restaurantId } },
+      where: { isVisible: true },
       select: { rating: true },
     });
     const histogram = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
@@ -172,7 +183,7 @@ export class ReviewsService {
     }
     const count = rows.length;
     const average = count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
-    return { restaurantId, count, average, histogram };
+    return { count, average, histogram };
   }
 }
 
@@ -184,6 +195,8 @@ function toDto(row: ReviewRow): ReviewDto {
     rating: row.rating,
     comment: row.comment,
     isVisible: row.isVisible,
+    moderationStatus: row.moderationStatus as ReviewModerationStatus,
+    flagReason: row.flagReason ?? null,
     ownerReply: row.ownerReply,
     ownerReplyAt: row.ownerReplyAt ? row.ownerReplyAt.toISOString() : null,
     createdAt: row.createdAt.toISOString(),

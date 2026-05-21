@@ -9,6 +9,7 @@ export const EXPORT_KINDS = [
   'payment-methods',
   'customer-retention',
   'orders-detail',
+  'customers',
 ] as const;
 export type ExportKind = (typeof EXPORT_KINDS)[number];
 
@@ -21,7 +22,6 @@ export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 export const ExportSchema = z.object({
   id: z.string(),
   requestedByUserId: z.string(),
-  restaurantId: z.string().nullable(),
   kind: z.enum(EXPORT_KINDS),
   format: z.enum(EXPORT_FORMATS),
   status: z.enum(EXPORT_STATUSES),
@@ -38,7 +38,6 @@ export const ExportListSchema = z.array(ExportSchema);
 export const CreateExportSchema = z.object({
   kind: z.enum(EXPORT_KINDS),
   format: z.enum(EXPORT_FORMATS).default('csv'),
-  restaurantId: z.string().min(1),
   params: z
     .object({
       from: z.string().datetime().optional(),

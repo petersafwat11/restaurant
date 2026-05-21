@@ -1,0 +1,114 @@
+- generic [ref=e1]:
+  - generic [ref=e20]:
+    - complementary "Primary" [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: TK
+        - generic [ref=e24]: Test Kitchen
+      - navigation [ref=e25]:
+        - link "Overview" [ref=e27] [cursor=pointer]:
+          - /url: /
+          - img [ref=e28]
+          - generic [ref=e31]: Overview
+        - generic [ref=e32]:
+          - generic [ref=e33]: Operate
+          - generic [ref=e34]:
+            - link "Orders" [ref=e35] [cursor=pointer]:
+              - /url: /orders
+              - img [ref=e36]
+              - generic [ref=e39]: Orders
+            - link "Kitchen Display" [ref=e40] [cursor=pointer]:
+              - /url: /kds
+              - img [ref=e41]
+              - generic [ref=e46]: Kitchen Display
+            - link "Reservations" [ref=e47] [cursor=pointer]:
+              - /url: /reservations
+              - img [ref=e48]
+              - generic [ref=e50]: Reservations
+        - generic [ref=e51]:
+          - generic [ref=e52]: Catalog
+          - generic [ref=e53]:
+            - link "Menu" [active] [ref=e54] [cursor=pointer]:
+              - /url: /menu
+              - img [ref=e55]
+              - generic [ref=e58]: Menu
+            - link "Promotions" [ref=e59] [cursor=pointer]:
+              - /url: /promotions
+              - img [ref=e60]
+              - generic [ref=e63]: Promotions
+        - generic [ref=e64]:
+          - generic [ref=e65]: People
+          - generic [ref=e66]:
+            - link "Customers" [ref=e67] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=e69]
+              - generic [ref=e74]: Customers
+            - link "Reviews" [ref=e75] [cursor=pointer]:
+              - /url: /reviews
+              - img [ref=e76]
+              - generic [ref=e78]: Reviews
+            - link "Staff" [ref=e79] [cursor=pointer]:
+              - /url: /staff
+              - img [ref=e80]
+              - generic [ref=e82]: Staff
+        - generic [ref=e83]:
+          - generic [ref=e84]: Insights
+          - generic [ref=e85]:
+            - link "Reports" [ref=e86] [cursor=pointer]:
+              - /url: /reports/exports
+              - img [ref=e87]
+              - generic [ref=e90]: Reports
+            - link "Audit log" [ref=e91] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e92]
+              - generic [ref=e96]: Audit log
+        - generic [ref=e97]:
+          - generic [ref=e98]: Configure
+          - generic [ref=e99]:
+            - link "Restaurant" [ref=e100] [cursor=pointer]:
+              - /url: /restaurant
+              - img [ref=e101]
+              - generic [ref=e104]: Restaurant
+            - link "Contact messages" [ref=e105] [cursor=pointer]:
+              - /url: /contact
+              - img [ref=e106]
+              - generic [ref=e109]: Contact messages
+            - link "Settings" [ref=e110] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e111]
+              - generic [ref=e122]: Settings
+      - generic [ref=e123]:
+        - generic [ref=e124]: OO
+        - generic [ref=e125]:
+          - generic [ref=e126]: Olive Owner
+          - generic [ref=e127]: owner
+        - button "Collapse sidebar" [ref=e128] [cursor=pointer]:
+          - img [ref=e129]
+    - generic [ref=e132]:
+      - banner [ref=e133]:
+        - heading "Restaurant profile" [level=1] [ref=e193]
+        - button "TK Select restaurant" [ref=e135] [cursor=pointer]:
+          - generic [ref=e136]: TK
+          - generic [ref=e137]: Select restaurant
+          - img [ref=e138]
+        - button "Search (Cmd+K)" [ref=e194] [cursor=pointer]:
+          - img [ref=e195]
+          - generic [ref=e198]: Search orders, customers, items…
+          - generic [ref=e199]: ⌘K
+        - button "Notifications · Realtime connected" [ref=e200] [cursor=pointer]:
+          - img [ref=e201]
+        - button "Account" [ref=e205] [cursor=pointer]: OO
+      - main [ref=e152]:
+        - generic [ref=e206]:
+          - status [ref=e207]:
+            - img [ref=e208]
+            - generic [ref=e211]: Loading
+          - paragraph [ref=e212]: Loading restaurant…
+  - region "Notifications alt+T"
+  - status [ref=e213]:
+    - generic [ref=e214]:
+      - img [ref=e216]
+      - generic [ref=e218]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e219] [cursor=pointer]:
+          - img [ref=e220]
+  - alert [ref=e19]: Audit log

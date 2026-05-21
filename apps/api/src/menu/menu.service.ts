@@ -27,13 +27,15 @@ import type {
   UpdateModifierGroupDto,
   UpdateModifierOptionDto,
 } from '@repo/types';
-import { decimalToString } from '@repo/utils';
+import { decimalToString } from '@repo/utils/money';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../redis/cache.service';
 import { UploadsService } from '../uploads/uploads.service';
 
 const TREE_TTL_SECONDS = 300;
-const treeKey = (restaurantId: string) => `menu:${restaurantId}`;
+// Single-restaurant project — one tree cache key for the whole menu. v2 = post
+// restaurantId drop (categories/items no longer carry it).
+const TREE_KEY = 'menu:tree:v2';
 const availabilityKey = (itemId: string) => `availability:${itemId}`;
 
 @Injectable()
@@ -46,26 +48,17 @@ export class MenuService {
 
   // ---- Public reads -------------------------------------------------------
 
-  async getTree(restaurantId: string): Promise<MenuTreeDto> {
+  async getTree(): Promise<MenuTreeDto> {
     const tree = await this.cache.getOrSet<MenuTreeDto>(
-      treeKey(restaurantId),
+      TREE_KEY,
       TREE_TTL_SECONDS,
-      async () => this.loadTreeFromDb(restaurantId),
+      async () => this.loadTreeFromDb(),
     );
-
-    // Merge availability fast-path keys into the cached tree. Any item with
-    // an explicit availability key wins over the DB-baked value.
     return this.applyAvailabilityOverrides(tree);
   }
 
-  async getItem(
-    restaurantId: string,
-    categorySlug: string,
-    itemSlug: string,
-  ): Promise<MenuItemDetailDto> {
-    const category = await this.prisma.menuCategory.findUnique({
-      where: { restaurantId_slug: { restaurantId, slug: categorySlug } },
-    });
+  async getItem(categorySlug: string, itemSlug: string): Promise<MenuItemDetailDto> {
+    const category = await this.prisma.menuCategory.findUnique({ where: { slug: categorySlug } });
     if (!category) throw new NotFoundException('Category not found');
 
     const item = await this.prisma.menuItem.findUnique({
@@ -87,24 +80,22 @@ export class MenuService {
   // ---- Category writes ----------------------------------------------------
 
   async createCategory(dto: CreateMenuCategoryDto): Promise<MenuCategoryDto> {
-    await this.requireRestaurant(dto.restaurantId);
     try {
       const row = await this.prisma.menuCategory.create({
         data: {
-          restaurantId: dto.restaurantId,
           name: dto.name,
           slug: dto.slug,
           description: dto.description ?? null,
           imageUrl: dto.imageUrl ?? null,
-          position: dto.position ?? (await this.nextCategoryPosition(dto.restaurantId)),
+          position: dto.position ?? (await this.nextCategoryPosition()),
           isActive: dto.isActive ?? true,
         },
       });
-      await this.invalidateTree(dto.restaurantId);
+      await this.invalidateTree();
       return toCategoryDto(row, []);
     } catch (err) {
       if (isUniqueConstraintError(err)) {
-        throw new ConflictException('Slug already in use for this restaurant');
+        throw new ConflictException('Slug already in use');
       }
       throw err;
     }
@@ -125,30 +116,26 @@ export class MenuService {
         ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
       },
     });
-    await this.invalidateTree(updated.restaurantId);
+    await this.invalidateTree();
     return toCategoryDto(updated, []);
   }
 
-  async deleteCategory(id: string): Promise<void> {
+  async deleteCategory(id: string): Promise<{ id: string }> {
     const existing = await this.prisma.menuCategory.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Category not found');
     await this.prisma.menuCategory.delete({ where: { id } });
-    await this.invalidateTree(existing.restaurantId);
+    await this.invalidateTree();
+    return { id: existing.id };
   }
 
   async reorderCategories(dto: ReorderDto): Promise<void> {
     const categories = await this.prisma.menuCategory.findMany({
       where: { id: { in: dto.orderedIds } },
-      select: { id: true, restaurantId: true },
+      select: { id: true },
     });
     if (categories.length !== dto.orderedIds.length) {
       throw new NotFoundException('One or more categories not found');
     }
-    const restaurantIds = new Set(categories.map((c) => c.restaurantId));
-    if (restaurantIds.size !== 1) {
-      throw new ConflictException('Categories must belong to one restaurant');
-    }
-    const restaurantId = categories[0].restaurantId;
 
     await this.prisma.$transaction(
       dto.orderedIds.map((id, index) =>
@@ -158,7 +145,7 @@ export class MenuService {
         }),
       ),
     );
-    await this.invalidateTree(restaurantId);
+    await this.invalidateTree();
   }
 
   // ---- Item writes --------------------------------------------------------
@@ -190,7 +177,7 @@ export class MenuService {
         },
         include: { images: true },
       });
-      await this.invalidateTree(category.restaurantId);
+      await this.invalidateTree();
       return toItemDto(row);
     } catch (err) {
       if (isUniqueConstraintError(err)) {
@@ -201,10 +188,7 @@ export class MenuService {
   }
 
   async updateItem(id: string, dto: UpdateMenuItemDto): Promise<MenuItemDto> {
-    const existing = await this.prisma.menuItem.findUnique({
-      where: { id },
-      include: { category: { select: { restaurantId: true } } },
-    });
+    const existing = await this.prisma.menuItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Menu item not found');
 
     const updated = await this.prisma.menuItem.update({
@@ -229,32 +213,24 @@ export class MenuService {
       include: { images: { orderBy: { position: 'asc' } } },
     });
 
-    // If the explicit availability key was set, the row's value supersedes it.
     await this.cache.invalidate(availabilityKey(id));
-    await this.invalidateTree(existing.category.restaurantId);
+    await this.invalidateTree();
     return toItemDto(updated);
   }
 
-  async deleteItem(id: string): Promise<void> {
-    const existing = await this.prisma.menuItem.findUnique({
-      where: { id },
-      include: { category: { select: { restaurantId: true } } },
-    });
+  async deleteItem(id: string): Promise<{ id: string }> {
+    const existing = await this.prisma.menuItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Menu item not found');
     await this.prisma.menuItem.delete({ where: { id } });
     await this.cache.invalidate(availabilityKey(id));
-    await this.invalidateTree(existing.category.restaurantId);
+    await this.invalidateTree();
+    return { id: existing.id };
   }
 
   async setItemAvailability(id: string, dto: SetItemAvailabilityDto): Promise<MenuItemDto> {
-    const existing = await this.prisma.menuItem.findUnique({
-      where: { id },
-      include: { category: { select: { restaurantId: true } } },
-    });
+    const existing = await this.prisma.menuItem.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Menu item not found');
 
-    // Write-through: persist for durability, plus set the fast-path key so
-    // we don't have to bust the entire tree cache for a toggle.
     const updated = await this.prisma.menuItem.update({
       where: { id },
       data: { isAvailable: dto.isAvailable },
@@ -267,7 +243,7 @@ export class MenuService {
   async reorderItems(dto: ReorderItemsDto): Promise<void> {
     const items = await this.prisma.menuItem.findMany({
       where: { id: { in: dto.orderedIds } },
-      select: { id: true, categoryId: true, category: { select: { restaurantId: true } } },
+      select: { id: true, categoryId: true },
     });
     if (items.length !== dto.orderedIds.length) {
       throw new NotFoundException('One or more items not found');
@@ -286,16 +262,13 @@ export class MenuService {
         }),
       ),
     );
-    await this.invalidateTree(items[0].category.restaurantId);
+    await this.invalidateTree();
   }
 
   // ---- Item images --------------------------------------------------------
 
   async addItemImage(itemId: string, dto: AddMenuItemImageDto): Promise<MenuItemImageDto> {
-    const item = await this.prisma.menuItem.findUnique({
-      where: { id: itemId },
-      include: { category: { select: { restaurantId: true } } },
-    });
+    const item = await this.prisma.menuItem.findUnique({ where: { id: itemId } });
     if (!item) throw new NotFoundException('Menu item not found');
 
     const next = await this.prisma.menuItemImage.count({ where: { itemId } });
@@ -308,33 +281,23 @@ export class MenuService {
         position: next,
       },
     });
-    await this.invalidateTree(item.category.restaurantId);
+    await this.invalidateTree();
     return toImageDto(row);
   }
 
   async removeItemImage(itemId: string, imageId: string): Promise<void> {
-    const image = await this.prisma.menuItemImage.findUnique({
-      where: { id: imageId },
-      include: {
-        item: { select: { id: true, category: { select: { restaurantId: true } } } },
-      },
-    });
+    const image = await this.prisma.menuItemImage.findUnique({ where: { id: imageId } });
     if (!image || image.itemId !== itemId) {
       throw new NotFoundException('Image not found');
     }
     await this.prisma.menuItemImage.delete({ where: { id: imageId } });
-    // Best-effort R2 cleanup; failures are swallowed by the uploads service
-    // and the daily orphan sweep is the safety net.
     const key = this.uploads.extractKeyFromUrl(image.url);
     if (key) await this.uploads.deleteObject(key);
-    await this.invalidateTree(image.item.category.restaurantId);
+    await this.invalidateTree();
   }
 
   async reorderItemImages(itemId: string, dto: ReorderDto): Promise<void> {
-    const item = await this.prisma.menuItem.findUnique({
-      where: { id: itemId },
-      include: { category: { select: { restaurantId: true } } },
-    });
+    const item = await this.prisma.menuItem.findUnique({ where: { id: itemId } });
     if (!item) throw new NotFoundException('Menu item not found');
 
     const images = await this.prisma.menuItemImage.findMany({
@@ -353,7 +316,7 @@ export class MenuService {
         }),
       ),
     );
-    await this.invalidateTree(item.category.restaurantId);
+    await this.invalidateTree();
   }
 
   // ---- Modifier groups ----------------------------------------------------
@@ -362,10 +325,7 @@ export class MenuService {
     itemId: string,
     dto: CreateModifierGroupDto,
   ): Promise<ModifierGroupDto> {
-    const item = await this.prisma.menuItem.findUnique({
-      where: { id: itemId },
-      include: { category: { select: { restaurantId: true } } },
-    });
+    const item = await this.prisma.menuItem.findUnique({ where: { id: itemId } });
     if (!item) throw new NotFoundException('Menu item not found');
 
     const row = await this.prisma.menuItemModifierGroup.create({
@@ -377,17 +337,14 @@ export class MenuService {
         maxSelect: dto.maxSelect ?? 1,
       },
     });
-    await this.invalidateTree(item.category.restaurantId);
+    await this.invalidateTree();
     return toGroupDto(row, []);
   }
 
   async updateModifierGroup(id: string, dto: UpdateModifierGroupDto): Promise<ModifierGroupDto> {
     const group = await this.prisma.menuItemModifierGroup.findUnique({
       where: { id },
-      include: {
-        options: { orderBy: { name: 'asc' } },
-        item: { include: { category: { select: { restaurantId: true } } } },
-      },
+      include: { options: { orderBy: { name: 'asc' } } },
     });
     if (!group) throw new NotFoundException('Modifier group not found');
 
@@ -401,18 +358,15 @@ export class MenuService {
       },
       include: { options: { orderBy: { name: 'asc' } } },
     });
-    await this.invalidateTree(group.item.category.restaurantId);
+    await this.invalidateTree();
     return toGroupDto(updated, updated.options);
   }
 
   async deleteModifierGroup(id: string): Promise<void> {
-    const group = await this.prisma.menuItemModifierGroup.findUnique({
-      where: { id },
-      include: { item: { include: { category: { select: { restaurantId: true } } } } },
-    });
+    const group = await this.prisma.menuItemModifierGroup.findUnique({ where: { id } });
     if (!group) throw new NotFoundException('Modifier group not found');
     await this.prisma.menuItemModifierGroup.delete({ where: { id } });
-    await this.invalidateTree(group.item.category.restaurantId);
+    await this.invalidateTree();
   }
 
   // ---- Modifier options ---------------------------------------------------
@@ -421,10 +375,7 @@ export class MenuService {
     groupId: string,
     dto: CreateModifierOptionDto,
   ): Promise<ModifierOptionDto> {
-    const group = await this.prisma.menuItemModifierGroup.findUnique({
-      where: { id: groupId },
-      include: { item: { include: { category: { select: { restaurantId: true } } } } },
-    });
+    const group = await this.prisma.menuItemModifierGroup.findUnique({ where: { id: groupId } });
     if (!group) throw new NotFoundException('Modifier group not found');
 
     const row = await this.prisma.menuItemModifierOption.create({
@@ -435,21 +386,12 @@ export class MenuService {
         isDefault: dto.isDefault ?? false,
       },
     });
-    await this.invalidateTree(group.item.category.restaurantId);
+    await this.invalidateTree();
     return toOptionDto(row);
   }
 
   async updateModifierOption(id: string, dto: UpdateModifierOptionDto): Promise<ModifierOptionDto> {
-    const option = await this.prisma.menuItemModifierOption.findUnique({
-      where: { id },
-      include: {
-        group: {
-          include: {
-            item: { include: { category: { select: { restaurantId: true } } } },
-          },
-        },
-      },
-    });
+    const option = await this.prisma.menuItemModifierOption.findUnique({ where: { id } });
     if (!option) throw new NotFoundException('Modifier option not found');
 
     const updated = await this.prisma.menuItemModifierOption.update({
@@ -460,32 +402,22 @@ export class MenuService {
         ...(dto.isDefault !== undefined ? { isDefault: dto.isDefault } : {}),
       },
     });
-    await this.invalidateTree(option.group.item.category.restaurantId);
+    await this.invalidateTree();
     return toOptionDto(updated);
   }
 
   async deleteModifierOption(id: string): Promise<void> {
-    const option = await this.prisma.menuItemModifierOption.findUnique({
-      where: { id },
-      include: {
-        group: {
-          include: {
-            item: { include: { category: { select: { restaurantId: true } } } },
-          },
-        },
-      },
-    });
+    const option = await this.prisma.menuItemModifierOption.findUnique({ where: { id } });
     if (!option) throw new NotFoundException('Modifier option not found');
     await this.prisma.menuItemModifierOption.delete({ where: { id } });
-    await this.invalidateTree(option.group.item.category.restaurantId);
+    await this.invalidateTree();
   }
 
   // ---- Private helpers ----------------------------------------------------
 
-  private async loadTreeFromDb(restaurantId: string): Promise<MenuTreeDto> {
-    await this.requireRestaurant(restaurantId);
+  private async loadTreeFromDb(): Promise<MenuTreeDto> {
     const categories = await this.prisma.menuCategory.findMany({
-      where: { restaurantId, isActive: true },
+      where: { isActive: true },
       include: {
         items: {
           include: {
@@ -502,10 +434,8 @@ export class MenuService {
     });
 
     return {
-      restaurantId,
       categories: categories.map((c) => ({
         id: c.id,
-        restaurantId: c.restaurantId,
         name: c.name,
         slug: c.slug,
         description: c.description,
@@ -549,21 +479,16 @@ export class MenuService {
     return override === null ? fallback : override;
   }
 
-  private async requireRestaurant(id: string): Promise<void> {
-    const r = await this.prisma.restaurant.findUnique({ where: { id }, select: { id: true } });
-    if (!r) throw new NotFoundException('Restaurant not found');
-  }
-
-  private async nextCategoryPosition(restaurantId: string): Promise<number> {
-    return this.prisma.menuCategory.count({ where: { restaurantId } });
+  private async nextCategoryPosition(): Promise<number> {
+    return this.prisma.menuCategory.count();
   }
 
   private async nextItemPosition(categoryId: string): Promise<number> {
     return this.prisma.menuItem.count({ where: { categoryId } });
   }
 
-  private async invalidateTree(restaurantId: string): Promise<void> {
-    await this.cache.invalidate(treeKey(restaurantId));
+  private async invalidateTree(): Promise<void> {
+    await this.cache.invalidate(TREE_KEY);
   }
 }
 
@@ -574,7 +499,6 @@ export class MenuService {
 function toCategoryDto(row: MenuCategory, items: MenuItemDto[]): MenuCategoryDto {
   return {
     id: row.id,
-    restaurantId: row.restaurantId,
     name: row.name,
     slug: row.slug,
     description: row.description,

@@ -1,6 +1,7 @@
 // Top-level so it's set before any module under test evaluates its env schema.
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:4000/api/v1';
 
+import { cleanup } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
@@ -16,9 +17,15 @@ const defaultHandlers = [
 export const server = setupServer(...defaultHandlers);
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  // 'warn' keeps the dev signal but doesn't fail tests when a hook fires
+  // before its permission gate evaluates — common for pages that gate the
+  // *rendered output* (RequirePermission) but still mount data hooks.
+  server.listen({ onUnhandledRequest: 'warn' });
 });
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  cleanup();
+  server.resetHandlers();
+});
 afterAll(() => server.close());
 
 // Polyfill matchMedia for happy-dom

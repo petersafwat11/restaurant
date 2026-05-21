@@ -31,7 +31,6 @@ describe('useDashboardOverview', () => {
             {
               id: 'ord_recent_1',
               orderNumber: 'R-2026-000009',
-              restaurantId: 'rest_1',
               status: 'CONFIRMED',
               type: 'PICKUP',
               grandTotal: '24.00',
@@ -46,7 +45,7 @@ describe('useDashboardOverview', () => {
       ),
     );
 
-    const { result } = renderHookWithProviders(() => useDashboardOverview('rest_1', 'today'));
+    const { result } = renderHookWithProviders(() => useDashboardOverview('today'));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

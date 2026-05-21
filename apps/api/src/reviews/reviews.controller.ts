@@ -12,6 +12,7 @@ import type {
   ReviewListQuery,
   ReviewModerationDto,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -37,18 +38,15 @@ export class ReviewsController {
   }
 
   @Public()
-  @Get('restaurants/:id/reviews')
-  listForRestaurant(
-    @Param('id') id: string,
-    @Query(new ZodValidationPipe(ReviewListQuerySchema)) q: ReviewListQuery,
-  ) {
-    return this.reviews.listForRestaurant(id, q);
+  @Get('reviews')
+  list(@Query(new ZodValidationPipe(ReviewListQuerySchema)) q: ReviewListQuery) {
+    return this.reviews.list(q);
   }
 
   @Public()
-  @Get('restaurants/:id/reviews/summary')
-  summary(@Param('id') id: string) {
-    return this.reviews.getSummary(id);
+  @Get('reviews/summary')
+  summary() {
+    return this.reviews.getSummary();
   }
 
   @Permissions('review:moderate')
@@ -59,6 +57,7 @@ export class ReviewsController {
 
   @Permissions('review:moderate')
   @Patch('admin/reviews/:id')
+  @AuditAction('review:moderate', 'review')
   moderate(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(ReviewModerationSchema)) dto: ReviewModerationDto,
@@ -68,6 +67,7 @@ export class ReviewsController {
 
   @Permissions('review:moderate')
   @Post('admin/reviews/:id/reply')
+  @AuditAction('review:moderate', 'review')
   reply(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(OwnerReplySchema)) dto: OwnerReplyDto,
@@ -77,6 +77,7 @@ export class ReviewsController {
 
   @Permissions('review:moderate')
   @Delete('admin/reviews/:id')
+  @AuditAction('review:moderate', 'review')
   hide(@Param('id') id: string) {
     return this.reviews.setVisibility(id, { isVisible: false });
   }

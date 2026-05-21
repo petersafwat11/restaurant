@@ -7,7 +7,7 @@ import {
   decimalToString,
   multiply,
   toDecimal,
-} from '@repo/utils';
+} from '@repo/utils/money';
 
 export interface CartPricingInput {
   items: Pick<CartItem, 'unitPrice' | 'quantity'>[];

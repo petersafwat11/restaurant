@@ -1,0 +1,38 @@
+- generic [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - img "Restaurant Admin logo" [ref=e9]
+      - generic [ref=e14]: Restaurant Admin
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "Sign in" [level=1] [ref=e17]
+        - paragraph [ref=e18]: Use your staff credentials to access the admin console.
+      - group [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e23]: Email*
+          - textbox "Email" [active] [ref=e25]:
+            - /placeholder: you@restaurant.com
+        - generic [ref=e26]:
+          - generic [ref=e28]: Password*
+          - generic [ref=e30]:
+            - textbox "Password" [ref=e31]:
+              - /placeholder: ••••••••
+            - button "Show password" [ref=e32] [cursor=pointer]:
+              - img [ref=e33]
+        - generic [ref=e36]:
+          - generic [ref=e37] [cursor=pointer]:
+            - checkbox "Remember me" [ref=e38]
+            - checkbox
+            - text: Remember me
+          - link "Forgot password?" [ref=e39] [cursor=pointer]:
+            - /url: /forgot-password
+        - button "Sign in" [ref=e40] [cursor=pointer]
+  - region "Notifications alt+T"
+  - status [ref=e41]:
+    - generic [ref=e42]:
+      - img [ref=e44]
+      - generic [ref=e46]:
+        - text: Static route
+        - button "Hide static indicator" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+  - alert [ref=e51]

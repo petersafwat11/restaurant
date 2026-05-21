@@ -10,7 +10,7 @@ import type {
   ReferralListQuery,
   ReferralMeDto,
 } from '@repo/types';
-import { REFERRAL_REFEREE_POINTS, REFERRAL_REFERRER_POINTS } from '@repo/utils';
+import { REFERRAL_REFEREE_POINTS, REFERRAL_REFERRER_POINTS } from '@repo/utils/loyalty';
 import type { Queue } from 'bullmq';
 import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { ENV, type ENV_TYPE } from '../config/config.module';

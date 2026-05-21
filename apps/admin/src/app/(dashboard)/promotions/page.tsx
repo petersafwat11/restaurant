@@ -1,4 +1,12 @@
-// TODO(ui): promotions list
+'use client';
+
+import { RequirePermission } from '@/features/auth/components';
+import { PromotionsList } from '@/features/promotions/components';
+
 export default function PromotionsPage() {
-  return null;
+  return (
+    <RequirePermission perm="promotion:read">
+      <PromotionsList />
+    </RequirePermission>
+  );
 }

@@ -1,6 +1,5 @@
 export const restaurantQueryKeys = {
-  all: ['restaurants'] as const,
-  list: () => ['restaurants', 'list'] as const,
-  bySlug: (slug: string) => ['restaurants', 'bySlug', slug] as const,
-  hours: (id: string) => ['restaurants', id, 'hours'] as const,
+  all: ['restaurant'] as const,
+  current: () => ['restaurant', 'current'] as const,
+  hours: () => ['restaurant', 'hours'] as const,
 };

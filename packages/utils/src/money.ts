@@ -47,7 +47,13 @@ const CURRENCY_LOCALE: Record<string, string> = {
   USD: 'en-US',
 };
 
-export function formatMoney(value: DecimalLike, currency: string, locale?: string): string {
+/**
+ * @deprecated Use `formatMoney` from `./format.ts` — same signature, but
+ * browser-safe (doesn't pull `@prisma/client` into client bundles). Kept here
+ * for binary-compatible server code; new client imports should reach for
+ * the format.ts version which is re-exported from the barrel.
+ */
+export function formatMoneyServer(value: DecimalLike, currency: string, locale?: string): string {
   const num = toDecimal(value).toNumber();
   const resolved = locale ?? CURRENCY_LOCALE[currency.toUpperCase()] ?? 'en-US';
   return new Intl.NumberFormat(resolved, {
