@@ -61,11 +61,7 @@ export function CategoryCreateModal({ open, onOpenChange }: CategoryCreateModalP
             placeholder={t('namePlaceholder')}
           />
         </FormField>
-        <FormField
-          label={t('slugLabel')}
-          required
-          helper={t('slugHelper')}
-        >
+        <FormField label={t('slugLabel')} required helper={t('slugHelper')}>
           <Input
             value={computedSlug}
             maxLength={80}

@@ -70,9 +70,7 @@ export default function VerifyEmailPage() {
     <AuthFormShell
       title={t('title')}
       helper={
-        email
-          ? t('helperWithEmail', { email: decodeURIComponent(email) })
-          : t('helperGeneric')
+        email ? t('helperWithEmail', { email: decodeURIComponent(email) }) : t('helperGeneric')
       }
       footer={
         <Link href="/login" className="text-accent underline-offset-4 hover:underline">

@@ -48,9 +48,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
       header={
         message && (
           <div className="px-6 py-4">
-            <div className="text-h2-admin text-fg">
-              {message.subject ?? t('drawer.noSubject')}
-            </div>
+            <div className="text-h2-admin text-fg">{message.subject ?? t('drawer.noSubject')}</div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">
               <span>{message.name}</span>
               <span className="text-fg-subtle">·</span>
@@ -89,9 +87,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
       {message && (
         <div className="space-y-4">
           <section>
-            <div className="mb-1 text-caption-admin text-fg-subtle">
-              {t('drawer.messageLabel')}
-            </div>
+            <div className="mb-1 text-caption-admin text-fg-subtle">{t('drawer.messageLabel')}</div>
             <div className="whitespace-pre-wrap rounded-md border-hairline bg-surface-2 p-3 text-sm text-fg">
               {message.message}
             </div>
@@ -126,7 +122,9 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
                     }`}
                   >
                     <div className="mb-1 flex items-center justify-between text-[11px] text-fg-subtle">
-                      <span>{n.kind === 'REPLY' ? t('drawer.kind.reply') : t('drawer.kind.note')}</span>
+                      <span>
+                        {n.kind === 'REPLY' ? t('drawer.kind.reply') : t('drawer.kind.note')}
+                      </span>
                       <RelativeTime value={n.createdAt} />
                     </div>
                     <div className="whitespace-pre-wrap text-fg">{n.body}</div>
@@ -138,9 +136,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
 
           {canReply && (
             <section>
-              <div className="mb-1 text-caption-admin text-fg-subtle">
-                {t('drawer.replyLabel')}
-              </div>
+              <div className="mb-1 text-caption-admin text-fg-subtle">{t('drawer.replyLabel')}</div>
               <Textarea
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
@@ -163,9 +159,7 @@ export function ContactDrawer({ message, onOpenChange }: Props) {
 
           {canNote && (
             <section>
-              <div className="mb-1 text-caption-admin text-fg-subtle">
-                {t('drawer.noteLabel')}
-              </div>
+              <div className="mb-1 text-caption-admin text-fg-subtle">{t('drawer.noteLabel')}</div>
               <Textarea
                 value={noteBody}
                 onChange={(e) => setNoteBody(e.target.value)}

@@ -1,8 +1,8 @@
 'use client';
 
 import { useAddToCart } from '@/features/cart/hooks';
-import { Link } from '@/i18n/navigation';
 import { useMenuTree } from '@/features/menu/hooks';
+import { Link } from '@/i18n/navigation';
 import { mockFeaturedDishes } from '@/lib/mock/szef-donald';
 import { Container, DishCard, SectionHeader } from '@repo/ui';
 import { ArrowRight } from 'lucide-react';

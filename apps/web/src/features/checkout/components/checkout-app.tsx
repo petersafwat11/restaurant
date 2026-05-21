@@ -41,6 +41,7 @@ const DeliveryLocationPicker = dynamic(
   () => import('@repo/ui').then((m) => m.DeliveryLocationPicker),
   { ssr: false },
 );
+import { Link, useRouter } from '@/i18n/navigation';
 import { formatMoney } from '@repo/utils';
 import {
   ArrowLeft,
@@ -53,7 +54,6 @@ import {
   Utensils,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Link, useRouter } from '@/i18n/navigation';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -303,9 +303,7 @@ export function CheckoutApp() {
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null);
     if (values.orderType === 'DELIVERY' && belowMinimum) {
-      setSubmitError(
-        t('errors.minOrderToast', { amount: formatMoney(minOrderAmount, currency) }),
-      );
+      setSubmitError(t('errors.minOrderToast', { amount: formatMoney(minOrderAmount, currency) }));
       return;
     }
     setSubmitting(true);
@@ -419,8 +417,7 @@ export function CheckoutApp() {
             : inZone
               ? {
                   kind: 'in-zone' as const,
-                  zoneName:
-                    checkedZoneName ?? t('sections.whereWhen.pickerStatus.defaultZoneName'),
+                  zoneName: checkedZoneName ?? t('sections.whereWhen.pickerStatus.defaultZoneName'),
                 }
               : { kind: 'out-of-zone' as const };
 
@@ -459,9 +456,7 @@ export function CheckoutApp() {
                   options={ORDER_TYPE_OPTIONS.map((o) => ({
                     ...o,
                     badge:
-                      o.id === 'DELIVERY'
-                        ? `${defaultDeliveryFee} ${currencySymbol}`
-                        : o.badge,
+                      o.id === 'DELIVERY' ? `${defaultDeliveryFee} ${currencySymbol}` : o.badge,
                     badgeTone: o.id === 'DELIVERY' ? undefined : o.badgeTone,
                   }))}
                   value={field.value}
@@ -728,12 +723,7 @@ export function CheckoutApp() {
             status={sectionStatus(4, 3)}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 4: false }))}
           >
-            <FormField
-              id="order-notes"
-              label=""
-              size="md"
-              helper={t('sections.notes.helper')}
-            >
+            <FormField id="order-notes" label="" size="md" helper={t('sections.notes.helper')}>
               <textarea
                 {...form.register('orderNotes')}
                 rows={3}
@@ -797,11 +787,7 @@ export function CheckoutApp() {
           </CheckoutSection>
 
           {/* 6 — Tip — only unlocked after step 5 */}
-          <CheckoutSection
-            step={6}
-            title={t('sections.tip.title')}
-            status={sectionStatus(6, 5)}
-          >
+          <CheckoutSection step={6} title={t('sections.tip.title')} status={sectionStatus(6, 5)}>
             <Controller
               name="tipAmount"
               control={form.control}

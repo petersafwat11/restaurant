@@ -103,7 +103,9 @@ export default function AdminOrderDetailPage() {
           </Link>
           <span className="text-fg-subtle">/</span>
           <h1 className="font-mono text-h1 tracking-wide text-fg">{order.orderNumber}</h1>
-          <TypeBadge label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()} />
+          <TypeBadge
+            label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()}
+          />
           <StatusPill status={order.status} tokens={STATUS_TOKENS} />
         </div>
         <div className="flex items-center gap-2" data-print="hide">

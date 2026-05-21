@@ -287,6 +287,7 @@ function ReservationsList({
         </thead>
         <tbody>
           {items.map((r) => (
+            // biome-ignore lint/a11y/useKeyWithClickEvents: row click is a UX shortcut; per-row keyboard focus would clutter the listing table
             <tr
               key={r.id}
               className="cursor-pointer border-t border-border/[var(--border-alpha)] hover:bg-surface-2/40"
@@ -310,9 +311,7 @@ function ReservationsList({
               </td>
               <td className="px-4 py-3 tabular-nums text-fg">{r.guestCount}</td>
               <td className="px-4 py-3 text-fg-muted">
-                {r.tableId
-                  ? (tableNameById.get(r.tableId) ?? r.tableId)
-                  : t('listTable.unseated')}
+                {r.tableId ? (tableNameById.get(r.tableId) ?? r.tableId) : t('listTable.unseated')}
               </td>
               <td className="px-4 py-3">
                 <ReservationStatusBadge status={r.status} />

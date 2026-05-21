@@ -56,10 +56,7 @@ export function Topbar({
   }, [user]);
 
   return (
-    <header
-      role="banner"
-      className="sticky top-0 z-40 flex h-topbar items-center gap-4 border-b-hairline bg-bg/80 px-6 backdrop-blur"
-    >
+    <header className="sticky top-0 z-40 flex h-topbar items-center gap-4 border-b-hairline bg-bg/80 px-6 backdrop-blur">
       <h1 className="text-h1-admin text-fg">{title}</h1>
 
       {showDateRange && range && onRangeChange && (

@@ -56,8 +56,8 @@ export function LandingTestimonials() {
           align="center"
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {cards.map((tc, i) => (
-            <TestimonialCard key={i} {...tc} />
+          {cards.map((tc) => (
+            <TestimonialCard key={tc.author.name} {...tc} />
           ))}
         </div>
         <div className="mt-10 flex justify-center">

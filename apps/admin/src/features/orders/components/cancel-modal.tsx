@@ -125,11 +125,7 @@ export function CancelModal({ orderId, onOpenChange, labels }: CancelModalProps)
           </Select>
         </FormField>
 
-        <FormField
-          label={L.notesLabel}
-          required={reason === L.otherKey}
-          helper={L.notesHelper}
-        >
+        <FormField label={L.notesLabel} required={reason === L.otherKey} helper={L.notesHelper}>
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}

@@ -96,9 +96,9 @@ export function CartContainer() {
         position="br"
         hidden={hideFloating}
       />
-      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+      <output aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
-      </div>
+      </output>
     </>
   );
 }

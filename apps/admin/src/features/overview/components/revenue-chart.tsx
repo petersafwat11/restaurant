@@ -44,7 +44,12 @@ export function RevenueChart({ period, currency = 'USD' }: RevenueChartProps) {
     <div className="flex h-[360px] flex-col rounded-card border-hairline bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-h2-admin text-fg">{t('title')}</h2>
-        <div role="group" aria-label={t('seriesAriaLabel')} className="flex items-center gap-1 text-xs">
+        <div
+          // biome-ignore lint/a11y/useSemanticElements: <fieldset> would force default form styling on a toolbar of toggle buttons
+          role="group"
+          aria-label={t('seriesAriaLabel')}
+          className="flex items-center gap-1 text-xs"
+        >
           <button
             type="button"
             aria-pressed

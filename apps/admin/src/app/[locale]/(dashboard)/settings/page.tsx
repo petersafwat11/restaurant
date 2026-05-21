@@ -299,6 +299,7 @@ export default function AdminSettingsPage() {
           title={t('reservations.title')}
           description={t('reservations.description')}
         >
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: NumberStepper renders its own input */}
           <label className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <span className="block text-small text-fg">{t('reservations.slotLength')}</span>
@@ -318,6 +319,7 @@ export default function AdminSettingsPage() {
               onChange={(reservationSlotMinutes) => commit({ reservationSlotMinutes })}
             />
           </label>
+          {/* biome-ignore lint/a11y/noLabelWithoutControl: NumberStepper renders its own input */}
           <label className="flex items-center justify-between gap-4">
             <div className="min-w-0">
               <span className="block text-small text-fg">{t('reservations.buffer')}</span>

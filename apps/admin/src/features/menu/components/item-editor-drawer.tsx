@@ -411,6 +411,7 @@ function DietarySection({
   return (
     <div className="flex flex-col gap-2">
       {flags.map(({ key, label, sub }) => (
+        // biome-ignore lint/a11y/noLabelWithoutControl: Switch renders its own input
         <label
           key={key}
           className="flex items-center justify-between gap-3 rounded-md border-hairline bg-surface p-3"

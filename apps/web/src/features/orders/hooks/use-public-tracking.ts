@@ -11,7 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 export function usePublicOrderTracking(token: string | null | undefined) {
   return useQuery({
     queryKey: ['orders', 'public-tracking', token] as const,
-    queryFn: () => getApiClient().orders.getTrackingByToken(token!),
+    // `enabled` below gates execution on token being truthy, so the assertion
+    // narrows nullable → string for the API call signature.
+    queryFn: () => getApiClient().orders.getTrackingByToken(token as string),
     enabled: !!token,
     staleTime: 15_000,
     // Public tracking can't subscribe to the socket (no auth → no room access),

@@ -18,7 +18,6 @@ export function notify(level: NotifyLevel, message: string): void {
     case 'warning':
       toast.warning(message);
       return;
-    case 'info':
     default:
       toast(message);
       return;

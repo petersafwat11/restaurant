@@ -14,8 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateAddressDto, CreateAddressSchema } from '@repo/types';
 import { EmptyState, FormField } from '@repo/ui';
 import { MapPin, Plus, Star, Trash2 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 

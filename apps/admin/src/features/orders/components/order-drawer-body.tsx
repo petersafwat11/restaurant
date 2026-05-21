@@ -133,11 +133,7 @@ export function OrderDrawerBody({ order, labels }: OrderDrawerBodyProps) {
             <PriceRow label={L.subtotal} value={order.subtotal} currency={order.currency} />
             <PriceRow label={L.tax} value={order.taxTotal} currency={order.currency} />
             {Number(order.deliveryFee) > 0 && (
-              <PriceRow
-                label={L.deliveryFee}
-                value={order.deliveryFee}
-                currency={order.currency}
-              />
+              <PriceRow label={L.deliveryFee} value={order.deliveryFee} currency={order.currency} />
             )}
             {Number(order.tipAmount) > 0 && (
               <PriceRow label={L.tip} value={order.tipAmount} currency={order.currency} />

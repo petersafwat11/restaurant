@@ -56,7 +56,7 @@ function hoursToRows(hours: OperatingHoursDto[]): Row[] {
         isClosed: h.isClosed,
       };
     }
-    return defaults[dayOfWeek]!;
+    return defaults[dayOfWeek] as Row;
   });
 }
 
@@ -145,11 +145,7 @@ export default function AdminHoursPage() {
         </Link>
       </div>
 
-      <SettingsSectionCard
-        id="hours"
-        title={t('card.title')}
-        description={t('card.description')}
-      >
+      <SettingsSectionCard id="hours" title={t('card.title')} description={t('card.description')}>
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
             <Spinner size="lg" />
@@ -164,7 +160,7 @@ export default function AdminHoursPage() {
           <fieldset className="space-y-2">
             <legend className="sr-only">{t('card.title')}</legend>
             {draft.map((r) => {
-              const dayKey = DAY_KEYS[r.dayOfWeek]!;
+              const dayKey = DAY_KEYS[r.dayOfWeek] as (typeof DAY_KEYS)[number];
               const dayLong = tCommon(`days.${dayKey}`);
               const dayShort = tCommon(`daysShort.${dayKey}`);
               const errCode = errors[r.dayOfWeek];
@@ -188,7 +184,9 @@ export default function AdminHoursPage() {
                     />
                     {t('open')}
                   </label>
-                  <div className={`flex flex-1 items-center gap-2 ${r.isClosed ? 'opacity-40' : ''}`}>
+                  <div
+                    className={`flex flex-1 items-center gap-2 ${r.isClosed ? 'opacity-40' : ''}`}
+                  >
                     <input
                       type="time"
                       value={r.opensAt}
@@ -206,7 +204,9 @@ export default function AdminHoursPage() {
                       aria-label={t('closeTimeAria', { day: dayLong })}
                       className="h-9 w-28 rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-2 text-small tabular-nums text-fg outline-none focus:border-accent"
                     />
-                    {r.isClosed && <span className="text-small text-fg-tertiary">{t('closed')}</span>}
+                    {r.isClosed && (
+                      <span className="text-small text-fg-tertiary">{t('closed')}</span>
+                    )}
                     {errCode && !r.isClosed && (
                       <span className="text-small text-negative">{t(`errors.${errCode}`)}</span>
                     )}

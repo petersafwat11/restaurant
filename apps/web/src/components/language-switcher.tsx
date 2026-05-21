@@ -1,10 +1,10 @@
 'use client';
 
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import * as React from 'react';
 import { useTransition } from 'react';
-import { usePathname, useRouter } from '@/i18n/navigation';
-import { routing } from '@/i18n/routing';
 
 type LocaleCode = (typeof routing.locales)[number];
 
@@ -36,6 +36,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   }
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: <fieldset> would force default form styling on a pill switch
     <div
       role="group"
       aria-label="Language"

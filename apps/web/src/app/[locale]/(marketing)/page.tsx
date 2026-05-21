@@ -5,9 +5,9 @@ import { LandingHoursLocation } from '@/features/landing/sections/hours-location
 import { LandingNewsletter } from '@/features/landing/sections/newsletter';
 import { LandingStory } from '@/features/landing/sections/story';
 import { LandingTestimonials } from '@/features/landing/sections/testimonials';
+import { getAlternates } from '@/lib/seo/alternates';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
-import { getAlternates } from '@/lib/seo/alternates';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];

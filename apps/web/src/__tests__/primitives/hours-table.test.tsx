@@ -42,7 +42,7 @@ describe('HoursTable (ISO day numbers)', () => {
     const { container } = render(<HoursTable hours={week} highlightToday />);
     const todayRow = container.querySelector(`tr[aria-current="date"]`);
     expect(todayRow).toBeTruthy();
-    expect(todayRow!.querySelector('th')!.textContent).toBe(
+    expect(todayRow?.querySelector('th')?.textContent).toBe(
       ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][today],
     );
   });

@@ -146,6 +146,7 @@ export function ItemsList({
         cell: (info) => {
           const it = info.row.original;
           return (
+            // biome-ignore lint/a11y/useKeyWithClickEvents: span wraps a Switch only to stop the row's click handler — no keyboard interaction needed
             <span onClick={(e) => e.stopPropagation()}>
               <Switch
                 checked={it.isAvailable}

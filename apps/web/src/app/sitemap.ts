@@ -1,6 +1,6 @@
-import type { MetadataRoute } from 'next';
 import { getPathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import type { MetadataRoute } from 'next';
 
 /**
  * Per-locale sitemap with `<xhtml:link rel="alternate" hreflang>` alternates.
@@ -13,14 +13,7 @@ import { routing } from '@/i18n/routing';
  * The base URL falls back to localhost when `NEXT_PUBLIC_APP_URL` is unset so
  * dev builds don't crash; production deployments MUST set it.
  */
-const PUBLIC_ROUTES = [
-  '/',
-  '/about',
-  '/contact',
-  '/locations',
-  '/reservations',
-  '/menu',
-] as const;
+const PUBLIC_ROUTES = ['/', '/about', '/contact', '/locations', '/reservations', '/menu'] as const;
 
 function baseUrl(): string {
   return (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
@@ -32,10 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return PUBLIC_ROUTES.flatMap((href) => {
     const alternates = Object.fromEntries(
-      routing.locales.map((locale) => [
-        locale,
-        `${base}${getPathname({ locale, href })}`,
-      ]),
+      routing.locales.map((locale) => [locale, `${base}${getPathname({ locale, href })}`]),
     );
     return routing.locales.map((locale) => ({
       url: `${base}${getPathname({ locale, href })}`,

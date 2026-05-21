@@ -165,7 +165,8 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
                   <ul className="space-y-1 text-sm">
                     {c.paymentMethods.map((p) => (
                       <li key={p.id} className="text-fg-muted">
-                        {p.brand ?? t('payment.cardFallback')} ···· {p.last4 ?? t('payment.last4Fallback')}
+                        {p.brand ?? t('payment.cardFallback')} ····{' '}
+                        {p.last4 ?? t('payment.last4Fallback')}
                       </li>
                     ))}
                   </ul>

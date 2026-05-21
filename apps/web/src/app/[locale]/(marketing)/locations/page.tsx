@@ -167,16 +167,10 @@ function WeekTimeline({ hours, now }: WeekTimelineProps) {
           return (
             <div
               key={d}
-              className={
-                'grid grid-cols-[44px_1fr_88px] items-center gap-3 rounded-md py-1.5 sm:gap-4 ' +
-                (isToday ? 'bg-surface-warm/40 px-2' : 'px-2')
-              }
+              className={`grid grid-cols-[44px_1fr_88px] items-center gap-3 rounded-md py-1.5 sm:gap-4 ${isToday ? 'bg-surface-warm/40 px-2' : 'px-2'}`}
             >
               <span
-                className={
-                  'text-caption font-semibold uppercase tracking-wider ' +
-                  (isToday ? 'text-accent' : 'text-fg-muted')
-                }
+                className={`text-caption font-semibold uppercase tracking-wider ${isToday ? 'text-accent' : 'text-fg-muted'}`}
               >
                 {shortDay(d)}
               </span>
@@ -184,10 +178,7 @@ function WeekTimeline({ hours, now }: WeekTimelineProps) {
               <div className="relative h-3 rounded-full bg-surface-warm/70">
                 {!isClosed && (
                   <div
-                    className={
-                      'absolute inset-y-0 rounded-full transition-colors ' +
-                      (isToday ? 'bg-accent/55 ring-1 ring-inset ring-accent/40' : 'bg-accent/25')
-                    }
+                    className={`absolute inset-y-0 rounded-full transition-colors ${isToday ? 'bg-accent/55 ring-1 ring-inset ring-accent/40' : 'bg-accent/25'}`}
                     style={{ left: `${left}%`, width: `${Math.max(0, right - left)}%` }}
                   />
                 )}
@@ -203,10 +194,7 @@ function WeekTimeline({ hours, now }: WeekTimelineProps) {
               </div>
 
               <span
-                className={
-                  'text-right text-caption tabular-nums ' +
-                  (isClosed ? 'text-fg-subtle' : isToday ? 'font-medium text-fg' : 'text-fg-muted')
-                }
+                className={`text-right text-caption tabular-nums ${isClosed ? 'text-fg-subtle' : isToday ? 'font-medium text-fg' : 'text-fg-muted'}`}
               >
                 {isClosed || !row
                   ? t('weekTimeline.closed')
@@ -271,7 +259,9 @@ function MapCard({ restaurant: r }: MapCardProps) {
           preserveAspectRatio="xMidYMid slice"
           className="absolute inset-0 h-full w-full"
           aria-hidden
+          role="presentation"
         >
+          <title>Map</title>
           <defs>
             <pattern id="gridFine" width="32" height="32" patternUnits="userSpaceOnUse">
               <path
@@ -342,7 +332,8 @@ function MapCard({ restaurant: r }: MapCardProps) {
         {/* Restaurant pin */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[68%]">
           <span className="absolute -inset-3 animate-ping rounded-full bg-accent/40" />
-          <svg width={46} height={58} viewBox="0 0 44 56" aria-hidden>
+          <svg width={46} height={58} viewBox="0 0 44 56" aria-hidden role="presentation">
+            <title>Restaurant pin</title>
             <path
               d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
               fill="rgb(var(--accent))"
@@ -512,19 +503,13 @@ export default function LocationsPage() {
               {status && (
                 <span className="inline-flex items-center gap-2">
                   <span
-                    className={
-                      'relative grid h-2.5 w-2.5 place-items-center ' +
-                      (status.isOpen ? 'text-positive' : 'text-white/60')
-                    }
+                    className={`relative grid h-2.5 w-2.5 place-items-center ${status.isOpen ? 'text-positive' : 'text-white/60'}`}
                   >
                     {status.isOpen && (
                       <span className="absolute inset-0 animate-ping rounded-full bg-positive opacity-75" />
                     )}
                     <span
-                      className={
-                        'relative h-2.5 w-2.5 rounded-full ' +
-                        (status.isOpen ? 'bg-positive' : 'bg-white/60')
-                      }
+                      className={`relative h-2.5 w-2.5 rounded-full ${status.isOpen ? 'bg-positive' : 'bg-white/60'}`}
                     />
                   </span>
                   <span className="font-semibold uppercase tracking-wider text-white">
@@ -626,10 +611,7 @@ export default function LocationsPage() {
                     <h3 className="text-eyebrow uppercase text-fg-muted">{t('hours.label')}</h3>
                     {status && (
                       <span
-                        className={
-                          'text-caption font-medium ' +
-                          (status.isOpen ? 'text-positive' : 'text-fg-muted')
-                        }
+                        className={`text-caption font-medium ${status.isOpen ? 'text-positive' : 'text-fg-muted'}`}
                       >
                         {status.detail}
                       </span>

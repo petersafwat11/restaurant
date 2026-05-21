@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+import { getAlternates } from '@/lib/seo/alternates';
 import { Container, EmptyState } from '@repo/ui';
 import { CalendarClock } from 'lucide-react';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAlternates } from '@/lib/seo/alternates';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];

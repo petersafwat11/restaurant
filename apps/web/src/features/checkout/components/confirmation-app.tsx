@@ -111,9 +111,7 @@ function StatusTimeline({ order }: { order: OrderDto }) {
               )}
             </div>
             <div className="flex flex-1 flex-col">
-              <span className="text-small font-medium text-fg">
-                {t(`status.${event.status}`)}
-              </span>
+              <span className="text-small font-medium text-fg">{t(`status.${event.status}`)}</span>
               <span className="text-caption tabular-nums text-fg-subtle">
                 {format.dateTime(new Date(event.createdAt), {
                   hour: '2-digit',
@@ -202,7 +200,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
       <Container className="pb-24 pt-16">
         <SuccessHero
           title={t('hero.title')}
-          description={<>{t('hero.description')}</>}
+          description={t('hero.description')}
           meta={
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center gap-3 rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-3 shadow-sm">

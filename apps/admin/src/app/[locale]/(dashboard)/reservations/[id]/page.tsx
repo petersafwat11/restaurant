@@ -9,9 +9,9 @@ import {
   useSeatReservation,
   useTables,
 } from '@/features/reservations/hooks';
+import { Link } from '@/i18n/navigation';
 import { getApiClient } from '@/lib/api-client';
 import type { ReservationDto, RestaurantPublicDto } from '@repo/types';
-import { Link } from '@/i18n/navigation';
 import { ActionModal, EmptyState, KeyValueGrid, PageSpinner, SettingsSectionCard } from '@repo/ui';
 import { formatRestaurantDateTime } from '@repo/utils';
 import { useQuery } from '@tanstack/react-query';

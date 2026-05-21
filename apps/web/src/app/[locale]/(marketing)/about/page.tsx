@@ -1,7 +1,7 @@
-import type { Metadata } from 'next';
-import { Container, SectionHeader } from '@repo/ui';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getAlternates } from '@/lib/seo/alternates';
+import { Container, SectionHeader } from '@repo/ui';
+import type { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];

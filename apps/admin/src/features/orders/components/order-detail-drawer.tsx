@@ -15,7 +15,7 @@ import {
 } from '@repo/ui';
 import { AlertCircle, ArrowRight, Printer } from 'lucide-react';
 import * as React from 'react';
-import { type OrderDrawerBodyLabels, OrderDrawerBody } from './order-drawer-body';
+import { OrderDrawerBody, type OrderDrawerBodyLabels } from './order-drawer-body';
 
 export interface OrderDetailDrawerLabels {
   ariaLabel: string;

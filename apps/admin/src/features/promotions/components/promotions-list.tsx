@@ -139,7 +139,6 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         },
       },
     ],
-    // biome-ignore lint/correctness/useExhaustiveDependencies: fmtValue/fmtWindow are stable per render and use t which is captured via dep
     [t],
   );
 

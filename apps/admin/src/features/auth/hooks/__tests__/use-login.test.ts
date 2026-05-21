@@ -28,9 +28,7 @@ afterEach(() => {
 
 describe('useLogin', () => {
   it('sets the session on success', async () => {
-    server.use(
-      http.post(`${API}/auth/login`, async () => HttpResponse.json({ user: fakeUser })),
-    );
+    server.use(http.post(`${API}/auth/login`, async () => HttpResponse.json({ user: fakeUser })));
 
     const { result } = renderHookWithProviders(() => useLogin());
     result.current.mutate({

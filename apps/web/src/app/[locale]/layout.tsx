@@ -1,10 +1,10 @@
+import { routing } from '@/i18n/routing';
+import { AppProviders } from '@/providers/app-providers';
 import type { Metadata } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
+import { Fraunces, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
-import { AppProviders } from '@/providers/app-providers';
-import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 const fraunces = Fraunces({

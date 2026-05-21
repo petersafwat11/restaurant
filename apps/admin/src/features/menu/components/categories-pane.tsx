@@ -142,6 +142,7 @@ function CategoryRow({
         // nested buttons are invalid HTML and cause a React hydration error.
         // Use a row-level click target via a div + keyboard handler.
         <div
+          // biome-ignore lint/a11y/useSemanticElements: nested-button HTML conflict — see comment above
           role="button"
           tabIndex={0}
           onClick={onSelect}

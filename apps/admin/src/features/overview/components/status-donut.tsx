@@ -42,7 +42,9 @@ export function StatusDonut({ period }: StatusDonutProps) {
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
           <div>
             <div className="text-h1-admin tabular-nums text-fg">{fmtInt(total)}</div>
-            <div className="text-xs text-fg-subtle">{t('centerLabel', { period: periodLabel })}</div>
+            <div className="text-xs text-fg-subtle">
+              {t('centerLabel', { period: periodLabel })}
+            </div>
           </div>
         </div>
       </div>

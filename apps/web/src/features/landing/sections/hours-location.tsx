@@ -11,7 +11,14 @@ function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addres
       aria-label={ariaLabel}
       className="relative aspect-[4/3] w-full overflow-hidden rounded-image-lg bg-surface-warm"
     >
-      <svg viewBox="0 0 400 300" preserveAspectRatio="none" className="h-full w-full" aria-hidden>
+      <svg
+        viewBox="0 0 400 300"
+        preserveAspectRatio="none"
+        className="h-full w-full"
+        aria-hidden
+        role="presentation"
+      >
+        <title>Map</title>
         <defs>
           <pattern id="streetGrid" width="48" height="48" patternUnits="userSpaceOnUse">
             <path
@@ -39,7 +46,8 @@ function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addres
       </svg>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="absolute -inset-3 animate-ping rounded-full bg-accent opacity-30" />
-        <svg width={44} height={56} viewBox="0 0 44 56" aria-hidden>
+        <svg width={44} height={56} viewBox="0 0 44 56" aria-hidden role="presentation">
+          <title>Location pin</title>
           <path
             d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
             fill="rgb(var(--accent))"

@@ -8,7 +8,7 @@ import { Filter, Maximize2, Minimize2, Volume2, VolumeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
-type Filter = 'ALL' | 'DELIVERY' | 'PICKUP' | 'DINE_IN';
+type KdsFilter = 'ALL' | 'DELIVERY' | 'PICKUP' | 'DINE_IN';
 
 // Two-tone chime via Web Audio. No asset, no autoplay surprise — caller must
 // have interacted with the page (the toggle button click) before this fires
@@ -49,7 +49,7 @@ function ticketsByStatus(tickets: KitchenTicketDto[], status: OrderStatus): Kitc
   return tickets.filter((t) => t.status === status);
 }
 
-const FILTERS: Filter[] = ['ALL', 'DINE_IN', 'PICKUP', 'DELIVERY'];
+const FILTERS: KdsFilter[] = ['ALL', 'DINE_IN', 'PICKUP', 'DELIVERY'];
 
 function Column({
   title,
@@ -96,7 +96,7 @@ export default function KdsPage() {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('kds.sound') !== 'off';
   });
-  const [filter, setFilter] = React.useState<Filter>('ALL');
+  const [filter, setFilter] = React.useState<KdsFilter>('ALL');
   const [fullscreen, setFullscreen] = React.useState(false);
   const playChime = useChime(sound);
   const prevCountRef = React.useRef<number>(feed.data?.length ?? 0);
@@ -146,11 +146,7 @@ export default function KdsPage() {
     <div className="flex h-screen flex-col">
       <header className="flex shrink-0 items-center justify-between border-b border-border/[var(--border-alpha)] bg-surface/60 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-3 text-small">
-          <Link
-            href="/orders"
-            className="text-fg-muted hover:text-fg"
-            aria-label={t('backAria')}
-          >
+          <Link href="/orders" className="text-fg-muted hover:text-fg" aria-label={t('backAria')}>
             {t('backToAdmin')}
           </Link>
           <span className="text-fg-subtle">/</span>

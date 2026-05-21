@@ -136,6 +136,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: control passed via `children`
     <label className="block">
       <span className="mb-1 block text-caption uppercase tracking-wider text-fg-subtle">
         {label}
@@ -289,10 +290,7 @@ export default function RestaurantProfilePage() {
               onChange={(e) => patch('name', e.target.value)}
             />
           </Field>
-          <Field
-            label={t('identity.slugLabel')}
-            hint={t('identity.slugHint')}
-          >
+          <Field label={t('identity.slugLabel')} hint={t('identity.slugHint')}>
             <Input
               value={draft.slug}
               maxLength={80}

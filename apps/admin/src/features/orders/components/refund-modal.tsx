@@ -118,9 +118,7 @@ export function RefundModal({ orderId, onOpenChange, labels }: RefundModalProps)
       open={open}
       onOpenChange={onOpenChange}
       title={order ? L.title(order.orderNumber) : L.titleFallback}
-      description={
-        order ? L.description(formatMoney(order.grandTotal, order.currency)) : ''
-      }
+      description={order ? L.description(formatMoney(order.grandTotal, order.currency)) : ''}
       footerHelper={L.footerHelper}
       primary={{
         label: order
@@ -140,6 +138,7 @@ export function RefundModal({ orderId, onOpenChange, labels }: RefundModalProps)
             <button
               key={m}
               type="button"
+              // biome-ignore lint/a11y/useSemanticElements: radio group is rendered with `<button role="radio">` to keep the segmented-control visual styling
               role="radio"
               aria-checked={mode === m}
               onClick={() => {

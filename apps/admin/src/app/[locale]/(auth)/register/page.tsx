@@ -101,9 +101,7 @@ export default function RegisterPage() {
             label={t('password')}
             required
             error={form.formState.errors.password?.message}
-            helper={
-              !form.formState.errors.password && !password ? t('passwordHelper') : undefined
-            }
+            helper={!form.formState.errors.password && !password ? t('passwordHelper') : undefined}
           >
             <PasswordInput autoComplete="new-password" {...form.register('password')} />
           </FormField>

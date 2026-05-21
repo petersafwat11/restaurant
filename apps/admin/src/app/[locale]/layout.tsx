@@ -1,8 +1,8 @@
+import { routing } from '@/i18n/routing';
+import { AppProviders } from '@/providers/app-providers';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { AppProviders } from '@/providers/app-providers';
-import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 type Props = {

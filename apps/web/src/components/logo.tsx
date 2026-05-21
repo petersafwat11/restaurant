@@ -20,7 +20,15 @@ interface LogoProps {
 
 export function Logo({ variant = 'full', size = 40, className }: LogoProps) {
   const hex = (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden className="shrink-0">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      aria-hidden="true"
+      role="presentation"
+      className="shrink-0"
+    >
+      <title>Szef Donald</title>
       <defs>
         <linearGradient id="szef-copper" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#D9551E" />

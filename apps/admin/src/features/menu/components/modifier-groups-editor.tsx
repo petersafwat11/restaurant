@@ -85,6 +85,7 @@ function ModifierGroupCard({
             validate={(v) => (v.length === 0 ? 'Required' : null)}
           />
           <div className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: Switch renders its own input */}
             <label className="inline-flex items-center gap-2">
               <Switch
                 checked={group.isRequired}
