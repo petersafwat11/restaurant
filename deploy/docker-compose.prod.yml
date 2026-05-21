@@ -1,0 +1,166 @@
+# Production stack for the restaurant app.
+# Lives on the Contabo VPS at /opt/restaurant/docker-compose.yml (this file
+# is rsynced there by deploy.yml). Image tags are :latest by default; CI may
+# pin to a specific :sha-* via `IMAGE_TAG` env on `docker compose pull`.
+#
+# Operations:
+#   pull:    docker compose pull
+#   up:      docker compose up -d
+#   migrate: docker compose run --rm api pnpm --filter @repo/db migrate:deploy
+#   seed:    docker compose run --rm api pnpm --filter @repo/db seed
+#   logs:    docker compose logs -f api
+#
+# Network: a single internal bridge net. Only Caddy is exposed on 80/443.
+# Pre-create the network on first run with: `docker network create app-net`.
+
+name: restaurant
+
+networks:
+  app-net:
+    external: true
+
+volumes:
+  postgres-data:
+  redis-data:
+  caddy-data:
+  caddy-config:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    init: true
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-restaurant}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [app-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-restaurant}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    init: true
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks: [app-net]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    image: ${API_IMAGE:-ghcr.io/petersafwat11/restaurant-api}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-restaurant}?schema=public
+      REDIS_URL: redis://redis:6379
+      UPLOADS_DIR: /var/uploads
+      APP_URL_WEB: ${APP_URL_WEB:?APP_URL_WEB is required}
+      APP_URL_ADMIN: ${APP_URL_ADMIN:?APP_URL_ADMIN is required}
+      APP_URL_API: ${APP_URL_API:?APP_URL_API is required}
+      APP_DEEP_LINK_SCHEME: ${APP_DEEP_LINK_SCHEME:-restaurant}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-30d}
+      ORDER_TRACKING_SECRET: ${ORDER_TRACKING_SECRET:-}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-Restaurant <no-reply@example.com>}
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM: ${TWILIO_FROM:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENV: ${SENTRY_ENV:-production}
+      POSTHOG_KEY: ${POSTHOG_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-https://app.posthog.com}
+    volumes:
+      - /opt/restaurant/uploads:/var/uploads
+    networks: [app-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/v1/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/petersafwat11/restaurant-web}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      api: { condition: service_started }
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_URL: ${APP_URL_API}/api/v1
+      APP_URL_API: ${APP_URL_API}
+    networks: [app-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  admin:
+    image: ${ADMIN_IMAGE:-ghcr.io/petersafwat11/restaurant-admin}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    init: true
+    depends_on:
+      api: { condition: service_started }
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_URL: ${APP_URL_API}/api/v1
+      APP_URL_API: ${APP_URL_API}
+    networks: [app-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    init: true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 (QUIC)
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+      CADDY_EMAIL: ${CADDY_EMAIL:-admin@example.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [app-net]
+    depends_on:
+      - web
+      - admin
+      - api

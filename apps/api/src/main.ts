@@ -1,11 +1,13 @@
 import 'reflect-metadata';
-import { join } from 'node:path';
+import { resolve } from 'node:path';
 import fastifyCookie from '@fastify/cookie';
+import fastifyMultipart from '@fastify/multipart';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { MAX_UPLOAD_BYTES } from '@repo/types';
 import { initNodeSentry } from '@repo/observability';
 import { AppModule } from './app.module';
 import { env } from './config/env';
@@ -48,13 +50,21 @@ async function bootstrap() {
   // Cookie support — must be registered before any routes consume cookies.
   await app.register(fastifyCookie as Parameters<typeof app.register>[0]);
 
+  // Multipart support for uploads (single file per request, 5 MB cap).
+  await app.register(fastifyMultipart as Parameters<typeof app.register>[0], {
+    limits: {
+      fileSize: MAX_UPLOAD_BYTES,
+      files: 1,
+    },
+  });
+
   app.setGlobalPrefix('api/v1');
 
   // Serve uploaded files (menu images, etc.) from the host filesystem. Kept
   // outside the /api/v1 prefix so URLs are short and cache-friendly. In
-  // production the same directory can be fronted by a CDN or nginx.
+  // production the same directory is a bind-mounted Docker volume.
   app.useStaticAssets({
-    root: join(process.cwd(), 'uploads'),
+    root: resolve(env.UPLOADS_DIR),
     prefix: '/uploads/',
     decorateReply: false,
   });

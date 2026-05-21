@@ -5,7 +5,6 @@ export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_REPORTS = 'reports';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
-export const QUEUE_R2_CLEANUP = 'r2.orphan-cleanup';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
@@ -15,7 +14,6 @@ export const QUEUE_NAMES = {
   reports: QUEUE_REPORTS,
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
-  r2Cleanup: QUEUE_R2_CLEANUP,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -42,4 +40,3 @@ export const JOB_REPORTS_CLEANUP = 'reports.cleanup';
 export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';
 export const JOB_ANALYTICS_ROLLUP_FINALIZE = 'analytics.rollup-finalize';
 export const JOB_AUDIT_WRITE = 'audit.write';
-export const JOB_R2_ORPHAN_SWEEP = 'r2.orphan-sweep';

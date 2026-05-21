@@ -292,7 +292,7 @@ export class MenuService {
     }
     await this.prisma.menuItemImage.delete({ where: { id: imageId } });
     const key = this.uploads.extractKeyFromUrl(image.url);
-    if (key) await this.uploads.deleteObject(key);
+    if (key) await this.uploads.deleteByKey(key);
     await this.invalidateTree();
   }
 

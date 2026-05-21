@@ -200,10 +200,9 @@ import {
   type PaymentMethodsBreakdownDto,
   PaymentMethodsBreakdownSchema,
   PaymentSchema,
-  type PresignUploadDto,
-  PresignUploadSchema,
-  type PresignedUploadResponseDto,
-  PresignedUploadResponseSchema,
+  type UploadKind,
+  type UploadResponseDto,
+  UploadResponseSchema,
   type PromotionDto,
   PromotionListSchema,
   PromotionSchema,
@@ -774,12 +773,57 @@ export function createApiClient(opts: ApiClientOptions) {
 
   // ---- uploads ----------------------------------------------------------
   const uploads = {
-    presign: (input: PresignUploadDto): Promise<PresignedUploadResponseDto> =>
-      request('/uploads/presign', {
+    /**
+     * Direct multipart upload of an image. The server validates kind, mime,
+     * and size; on success returns `{ publicUrl, key }`. Caller wires `key`
+     * into the relevant DB row via the appropriate mutation.
+     */
+    upload: async (input: { file: File; kind: UploadKind }): Promise<UploadResponseDto> => {
+      const url = buildUrl(opts.baseUrl, '/uploads');
+      const headers: Record<string, string> = {};
+      if (opts.getAccessToken) {
+        const token = await opts.getAccessToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+      }
+      if (opts.audience) {
+        headers['X-App-Audience'] = opts.audience;
+      }
+
+      const form = new FormData();
+      form.append('kind', input.kind);
+      form.append('file', input.file);
+
+      const init: RequestInit = {
         method: 'POST',
-        body: PresignUploadSchema.parse(input),
-        responseSchema: PresignedUploadResponseSchema,
-      }),
+        headers,
+        body: form,
+        credentials: 'include',
+      };
+
+      let res = await fetchImpl(url, init);
+      if (res.status === 401 && !isCookieClient && opts.refreshAccessToken) {
+        const newToken = await opts.refreshAccessToken();
+        if (newToken) {
+          headers.Authorization = `Bearer ${newToken}`;
+          res = await fetchImpl(url, { ...init, headers });
+        } else if (opts.onUnauthorized) {
+          await opts.onUnauthorized();
+        }
+      } else if (res.status === 401 && opts.onUnauthorized) {
+        await opts.onUnauthorized();
+      }
+
+      if (!res.ok) {
+        let body: unknown;
+        try {
+          body = await res.json();
+        } catch {
+          body = { message: await res.text().catch(() => '') };
+        }
+        throw ApiError.fromResponse(res.status, body);
+      }
+      return UploadResponseSchema.parse(await res.json());
+    },
   };
 
   // ---- cart -------------------------------------------------------------

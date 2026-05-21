@@ -5,7 +5,6 @@ import {
   QUEUE_AUDIT,
   QUEUE_EMAIL,
   QUEUE_PUSH,
-  QUEUE_R2_CLEANUP,
   QUEUE_RECEIPT,
   QUEUE_REPORTS,
   QUEUE_SMS,
@@ -19,7 +18,6 @@ import { AnalyticsProcessor } from './analytics.processor';
 import { AuditProcessor } from './audit.processor';
 import { EmailProcessor } from './email.processor';
 import { PushProcessor } from './push.processor';
-import { R2OrphanCleanupProcessor } from './r2-orphan-cleanup.processor';
 import { ReceiptProcessor } from './receipt.processor';
 import { ReportsProcessor } from './reports.processor';
 import { SmsProcessor } from './sms.processor';
@@ -41,7 +39,6 @@ import { SmsProcessor } from './sms.processor';
       { name: QUEUE_REPORTS },
       { name: QUEUE_ANALYTICS },
       { name: QUEUE_AUDIT },
-      { name: QUEUE_R2_CLEANUP },
     ),
   ],
   providers: [
@@ -52,7 +49,6 @@ import { SmsProcessor } from './sms.processor';
     ReportsProcessor,
     AnalyticsProcessor,
     AuditProcessor,
-    R2OrphanCleanupProcessor,
   ],
 })
 export class JobsModule {}

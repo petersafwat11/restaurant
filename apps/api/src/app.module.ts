@@ -18,6 +18,7 @@ import { ConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { HealthController } from './health/health.controller';
 import path from 'node:path';
 import {
   AcceptLanguageResolver,
@@ -116,6 +117,7 @@ import { UsersModule } from './users/users.module';
     JobsModule,
     SchedulerModule,
   ],
+  controllers: [HealthController],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },

@@ -1,7 +1,25 @@
 # Deployment Plan: Restaurant App → Contabo VPS
 
-**Status:** Draft for approval.
+**Status:** Approved 2026-05-22. Code-changes phase in progress.
 **Owner:** Peter (you = decisions/payment/credentials) + Claude (execution via SSH and Playwright).
+
+---
+
+## 0. Current status
+
+| Item | State |
+|---|---|
+| VPS purchased | ✅ 2026-05-21 — Contabo Cloud VPS 10 SSD, Hub Europe |
+| VPS IPv4 | `207.180.217.159` |
+| VPS IPv6 | `2a02:c207:2331:6770::/64` |
+| Customer / Order ID | `14993659` / `14993660` |
+| Initial root password | ⚠️ stored in `deploy/.secrets.local.md` (gitignored) — burned after first SSH session |
+| Domain | ✅ `szefdonald.pl` purchased on Hostinger |
+| Hostnames | `szefdonald.pl` (web) · `admin.szefdonald.pl` · `api.szefdonald.pl` |
+| SSH key | ✅ generated 2026-05-22 — `~/.ssh/contabo_restaurant{,.pub}`, fingerprint `SHA256:npd9YFVzE29vHQ9BXLXtE+iKcq4hpALGhCPuj1RdVbI` |
+| Stripe | ⏳ deferred — owner has not applied yet; payments module runs the dev stub for launch |
+| Sentry / PostHog | ⏳ skipped for launch — env vars left blank, code already no-ops |
+| Admin user | seeded by Claude during first deploy (Peter provides desired email/password) |
 
 ---
 
@@ -9,25 +27,41 @@
 
 | Decision | Choice | Notes |
 |---|---|---|
-| VPS provider | **Contabo Cloud VPS 10** | 4 vCPU, 8 GB RAM, 200 Mbit/s |
-| Storage | **150 GB SSD (free)** | SSD is plenty for our workload |
-| Region | **EU (Germany)** | Assumed MENA customer base; confirm before purchase |
+| VPS provider | **Contabo Cloud VPS 10 SSD** | 4 vCPU, 8 GB RAM, 200 Mbit/s — purchased |
+| Storage | **150 GB SSD (free)** | Plenty for our workload |
+| Region | **Hub Europe** | Closest to MENA customer base |
 | OS | **Ubuntu 24.04 LTS, plain** | No control panel |
 | Term | **1 month first** | Verify, then renew 12-month for -20% |
-| Auto Backup add-on | **No** | We will do free nightly local `pg_dump` instead |
-| Object storage | **None** | Images go to a local-disk Docker volume |
-| Domain registrar | **Hostinger** (new domain — name TBD by user) | |
+| Auto Backup add-on | **No** | Free nightly local `pg_dump` instead (7-day retention) |
+| Object storage | **None** | Images go to local-disk Docker volume |
+| Domain registrar | **Hostinger** | Domain name TBD; URL pattern below |
 | URL pattern | `web` = `{domain}` · `admin` = `admin.{domain}` · `api` = `api.{domain}` | |
 | Projects on this VPS | **Restaurant app only for now** | Caddy reverse-proxy ready to host more later |
 | TLS | **Caddy + Let's Encrypt** | Auto-issued, auto-renewed |
 | Container registry | **GitHub Container Registry (ghcr.io)** | Free for private images on personal accounts |
 | CI/CD | **GitHub Actions** | Build → push → SSH deploy → migrate |
-| Monitoring | **Sentry (already wired) + UptimeRobot free tier** | |
+| Monitoring | **UptimeRobot free tier only** | Sentry/PostHog deferred |
 | Email | **Resend** (existing env vars) | Don't send mail from VPS IP — Contabo IPs are often blocklisted |
 | SMS | **Twilio** (existing env vars) | |
-| Payments | **Stripe** (existing env vars) | |
+| Payments | **Stripe deferred** | Module runs dev stub until real keys supplied |
 
 **Estimated monthly cost:** €4.50/mo (VPS 1mo) → €3.60/mo (after 12mo renewal). Domain ~$10/year. Everything else free tier or already paid.
+
+---
+
+## 0a. Security note: initial root password
+
+The Contabo initial root password was sent through plaintext channels (email + chat). Treat it as **compromised the moment we got it**. The bootstrap script's very first responsibilities, in order:
+
+1. SSH in as root using the compromised password (one and only time).
+2. Create `deploy` user with sudo + installed SSH public key.
+3. `passwd root` to rotate to a new strong password (or `passwd -l root` to lock entirely).
+4. Edit `/etc/ssh/sshd_config.d/99-hardening.conf`:
+   - `PermitRootLogin no`
+   - `PasswordAuthentication no`
+   - `PubkeyAuthentication yes`
+5. `systemctl restart sshd`.
+6. From this point: SSH only as `deploy` with the keypair. The leaked password is dead.
 
 ---
 

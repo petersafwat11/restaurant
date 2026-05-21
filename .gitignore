@@ -62,3 +62,7 @@ dump.rdb
 
 # Playwright MCP session artifacts
 .playwright-mcp/
+
+# Deployment local secrets (VPS credentials, etc.) — never commit
+deploy/.secrets.local
+deploy/.secrets.local.*

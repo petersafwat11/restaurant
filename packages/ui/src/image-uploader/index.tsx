@@ -41,12 +41,12 @@ export interface ImageUploaderProps {
 
 /**
  * Drop-or-click uploader with drag-to-reorder thumbnails. Storage-agnostic
- * — the parent component supplies `onAdd(files)` which typically calls a
- * presign hook (`useImagePresign` → `PUT` to R2 → `POST` attach).
+ * — the parent component supplies `onAdd(files)` which typically calls
+ * `useUploadImage()` (multipart POST → API writes to disk → returns
+ * `{ publicUrl, key }`).
  *
- * Page-3 fix #3: replaces the bespoke per-section uploader in the Claude
- * Design source. Used by Menu items, Promotions banners, restaurant
- * logo/cover, and customer avatars — `aspect` + `layout` are the only knobs.
+ * Used by Menu items, Promotions banners, restaurant logo/cover, and
+ * customer avatars — `aspect` + `layout` are the only knobs.
  */
 export function ImageUploader({
   images,

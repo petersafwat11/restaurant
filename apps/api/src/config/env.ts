@@ -24,17 +24,13 @@ const EnvSchema = z.object({
 
   APP_URL_WEB: z.string().url().default('http://localhost:3000'),
   APP_URL_ADMIN: z.string().url().default('http://localhost:3001'),
+  APP_URL_API: z.string().url().default('http://localhost:4000'),
   APP_DEEP_LINK_SCHEME: z.string().default('restaurant'),
 
-  // Cloudflare R2 (S3-compatible). Empty in dev → uploads service falls
-  // back to a stubbed presigned URL so e2e tests + bring-up don't need
-  // real credentials.
-  R2_ENDPOINT: z.string().optional().default(''),
-  R2_ACCESS_KEY_ID: z.string().optional().default(''),
-  R2_SECRET_ACCESS_KEY: z.string().optional().default(''),
-  R2_BUCKET: z.string().optional().default(''),
-  R2_PUBLIC_URL: z.string().optional().default(''),
-  R2_REGION: z.string().default('auto'),
+  // Local-disk uploads. Files are written under UPLOADS_DIR and served via
+  // the API at `${APP_URL_API}/uploads/{key}` (static middleware in main.ts).
+  // In prod, UPLOADS_DIR is a bind-mounted Docker volume (`/var/uploads`).
+  UPLOADS_DIR: z.string().default('uploads'),
 
   // Stripe. Empty in dev → payments module runs a fake provider that issues
   // a deterministic `client_secret` so the frontend SDK path can still be
