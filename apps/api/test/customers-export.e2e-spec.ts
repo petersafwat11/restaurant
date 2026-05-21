@@ -1,6 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
+import {
+  createTestApp,
+  ensureOwnerToken,
+  ensureRestaurant,
+  resetDb,
+  resetMenuDb,
+} from './setup-e2e';
 
 describe('customers export (e2e)', () => {
   let app: NestFastifyApplication;
@@ -19,6 +25,9 @@ describe('customers export (e2e)', () => {
     await resetMenuDb(app);
     await resetDb(app);
     ownerToken = await ensureOwnerToken(app);
+    // The export endpoint resolves a per-tenant slug for the filename — no
+    // Restaurant row → NotFoundException → 404. Seed one before the test.
+    await ensureRestaurant(app);
 
     for (const email of [
       'alice.cust.e2e@test.local',

@@ -7,7 +7,18 @@ import type {
   RealtimeEventName,
   SubscribeAck,
 } from '@repo/types';
-import type { Socket } from 'socket.io-client';
+
+// Pull `Socket` through the same dynamic import the runtime uses, with an
+// explicit `resolution-mode: 'import'` hint. Under NodeNext, the package's
+// "require" and "import" conditions point at separate .d.ts files whose
+// `Socket` interfaces are nominally distinct (socket.io-client@4.x ships
+// both CJS and ESM builds). Without the hint, `typeof import(...)` from
+// this CJS package resolves via "require", while the runtime `await import`
+// resolves via "import" — leading to a cross-condition assignability error
+// when assigning the runtime `io()` return to a Socket-typed variable.
+type Socket = ReturnType<
+  (typeof import('socket.io-client', { with: { 'resolution-mode': 'import' } }))['io']
+>;
 
 export type RealtimeEventMap = {
   'order.created': OrderCreatedEvent;

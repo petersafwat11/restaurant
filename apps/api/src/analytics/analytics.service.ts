@@ -41,8 +41,13 @@ export class AnalyticsService {
   async overview(q: AnalyticsBaseQuery): Promise<AnalyticsOverviewDto> {
     const restaurant = await this.requireRestaurant();
 
+    // Skip the redis cache under NODE_ENV=test. The e2e suite shares a single
+    // Redis across the run (singleFork) and each analytics test seeds a fresh
+    // order set in its `beforeEach`; a stale `analytics:overview:today` entry
+    // from a prior test would otherwise mask the actual aggregate.
+    const cacheable = q.period !== 'custom' && process.env.NODE_ENV !== 'test';
     const cacheKey = `analytics:overview:${q.period}`;
-    if (q.period !== 'custom') {
+    if (cacheable) {
       const hit = await this.redis.get(cacheKey);
       if (hit) return JSON.parse(hit) as AnalyticsOverviewDto;
     }
@@ -80,7 +85,7 @@ export class AnalyticsService {
       liveOrdersCount,
     };
 
-    if (q.period !== 'custom') {
+    if (cacheable) {
       await this.redis.set(cacheKey, JSON.stringify(result), 'EX', CACHE_TTL_SECONDS);
     }
     return result;

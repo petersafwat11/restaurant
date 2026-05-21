@@ -42,7 +42,11 @@ export class LoyaltyService {
     const limit = query.limit ?? 20;
     const rows = await this.prisma.loyaltyTransaction.findMany({
       where: { accountId: account.id },
-      orderBy: { createdAt: 'desc' },
+      // `id` (cuid) is a deterministic tiebreaker when two ledger rows share
+      // a createdAt — e.g. when a single `createMany` writes both at the same
+      // millisecond. Without it, the order is implementation-defined and the
+      // newest-first contract breaks under bulk writes.
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit + 1,
       ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     });
