@@ -15,6 +15,10 @@
   "grandTotal": "Total",
   "backToMenu": "Back to menu",
   "heading": "Almost there.",
+  "signedInBanner": {
+    "prefix": "Ordering as",
+    "detail": "We filled in your details and default address."
+  },
   "continue": "Continue",
   "skip": "Skip",
   "noFee": "No fee",

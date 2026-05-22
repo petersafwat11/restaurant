@@ -1,5 +1,6 @@
 'use client';
 
+import { useAddresses } from '@/features/addresses/hooks';
 import { useCartSessionKey } from '@/components/cart-session-provider';
 import { useCart } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
@@ -125,6 +126,8 @@ export function CheckoutApp() {
   // in the request body. For guests we forward the cart session cookie's
   // value so the server can resolve their cart and attach the order.
   const cartSessionKey = useCartSessionKey();
+  // Saved addresses for the authed user. Empty (and disabled fetch) for guests.
+  const addressesQuery = useAddresses();
   const restaurantQuery = useRestaurant();
 
   const restaurant = restaurantQuery.data;
@@ -176,6 +179,39 @@ export function CheckoutApp() {
       tipAmount: '0.00',
     },
   });
+
+  // The auth store and /addresses/list both hydrate after first render, so the
+  // form's `defaultValues` above land empty for an already-signed-in user.
+  // Prefill any fields the user hasn't touched yet — manually edited values
+  // (tracked via dirtyFields) are preserved.
+  const hasPrefilledRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!user) return;
+    if (hasPrefilledRef.current) return;
+    const dirty = form.formState.dirtyFields;
+    const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    if (!dirty.contact?.name && fullName) form.setValue('contact.name', fullName);
+    if (!dirty.contact?.phone && user.phone) form.setValue('contact.phone', user.phone);
+    if (!dirty.contact?.email && user.email) form.setValue('contact.email', user.email);
+
+    // Pre-select a saved address: prefer the user's default, otherwise the
+    // first. Skip addresses without a geoPoint — the form requires one and
+    // the user can drop a pin themselves on the map picker.
+    const candidate =
+      addressesQuery.data?.find((a) => a.isDefault) ?? addressesQuery.data?.[0] ?? null;
+    if (candidate?.geoPoint && !dirty.address) {
+      form.setValue('address', {
+        line1: candidate.line1,
+        apartment: candidate.line2 ?? undefined,
+        city: candidate.city,
+        country: candidate.country,
+        geoPoint: candidate.geoPoint,
+      });
+    }
+    // Mark prefilled only once both user and (if there are any) addresses have
+    // resolved — that way we don't burn the ref before the address arrives.
+    if (!addressesQuery.isLoading) hasPrefilledRef.current = true;
+  }, [user, addressesQuery.data, addressesQuery.isLoading, form]);
 
   const cart = cartQuery.data;
   const lines = (cart?.items ?? []).map((i) => cartItemToDisplay(i));
@@ -443,6 +479,26 @@ export function CheckoutApp() {
       >
         {t('heading')}
       </h1>
+
+      {user && (
+        <div
+          role="status"
+          className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-2 text-small text-fg-muted shadow-sm"
+        >
+          <span className="relative grid h-2 w-2 place-items-center">
+            <span className="absolute inset-0 animate-ping rounded-full bg-positive opacity-60" />
+            <span className="relative h-2 w-2 rounded-full bg-positive" />
+          </span>
+          <span>
+            {t('signedInBanner.prefix')}{' '}
+            <span className="font-semibold text-fg">
+              {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email}
+            </span>
+          </span>
+          <span className="text-fg-subtle">·</span>
+          <span className="text-fg-subtle">{t('signedInBanner.detail')}</span>
+        </div>
+      )}
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[62fr_38fr]">
         <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>

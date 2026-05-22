@@ -2,7 +2,6 @@
 
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
-import { useRealtimeStatus } from '@/features/orders/hooks/use-realtime-status';
 import { Link } from '@/i18n/navigation';
 import { type OrderDto, type OrderItemDto } from '@repo/types';
 import {
@@ -16,7 +15,7 @@ import {
   SuccessHero,
   trackingStateFor,
 } from '@repo/ui';
-import { Check, Copy, HelpCircle, MapPin, Phone, Receipt, Sparkles, Timer } from 'lucide-react';
+import { Check, Copy, HelpCircle, MapPin, Phone, Sparkles, Timer } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -60,80 +59,12 @@ function orderItemToDisplay(item: OrderItemDto) {
   });
 }
 
-function LiveDot({ connected }: { connected: boolean }) {
-  return (
-    <span className="relative inline-flex h-2.5 w-2.5">
-      {connected && (
-        <span className="absolute inset-0 inline-flex h-full w-full animate-ping rounded-full bg-positive opacity-60" />
-      )}
-      <span
-        className={
-          connected
-            ? 'relative inline-flex h-2.5 w-2.5 rounded-full bg-positive'
-            : 'relative inline-flex h-2.5 w-2.5 rounded-full bg-fg-subtle/60'
-        }
-      />
-    </span>
-  );
-}
-
-function StatusTimeline({ order }: { order: OrderDto }) {
-  const t = useTranslations('web.shop.checkoutSuccess');
-  const format = useFormatter();
-  const events = [...order.statusEvents].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
-  if (events.length === 0) return null;
-
-  return (
-    <ol className="relative flex flex-col gap-4">
-      {events.map((event, i) => {
-        const isLast = i === events.length - 1;
-        return (
-          <li key={event.id} className="flex items-start gap-3">
-            <div className="relative flex h-full flex-col items-center">
-              <span
-                aria-hidden
-                className={
-                  isLast
-                    ? 'grid h-6 w-6 place-items-center rounded-full bg-accent text-text-on-accent shadow-[0_0_0_4px_rgba(217,85,30,0.12)]'
-                    : 'grid h-6 w-6 place-items-center rounded-full bg-positive text-text-on-accent'
-                }
-              >
-                <Check size={12} strokeWidth={3} />
-              </span>
-              {!isLast && (
-                <span
-                  aria-hidden
-                  className="mt-1 w-px flex-1 bg-border/[var(--border-strong-alpha)]"
-                  style={{ minHeight: 12 }}
-                />
-              )}
-            </div>
-            <div className="flex flex-1 flex-col">
-              <span className="text-small font-medium text-fg">{t(`status.${event.status}`)}</span>
-              <span className="text-caption tabular-nums text-fg-subtle">
-                {format.dateTime(new Date(event.createdAt), {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-              {event.note && <span className="mt-0.5 text-small text-fg-muted">{event.note}</span>}
-            </div>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   const t = useTranslations('web.shop.checkoutSuccess');
   const format = useFormatter();
   const searchParams = useSearchParams();
   const token = searchParams.get('t');
   const orderQuery = useOrderTracking(orderId, token);
-  const realtime = useRealtimeStatus();
 
   if (orderQuery.isLoading) {
     return (
@@ -187,8 +118,6 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
       ? { amount: order.deliveryFee }
       : { label: t('summary.free') };
 
-  const connected = realtime === 'connected';
-
   return (
     <div className="relative isolate">
       {/* Soft brand-accent wash behind the hero */}
@@ -213,12 +142,6 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                   </span>
                 </div>
                 <CopyButton value={order.orderNumber} />
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/[var(--border-alpha)] bg-surface-elevated px-3 py-2 text-caption text-fg-muted shadow-sm">
-                <LiveDot connected={connected} />
-                <span className="font-medium text-fg">
-                  {connected ? t('hero.live') : t('hero.reconnecting')}
-                </span>
               </div>
             </div>
           }
@@ -307,24 +230,6 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                   )}
                 </div>
               </div>
-            </section>
-
-            {/* Live activity timeline */}
-            <section
-              aria-label={t('activity.regionLabel')}
-              className="rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 shadow-sm"
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Receipt size={18} className="text-fg-subtle" />
-                  <h2 className="text-body font-semibold text-fg">{t('activity.heading')}</h2>
-                </div>
-                <span className="inline-flex items-center gap-2 text-caption text-fg-subtle">
-                  <LiveDot connected={connected} />
-                  {t('activity.live')}
-                </span>
-              </div>
-              <StatusTimeline order={order} />
             </section>
 
             {/* Help card */}

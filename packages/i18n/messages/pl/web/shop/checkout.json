@@ -15,6 +15,10 @@
   "grandTotal": "Razem",
   "backToMenu": "Wróć do menu",
   "heading": "Prawie gotowe.",
+  "signedInBanner": {
+    "prefix": "Zamówienie jako",
+    "detail": "Wypełniliśmy Twoje dane i domyślny adres."
+  },
   "continue": "Dalej",
   "skip": "Pomiń",
   "noFee": "Bez opłat",
