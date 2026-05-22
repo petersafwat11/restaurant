@@ -685,9 +685,16 @@ const CATEGORIES: SeedCategory[] = [
 ];
 
 // Locally hosted menu images live under apps/api/uploads/menu-items/ and are
-// served by the API at /uploads/. URLs are hardcoded to dev since seeding is
-// dev-only; deployed envs reseed with a different base if needed.
-const MENU_IMAGE_BASE = process.env.MENU_IMAGE_BASE_URL ?? 'http://localhost:4000/uploads/menu-items';
+// served by the API at /uploads/. Base URL resolution order:
+//   1. MENU_IMAGE_BASE_URL — explicit override (e.g. CDN)
+//   2. APP_URL_API + /uploads/menu-items — production case; APP_URL_API is
+//      set in the prod .env to https://api.{domain}
+//   3. localhost fallback for dev
+const MENU_IMAGE_BASE =
+  process.env.MENU_IMAGE_BASE_URL ??
+  (process.env.APP_URL_API
+    ? `${process.env.APP_URL_API.replace(/\/+$/, '')}/uploads/menu-items`
+    : 'http://localhost:4000/uploads/menu-items');
 
 async function seedMenu() {
   // Wipe existing menu so renamed/removed items don't linger. CartItem has

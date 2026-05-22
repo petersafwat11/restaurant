@@ -4,6 +4,8 @@ import { useRestaurants } from '@/features/restaurants/hooks';
 import { Link } from '@/i18n/navigation';
 import type { RestaurantPublicDto } from '@repo/types';
 import { Container, type DayOfWeek, EmptyState, HoursTable, PageSpinner } from '@repo/ui';
+// Note: WeekTimeline (the "Open hours at a glance" bar chart) was removed per
+// design feedback — the HoursTable alongside the address already covers it.
 import { ArrowUpRight, MapPin, Phone, Share2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -107,125 +109,6 @@ function useClock(): Date | null {
     return () => clearInterval(id);
   }, []);
   return now;
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Week timeline                                                             */
-/* -------------------------------------------------------------------------- */
-
-interface WeekTimelineProps {
-  hours: HourRow[];
-  now: Date | null;
-}
-
-const TIMELINE_START = 8 * 60; // 08:00
-const TIMELINE_END = 24 * 60 + 60; // 25:00 — accommodates closings just past midnight visually
-
-function clampPct(value: number) {
-  return Math.max(0, Math.min(100, value));
-}
-
-function WeekTimeline({ hours, now }: WeekTimelineProps) {
-  const t = useTranslations('web.marketing.locations');
-  const locale = useLocale();
-  const today = now ? now.getDay() : -1;
-  const nowMins = now ? now.getHours() * 60 + now.getMinutes() : 0;
-  const span = TIMELINE_END - TIMELINE_START;
-
-  // Order Mon–Sun for a more familiar week
-  const order: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
-
-  const ticks = [10, 14, 18, 22];
-
-  const shortDay = (d: number) => t(`days.short.${d}` as 'days.short.0');
-
-  return (
-    <div className="overflow-hidden rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 sm:p-8">
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-eyebrow uppercase text-accent">{t('weekTimeline.eyebrow')}</p>
-          <h3 className="mt-2 font-display text-h3 text-fg">{t('weekTimeline.title')}</h3>
-        </div>
-        <p className="hidden text-caption text-fg-subtle sm:block">{t('weekTimeline.subtitle')}</p>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        {order.map((d) => {
-          const row = hours.find((h) => h.dayOfWeek === d);
-          const isToday = d === today;
-          const isClosed = !row || row.isClosed;
-
-          const openMin = row && !row.isClosed ? toMinutes(row.opensAt) : 0;
-          let closeMin = row && !row.isClosed ? toMinutes(row.closesAt) : 0;
-          // Treat closeMin <= openMin as crossing midnight
-          if (!isClosed && closeMin <= openMin) closeMin += 24 * 60;
-
-          const left = clampPct(((openMin - TIMELINE_START) / span) * 100);
-          const right = clampPct(((closeMin - TIMELINE_START) / span) * 100);
-          const nowPct = clampPct(((nowMins - TIMELINE_START) / span) * 100);
-
-          return (
-            <div
-              key={d}
-              className={`grid grid-cols-[44px_1fr_88px] items-center gap-3 rounded-md py-1.5 sm:gap-4 ${isToday ? 'bg-surface-warm/40 px-2' : 'px-2'}`}
-            >
-              <span
-                className={`text-caption font-semibold uppercase tracking-wider ${isToday ? 'text-accent' : 'text-fg-muted'}`}
-              >
-                {shortDay(d)}
-              </span>
-
-              <div className="relative h-3 rounded-full bg-surface-warm/70">
-                {!isClosed && (
-                  <div
-                    className={`absolute inset-y-0 rounded-full transition-colors ${isToday ? 'bg-accent/55 ring-1 ring-inset ring-accent/40' : 'bg-accent/25'}`}
-                    style={{ left: `${left}%`, width: `${Math.max(0, right - left)}%` }}
-                  />
-                )}
-                {isToday && now && (
-                  <div
-                    className="absolute -top-1 -bottom-1 w-px bg-fg"
-                    style={{ left: `${nowPct}%` }}
-                    aria-hidden
-                  >
-                    <span className="absolute -left-[3px] -top-[3px] block h-[7px] w-[7px] rounded-full bg-fg shadow-[0_0_0_2px_rgb(var(--surface-elevated))]" />
-                  </div>
-                )}
-              </div>
-
-              <span
-                className={`text-right text-caption tabular-nums ${isClosed ? 'text-fg-subtle' : isToday ? 'font-medium text-fg' : 'text-fg-muted'}`}
-              >
-                {isClosed || !row
-                  ? t('weekTimeline.closed')
-                  : `${formatHM(locale, row.opensAt)}–${formatHM(locale, row.closesAt)}`}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* axis ticks */}
-      <div className="mt-3 grid grid-cols-[44px_1fr_88px] gap-3 sm:gap-4">
-        <span aria-hidden />
-        <div className="relative h-4">
-          {ticks.map((tickHour) => {
-            const pct = clampPct(((tickHour * 60 - TIMELINE_START) / span) * 100);
-            return (
-              <span
-                key={tickHour}
-                className="absolute top-0 -translate-x-1/2 text-[10px] uppercase tracking-wider text-fg-subtle"
-                style={{ left: `${pct}%` }}
-              >
-                {formatHM(locale, `${tickHour}:00`)}
-              </span>
-            );
-          })}
-        </div>
-        <span aria-hidden />
-      </div>
-    </div>
-  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -626,17 +509,6 @@ export default function LocationsPage() {
           </div>
         </Container>
       </section>
-
-      {/* ------------------------------------------------------------------ */}
-      {/*  Week timeline                                                     */}
-      {/* ------------------------------------------------------------------ */}
-      {hours.length > 0 && (
-        <section className="bg-surface py-section-y-mobile sm:py-section-y">
-          <Container>
-            <WeekTimeline hours={hours} now={now} />
-          </Container>
-        </section>
-      )}
 
       <StickyMobileBar tel={tel} directionsHref={directionsHref} />
     </>
