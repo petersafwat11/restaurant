@@ -44,7 +44,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get upgrade -y
 apt-get install -y --no-install-recommends \
-  ca-certificates curl gnupg lsb-release ufw fail2ban unattended-upgrades \
+  ca-certificates curl gnupg lsb-release ufw unattended-upgrades \
   rsync cron tzdata
 
 log "Setting timezone to UTC…"
@@ -111,10 +111,11 @@ ufw allow 443/udp comment 'HTTP/3 (QUIC)'
 ufw --force enable
 
 # -----------------------------------------------------------------------------
-# 6. fail2ban (default sshd jail)
+# 6. fail2ban — SKIPPED on purpose
 # -----------------------------------------------------------------------------
-log "Enabling fail2ban…"
-systemctl enable --now fail2ban
+# With key-only SSH (no password auth), fail2ban's sshd jail provides little
+# value and is easy to trip during initial deploys, locking us out. We're
+# relying on UFW + key-only SSH instead. Add fail2ban later if needed.
 
 # -----------------------------------------------------------------------------
 # 7. Unattended upgrades (security patches auto-applied)
