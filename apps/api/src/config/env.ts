@@ -56,6 +56,10 @@ const EnvSchema = z.object({
   // Auth cookie attributes. Default `lax` works when web/admin/api share an
   // eTLD+1; set `none` (plus HTTPS) for fully cross-site deployments.
   COOKIE_SAMESITE: z.enum(['lax', 'none', 'strict']).default('lax'),
+  // Cookie Domain attribute. In prod set to e.g. `.szefdonald.pl` so cookies
+  // issued by api.* are also sent to the bare domain (where web's middleware
+  // reads them). Empty → host-only cookies (correct for dev on localhost).
+  COOKIE_DOMAIN: z.string().optional().default(''),
   // Window before AT expiry (seconds) where the sliding refresh kicks in.
   AUTH_SLIDING_REFRESH_THRESHOLD: z.coerce.number().int().positive().default(300),
 });

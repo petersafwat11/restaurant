@@ -39,6 +39,10 @@ function baseCookieOptions(env: ENV_TYPE): CookieSerializeOptions {
     secure: env.NODE_ENV === 'production' || env.COOKIE_SAMESITE === 'none',
     sameSite: env.COOKIE_SAMESITE,
     path: '/',
+    // When set, cookies are sent to every subdomain of COOKIE_DOMAIN (so
+    // api.example.com can issue a cookie that the bare example.com sees).
+    // Empty in dev → host-only cookies, which is correct for localhost.
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   };
 }
 

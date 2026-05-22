@@ -31,14 +31,26 @@ function stripLocale(pathname: string): string {
   return pathname;
 }
 
+// Auth cookies are named per audience (see apps/api/src/common/auth/cookies.ts):
+//   web_at  = access token
+//   web_rt  = refresh token
+// We probe for either — the access token is short-lived and may have expired
+// even when the user is still logged in via the refresh token.
+const AUTH_COOKIE_NAMES = ['web_rt', 'web_at'] as const;
+
 export default function middleware(req: NextRequest) {
   const path = stripLocale(req.nextUrl.pathname);
   const isProtected = PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 
-  if (isProtected && !req.cookies.get('refresh_token')?.value) {
+  const hasAuthCookie = AUTH_COOKIE_NAMES.some((name) => !!req.cookies.get(name)?.value);
+
+  if (isProtected && !hasAuthCookie) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
-    url.searchParams.set('redirect', req.nextUrl.pathname);
+    // Strip the locale from the redirect target — the locale-aware
+    // `useRouter().push()` on the login page re-applies it, and `/en/account`
+    // would otherwise become `/en/en/account`.
+    url.searchParams.set('redirect', stripLocale(req.nextUrl.pathname));
     return NextResponse.redirect(url);
   }
 

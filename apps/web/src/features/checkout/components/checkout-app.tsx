@@ -1,5 +1,6 @@
 'use client';
 
+import { useCartSessionKey } from '@/components/cart-session-provider';
 import { useCart } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
@@ -120,6 +121,10 @@ export function CheckoutApp() {
   const cartQuery = useCart();
   const createOrder = useCreateOrder();
   const user = useAuthStore((s) => s.user);
+  // The API derives identity from either the authed user or a `sessionKey`
+  // in the request body. For guests we forward the cart session cookie's
+  // value so the server can resolve their cart and attach the order.
+  const cartSessionKey = useCartSessionKey();
   const restaurantQuery = useRestaurant();
 
   const restaurant = restaurantQuery.data;
@@ -357,6 +362,9 @@ export function CheckoutApp() {
         pickupAt: values.timeSlot.kind === 'scheduled' ? values.timeSlot.iso : null,
         notes: values.orderNotes || null,
         tipAmount: values.tipAmount,
+        // Only send sessionKey for guests; signed-in users are identified by
+        // the bearer token and don't need it.
+        ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
       });
 
       // Stripe Elements two-phase flow: order is now PENDING; PaymentIntent

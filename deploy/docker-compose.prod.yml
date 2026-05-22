@@ -85,6 +85,7 @@ services:
       JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-30d}
       ORDER_TRACKING_SECRET: ${ORDER_TRACKING_SECRET:-}
       COOKIE_SAMESITE: ${COOKIE_SAMESITE:-lax}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       MAIL_FROM: ${MAIL_FROM:-Restaurant <no-reply@example.com>}
       SMTP_HOST: ${SMTP_HOST:-localhost}
