@@ -76,10 +76,12 @@ jobs:
             docker compose up -d postgres redis caddy
 
             echo "==> Running migrations"
-            docker compose run --rm api node -e "process.exit(0)" >/dev/null  # sanity
-            docker compose run --rm \
-              -e DATABASE_URL \
-              api sh -c "cd packages/db && npx prisma migrate deploy"
+            # The api image runs as a non-root user that can't write to /app
+            # for pnpm/npx caches, so call the bundled prisma binary directly
+            # from packages/db/node_modules.
+            docker compose run --rm --entrypoint "" \
+              -w /app/packages/db \
+              api node_modules/.bin/prisma migrate deploy
 
             echo "==> Rolling restart of app containers"
             docker compose up -d --no-deps api web admin
@@ -94,10 +96,18 @@ jobs:
           if [[ -z "$DOMAIN" ]]; then
             echo "PROD_DOMAIN secret not set — skipping smoke test"; exit 0
           fi
-          for host in "$DOMAIN" "admin.$DOMAIN" "api.$DOMAIN"; do
-            echo "→ checking https://$host/healthz"
+          # web/admin /healthz is intercepted by next-intl middleware, so
+          # the only universal probe is /. The API exposes /api/v1/healthz.
+          declare -A probes=(
+            ["$DOMAIN"]="/"
+            ["admin.$DOMAIN"]="/"
+            ["api.$DOMAIN"]="/api/v1/healthz"
+          )
+          for host in "${!probes[@]}"; do
+            url="https://$host${probes[$host]}"
+            echo "→ checking $url"
             for i in 1 2 3 4 5; do
-              if curl -fsS "https://$host/healthz" -o /dev/null; then
+              if curl -fsS "$url" -o /dev/null; then
                 echo "   ok"; break
               fi
               if [[ $i -eq 5 ]]; then

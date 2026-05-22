@@ -60,6 +60,24 @@ jobs:
           echo "image=${REPO}" >> "$GITHUB_OUTPUT"
           echo "sha_short=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
 
+      # Build args for web/admin so the production API URL is baked into the
+      # Next.js bundle (NEXT_PUBLIC_* is inlined at build time). PROD_DOMAIN
+      # comes from the repo secret set during deployment.
+      - name: Compute next.js build args
+        id: nextargs
+        run: |
+          DOMAIN="${{ secrets.PROD_DOMAIN }}"
+          if [ -z "$DOMAIN" ]; then
+            echo "build_args=" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "build_args<<EOF"
+              echo "APP_URL_API=https://api.${DOMAIN}"
+              echo "NEXT_PUBLIC_API_URL=https://api.${DOMAIN}/api/v1"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build & push
         uses: docker/build-push-action@v6
         with:
@@ -67,6 +85,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          build-args: ${{ steps.nextargs.outputs.build_args }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
           provenance: false
