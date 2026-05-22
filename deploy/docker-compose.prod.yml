@@ -61,6 +61,11 @@ services:
     image: ${API_IMAGE:-ghcr.io/petersafwat11/restaurant-api}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     init: true
+    # tsx is needed at runtime because workspace packages (@repo/types etc.)
+    # ship raw TypeScript sources; tsx's loader handles the .ts imports the
+    # compiled API still references via require("@repo/types/permissions").
+    working_dir: /app/apps/api
+    command: ["node_modules/.bin/tsx", "dist/src/main.js"]
     depends_on:
       postgres: { condition: service_healthy }
       redis:    { condition: service_healthy }
@@ -118,7 +123,9 @@ services:
       APP_URL_API: ${APP_URL_API}
     networks: [app-net]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      # web's `/healthz` route is shadowed by next-intl middleware (which routes
+      # everything through `[locale]`). Use `/` which we know responds 200.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -138,7 +145,9 @@ services:
       APP_URL_API: ${APP_URL_API}
     networks: [app-net]
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      # admin's `/healthz` route is similarly shadowed. Hit `/` which responds
+      # (may be 200 or redirect — both indicate the Next.js server is up).
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 6

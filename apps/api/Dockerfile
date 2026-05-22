@@ -41,7 +41,8 @@ ENV NODE_ENV=production \
     API_PORT=4000 \
     UPLOADS_DIR=/var/uploads
 RUN groupadd -r app && useradd -r -g app -d /app -s /sbin/nologin app \
- && mkdir -p /var/uploads && chown -R app:app /var/uploads
+ && mkdir -p /var/uploads /app/.cache && chown -R app:app /var/uploads /app
+
 WORKDIR /app
 
 # Copy node_modules (with Prisma client) + the built API + the schema (needed
@@ -55,5 +56,8 @@ COPY --from=builder --chown=app:app /app/package.json /app/pnpm-lock.yaml /app/p
 
 USER app
 EXPOSE 4000
-# `tini` via Docker's --init flag (set in compose) handles PID 1 zombie reaping.
-CMD ["node", "apps/api/dist/main.js"]
+# The compiled API imports workspace packages like @repo/types, whose
+# package.json `main` points to TypeScript sources (we don't build the
+# shared packages separately). tsx's ESM loader lets Node resolve those
+# `.ts` files at runtime. `tini` handles PID 1 zombie reaping via --init.
+CMD ["node", "--import", "tsx/esm", "apps/api/dist/src/main.js"]
