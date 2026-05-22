@@ -25,6 +25,11 @@ const preset = {
 				bg: "rgb(var(--bg) / <alpha-value>)",
 				surface: "rgb(var(--surface) / <alpha-value>)",
 				"surface-2": "rgb(var(--surface-elevated) / <alpha-value>)",
+				// Alias for the same token under a more descriptive name. Most
+				// app code references `bg-surface-elevated`; without this entry
+				// Tailwind silently drops those classes and elements lose their
+				// background (e.g. the landing hero "Open now" / chef badges).
+				"surface-elevated": "rgb(var(--surface-elevated) / <alpha-value>)",
 				"surface-warm": "rgb(var(--surface-warm) / <alpha-value>)",
 				border: "rgb(var(--border) / <alpha-value>)",
 				"border-strong": "rgb(var(--border-strong) / <alpha-value>)",
