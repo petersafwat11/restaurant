@@ -1,0 +1,14 @@
+{
+  "ariaLabel": "Order progress",
+  "cancelled": "Cancelled",
+  "refunded": "Refunded",
+  "step": {
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "onTheWay": "On the way",
+    "delivered": "Delivered",
+    "readyForPickup": "Ready for pickup",
+    "pickedUp": "Picked up",
+    "served": "Served"
+  }
+}

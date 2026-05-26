@@ -11,7 +11,7 @@ import {
   type OrdersFiltersState,
   RefundModal,
   SoundToggle,
-  buildOrderColumns,
+  useOrderColumns,
 } from '@/features/orders/components';
 import {
   type AdminOrderFilters,
@@ -155,14 +155,7 @@ export default function OrdersPage() {
     [advance],
   );
 
-  const columns = React.useMemo(
-    () =>
-      buildOrderColumns({
-        onAdvance,
-        onView: (o) => setDrawerOrderId(o.id),
-      }),
-    [onAdvance],
-  );
+  const columns = useOrderColumns({ onAdvance });
 
   const selection: DataTableSelectionState<string> = { selected, onChange: setSelected };
   const [sort, setSort] = React.useState<DataTableSortState | null>(null);

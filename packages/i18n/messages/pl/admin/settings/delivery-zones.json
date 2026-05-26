@@ -2,8 +2,7 @@
   "title": "Strefy dostawy",
   "backToSettings": "Ustawienia",
   "mapLoading": "Ładowanie mapy…",
-  "intro": "Narysuj wielokąty obszarów, do których dostarczasz. Stała opłata za dostawę i minimalna wartość zamówienia są ustawiane na stronie {link} i obowiązują dla wszystkich stref.",
-  "introLink": "Ustawienia",
+  "intro": "Narysuj wielokąty obszarów, do których dostarczasz. Stała opłata za dostawę i minimalna wartość zamówienia są ustawiane na stronie <link>Ustawienia</link> i obowiązują dla wszystkich stref.",
   "zones": {
     "title": "Strefy",
     "description": "Kliknij strefę, aby wyróżnić ją na mapie.",

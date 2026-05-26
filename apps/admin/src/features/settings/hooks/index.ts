@@ -11,6 +11,7 @@ import type {
   UpdateRestaurantSettingsDto,
 } from '@repo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 
 const settingsKeys = {
   all: ['settings'] as const,
@@ -25,36 +26,39 @@ export function useRestaurantSettings() {
 }
 
 export function useUpdateRestaurantSettings() {
+  const t = useTranslations('admin.settings.general');
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, UpdateRestaurantSettingsDto>({
     mutationFn: (input) => getApiClient().settings.update(input),
     onSuccess: (data) => {
       qc.setQueryData(settingsKeys.current(), data);
-      notify('success', 'Settings saved');
+      notify('success', t('toasts.saved'));
     },
     onError: (err) => notify('error', err.message),
   });
 }
 
 export function useAddHoliday() {
+  const t = useTranslations('admin.settings.holidays');
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, HolidayDto>({
     mutationFn: (input) => getApiClient().settings.addHoliday(input),
     onSuccess: (data) => {
       qc.setQueryData(settingsKeys.current(), data);
-      notify('success', 'Holiday added');
+      notify('success', t('toasts.added'));
     },
     onError: (err) => notify('error', err.message),
   });
 }
 
 export function useRemoveHoliday() {
+  const t = useTranslations('admin.settings.holidays');
   const qc = useQueryClient();
   return useMutation<RestaurantSettingsDto, ApiError, string>({
     mutationFn: (date) => getApiClient().settings.removeHoliday(date),
     onSuccess: (data) => {
       qc.setQueryData(settingsKeys.current(), data);
-      notify('success', 'Holiday removed');
+      notify('success', t('toasts.removed'));
     },
     onError: (err) => notify('error', err.message),
   });

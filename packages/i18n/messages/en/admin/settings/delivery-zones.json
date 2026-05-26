@@ -2,8 +2,7 @@
   "title": "Delivery zones",
   "backToSettings": "Settings",
   "mapLoading": "Loading map…",
-  "intro": "Draw the polygons where you deliver. The flat delivery fee and minimum order live on the main {link} page and apply to all zones.",
-  "introLink": "Settings",
+  "intro": "Draw the polygons where you deliver. The flat delivery fee and minimum order live on the main <link>Settings</link> page and apply to all zones.",
   "zones": {
     "title": "Zones",
     "description": "Click a zone to highlight it on the map.",

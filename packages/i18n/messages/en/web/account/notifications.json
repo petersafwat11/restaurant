@@ -7,5 +7,6 @@
   },
   "markAllRead": "Mark all as read",
   "markRead": "Mark read",
-  "unreadCount": "{count, plural, one {# unread} other {# unread}}"
+  "unreadCount": "{count, plural, one {# unread} other {# unread}}",
+  "preferencesUpdated": "Preferences updated"
 }

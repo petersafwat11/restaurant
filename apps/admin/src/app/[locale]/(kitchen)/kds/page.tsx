@@ -240,6 +240,20 @@ export default function KdsPage() {
                         ? undefined
                         : () => advance.mutate({ orderId: t.orderId, current: t.status })
                     }
+                    labels={{
+                      typeLabels: {
+                        DELIVERY: tFilters('DELIVERY'),
+                        PICKUP: tFilters('PICKUP'),
+                        DINE_IN: tFilters('DINE_IN'),
+                      },
+                      advanceLabels: {
+                        CONFIRMED: t('ticket.advance.CONFIRMED'),
+                        PREPARING: t('ticket.advance.PREPARING'),
+                        READY: t('ticket.advance.READY'),
+                      },
+                      back: t('ticket.back'),
+                      waitingAria: (m) => t('ticket.waiting', { minutes: m }),
+                    }}
                   />
                 ))}
               </Column>

@@ -6,6 +6,10 @@
   "resend": "Resend email",
   "resendComingSoon": "Resend coming soon",
   "backToLogin": "Back to sign in",
+  "successToast": "Email verified",
+  "errors": {
+    "tokenInvalid": "This verification link is invalid or has expired."
+  },
   "otpSent": "We sent a code to {target}",
   "codeLabel": "Verification code",
   "submit": "Verify",

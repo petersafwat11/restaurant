@@ -70,7 +70,7 @@ export default function AdminDeliveryZonesPage() {
   const center = React.useMemo(() => {
     const g = restaurant.data?.geoPoint;
     if (g) return { lat: g.lat, lng: g.lng };
-    return { lat: 52.2297, lng: 21.0122 }; // Warsaw default
+    return { lat: 50.8505, lng: 20.6275 }; // Kielce default
   }, [restaurant.data]);
 
   const mapZones: MapZone[] = React.useMemo(

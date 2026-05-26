@@ -23,6 +23,11 @@ export function LandingNewsletter() {
           onSubmit={async () => {
             await new Promise((r) => setTimeout(r, 600));
           }}
+          placeholder={t('emailPlaceholder')}
+          ctaLabel={t('subscribe')}
+          successMessage={t('subscribeSuccess')}
+          errorMessage={t('subscribeError')}
+          emailAriaLabel={t('emailAriaLabel')}
         />
       </Container>
     </section>

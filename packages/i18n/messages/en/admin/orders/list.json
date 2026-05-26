@@ -20,5 +20,53 @@
     "description": "Each selected order will be moved to its next status. This cannot be undone in bulk.",
     "primary": "Advance {count}",
     "secondary": "Cancel"
+  },
+  "columns": {
+    "orderNumber": "Order #",
+    "customer": "Customer",
+    "items": "Items",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "guest": "Guest",
+    "type": "Type",
+    "status": "Status",
+    "total": "Total",
+    "placed": "Placed",
+    "elapsed": "Elapsed"
+  },
+  "filters": {
+    "statusAriaLabel": "Status",
+    "all": "All",
+    "typeLabel": "Type",
+    "paymentLabel": "Payment",
+    "searchPlaceholder": "Search order #, customer…",
+    "sortPlaceholder": "Sort",
+    "types": {
+      "DELIVERY": "Delivery",
+      "PICKUP": "Pickup",
+      "DINE_IN": "Dine-in"
+    },
+    "payments": {
+      "PAID": "Paid",
+      "PENDING": "Pending",
+      "REFUNDED": "Refunded",
+      "PARTIALLY_REFUNDED": "Partial",
+      "FAILED": "Failed"
+    }
+  },
+  "sort": {
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "totalDesc": "Highest total",
+    "waitDesc": "Longest wait"
+  },
+  "livePulse": {
+    "newOrders": "{count} new in last 5 min",
+    "caughtUp": "All caught up"
+  },
+  "soundToggle": {
+    "muteAria": "Mute new-order chime",
+    "unmuteAria": "Unmute new-order chime",
+    "muteTitle": "Mute chime",
+    "unmuteTitle": "Unmute chime"
   }
 }

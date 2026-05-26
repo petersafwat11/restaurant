@@ -9,5 +9,10 @@
   "forgotPassword": "Forgot password?",
   "needAccount": "Need an account?",
   "requestAccess": "Request access",
-  "welcomeBack": "Welcome back, {name}"
+  "welcomeBack": "Welcome back, {name}",
+  "successToast": "Signed in",
+  "errors": {
+    "invalidCredentials": "Invalid email or password.",
+    "accountDisabled": "Your account has been disabled. Contact support."
+  }
 }

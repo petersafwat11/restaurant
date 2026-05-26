@@ -48,14 +48,14 @@ export default function LoyaltyPage() {
               </div>
               <div className="flex items-center gap-2 rounded-full bg-accent/[0.10] px-3 py-1.5">
                 <Sparkles size={14} className="text-accent" />
-                <span className="text-small font-medium text-accent">{account.tier}</span>
+                <span className="text-small font-medium text-accent">{t(`tiers.${account.tier}`)}</span>
               </div>
             </div>
             {account.nextTier && account.pointsToNextTier != null && (
               <div className="mt-4 text-small text-fg-muted">
                 {t.rich('tierProgress', {
                   points: account.pointsToNextTier.toLocaleString(),
-                  tier: account.nextTier,
+                  tier: t(`tiers.${account.nextTier}`),
                   strong: (chunks) => <strong className="text-fg">{chunks}</strong>,
                 })}
               </div>
@@ -80,7 +80,7 @@ export default function LoyaltyPage() {
                     className="flex items-center justify-between rounded-md border border-border/[var(--border-alpha)] bg-surface-2 px-4 py-3"
                   >
                     <div className="flex flex-col">
-                      <span className="text-small font-medium text-fg">{tx.reason}</span>
+                      <span className="text-small font-medium text-fg">{t(`kinds.${tx.kind}`)}</span>
                       <span className="text-[12px] text-fg-subtle">
                         {new Date(tx.createdAt).toLocaleString()}
                       </span>

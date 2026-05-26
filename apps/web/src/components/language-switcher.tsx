@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useTransition } from 'react';
 
@@ -23,6 +23,7 @@ interface LanguageSwitcherProps {
  * on the resulting request so the preference persists across pages.
  */
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
+  const t = useTranslations('web.layout');
   const locale = useLocale() as LocaleCode;
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +40,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     // biome-ignore lint/a11y/useSemanticElements: <fieldset> would force default form styling on a pill switch
     <div
       role="group"
-      aria-label="Language"
+      aria-label={t('languageSwitcherLabel')}
       className={`inline-flex items-center rounded-full border border-border/[var(--border-strong-alpha)] bg-surface/60 p-0.5 text-xs ${className ?? ''}`}
     >
       {PILLS.map(({ label, code }) => {

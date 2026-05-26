@@ -6,6 +6,8 @@ export interface StarsProps {
   /** 0–5, supports 0.5 increments. */
   value: number;
   size?: number;
+  /** Accessible label for the stars group. Falls back to English when absent. */
+  ariaLabel?: string;
   className?: string;
 }
 
@@ -15,11 +17,11 @@ export interface StarsProps {
  * Sub-primitive used by TestimonialCard and Hero's rating slot. Renders
  * inline-flex so it composes with adjacent text.
  */
-export function Stars({ value, size = 16, className }: StarsProps) {
+export function Stars({ value, size = 16, ariaLabel, className }: StarsProps) {
   return (
     <span
       role="img"
-      aria-label={`${value} out of 5 stars`}
+      aria-label={ariaLabel ?? `${value} out of 5 stars`}
       className={cn('inline-flex items-center gap-0.5 text-accent', className)}
     >
       {[0, 1, 2, 3, 4].map((i) => {

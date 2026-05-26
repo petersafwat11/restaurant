@@ -8,5 +8,12 @@
   "cta": {
     "orderNow": "Order now"
   },
-  "languageSwitcherLabel": "Language"
+  "languageSwitcherLabel": "Language",
+  "meta": {
+    "title": "Szef Donald — Real kebab. Made daily.",
+    "description": "Kebab, falafel and tacos made fresh through the day. Order online for delivery, pickup, or eat in."
+  },
+  "cart": {
+    "ariaLabel": "{count, plural, =0 {Cart, empty} one {Cart, # item} other {Cart, # items}}"
+  }
 }

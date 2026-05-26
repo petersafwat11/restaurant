@@ -77,12 +77,12 @@
       "when": "Kiedy",
       "address": {
         "line1": "Ulica i numer",
-        "line1Placeholder": "ul. Marszałkowska 102",
+        "line1Placeholder": "ul. Ks. Piotra Ściegiennego 68a",
         "apartment": "Mieszkanie / Piętro",
         "apartmentHelper": "Opcjonalne",
         "apartmentPlaceholder": "m. 5B / 3 piętro",
         "city": "Miasto",
-        "cityPlaceholder": "Warszawa"
+        "cityPlaceholder": "Kielce"
       },
       "outOfZone": "Przepraszamy — nie dowozimy jeszcze pod ten adres. Odbiór osobisty jest dostępny.",
       "switchToPickup": "Zmień na odbiór",

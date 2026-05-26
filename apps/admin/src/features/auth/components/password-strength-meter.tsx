@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 function scorePassword(pw: string): { score: 0 | 1 | 2 | 3 | 4; checks: PasswordChecks } {
@@ -21,7 +22,7 @@ interface PasswordChecks {
   digit: boolean;
 }
 
-const LABELS = ['Too weak', 'Weak', 'Okay', 'Good', 'Strong'] as const;
+const LABEL_KEYS = ['tooWeak', 'weak', 'okay', 'good', 'strong'] as const;
 const SEGMENT_COLORS = [
   'bg-negative',
   'bg-negative',
@@ -31,6 +32,7 @@ const SEGMENT_COLORS = [
 ] as const;
 
 export function PasswordStrengthMeter({ value }: { value: string }) {
+  const t = useTranslations('admin.auth.passwordStrength');
   const { score, checks } = React.useMemo(() => scorePassword(value), [value]);
   const tone = SEGMENT_COLORS[score];
 
@@ -49,7 +51,7 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
       </div>
       {value && (
         <div className="flex items-center justify-between text-[11px] text-fg-subtle">
-          <span>{LABELS[score]}</span>
+          <span>{t(LABEL_KEYS[score])}</span>
           <span className="flex gap-2">
             <Hint ok={checks.length}>8+</Hint>
             <Hint ok={checks.upper}>A-Z</Hint>

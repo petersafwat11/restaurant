@@ -3,6 +3,7 @@
 import { useCreateReservation } from '@/features/reservations/hooks';
 import { Button, DetailDrawer, FormField, Input, Textarea } from '@repo/ui';
 import { CalendarPlus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface ReservationCreateDrawerProps {
@@ -50,6 +51,7 @@ export function ReservationCreateDrawer({
   onOpenChange,
   defaultStart,
 }: ReservationCreateDrawerProps) {
+  const t = useTranslations('admin.reservations.list.createDrawer');
   const [draft, setDraft] = React.useState<Draft>(() => emptyDraft(defaultStart));
   const create = useCreateReservation();
 
@@ -93,37 +95,37 @@ export function ReservationCreateDrawer({
       open={open}
       onOpenChange={onOpenChange}
       width={520}
-      ariaLabel="New reservation"
+      ariaLabel={t('ariaLabel')}
       header={
         <div className="px-6 py-4">
           <div className="text-caption uppercase tracking-wider text-fg-subtle">
-            New reservation
+            {t('eyebrow')}
           </div>
           <div className="mt-1 flex items-center gap-2 text-h2 font-semibold text-fg">
-            <CalendarPlus size={18} /> Book a table
+            <CalendarPlus size={18} /> {t('title')}
           </div>
         </div>
       }
       footer={
         <div className="flex w-full items-center justify-end gap-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button variant="primary" onClick={save} disabled={!valid || create.isPending}>
-            {create.isPending ? 'Booking…' : 'Book reservation'}
+            {create.isPending ? t('submitLoading') : t('submit')}
           </Button>
         </div>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="When" required className="sm:col-span-2">
+        <FormField label={t('fields.when')} required className="sm:col-span-2">
           <Input
             type="datetime-local"
             value={draft.startAtLocal}
             onChange={(e) => set('startAtLocal', e.target.value)}
           />
         </FormField>
-        <FormField label="Party size" required>
+        <FormField label={t('fields.partySize')} required>
           <Input
             type="number"
             min={1}
@@ -135,28 +137,28 @@ export function ReservationCreateDrawer({
             }}
           />
         </FormField>
-        <FormField label="Occasion" helper="Birthday, anniversary, etc.">
+        <FormField label={t('fields.occasion')} helper={t('fields.occasionHelper')}>
           <Input
             value={draft.occasion}
             maxLength={120}
             onChange={(e) => set('occasion', e.target.value)}
           />
         </FormField>
-        <FormField label="Guest name" required className="sm:col-span-2">
+        <FormField label={t('fields.guestName')} required className="sm:col-span-2">
           <Input
             value={draft.contactName}
             maxLength={120}
             onChange={(e) => set('contactName', e.target.value)}
           />
         </FormField>
-        <FormField label="Phone" required>
+        <FormField label={t('fields.phone')} required>
           <Input
             value={draft.contactPhone}
             maxLength={30}
             onChange={(e) => set('contactPhone', e.target.value)}
           />
         </FormField>
-        <FormField label="Email">
+        <FormField label={t('fields.email')}>
           <Input
             type="email"
             value={draft.contactEmail}
@@ -164,9 +166,9 @@ export function ReservationCreateDrawer({
           />
         </FormField>
         <FormField
-          label="Notes"
+          label={t('fields.notes')}
           className="sm:col-span-2"
-          helper="Allergies, seating preferences, etc."
+          helper={t('fields.notesHelper')}
         >
           <Textarea
             value={draft.notes}

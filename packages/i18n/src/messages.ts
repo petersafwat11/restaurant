@@ -7,6 +7,7 @@ import enAdminAuditLog from '../messages/en/admin/audit-log.json';
 import enAdminAuthForgotPassword from '../messages/en/admin/auth/forgot-password.json';
 import enAdminAuthLayout from '../messages/en/admin/auth/layout.json';
 import enAdminAuthLogin from '../messages/en/admin/auth/login.json';
+import enAdminAuthPasswordStrength from '../messages/en/admin/auth/password-strength.json';
 import enAdminAuthRegister from '../messages/en/admin/auth/register.json';
 import enAdminAuthResetPassword from '../messages/en/admin/auth/reset-password.json';
 import enAdminAuthVerifyEmail from '../messages/en/admin/auth/verify-email.json';
@@ -36,6 +37,7 @@ import enCommon from '../messages/en/common.json';
 import enErrors from '../messages/en/errors.json';
 import enSharedOrderNotify from '../messages/en/shared/order-notify.json';
 import enSharedOrderStatus from '../messages/en/shared/order-status.json';
+import enSharedOrderTracking from '../messages/en/shared/order-tracking.json';
 import enSharedOrder from '../messages/en/shared/order.json';
 import enValidation from '../messages/en/validation.json';
 import enWebAccountAddresses from '../messages/en/web/account/addresses.json';
@@ -74,6 +76,7 @@ import plAdminAuditLog from '../messages/pl/admin/audit-log.json';
 import plAdminAuthForgotPassword from '../messages/pl/admin/auth/forgot-password.json';
 import plAdminAuthLayout from '../messages/pl/admin/auth/layout.json';
 import plAdminAuthLogin from '../messages/pl/admin/auth/login.json';
+import plAdminAuthPasswordStrength from '../messages/pl/admin/auth/password-strength.json';
 import plAdminAuthRegister from '../messages/pl/admin/auth/register.json';
 import plAdminAuthResetPassword from '../messages/pl/admin/auth/reset-password.json';
 import plAdminAuthVerifyEmail from '../messages/pl/admin/auth/verify-email.json';
@@ -103,6 +106,7 @@ import plCommon from '../messages/pl/common.json';
 import plErrors from '../messages/pl/errors.json';
 import plSharedOrderNotify from '../messages/pl/shared/order-notify.json';
 import plSharedOrderStatus from '../messages/pl/shared/order-status.json';
+import plSharedOrderTracking from '../messages/pl/shared/order-tracking.json';
 import plSharedOrder from '../messages/pl/shared/order.json';
 import plValidation from '../messages/pl/validation.json';
 import plWebAccountAddresses from '../messages/pl/web/account/addresses.json';
@@ -144,6 +148,7 @@ const EN_MESSAGES = {
       forgotPassword: enAdminAuthForgotPassword,
       layout: enAdminAuthLayout,
       login: enAdminAuthLogin,
+      passwordStrength: enAdminAuthPasswordStrength,
       register: enAdminAuthRegister,
       resetPassword: enAdminAuthResetPassword,
       verifyEmail: enAdminAuthVerifyEmail,
@@ -188,6 +193,7 @@ const EN_MESSAGES = {
   shared: {
     orderNotify: enSharedOrderNotify,
     orderStatus: enSharedOrderStatus,
+    orderTracking: enSharedOrderTracking,
     order: enSharedOrder,
   },
   validation: enValidation,
@@ -245,6 +251,7 @@ const PL_MESSAGES = {
       forgotPassword: plAdminAuthForgotPassword,
       layout: plAdminAuthLayout,
       login: plAdminAuthLogin,
+      passwordStrength: plAdminAuthPasswordStrength,
       register: plAdminAuthRegister,
       resetPassword: plAdminAuthResetPassword,
       verifyEmail: plAdminAuthVerifyEmail,
@@ -289,6 +296,7 @@ const PL_MESSAGES = {
   shared: {
     orderNotify: plSharedOrderNotify,
     orderStatus: plSharedOrderStatus,
+    orderTracking: plSharedOrderTracking,
     order: plSharedOrder,
   },
   validation: plValidation,

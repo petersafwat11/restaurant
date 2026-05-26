@@ -3,6 +3,7 @@
 import { useAddToCart, useCart, useRemoveCartItem, useUpdateCartItem } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { CartSheet, FloatingCartButton } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
@@ -21,6 +22,7 @@ export function CartContainer() {
   const [notes, setNotes] = React.useState('');
   const pathname = usePathname() ?? '';
   const router = useRouter();
+  const t = useTranslations('web.shop.cart');
 
   const cartQuery = useCart();
   const updateMutation = useUpdateCartItem();
@@ -49,11 +51,11 @@ export function CartContainer() {
       lastCountRef.current = itemCount;
       setAnnouncement(
         itemCount === 0
-          ? 'Cart is empty.'
-          : `Cart updated — ${itemCount} ${itemCount === 1 ? 'item' : 'items'}.`,
+          ? t('empty')
+          : `${t('title')} — ${t('itemCount', { count: itemCount })}`,
       );
     }
-  }, [itemCount]);
+  }, [itemCount, t]);
 
   const hideFloating = HIDE_CART_ROUTES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
@@ -78,13 +80,34 @@ export function CartContainer() {
         notes={{
           value: notes,
           onChange: setNotes,
-          placeholder: 'Anything we should know about your order?',
+          placeholder: t('notesPlaceholder'),
         }}
         emptyAction={{
-          label: 'Browse menu',
+          label: t('browseMenu'),
           onClick: () => {
             setOpen(false);
             router.push('/menu');
+          },
+        }}
+        labels={{
+          title: t('title'),
+          closeAriaLabel: t('closeAriaLabel'),
+          formatItemCount: (count) => `(${t('itemCount', { count })})`,
+          emptyTitle: t('empty'),
+          emptyDescription: t('emptyDescription'),
+          emptyActionLabel: t('browseMenu'),
+          notesLabel: t('notesLabel'),
+          notesPlaceholder: t('notesPlaceholder'),
+          subtotal: t('subtotal'),
+          delivery: t('delivery'),
+          deliveryValue: t('deliveryCalculated'),
+          total: t('total'),
+          checkoutCta: (total) => t('checkoutCta', { total }),
+          footerHint: t('footerHint'),
+          lineItem: {
+            remove: t('remove'),
+            notePrefix: t('notePrefix'),
+            quantityAriaLabel: (name) => t('quantityAriaLabel', { name }),
           },
         }}
       />

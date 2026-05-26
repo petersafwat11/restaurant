@@ -50,5 +50,8 @@
     "timezone": "Timezone",
     "currency": "Currency",
     "editLink": "Edit timezone or currency in <link>Restaurant profile</link>."
+  },
+  "toasts": {
+    "saved": "Settings saved"
   }
 }

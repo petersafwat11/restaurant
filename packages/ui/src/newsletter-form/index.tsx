@@ -11,6 +11,8 @@ export interface NewsletterFormProps {
   onSubmit: (email: string) => Promise<void>;
   successMessage?: string;
   errorMessage?: string;
+  /** Accessible label for the email input. Falls back to English when absent. */
+  emailAriaLabel?: string;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function NewsletterForm({
   onSubmit,
   successMessage = 'Welcome! Check your inbox for the code.',
   errorMessage = "Couldn't subscribe — try again.",
+  emailAriaLabel = 'Email address',
   className,
 }: NewsletterFormProps) {
   const [email, setEmail] = React.useState('');
@@ -77,7 +80,7 @@ export function NewsletterForm({
           }}
           placeholder={placeholder}
           required
-          aria-label="Email address"
+          aria-label={emailAriaLabel}
           className="flex-1 bg-transparent px-4 text-body text-fg outline-none placeholder:text-fg-subtle"
         />
         <button

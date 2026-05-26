@@ -1,6 +1,7 @@
 'use client';
 
 import { Volume2, VolumeX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface SoundToggleProps {
@@ -8,17 +9,14 @@ interface SoundToggleProps {
   onToggle: () => void;
 }
 
-/**
- * Topbar mute/unmute for the new-order chime. Persists in localStorage via
- * `useOrderChime` (which owns the state).
- */
 export function SoundToggle({ muted, onToggle }: SoundToggleProps) {
+  const t = useTranslations('admin.orders.list');
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={muted ? 'Unmute new-order chime' : 'Mute new-order chime'}
-      title={muted ? 'Unmute chime' : 'Mute chime'}
+      aria-label={muted ? t('soundToggle.unmuteAria') : t('soundToggle.muteAria')}
+      title={muted ? t('soundToggle.unmuteTitle') : t('soundToggle.muteTitle')}
       className="grid h-8 w-8 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
     >
       {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}

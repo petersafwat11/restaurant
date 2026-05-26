@@ -4,7 +4,17 @@ import { Container, HoursTable, SectionHeader } from '@repo/ui';
 import { ArrowUpRight, MapPin, Phone, Share2 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addressBadge: string }) {
+function MapPlaceholder({
+  ariaLabel,
+  addressBadge,
+  mapTitle,
+  pinTitle,
+}: {
+  ariaLabel: string;
+  addressBadge: string;
+  mapTitle: string;
+  pinTitle: string;
+}) {
   return (
     <div
       role="img"
@@ -18,7 +28,7 @@ function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addres
         aria-hidden
         role="presentation"
       >
-        <title>Map</title>
+        <title>{mapTitle}</title>
         <defs>
           <pattern id="streetGrid" width="48" height="48" patternUnits="userSpaceOnUse">
             <path
@@ -47,7 +57,7 @@ function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addres
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="absolute -inset-3 animate-ping rounded-full bg-accent opacity-30" />
         <svg width={44} height={56} viewBox="0 0 44 56" aria-hidden role="presentation">
-          <title>Location pin</title>
+          <title>{pinTitle}</title>
           <path
             d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
             fill="rgb(var(--accent))"
@@ -65,8 +75,19 @@ function MapPlaceholder({ ariaLabel, addressBadge }: { ariaLabel: string; addres
 
 export async function LandingHoursLocation() {
   const t = await getTranslations('web.marketing.home.hoursLocation');
+  const tCommon = await getTranslations('common');
   const phone = t('phone');
   const tel = phone.replace(/\s/g, '');
+  const dayLabels = [
+    tCommon('daysShort.sunday'),
+    tCommon('daysShort.monday'),
+    tCommon('daysShort.tuesday'),
+    tCommon('daysShort.wednesday'),
+    tCommon('daysShort.thursday'),
+    tCommon('daysShort.friday'),
+    tCommon('daysShort.saturday'),
+  ];
+  const closedLabel = tCommon('closed');
   return (
     <section
       id="locations"
@@ -104,10 +125,10 @@ export async function LandingHoursLocation() {
                 <Share2 size={14} /> {t('shareLocation')}
               </button>
             </div>
-            <HoursTable hours={mockHours} highlightToday layout="list" />
+            <HoursTable hours={mockHours} highlightToday layout="list" dayLabels={dayLabels} closedLabel={closedLabel} />
           </div>
           <div className="flex flex-col gap-3">
-            <MapPlaceholder ariaLabel={t('mapAriaLabel')} addressBadge={t('addressLine1')} />
+            <MapPlaceholder ariaLabel={t('mapAriaLabel')} addressBadge={t('addressLine1')} mapTitle={t('mapTitle')} pinTitle={t('pinTitle')} />
             <div className="flex justify-end">
               <Link
                 href="#"

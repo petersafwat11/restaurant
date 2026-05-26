@@ -13,6 +13,8 @@ export interface TestimonialCardProps {
   /** 1–5, 0.5 increments. */
   rating: number;
   source?: 'google' | 'tripadvisor' | 'facebook' | 'internal';
+  /** Accessible label passed to the Stars component (e.g. "4.8 out of 5 stars"). Falls back to English when absent. */
+  starsAriaLabel?: string;
   className?: string;
 }
 
@@ -28,6 +30,7 @@ export function TestimonialCard({
   author,
   rating,
   source,
+  starsAriaLabel,
   className,
 }: TestimonialCardProps) {
   return (
@@ -37,7 +40,7 @@ export function TestimonialCard({
         className,
       )}
     >
-      <Stars value={rating} size={16} />
+      <Stars value={rating} size={16} ariaLabel={starsAriaLabel} />
       <p
         className="m-0 text-body-l text-fg"
         style={{

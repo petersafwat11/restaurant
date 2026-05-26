@@ -50,5 +50,8 @@
     "timezone": "Strefa czasowa",
     "currency": "Waluta",
     "editLink": "Edytuj strefę czasową lub walutę w <link>Profil restauracji</link>."
+  },
+  "toasts": {
+    "saved": "Zapisano ustawienia"
   }
 }

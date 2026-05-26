@@ -24,5 +24,13 @@
     "silver": "Silver",
     "gold": "Gold",
     "platinum": "Platinum"
+  },
+  "kinds": {
+    "EARN": "Points earned",
+    "REDEEM": "Points redeemed",
+    "REVOKE": "Points revoked",
+    "EXPIRE": "Points expired",
+    "REFERRAL": "Referral bonus",
+    "ADJUST": "Manual adjustment"
   }
 }

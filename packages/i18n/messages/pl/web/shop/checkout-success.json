@@ -53,7 +53,10 @@
     "deliveryCaption": "Dostawa na",
     "pickupCaption": "Odbiór z",
     "dineInCaption": "Twój stolik",
-    "tableRecorded": "Numer stolika zapisany"
+    "tableRecorded": "Numer stolika zapisany",
+    "pickupName": "Szef Donald",
+    "pickupStreet": "Ul. Ks. Piotra Ściegiennego 68a",
+    "pickupCity": "25-115 Kielce"
   },
   "activity": {
     "regionLabel": "Aktywność zamówienia",
@@ -64,7 +67,9 @@
     "regionLabel": "Potrzebujesz pomocy",
     "title": "Potrzebujesz pomocy?",
     "description": "Alergie, brakująca pozycja, zmiana adresu? Zadzwoń — jesteśmy pod ręką.",
-    "messageUs": "Napisz do nas"
+    "messageUs": "Napisz do nas",
+    "phoneHref": "tel:+48221234567",
+    "phoneDisplay": "+48 22 123 45 67"
   },
   "summary": {
     "regionLabel": "Podsumowanie zamówienia",

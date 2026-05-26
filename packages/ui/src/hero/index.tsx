@@ -16,7 +16,7 @@ export interface HeroProps {
   /** Floating chips/badges positioned over the media — typically 1–2 absolute-positioned cards. */
   decoration?: React.ReactNode;
   /** Below-CTA rating row. */
-  rating?: { value: number; count: number; renderStars?: (value: number) => React.ReactNode };
+  rating?: { value: number; count: number; label?: string; renderStars?: (value: number) => React.ReactNode };
   /** Optional decorative background (e.g. half-off-edge hexagon). */
   background?: React.ReactNode;
   layout?: 'split' | 'stacked';
@@ -92,7 +92,7 @@ export function Hero({
                 <span className="font-medium tabular-nums text-fg">{rating.value.toFixed(1)}</span>
                 <span aria-hidden className="h-1 w-1 rounded-full bg-fg-subtle" />
                 <span className="text-fg-subtle">
-                  Based on {rating.count.toLocaleString()} Google reviews
+                  {rating.label ?? `Based on ${rating.count.toLocaleString()} Google reviews`}
                 </span>
               </div>
             )}

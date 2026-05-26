@@ -80,7 +80,7 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<AuthIssueResult> {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (existing) throw new ConflictException('Email already registered');
+    if (existing) throw new ConflictException({ message: 'Email already registered', code: 'emailAlreadyRegistered' });
 
     const passwordHash = await hashPassword(dto.password);
 
@@ -123,11 +123,11 @@ export class AuthService {
       where: { email: dto.email },
       include: this.userInclude(),
     });
-    if (!user || !user.passwordHash) throw new UnauthorizedException('Invalid credentials');
+    if (!user || !user.passwordHash) throw new UnauthorizedException({ message: 'Invalid credentials', code: 'invalidCredentials' });
 
     const ok = await verifyPassword(dto.password, user.passwordHash);
-    if (!ok) throw new UnauthorizedException('Invalid credentials');
-    if (!user.isActive) throw new UnauthorizedException('Account disabled');
+    if (!ok) throw new UnauthorizedException({ message: 'Invalid credentials', code: 'invalidCredentials' });
+    if (!user.isActive) throw new UnauthorizedException({ message: 'Account disabled', code: 'accountDisabled' });
 
     return this.issueTokensFor(user);
   }
@@ -249,7 +249,7 @@ export class AuthService {
 
   async resetPassword(dto: ResetPasswordDto): Promise<void> {
     const userId = await this.consumeOneOffToken('reset-password', dto.token);
-    if (!userId) throw new BadRequestException('Invalid or expired token');
+    if (!userId) throw new BadRequestException({ message: 'Invalid or expired token', code: 'tokenInvalid' });
 
     const passwordHash = await hashPassword(dto.password);
     await this.prisma.user.update({
@@ -266,7 +266,7 @@ export class AuthService {
 
   async verifyEmail(dto: VerifyEmailDto): Promise<void> {
     const userId = await this.consumeOneOffToken('verify-email', dto.token);
-    if (!userId) throw new BadRequestException('Invalid or expired token');
+    if (!userId) throw new BadRequestException({ message: 'Invalid or expired token', code: 'tokenInvalid' });
 
     await this.prisma.user.update({
       where: { id: userId },

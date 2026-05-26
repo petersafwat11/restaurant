@@ -11,63 +11,42 @@ import {
   SelectValue,
   Textarea,
 } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
-export interface CancelModalLabels {
-  title: (orderNumber: string) => string;
-  titleFallback: string;
-  description: string;
-  primary: string;
-  secondary: string;
-  reasonLabel: string;
-  notesLabel: string;
-  notesHelper: string;
-  pickReason: string;
-  notesPlaceholderOther: string;
-  notesPlaceholder: string;
-  reasons: string[];
-  otherKey: string;
-}
+const CANCEL_REASON_KEYS = [
+  'customerRequested',
+  'outOfStock',
+  'outOfRange',
+  'restaurantClosed',
+  'paymentFailed',
+  'other',
+] as const;
 
-const DEFAULT_CANCEL_LABELS: CancelModalLabels = {
-  title: (n) => `Cancel order ${n}?`,
-  titleFallback: 'Cancel order',
-  description:
-    'The customer will be refunded (if pre-paid) and notified. This action cannot be undone.',
-  primary: 'Cancel order',
-  secondary: 'Keep order',
-  reasonLabel: 'Reason',
-  notesLabel: 'Notes',
-  notesHelper: "Visible in audit log and on the customer's order page.",
-  pickReason: 'Pick a reason',
-  notesPlaceholderOther: 'Describe the reason…',
-  notesPlaceholder: 'Optional extra context…',
-  reasons: [
-    'Customer requested',
-    'Restaurant out of stock',
-    'Address out of delivery range',
-    'Restaurant closed',
-    'Payment failed',
-    'Other',
-  ],
-  otherKey: 'Other',
-};
+type CancelReasonKey = (typeof CANCEL_REASON_KEYS)[number];
 
 interface CancelModalProps {
   orderId: string | null;
   onOpenChange: (open: boolean) => void;
-  labels?: Partial<CancelModalLabels>;
 }
 
-export function CancelModal({ orderId, onOpenChange, labels }: CancelModalProps) {
-  const L = { ...DEFAULT_CANCEL_LABELS, ...labels } as CancelModalLabels;
-  const REASONS = L.reasons;
-  const defaultReason = REASONS[0] ?? L.otherKey;
+export function CancelModal({ orderId, onOpenChange }: CancelModalProps) {
+  const t = useTranslations('admin.orders.detail');
+  const defaultReason = CANCEL_REASON_KEYS[0];
   const open = orderId !== null;
   const q = useOrder(orderId ?? '');
   const cancel = useCancelOrder();
-  const [reason, setReason] = React.useState(defaultReason);
+  const [reason, setReason] = React.useState<CancelReasonKey>(defaultReason);
   const [note, setNote] = React.useState('');
+
+  const reasonLabels: Record<CancelReasonKey, string> = {
+    customerRequested: t('cancelModal.reasons.customerRequested'),
+    outOfStock: t('cancelModal.reasons.outOfStock'),
+    outOfRange: t('cancelModal.reasons.outOfRange'),
+    restaurantClosed: t('cancelModal.reasons.restaurantClosed'),
+    paymentFailed: t('cancelModal.reasons.paymentFailed'),
+    other: t('cancelModal.reasons.other'),
+  };
 
   React.useEffect(() => {
     if (open) {
@@ -77,11 +56,11 @@ export function CancelModal({ orderId, onOpenChange, labels }: CancelModalProps)
   }, [open, defaultReason]);
 
   const order = q.data;
-  const valid = reason !== L.otherKey || note.trim().length > 0;
+  const valid = reason !== 'other' || note.trim().length > 0;
 
   function submit() {
     if (!order) return;
-    const fullReason = reason === L.otherKey ? note.trim() : reason;
+    const fullReason = reason === 'other' ? note.trim() : reasonLabels[reason];
     cancel.mutate(
       {
         orderId: order.id,
@@ -99,38 +78,46 @@ export function CancelModal({ orderId, onOpenChange, labels }: CancelModalProps)
       open={open}
       onOpenChange={onOpenChange}
       variant="destructive"
-      title={order ? L.title(order.orderNumber) : L.titleFallback}
-      description={L.description}
+      title={order ? t('cancelModal.title', { number: order.orderNumber }) : t('cancelModal.titleFallback')}
+      description={t('cancelModal.description')}
       primary={{
-        label: L.primary,
+        label: t('cancelModal.primary'),
         onClick: submit,
         disabled: !valid,
         loading: cancel.isPending,
       }}
-      secondary={{ label: L.secondary, onClick: () => onOpenChange(false) }}
+      secondary={{ label: t('cancelModal.secondary'), onClick: () => onOpenChange(false) }}
     >
       <div className="flex flex-col gap-4">
-        <FormField label={L.reasonLabel} required>
-          <Select value={reason} onValueChange={setReason}>
+        <FormField label={t('cancelModal.reasonLabel')} required>
+          <Select value={reason} onValueChange={(v) => setReason(v as CancelReasonKey)}>
             <SelectTrigger>
-              <SelectValue placeholder={L.pickReason} />
+              <SelectValue placeholder={t('cancelModal.pickReason')} />
             </SelectTrigger>
             <SelectContent>
-              {REASONS.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {r}
+              {CANCEL_REASON_KEYS.map((key) => (
+                <SelectItem key={key} value={key}>
+                  {reasonLabels[key]}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </FormField>
 
-        <FormField label={L.notesLabel} required={reason === L.otherKey} helper={L.notesHelper}>
+        <FormField
+          label={t('cancelModal.notesLabel')}
+          required={reason === 'other'}
+          helper={t('cancelModal.notesHelper')}
+        >
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={500}
-            placeholder={reason === L.otherKey ? L.notesPlaceholderOther : L.notesPlaceholder}
+            placeholder={
+              reason === 'other'
+                ? t('cancelModal.notesPlaceholderOther')
+                : t('cancelModal.notesPlaceholder')
+            }
           />
         </FormField>
       </div>

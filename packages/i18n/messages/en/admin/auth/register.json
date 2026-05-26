@@ -15,5 +15,9 @@
   "referralCode": "Referral code",
   "referralPlaceholder": "e.g. RESTOA1B2",
   "hasAccount": "Already have an account?",
-  "login": "Sign in"
+  "login": "Sign in",
+  "successToast": "Account created — check your email to verify",
+  "errors": {
+    "emailAlreadyRegistered": "An account with this email already exists."
+  }
 }

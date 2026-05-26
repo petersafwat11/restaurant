@@ -10,7 +10,7 @@ export interface CheckoutSectionProps {
   step: number;
   title: string;
   status: CheckoutSectionStatus;
-  /** Shown inline next to the title when status='complete' — a one-line summary like "Marszałkowska 102 · ASAP". */
+  /** Shown inline next to the title when status='complete' — a one-line summary like "Ściegiennego 68a · ASAP". */
   summary?: React.ReactNode;
   /** Edit link top-right when complete. */
   onEdit?: () => void;

@@ -126,6 +126,8 @@ export function LandingFeaturedDishes() {
               flags={d.flags as never}
               flagLabels={flagLabels}
               onAdd={d.onAdd}
+              soldOutLabel={t('soldOutLabel')}
+              formatAddAriaLabel={(name) => t('addAriaLabel', { name })}
             />
           ))}
         </div>

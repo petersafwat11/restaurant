@@ -13,6 +13,7 @@ interface Props {
 
 export function CreatePromotionModal({ open, onOpenChange }: Props) {
   const t = useTranslations('admin.promotions.list');
+  const tErrors = useTranslations('errors');
   const create = useCreatePromotion();
   const { reset: resetCreate } = create;
   const [name, setName] = React.useState('');
@@ -74,7 +75,7 @@ export function CreatePromotionModal({ open, onOpenChange }: Props) {
             ))}
           </select>
         </div>
-        {create.error && <div className="text-xs text-negative">{create.error.message}</div>}
+        {create.error && <div className="text-xs text-negative">{tErrors('generic')}</div>}
       </div>
     </ActionModal>
   );

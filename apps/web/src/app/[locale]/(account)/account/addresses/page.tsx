@@ -41,7 +41,7 @@ export default function AddressesPage() {
     defaultValues: {
       label: '',
       line1: '',
-      city: 'Warszawa',
+      city: 'Kielce',
       country: 'PL',
       geoPoint: undefined as unknown as { lat: number; lng: number },
     },
@@ -167,8 +167,8 @@ export default function AddressesPage() {
                   zones={zonesQuery.data?.zones ?? []}
                   center={
                     restaurantQuery.data?.geoPoint ?? {
-                      lat: 52.2297,
-                      lng: 21.0122,
+                      lat: 50.8505,
+                      lng: 20.6275,
                     }
                   }
                   value={field.value ?? null}

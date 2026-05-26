@@ -11,5 +11,8 @@
     "title": "Verification failed",
     "description": "This link is invalid or expired. Try requesting a new one from your account.",
     "backToLogin": "Back to sign in"
+  },
+  "toasts": {
+    "success": "Email verified"
   }
 }

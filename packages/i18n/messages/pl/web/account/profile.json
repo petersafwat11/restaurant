@@ -4,6 +4,7 @@
     "firstName": "Imię",
     "lastName": "Nazwisko",
     "phone": "Telefon",
+    "phonePrefix": "+48",
     "phonePlaceholder": "512 345 678"
   },
   "actions": {

@@ -2,6 +2,7 @@
 
 import { usePublicOrderTracking } from '@/features/orders/hooks';
 import { Container, EmptyState, OrderProgressStepper, PageSpinner } from '@repo/ui';
+import type { OrderType } from '@repo/types';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -17,6 +18,7 @@ interface PublicTrackingAppProps {
  */
 export function PublicTrackingApp({ orderId, token }: PublicTrackingAppProps) {
   const t = useTranslations('web.public.track');
+  const tStepper = useTranslations('shared.orderTracking');
   const query = usePublicOrderTracking(token);
 
   if (!token) {
@@ -68,6 +70,12 @@ export function PublicTrackingApp({ orderId, token }: PublicTrackingAppProps) {
     );
   }
 
+  const stepsByMode: Record<OrderType, string[]> = {
+    DELIVERY: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.onTheWay'), tStepper('step.delivered')],
+    PICKUP: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.readyForPickup'), tStepper('step.pickedUp')],
+    DINE_IN: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.served')],
+  };
+
   return (
     <Container size="narrow" className="py-12">
       <div className="space-y-8">
@@ -86,7 +94,14 @@ export function PublicTrackingApp({ orderId, token }: PublicTrackingAppProps) {
           )}
         </header>
 
-        <OrderProgressStepper mode={tracking.type} status={tracking.status} />
+        <OrderProgressStepper
+          mode={tracking.type}
+          status={tracking.status}
+          steps={stepsByMode[tracking.type]}
+          cancelledLabel={tStepper('cancelled')}
+          refundedLabel={tStepper('refunded')}
+          ariaLabel={tStepper('ariaLabel')}
+        />
 
         {tracking.isTerminal && (
           <p className="text-center text-body text-fg-muted">{t('terminal')}</p>

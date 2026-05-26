@@ -7,5 +7,6 @@
   },
   "markAllRead": "Oznacz wszystkie jako przeczytane",
   "markRead": "Oznacz jako przeczytane",
-  "unreadCount": "{count, plural, one {# nieprzeczytane} few {# nieprzeczytane} many {# nieprzeczytanych} other {# nieprzeczytanych}}"
+  "unreadCount": "{count, plural, one {# nieprzeczytane} few {# nieprzeczytane} many {# nieprzeczytanych} other {# nieprzeczytanych}}",
+  "preferencesUpdated": "Preferencje zaktualizowane"
 }

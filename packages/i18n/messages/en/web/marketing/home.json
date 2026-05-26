@@ -17,7 +17,9 @@
     "openNow": "Open now",
     "closesAt": "Closes at {time}",
     "chefName": "Szef Donald",
-    "chefLocation": "Warszawa Centrum"
+    "chefLocation": "Kielce Centrum",
+    "ratingLabel": "Based on {count} Google reviews",
+    "starsAriaLabel": "{value} out of 5 stars"
   },
   "categories": {
     "eyebrow": "Explore",
@@ -41,6 +43,8 @@
     "viewFullMenuCta": "View the full menu",
     "addedToCart": "Added to cart",
     "addedToCartDescription": "1 × {name}",
+    "addAriaLabel": "Add {name} to cart",
+    "soldOutLabel": "Sold out today",
     "dishes": {
       "kebab-tortilla-srodni": {
         "name": "Kebab Tortilla Średni",
@@ -90,24 +94,27 @@
   "hoursLocation": {
     "eyebrow": "Find us",
     "title": "Open seven days.",
-    "mapAriaLabel": "Map showing Szef Donald on Marszałkowska 102, Warsaw",
-    "addressLine1": "Marszałkowska 102",
-    "addressLine2": "00-026 Warszawa, Poland",
-    "phone": "+48 22 555 01 23",
+    "mapAriaLabel": "Map showing Szef Donald on Ul. Ks. Piotra Ściegiennego 68a, Kielce",
+    "addressLine1": "Ul. Ks. Piotra Ściegiennego 68a",
+    "addressLine2": "25-115 Kielce, Poland",
+    "phone": "+48 883 953 589",
     "getDirections": "Get directions",
     "callUs": "Call us",
     "shareLocation": "Share location",
-    "viewLargerMap": "View larger map"
+    "viewLargerMap": "View larger map",
+    "mapTitle": "Map",
+    "pinTitle": "Location pin"
   },
   "testimonials": {
     "eyebrow": "Reviews",
     "title": "Trusted by thousands.",
     "description": "4.8 average rating across 1,247 reviews on Google.",
     "readAllReviews": "Read all reviews",
+    "starsAriaLabel": "{value} out of 5 stars",
     "anonymous": "Anonymous",
     "items": {
       "0": {
-        "quote": "Best kebab in Warsaw, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
+        "quote": "Best kebab in Kielce, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
         "name": "Kasia W.",
         "meta": "Local guide · 42 reviews"
       },
@@ -131,6 +138,11 @@
   "newsletter": {
     "eyebrow": "Stay in touch",
     "title": "Get a free baklava on your first order.",
-    "description": "Join the list — occasional emails, never spam. Unsubscribe whenever."
+    "description": "Join the list — occasional emails, never spam. Unsubscribe whenever.",
+    "emailPlaceholder": "Your email",
+    "subscribe": "Subscribe",
+    "subscribeSuccess": "Welcome! Check your inbox for the code.",
+    "subscribeError": "Couldn't subscribe — try again.",
+    "emailAriaLabel": "Email address"
   }
 }

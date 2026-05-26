@@ -13,6 +13,17 @@ import Link from 'next/link';
  */
 export function SzefSiteFooter() {
   const t = useTranslations('web.footer');
+  const tCommon = useTranslations('common');
+  const dayLabels = [
+    tCommon('daysShort.sunday'),
+    tCommon('daysShort.monday'),
+    tCommon('daysShort.tuesday'),
+    tCommon('daysShort.wednesday'),
+    tCommon('daysShort.thursday'),
+    tCommon('daysShort.friday'),
+    tCommon('daysShort.saturday'),
+  ];
+  const closedLabel = tCommon('closed');
   return (
     <SiteFooter
       brandSlot={
@@ -78,7 +89,7 @@ export function SzefSiteFooter() {
                 {mockLocation.phone}
               </Link>
               <div className="mt-2 text-surface/80">
-                <HoursTable hours={mockHours} layout="compact" highlightToday={false} />
+                <HoursTable hours={mockHours} layout="compact" highlightToday={false} dayLabels={dayLabels} closedLabel={closedLabel} />
               </div>
             </>
           ),

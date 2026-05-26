@@ -40,5 +40,9 @@
     "description": "Remove \"{label}\" on {date}?",
     "remove": "Remove",
     "cancel": "Cancel"
+  },
+  "toasts": {
+    "added": "Holiday added",
+    "removed": "Holiday removed"
   }
 }

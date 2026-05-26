@@ -1,6 +1,8 @@
 {
   "eyebrow": "Odwiedź nas",
-  "heroImageAlt": "",
+  "heroImageAlt": "Wejście do restauracji Szef Donald",
+  "mapTitle": "Mapa",
+  "restaurantPinTitle": "Pinezka restauracji",
   "status": {
     "openNow": "Otwarte",
     "closed": "Zamknięte",

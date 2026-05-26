@@ -77,7 +77,7 @@ export default function ProfilePage() {
           id="pf-phone"
           label={t('fields.phone')}
           size="lg"
-          prefix="+48"
+          prefix={t('fields.phonePrefix')}
           error={form.formState.errors.phone?.message}
         >
           <input

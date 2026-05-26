@@ -11,5 +11,8 @@
     "title": "Weryfikacja nieudana",
     "description": "Ten link jest nieprawidłowy lub wygasł. Poproś o nowy w ustawieniach konta.",
     "backToLogin": "Wróć do logowania"
+  },
+  "toasts": {
+    "success": "E-mail zweryfikowany"
   }
 }

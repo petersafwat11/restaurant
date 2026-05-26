@@ -105,7 +105,11 @@ export default function ResetPasswordPage() {
           {reset.isError && (
             <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 px-3 py-2 text-small-admin text-negative">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{reset.error.message}</span>
+              <span>
+                {reset.error.code === 'tokenInvalid'
+                  ? t('errors.tokenInvalid')
+                  : reset.error.message}
+              </span>
             </div>
           )}
 

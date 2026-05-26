@@ -1,0 +1,416 @@
+- generic [ref=e3]:
+  - img
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - banner:
+        - generic [ref=e8]:
+          - link "hostinger" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - img "hostinger" [ref=e11]
+          - generic [ref=e23]:
+            - link "Refer & earn up to $265" [ref=e25] [cursor=pointer]:
+              - /url: /referrals
+              - img [ref=e27]
+              - generic [ref=e30]: Refer & earn up to $265
+            - button "Ask AI" [expanded] [ref=e32] [cursor=pointer]:
+              - img [ref=e33]
+              - generic [ref=e35]: Ask AI
+            - generic [ref=e37]:
+              - button [ref=e38] [cursor=pointer]:
+                - img [ref=e40]
+              - button [ref=e42] [cursor=pointer]:
+                - img [ref=e44]
+            - button "Search" [ref=e50] [cursor=pointer]:
+              - img [ref=e51]
+            - button "Open menu" [ref=e55] [cursor=pointer]:
+              - img [ref=e56]
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e67]:
+            - navigation [ref=e69]:
+              - list [ref=e70]:
+                - listitem [ref=e71]:
+                  - link "Home Home" [ref=e74] [cursor=pointer]:
+                    - /url: /
+                    - button "Home" [ref=e75]:
+                      - img [ref=e76]
+                    - generic [ref=e78]: Home
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e79]:
+                  - button "Websites Websites" [ref=e82] [cursor=pointer]:
+                    - button "Websites" [ref=e83]:
+                      - img [ref=e84]
+                    - generic [ref=e86]: Websites
+                - listitem [ref=e87]:
+                  - list [ref=e88]:
+                    - listitem [ref=e89]:
+                      - link "All websites" [ref=e92] [cursor=pointer]:
+                        - /url: /websites
+                        - generic [ref=e93]: All websites
+                    - listitem [ref=e94]:
+                      - link "WordPress" [ref=e97] [cursor=pointer]:
+                        - /url: /websites?websiteType=wordpress
+                        - generic [ref=e98]: WordPress
+                    - listitem [ref=e99]:
+                      - link "Horizons" [ref=e102] [cursor=pointer]:
+                        - /url: /websites?websiteType=horizons
+                        - generic [ref=e103]: Horizons
+                    - listitem [ref=e104]:
+                      - link "Website Builder" [ref=e107] [cursor=pointer]:
+                        - /url: /websites?websiteType=builder
+                        - generic [ref=e108]: Website Builder
+                    - listitem [ref=e109]:
+                      - link "Node.js" [ref=e112] [cursor=pointer]:
+                        - /url: /websites?websiteType=nodejs
+                        - generic [ref=e113]: Node.js
+                    - listitem [ref=e114]:
+                      - link "PHP/HTML" [ref=e117] [cursor=pointer]:
+                        - /url: /websites?websiteType=other
+                        - generic [ref=e118]: PHP/HTML
+                - listitem [ref=e119]:
+                  - button "Domains Domains" [ref=e122] [cursor=pointer]:
+                    - button "Domains" [ref=e123]:
+                      - img [ref=e124]
+                    - generic [ref=e126]: Domains
+                - listitem [ref=e127]:
+                  - list [ref=e128]:
+                    - listitem [ref=e129]:
+                      - link "Domain portfolio" [ref=e132] [cursor=pointer]:
+                        - /url: /domains
+                        - generic [ref=e133]: Domain portfolio
+                    - listitem [ref=e134]:
+                      - link "Get a new domain" [ref=e137] [cursor=pointer]:
+                        - /url: /domains/domain-checker
+                        - generic [ref=e138]: Get a new domain
+                    - listitem [ref=e139]:
+                      - link "Transfers" [ref=e142] [cursor=pointer]:
+                        - /url: /domains/transfers
+                        - generic [ref=e143]: Transfers
+                    - listitem [ref=e144]:
+                      - link "Contact profiles" [ref=e147] [cursor=pointer]:
+                        - /url: /domains/contact-profiles
+                        - generic [ref=e148]: Contact profiles
+                - listitem [ref=e149]:
+                  - link "Emails Emails" [ref=e152] [cursor=pointer]:
+                    - /url: /emails
+                    - button "Emails" [ref=e153]:
+                      - img [ref=e154]
+                    - generic [ref=e156]: Emails
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e157]:
+                  - button "More services More services" [ref=e160] [cursor=pointer]:
+                    - button "More services" [ref=e161]:
+                      - img [ref=e162]
+                    - generic [ref=e164]: More services
+                - listitem [ref=e165]:
+                  - list [ref=e166]:
+                    - listitem [ref=e167]:
+                      - link "Marketplace" [ref=e170] [cursor=pointer]:
+                        - /url: /marketplace
+                        - generic [ref=e171]: Marketplace
+                    - listitem [ref=e172]:
+                      - link "WordPress Add-ons" [ref=e175] [cursor=pointer]:
+                        - /url: /addons/dashboard
+                        - generic [ref=e176]: WordPress Add-ons
+                    - listitem [ref=e177]:
+                      - link "AI tools" [ref=e180] [cursor=pointer]:
+                        - /url: /ai-tools
+                        - generic [ref=e181]: AI tools
+                    - listitem [ref=e182]:
+                      - link "Dark web monitor Dark web monitor" [ref=e185] [cursor=pointer]:
+                        - /url: /dark-web-monitor
+                        - button "Dark web monitor" [ref=e186]:
+                          - img [ref=e187]
+                        - generic [ref=e189]: Dark web monitor
+                    - listitem [ref=e190]:
+                      - link "nexos.ai credits" [ref=e193] [cursor=pointer]:
+                        - /url: /nexos-credits
+                        - generic [ref=e194]: nexos.ai credits
+                    - listitem [ref=e195]:
+                      - link "Oxylabs AI Studio credits" [ref=e198] [cursor=pointer]:
+                        - /url: /oxylabs-credits
+                        - generic [ref=e199]: Oxylabs AI Studio credits
+            - navigation [ref=e201]:
+              - list [ref=e202]:
+                - listitem [ref=e203]:
+                  - button "Horizons Horizons" [ref=e206] [cursor=pointer]:
+                    - button "Horizons" [ref=e207]:
+                      - img [ref=e208]
+                    - generic [ref=e210]: Horizons
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e211]:
+                  - link "Reach Reach" [ref=e214] [cursor=pointer]:
+                    - /url: /email-marketing
+                    - button "Reach" [ref=e215]:
+                      - img [ref=e216]
+                    - generic [ref=e218]: Reach
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e219]:
+                  - link "eCommerce eComm" [ref=e222] [cursor=pointer]:
+                    - /url: /ecommerce
+                    - button "eCommerce" [ref=e223]:
+                      - img [ref=e224]
+                    - generic [ref=e226]: eComm
+                - generic:
+                  - listitem:
+                    - list
+            - navigation [ref=e228]:
+              - list [ref=e229]:
+                - listitem [ref=e230]:
+                  - button "Agents Agents" [ref=e233] [cursor=pointer]:
+                    - button "Agents" [ref=e234]:
+                      - img [ref=e235]
+                    - generic [ref=e237]: Agents
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e238]:
+                  - link "OpenClaw OpenClaw" [ref=e241] [cursor=pointer]:
+                    - /url: /applications
+                    - button "OpenClaw" [ref=e242]:
+                      - img [ref=e243]
+                    - generic [ref=e245]: OpenClaw
+                - generic:
+                  - listitem:
+                    - list
+            - navigation [ref=e247]:
+              - list [ref=e248]:
+                - listitem [ref=e249]:
+                  - link "VPS VPS" [ref=e252] [cursor=pointer]:
+                    - /url: /vps
+                    - button "VPS" [ref=e253]:
+                      - img [ref=e254]
+                    - generic [ref=e256]: VPS
+                - generic:
+                  - listitem:
+                    - list
+                - listitem [ref=e257]:
+                  - link "API API" [ref=e260] [cursor=pointer]:
+                    - /url: /api
+                    - button "API" [ref=e261]:
+                      - img [ref=e262]
+                    - generic [ref=e264]: API
+                - generic:
+                  - listitem:
+                    - list
+          - complementary [ref=e267]:
+            - generic [ref=e269]:
+              - generic [ref=e274]:
+                - generic [ref=e275]: Select domain
+                - combobox [ref=e279] [cursor=pointer]:
+                  - generic [ref=e281]: szefdonald.pl
+                  - generic [ref=e282]:
+                    - img
+              - navigation [ref=e286]:
+                - list [ref=e287]:
+                  - listitem [ref=e288]:
+                    - menuitem "Domain Overview" [ref=e291] [cursor=pointer]:
+                      - img [ref=e293]
+                      - generic [ref=e296]: Domain Overview
+                  - generic:
+                    - listitem:
+                      - list
+                  - listitem [ref=e297]:
+                    - menuitem "DNS / Nameservers" [ref=e300] [cursor=pointer]:
+                      - img [ref=e302]
+                      - generic [ref=e305]: DNS / Nameservers
+                  - generic:
+                    - listitem:
+                      - list
+                  - listitem [ref=e306]:
+                    - menuitem "Domain Ownership" [ref=e309] [cursor=pointer]:
+                      - img [ref=e311]
+                      - generic [ref=e314]: Domain Ownership
+                  - generic:
+                    - listitem:
+                      - list
+                  - listitem [ref=e315]:
+                    - menuitem "Brand protection" [ref=e318] [cursor=pointer]:
+                      - img [ref=e320]
+                      - generic [ref=e323]: Brand protection
+                  - generic:
+                    - listitem:
+                      - list
+              - listitem [ref=e326]:
+                - menuitem "Give feedback" [ref=e329] [cursor=pointer]:
+                  - img [ref=e331]
+                  - generic [ref=e334]: Give feedback
+        - generic [ref=e337]:
+          - banner [ref=e338]:
+            - navigation "Breadcrumb" [ref=e339]:
+              - list [ref=e340]:
+                - listitem [ref=e341]:
+                  - link [ref=e342] [cursor=pointer]:
+                    - /url: /?amplitudeLocation=breadcrumbs
+                    - img [ref=e343]
+                  - img [ref=e345]
+                - listitem [ref=e347]:
+                  - link "Domain portfolio" [ref=e348] [cursor=pointer]:
+                    - /url: /domains?redirectLocation=breadcrumbs
+                    - generic [ref=e349]: Domain portfolio
+                  - img [ref=e350]
+                - listitem [ref=e352]:
+                  - link "szefdonald.pl" [ref=e353] [cursor=pointer]:
+                    - /url: /domain/szefdonald.pl/domain-overview?redirectLocation=breadcrumbs
+                    - generic [ref=e354]: szefdonald.pl
+                  - img [ref=e355]
+                - listitem [ref=e357]:
+                  - generic [ref=e359]: DNS / Nameservers
+            - heading "DNS / Nameservers" [level=1] [ref=e363]
+          - main [ref=e365]:
+            - generic [ref=e369]:
+              - list [ref=e371]:
+                - listitem [ref=e372]:
+                  - generic [ref=e374] [cursor=pointer]: DNS records
+                - listitem [ref=e375]:
+                  - generic [ref=e377] [cursor=pointer]: Child nameservers
+                - listitem [ref=e378]:
+                  - generic [ref=e380] [cursor=pointer]: Redirects
+                - listitem [ref=e381]:
+                  - generic [ref=e383] [cursor=pointer]: DNSSEC
+                - listitem [ref=e384]:
+                  - generic [ref=e386] [cursor=pointer]: DNS history
+              - generic [ref=e388]:
+                - region [ref=e389]:
+                  - paragraph [ref=e390]: Nameservers
+                  - paragraph [ref=e391]: Nameservers handle internet requests for your domain. You can use Hostinger nameservers or use custom nameservers to point to other hosting provider.
+                  - generic [ref=e392]:
+                    - paragraph [ref=e393]: horizon.dns-parking.com
+                    - paragraph [ref=e394]: orbit.dns-parking.com
+                  - button "Change Nameservers" [ref=e395] [cursor=pointer]:
+                    - generic [ref=e396]: Change Nameservers
+                - region [ref=e397]:
+                  - generic [ref=e398]:
+                    - generic [ref=e399]:
+                      - heading "Manage DNS records" [level=3] [ref=e400]
+                      - paragraph [ref=e401]: These records define how your domain behaves. Common uses include pointing your domain at web servers or configuring email delivery for your domain.
+                    - generic [ref=e402]:
+                      - button "Export" [ref=e403] [cursor=pointer]:
+                        - img [ref=e404]
+                        - generic [ref=e406]: Export
+                      - button "Import" [ref=e407] [cursor=pointer]:
+                        - img [ref=e408]
+                        - generic [ref=e410]: Import
+                  - generic [ref=e413]:
+                    - generic [ref=e414]:
+                      - generic [ref=e415]: Type
+                      - combobox "Type" [ref=e419] [cursor=pointer]:
+                        - generic [ref=e421]: A
+                        - generic [ref=e422]:
+                          - img
+                    - generic [ref=e424]:
+                      - generic [ref=e425]: Name
+                      - textbox "Name" [ref=e428]:
+                        - /placeholder: ""
+                        - text: admin
+                    - generic [ref=e432]:
+                      - generic [ref=e433]: Points to
+                      - textbox "Points to" [ref=e436]: 207.180.217.159
+                    - generic [ref=e440]:
+                      - generic [ref=e441]: TTL
+                      - spinbutton "TTL" [ref=e444]: "14400"
+                    - button "Add Record" [ref=e449] [cursor=pointer]:
+                      - generic [ref=e450]: Add Record
+                - region [ref=e451]:
+                  - generic [ref=e452]:
+                    - generic [ref=e456]:
+                      - img [ref=e457]
+                      - textbox "Search" [ref=e460]
+                    - table [ref=e465]:
+                      - rowgroup [ref=e466]:
+                        - row "Type Name Priority Content TTL" [ref=e467]:
+                          - columnheader "Type" [ref=e468] [cursor=pointer]:
+                            - generic [ref=e469]:
+                              - generic [ref=e471]: Type
+                              - img [ref=e472]
+                          - columnheader "Name" [ref=e474] [cursor=pointer]:
+                            - generic [ref=e475]:
+                              - generic [ref=e477]: Name
+                              - img [ref=e478]
+                          - columnheader "Priority" [ref=e480] [cursor=pointer]:
+                            - generic [ref=e481]:
+                              - generic [ref=e483]: Priority
+                              - img [ref=e484]
+                          - columnheader "Content" [ref=e486] [cursor=pointer]:
+                            - generic [ref=e487]:
+                              - generic [ref=e489]: Content
+                              - img [ref=e490]
+                          - columnheader "TTL" [ref=e492] [cursor=pointer]:
+                            - generic [ref=e493]:
+                              - generic [ref=e495]: TTL
+                              - img [ref=e496]
+                          - columnheader [ref=e498]
+                      - rowgroup [ref=e499]:
+                        - row "CNAME www 0 szefdonald.pl 300 Delete Edit" [ref=e500]:
+                          - cell "CNAME" [ref=e501]:
+                            - generic [ref=e503]: CNAME
+                          - cell "www" [ref=e504]:
+                            - generic [ref=e506]: www
+                          - cell "0" [ref=e507]:
+                            - generic [ref=e509]: "0"
+                          - cell "szefdonald.pl" [ref=e510]:
+                            - generic [ref=e512]: szefdonald.pl
+                          - cell "300" [ref=e513]:
+                            - generic [ref=e515]: "300"
+                          - cell "Delete Edit" [ref=e516]:
+                            - generic [ref=e517]:
+                              - button "Delete" [ref=e518] [cursor=pointer]:
+                                - generic [ref=e519]: Delete
+                              - button "Edit" [ref=e520] [cursor=pointer]:
+                                - generic [ref=e521]: Edit
+                        - row "A @ 0 207.180.217.159 300 Delete Edit" [ref=e687]:
+                          - cell "A" [ref=e523]:
+                            - generic [ref=e525]: A
+                          - cell "@" [ref=e526]:
+                            - generic [ref=e528]: "@"
+                          - cell "0" [ref=e529]:
+                            - generic [ref=e531]: "0"
+                          - cell "207.180.217.159" [ref=e688]:
+                            - generic [ref=e534]: 207.180.217.159
+                          - cell "300" [ref=e689]:
+                            - generic [ref=e537]: "300"
+                          - cell "Delete Edit" [ref=e538]:
+                            - generic [ref=e539]:
+                              - button "Delete" [ref=e540] [cursor=pointer]:
+                                - generic [ref=e541]: Delete
+                              - button "Edit" [ref=e542] [cursor=pointer]:
+                                - generic [ref=e543]: Edit
+                - region [ref=e544]:
+                  - paragraph [ref=e545]: Reset DNS records
+                  - paragraph [ref=e546]: This feature resets all existing DNS records of szefdonald.pl to default.
+                  - button "Reset DNS records" [ref=e547] [cursor=pointer]:
+                    - generic [ref=e548]: Reset DNS records
+    - generic [ref=e707]:
+      - heading "Add Additional A Record" [level=2] [ref=e708]
+      - paragraph [ref=e709]: An A record already exists on your domain's DNS zone. By confirming, you will add an additional A record.
+      - paragraph [ref=e710]: "Existing A record:"
+      - generic [ref=e711]:
+        - generic [ref=e712]:
+          - generic [ref=e713]: Name
+          - generic [ref=e714]: Content
+          - generic [ref=e715]: TTL
+        - generic [ref=e716]:
+          - generic [ref=e717]: "@"
+          - generic [ref=e718]: 207.180.217.159
+          - generic [ref=e719]: "300"
+      - paragraph [ref=e720]: "New A record:"
+      - generic [ref=e721]:
+        - generic [ref=e722]:
+          - generic [ref=e723]: Name
+          - generic [ref=e724]: Content
+          - generic [ref=e725]: TTL
+        - generic [ref=e726]:
+          - generic [ref=e727]: admin
+          - generic [ref=e728]: 207.180.217.159
+          - generic [ref=e729]: "14400"
+      - generic [ref=e730]:
+        - button "Cancel" [ref=e731] [cursor=pointer]
+        - button "Confirm" [ref=e732] [cursor=pointer]

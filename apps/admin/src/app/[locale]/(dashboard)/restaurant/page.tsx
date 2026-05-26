@@ -12,20 +12,25 @@ import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
 
+function MapLoadingFallback() {
+  const t = useTranslations('admin.restaurant');
+  return (
+    <div className="grid h-[360px] place-items-center rounded-card border border-border/[var(--border-alpha)] bg-surface text-small text-fg-muted">
+      {t('loadingMap')}
+    </div>
+  );
+}
+
 // Leaflet hard-requires `window` — load on the client only.
 const DeliveryLocationPicker = dynamic(
   () => import('@repo/ui').then((m) => m.DeliveryLocationPicker),
   {
     ssr: false,
-    loading: () => (
-      <div className="grid h-[360px] place-items-center rounded-card border border-border/[var(--border-alpha)] bg-surface text-small text-fg-muted">
-        Loading map…
-      </div>
-    ),
+    loading: () => <MapLoadingFallback />,
   },
 );
 
-const DEFAULT_MAP_CENTER = { lat: 52.2297, lng: 21.0122 }; // Warsaw fallback
+const DEFAULT_MAP_CENTER = { lat: 50.8505, lng: 20.6275 }; // Kielce fallback
 
 const restaurantAdminKey = ['restaurant', 'admin'] as const;
 

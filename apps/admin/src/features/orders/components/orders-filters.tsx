@@ -17,6 +17,7 @@ import {
   cn,
 } from '@repo/ui';
 import { ChevronDown, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 export type StatusFilter = 'all' | OrderStatus;
@@ -31,13 +32,6 @@ export interface OrdersFiltersState {
 
 export type SortKey = 'newest' | 'oldest' | 'total-desc' | 'wait-desc';
 
-const SORT_LABEL: Record<SortKey, string> = {
-  newest: 'Newest first',
-  oldest: 'Oldest first',
-  'total-desc': 'Highest total',
-  'wait-desc': 'Longest wait',
-};
-
 interface OrdersFiltersProps {
   value: OrdersFiltersState;
   onChange: (next: OrdersFiltersState) => void;
@@ -45,19 +39,38 @@ interface OrdersFiltersProps {
   searchRef?: React.Ref<HTMLInputElement>;
 }
 
-/**
- * Filter row + sort dropdown for the Orders page. Status pills are the
- * primary filter (keyboard 1–8); type/payment are multi-select popovers;
- * search is debounced upstream.
- */
 export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFiltersProps) {
+  const t = useTranslations('admin.orders.list');
+  const tStatus = useTranslations('shared.orderStatus');
+
   function set<K extends keyof OrdersFiltersState>(key: K, next: OrdersFiltersState[K]) {
     onChange({ ...value, [key]: next });
   }
 
+  const sortLabels: Record<SortKey, string> = {
+    newest: t('sort.newest'),
+    oldest: t('sort.oldest'),
+    'total-desc': t('sort.totalDesc'),
+    'wait-desc': t('sort.waitDesc'),
+  };
+
+  const typeLabels = {
+    DELIVERY: t('filters.types.DELIVERY'),
+    PICKUP: t('filters.types.PICKUP'),
+    DINE_IN: t('filters.types.DINE_IN'),
+  };
+
+  const paymentLabels = {
+    PAID: t('filters.payments.PAID'),
+    PENDING: t('filters.payments.PENDING'),
+    REFUNDED: t('filters.payments.REFUNDED'),
+    PARTIALLY_REFUNDED: t('filters.payments.PARTIALLY_REFUNDED'),
+    FAILED: t('filters.payments.FAILED'),
+  };
+
   const statusOptions = React.useMemo(
     () => [
-      { id: 'all' as const, label: 'All', count: counts.all },
+      { id: 'all' as const, label: t('filters.all'), count: counts.all },
       ...(
         [
           'PENDING',
@@ -70,13 +83,13 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
         ] as const
       ).map((s) => ({
         id: s,
-        label: STATUS_TOKENS[s].label,
+        label: tStatus(s),
         count: counts[s] ?? 0,
         dot: true,
         dotClassName: STATUS_TOKENS[s].bg,
       })),
     ],
-    [counts],
+    [counts, t, tStatus],
   );
 
   return (
@@ -85,27 +98,21 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
         value={value.status}
         onChange={(v) => set('status', v)}
         options={statusOptions}
-        ariaLabel="Status"
+        ariaLabel={t('filters.statusAriaLabel')}
       />
 
       <div className="flex flex-1 items-center gap-2">
         <MultiSelect
-          label="Type"
+          label={t('filters.typeLabel')}
           options={['DELIVERY', 'PICKUP', 'DINE_IN']}
-          labels={{ DELIVERY: 'Delivery', PICKUP: 'Pickup', DINE_IN: 'Dine-in' }}
+          labels={typeLabels}
           value={value.types}
           onChange={(v) => set('types', v as OrderType[])}
         />
         <MultiSelect
-          label="Payment"
+          label={t('filters.paymentLabel')}
           options={['PAID', 'PENDING', 'REFUNDED', 'PARTIALLY_REFUNDED', 'FAILED']}
-          labels={{
-            PAID: 'Paid',
-            PENDING: 'Pending',
-            REFUNDED: 'Refunded',
-            PARTIALLY_REFUNDED: 'Partial',
-            FAILED: 'Failed',
-          }}
+          labels={paymentLabels}
           value={value.payments}
           onChange={(v) => set('payments', v as PaymentStatus[])}
         />
@@ -119,7 +126,7 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
             ref={searchRef}
             value={value.search}
             onChange={(e) => set('search', e.target.value)}
-            placeholder="Search order #, customer…"
+            placeholder={t('filters.searchPlaceholder')}
             className="h-8 pl-8"
           />
           <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border-hairline-strong bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle">
@@ -129,12 +136,14 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
 
         <Select value={value.sort} onValueChange={(v) => set('sort', v as SortKey)}>
           <SelectTrigger className="h-8 w-44 text-xs">
-            <SelectValue placeholder="Sort">{SORT_LABEL[value.sort]}</SelectValue>
+            <SelectValue placeholder={t('filters.sortPlaceholder')}>
+              {sortLabels[value.sort]}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {(Object.keys(SORT_LABEL) as SortKey[]).map((k) => (
+            {(Object.keys(sortLabels) as SortKey[]).map((k) => (
               <SelectItem key={k} value={k}>
-                {SORT_LABEL[k]}
+                {sortLabels[k]}
               </SelectItem>
             ))}
           </SelectContent>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu as MenuIcon } from 'lucide-react';
-import Link from 'next/link';
+import DefaultLink from 'next/link';
 import * as React from 'react';
 import { Container } from '../container';
 import { cn } from '../lib/cn';
@@ -11,6 +11,11 @@ export interface SiteNavLink {
   label: string;
   active?: boolean;
 }
+
+// Permissive shape so we can accept both `next/link`'s Link and locale-aware
+// wrappers (e.g. next-intl) without fighting their richer `href` types.
+// biome-ignore lint/suspicious/noExplicitAny: variance escape hatch for injected Link components
+type LinkLikeComponent = React.ComponentType<any>;
 
 export interface SiteNavProps {
   /** Logo element (typically the brand Logo component). */
@@ -29,6 +34,12 @@ export interface SiteNavProps {
   sticky?: boolean;
   /** Callback to open the mobile menu drawer. */
   onOpenMobile?: () => void;
+  /**
+   * Link component used for the brand logo and primary nav items. Inject the
+   * app's locale-aware Link (e.g. next-intl's) so navigations preserve the
+   * URL locale prefix instead of falling back to cookie-based resolution.
+   */
+  linkComponent?: LinkLikeComponent;
 }
 
 /**
@@ -48,6 +59,7 @@ export function SiteNav({
   variant = 'transparent',
   sticky = true,
   onOpenMobile,
+  linkComponent: LinkComponent = DefaultLink,
 }: SiteNavProps) {
   return (
     <header
@@ -60,15 +72,15 @@ export function SiteNav({
       )}
     >
       <Container className="flex h-full items-center justify-between gap-4">
-        <Link href="/" aria-label="Szef Donald home" className="shrink-0">
+        <LinkComponent href="/" aria-label="Szef Donald home" className="shrink-0">
           {logo}
-        </Link>
+        </LinkComponent>
         <nav
           aria-label="Primary"
           className="hidden flex-1 items-center justify-center gap-8 lg:flex"
         >
           {links.map((l) => (
-            <Link
+            <LinkComponent
               key={l.href}
               href={l.href}
               aria-current={l.active ? 'page' : undefined}
@@ -80,7 +92,7 @@ export function SiteNav({
               )}
             >
               {l.label}
-            </Link>
+            </LinkComponent>
           ))}
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">

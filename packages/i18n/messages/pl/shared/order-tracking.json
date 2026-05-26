@@ -1,0 +1,14 @@
+{
+  "ariaLabel": "Postęp zamówienia",
+  "cancelled": "Anulowane",
+  "refunded": "Zwrócone",
+  "step": {
+    "confirmed": "Potwierdzone",
+    "preparing": "Przygotowywane",
+    "onTheWay": "W drodze",
+    "delivered": "Dostarczone",
+    "readyForPickup": "Gotowe do odbioru",
+    "pickedUp": "Odebrane",
+    "served": "Podane"
+  }
+}

@@ -191,9 +191,9 @@ async function seedRestaurants() {
     where: { slug: RESTAURANT_SLUG },
     update: {
       name: 'Szef Donald',
-      description: 'Kebab i falafel — Warsaw kebab shop.',
-      phone: '+48 22 555 0100',
-      email: 'hello@szefdonald.local',
+      description: 'Kebab i falafel — Kielce kebab shop.',
+      phone: '+48 883 953 589',
+      email: 'mahmodrasul123@gmail.com',
       timezone: 'Europe/Warsaw',
       currency: 'PLN',
       isActive: true,
@@ -201,16 +201,16 @@ async function seedRestaurants() {
     create: {
       slug: RESTAURANT_SLUG,
       name: 'Szef Donald',
-      description: 'Kebab i falafel — Warsaw kebab shop.',
-      phone: '+48 22 555 0100',
-      email: 'hello@szefdonald.local',
+      description: 'Kebab i falafel — Kielce kebab shop.',
+      phone: '+48 883 953 589',
+      email: 'mahmodrasul123@gmail.com',
       address: {
-        line1: 'ul. Marszałkowska 1',
-        city: 'Warsaw',
-        zip: '00-001',
+        line1: 'ul. Ks. Piotra Ściegiennego 68a',
+        city: 'Kielce',
+        zip: '25-115',
         country: 'PL',
       },
-      geoPoint: { lat: 52.2297, lng: 21.0122 },
+      geoPoint: { lat: 50.8505, lng: 20.6275 },
       timezone: 'Europe/Warsaw',
       currency: 'PLN',
       isActive: true,
@@ -1131,36 +1131,36 @@ async function seedReviews() {
 }
 
 async function seedDeliveryZones() {
-  console.log('▸ Seeding 2 delivery zones (Warsaw)');
+  console.log('▸ Seeding 2 delivery zones (Kielce)');
   const zones = [
     {
       id: 'zone-central',
-      name: 'Central Warsaw',
+      name: 'Central Kielce',
       polygon: {
         type: 'Polygon',
         coordinates: [
           [
-            [21.0, 52.2],
-            [21.05, 52.2],
-            [21.05, 52.25],
-            [21.0, 52.25],
-            [21.0, 52.2],
+            [20.6, 50.83],
+            [20.66, 50.83],
+            [20.66, 50.88],
+            [20.6, 50.88],
+            [20.6, 50.83],
           ],
         ],
       },
     },
     {
       id: 'zone-extended',
-      name: 'Outer Warsaw',
+      name: 'Outer Kielce',
       polygon: {
         type: 'Polygon',
         coordinates: [
           [
-            [20.95, 52.15],
-            [21.1, 52.15],
-            [21.1, 52.3],
-            [20.95, 52.3],
-            [20.95, 52.15],
+            [20.55, 50.80],
+            [20.71, 50.80],
+            [20.71, 50.92],
+            [20.55, 50.92],
+            [20.55, 50.80],
           ],
         ],
       },

@@ -1,12 +1,24 @@
 {
   "title": "Your cart",
+  "closeAriaLabel": "Close cart",
   "empty": "Your cart is empty",
+  "emptyDescription": "Browse the menu and add something tasty.",
+  "browseMenu": "Browse menu",
   "subtotal": "Subtotal",
   "discount": "Discount",
+  "delivery": "Delivery",
+  "deliveryCalculated": "Calculated at checkout",
+  "total": "Total",
   "estimatedTotal": "Estimated total",
   "applyCoupon": "Apply coupon",
   "couponApplied": "Coupon {code} applied",
   "remove": "Remove",
+  "notePrefix": "Note",
+  "quantityAriaLabel": "Quantity for {name}",
+  "notesLabel": "Notes for the kitchen",
+  "notesPlaceholder": "Anything we should know about your order?",
   "itemCount": "{count, plural, one {# item} other {# items}}",
-  "checkout": "Checkout"
+  "checkout": "Checkout",
+  "checkoutCta": "Checkout · {total}",
+  "footerHint": "Free baklava on first order — code at checkout."
 }

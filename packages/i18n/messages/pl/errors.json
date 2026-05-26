@@ -6,5 +6,9 @@
   "notFound": "Nie znaleziono.",
   "rateLimited": "Zbyt wiele zapytań. Zwolnij.",
   "couponInvalid": "Ten kupon nie jest poprawny.",
-  "outOfStock": "Niektóre pozycje nie są już dostępne."
+  "outOfStock": "Niektóre pozycje nie są już dostępne.",
+  "emailAlreadyRegistered": "Ten adres e-mail jest już zarejestrowany.",
+  "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+  "accountDisabled": "To konto zostało wyłączone.",
+  "tokenInvalid": "Ten link jest nieprawidłowy lub wygasł."
 }

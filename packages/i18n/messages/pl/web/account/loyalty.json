@@ -24,5 +24,13 @@
     "silver": "Srebro",
     "gold": "Złoto",
     "platinum": "Platyna"
+  },
+  "kinds": {
+    "EARN": "Zdobyte punkty",
+    "REDEEM": "Wymienione punkty",
+    "REVOKE": "Cofnięte punkty",
+    "EXPIRE": "Wygasłe punkty",
+    "REFERRAL": "Premia za polecenie",
+    "ADJUST": "Korekta ręczna"
   }
 }

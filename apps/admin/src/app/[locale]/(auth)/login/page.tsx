@@ -87,7 +87,13 @@ export default function LoginPage() {
           {login.isError && (
             <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 px-3 py-2 text-small-admin text-negative">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{login.error.message}</span>
+              <span>
+                {login.error.code === 'invalidCredentials'
+                  ? t('errors.invalidCredentials')
+                  : login.error.code === 'accountDisabled'
+                    ? t('errors.accountDisabled')
+                    : login.error.message}
+              </span>
             </div>
           )}
 

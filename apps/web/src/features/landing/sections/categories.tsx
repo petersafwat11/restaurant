@@ -23,6 +23,7 @@ export async function LandingCategories() {
                 image={{ src: c.image, alt: t('categoryAlt', { label }) }}
                 label={label}
                 itemCount={c.itemCount}
+                itemCountLabel={c.itemCount != null ? t('itemCount', { count: c.itemCount }) : undefined}
               />
             );
           })}

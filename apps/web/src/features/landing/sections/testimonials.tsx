@@ -57,7 +57,11 @@ export function LandingTestimonials() {
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {cards.map((tc) => (
-            <TestimonialCard key={tc.author.name} {...tc} />
+            <TestimonialCard
+              key={tc.author.name}
+              {...tc}
+              starsAriaLabel={t('starsAriaLabel', { value: tc.rating })}
+            />
           ))}
         </div>
         <div className="mt-10 flex justify-center">

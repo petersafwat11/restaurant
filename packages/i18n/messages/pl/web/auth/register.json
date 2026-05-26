@@ -19,5 +19,8 @@
   "links": {
     "hasAccount": "Masz już konto?",
     "signIn": "Zaloguj się"
+  },
+  "toasts": {
+    "success": "Konto utworzone — sprawdź e-mail, aby je zweryfikować"
   }
 }

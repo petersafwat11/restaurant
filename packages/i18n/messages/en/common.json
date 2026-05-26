@@ -11,10 +11,13 @@
   "loading": "Loading…",
   "retry": "Retry",
   "close": "Close",
+  "closed": "Closed",
   "yes": "Yes",
   "no": "No",
   "currency": "Currency",
   "language": "Language",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
   "logout": "Log out",
   "skipToContent": "Skip to content",
   "days": {

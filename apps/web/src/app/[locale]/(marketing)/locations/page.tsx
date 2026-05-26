@@ -144,7 +144,7 @@ function MapCard({ restaurant: r }: MapCardProps) {
           aria-hidden
           role="presentation"
         >
-          <title>Map</title>
+          <title>{t('mapTitle')}</title>
           <defs>
             <pattern id="gridFine" width="32" height="32" patternUnits="userSpaceOnUse">
               <path
@@ -216,7 +216,7 @@ function MapCard({ restaurant: r }: MapCardProps) {
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[68%]">
           <span className="absolute -inset-3 animate-ping rounded-full bg-accent/40" />
           <svg width={46} height={58} viewBox="0 0 44 56" aria-hidden role="presentation">
-            <title>Restaurant pin</title>
+            <title>{t('restaurantPinTitle')}</title>
             <path
               d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
               fill="rgb(var(--accent))"
@@ -500,7 +500,13 @@ export default function LocationsPage() {
                       </span>
                     )}
                   </div>
-                  <HoursTable hours={hoursForTable} highlightToday layout="list" />
+                  <HoursTable
+                    hours={hoursForTable}
+                    highlightToday
+                    layout="list"
+                    dayLabels={[0, 1, 2, 3, 4, 5, 6].map((d) => t(`days.short.${d}` as 'days.short.0'))}
+                    closedLabel={t('weekTimeline.closed')}
+                  />
                 </div>
               )}
             </div>

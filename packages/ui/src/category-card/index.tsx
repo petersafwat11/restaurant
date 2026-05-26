@@ -8,6 +8,8 @@ export interface CategoryCardProps {
   image: { src: string; alt: string; priority?: boolean; sizes?: string };
   label: string;
   itemCount?: number;
+  /** Pre-formatted, translated item count string (e.g. "5 items"). When present, shown instead of the English fallback. */
+  itemCountLabel?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -24,6 +26,7 @@ export function CategoryCard({
   image,
   label,
   itemCount,
+  itemCountLabel,
   size = 'md',
   className,
 }: CategoryCardProps) {
@@ -67,7 +70,7 @@ export function CategoryCard({
         </div>
         {itemCount != null && (
           <div className="mt-1 text-small text-white/85">
-            {itemCount} {itemCount === 1 ? 'item' : 'items'}
+            {itemCountLabel ?? `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
           </div>
         )}
       </div>

@@ -1,0 +1,221 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4] [cursor=pointer]: OK
+      - generic [ref=e5]:
+        - text: In order to optimally design our website and to show appropriate offers we are using cookies. By continuing to use our website you agree that we set cookies.
+        - link "More Information" [ref=e6] [cursor=pointer]:
+          - /url: javascript:window.open('https://contabo.com/en/legal/privacy/', 'fenster1', 'width=785,height=700,status=yes,scrollbars=yes,resizable=yes');fenster.focus();
+    - generic [ref=e7]:
+      - img [ref=e8]
+      - link "Home" [ref=e9] [cursor=pointer]:
+        - /url: /
+      - img [ref=e10]
+      - link "not IPv6 capable (what's this?)" [ref=e11] [cursor=pointer]:
+        - /url: "#"
+      - img [ref=e12]
+      - link "Company details" [ref=e13] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/impressum/
+      - img [ref=e14]
+      - link "General terms" [ref=e15] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/terms-and-conditions/
+      - img [ref=e16]
+      - link "Data privacy" [ref=e17] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/privacy/
+      - link "Support" [ref=e18] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e19]
+        - text: Support
+      - img [ref=e20]
+      - link "log out" [ref=e21] [cursor=pointer]:
+        - /url: /account/logout
+    - generic [ref=e22]:
+      - img [ref=e23]
+      - text: "Logged in: petersafwat640@gmail.com Customer ID: 14993659"
+    - img [ref=e24]
+    - generic [ref=e26]:
+      - generic [ref=e27]: Access our New Customer Panel to Manage your Services in New Design
+      - button "Go to new.contabo.com" [ref=e28] [cursor=pointer]
+    - generic [ref=e30]:
+      - generic [ref=e31]: Enhance the security of your data and prevent misuse. Activate two-factor authentication!
+      - button "Activate" [ref=e32] [cursor=pointer]
+    - generic [ref=e34]:
+      - heading "Reinstallation - Cloud VPS for 207.180.217.159" [level=1] [ref=e36]
+      - generic [ref=e107]:
+        - heading "Reinstallation" [level=3] [ref=e109]
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - generic [ref=e113]: warning
+              - generic [ref=e114]: All data on this VPS/VDS will be deleted!
+            - generic [ref=e115]:
+              - generic [ref=e116]: "You are about to reinstall the following instance(s):"
+              - generic [ref=e117]:
+                - generic [ref=e118]: Cloud VPS 10 SSD
+                - generic [ref=e119]: "- 207.180.217.159"
+            - tablist [ref=e120]:
+              - generic [ref=e123]:
+                - tab "Standard installation" [ref=e124] [cursor=pointer]:
+                  - generic:
+                    - generic: Standard installation
+                - tab "Application Installation" [ref=e125] [cursor=pointer]:
+                  - generic:
+                    - generic: Application Installation
+                - tab "Advanced/Custom Image Installation" [selected] [ref=e126] [cursor=pointer]:
+                  - generic:
+                    - generic: Advanced/Custom Image Installation
+            - generic [ref=e156]:
+              - generic [ref=e158]:
+                - generic [ref=e159]:
+                  - radio "Custom Image" [ref=e161] [cursor=pointer]
+                  - generic [ref=e164]: Custom Image
+                - generic [ref=e166]: info
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - radio "Standard Image" [checked] [ref=e171] [cursor=pointer]
+                  - generic [ref=e175]: Standard Image
+                - generic [ref=e177]: info
+            - main [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]:
+                  - generic [ref=e181]: Standard Image
+                  - textbox "Select standard image" [ref=e184]: Ubuntu 24.04 (LTS)
+                - generic [ref=e185]:
+                  - text: Root Password
+                  - generic [ref=e187]: info
+                - generic [ref=e190]:
+                  - textbox "Select or create new password" [ref=e191]
+                  - button "✖ clear" [ref=e192] [cursor=pointer]
+                - generic [ref=e193]: Password or public SSH-Keys must be set in order to access the VPS/VDS.
+                - generic [ref=e194]:
+                  - generic [ref=e195]:
+                    - switch "Enable Root User" [checked] [ref=e196] [cursor=pointer]:
+                      - generic [ref=e201]:
+                        - img [ref=e202]
+                        - img [ref=e204]
+                    - generic [ref=e206]: Enable Root User
+                  - generic [ref=e208]: info
+                - button "Public SSH-Key for User Root" [ref=e227]:
+                  - text: Public SSH-Key for User Root
+                  - generic [ref=e211]: info
+                - generic [ref=e213]:
+                  - textbox "Select or create new SSH-Key" [ref=e215]
+                  - generic [ref=e228]:
+                    - button "contabo-restaurant-deploy" [ref=e229] [cursor=pointer]:
+                      - generic [ref=e231]: contabo-restaurant-deploy
+                    - button "Add and store Public SSH-Key" [ref=e232] [cursor=pointer]:
+                      - generic [ref=e234]:
+                        - generic [ref=e235]: add_circle
+                        - text: Add and store Public SSH-Key
+                    - button "Enter an SSH-Key just for this installation" [ref=e236] [cursor=pointer]:
+                      - generic [ref=e238]:
+                        - img [ref=e240]
+                        - text: Enter an SSH-Key just for this installation
+                - generic [ref=e216]: Password or public SSH-Keys must be set in order to access the VPS/VDS.
+                - button "Cloud-Init" [ref=e217]
+                - generic [ref=e220]:
+                  - textbox "Select cloud init template" [ref=e221]
+                  - button "✖ clear" [ref=e222] [cursor=pointer]
+                - textbox [ref=e226]
+            - generic: "*"
+            - generic: "*"
+          - generic [ref=e152]:
+            - button "Install" [disabled]:
+              - generic: Install
+            - button "Cancel" [ref=e153] [cursor=pointer]:
+              - generic [ref=e154]: Cancel
+    - generic [ref=e37]:
+      - generic [ref=e39]:
+        - generic [ref=e40]: control panel
+        - list [ref=e41]:
+          - listitem [ref=e42]:
+            - link "Your services" [ref=e43] [cursor=pointer]:
+              - /url: /abos
+          - listitem [ref=e44]:
+            - link "Customer details" [ref=e45] [cursor=pointer]:
+              - /url: /account/details
+          - listitem [ref=e46]:
+            - link "API" [ref=e47] [cursor=pointer]:
+              - /url: /api/details
+          - listitem [ref=e48]:
+            - link "Custom Images" [ref=e49] [cursor=pointer]:
+              - /url: /custom_images
+          - listitem [ref=e50]:
+            - link "Object Storage" [ref=e51] [cursor=pointer]:
+              - /url: /object_storage
+          - listitem [ref=e52]:
+            - link "Auto Backup" [ref=e53] [cursor=pointer]:
+              - /url: /auto_backup
+          - listitem [ref=e54]:
+            - link "Private Networking" [ref=e55] [cursor=pointer]:
+              - /url: /private_network
+          - listitem
+          - listitem [ref=e56]:
+            - link "Unpaid Orders" [ref=e57] [cursor=pointer]:
+              - /url: /pending_orders
+          - listitem [ref=e58]:
+            - text: Firewall
+            - img [ref=e59]
+          - listitem [ref=e60]:
+            - link "Data Processing Agreement" [ref=e61] [cursor=pointer]:
+              - /url: /dpa
+          - listitem [ref=e62]:
+            - link "Billing" [ref=e63] [cursor=pointer]:
+              - /url: /account/payment
+          - listitem [ref=e64]:
+            - link "Payment Method" [ref=e65] [cursor=pointer]:
+              - /url: /account/payment_method
+          - listitem [ref=e66]:
+            - link "Server control" [ref=e67] [cursor=pointer]:
+              - /url: /dservers
+          - listitem [ref=e68]:
+            - link "VDS control" [ref=e69] [cursor=pointer]:
+              - /url: /vds
+          - listitem [ref=e70]:
+            - link "VPS control" [ref=e71] [cursor=pointer]:
+              - /url: /vps
+          - listitem [ref=e72]:
+            - link "IP Management" [ref=e73] [cursor=pointer]:
+              - /url: /ips
+          - listitem [ref=e74]:
+            - link "OS reinstalls" [ref=e75] [cursor=pointer]:
+              - /url: /asi
+          - listitem [ref=e76]:
+            - link "Domains" [ref=e77] [cursor=pointer]:
+              - /url: /domain
+          - listitem [ref=e78]: DNS Zone Management
+          - listitem [ref=e79]: Reverse DNS Management
+          - listitem [ref=e80]:
+            - link "Tutorials" [ref=e81] [cursor=pointer]:
+              - /url: https://contabo.com/blog/tutorials/
+          - listitem [ref=e82]:
+            - link "Support" [ref=e83] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e87]:
+        - generic [ref=e88]: New Order
+        - list [ref=e89]:
+          - listitem [ref=e90]:
+            - link "VPS" [ref=e91] [cursor=pointer]:
+              - /url: /account/ecommerce/vps
+          - listitem [ref=e92]:
+            - link "Storage-VPS" [ref=e93] [cursor=pointer]:
+              - /url: /account/ecommerce/storage-vps
+          - listitem [ref=e94]:
+            - link "VDS" [ref=e95] [cursor=pointer]:
+              - /url: /account/ecommerce/vds
+          - listitem [ref=e96]:
+            - link "Object-Storage" [ref=e97] [cursor=pointer]:
+              - /url: /account/ecommerce/object-storage
+          - listitem [ref=e98]:
+            - link "Server" [ref=e99] [cursor=pointer]:
+              - /url: /account/ecommerce/dedicated-servers
+          - listitem [ref=e100]:
+            - link "Outlet-Server" [ref=e101] [cursor=pointer]:
+              - /url: /account/ecommerce/server-outlet
+          - listitem [ref=e102]:
+            - link "Domain" [ref=e103] [cursor=pointer]:
+              - /url: /domain/order
+  - iframe [ref=e105]:
+    - generic [ref=f42e1] [cursor=pointer]:
+      - img "Help" [ref=f42e2]
+      - generic [ref=f42e4]: Search Help

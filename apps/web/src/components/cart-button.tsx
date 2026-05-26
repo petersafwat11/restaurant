@@ -5,6 +5,8 @@ import { ShoppingBag } from 'lucide-react';
 interface CartButtonProps {
   count?: number;
   onClick?: () => void;
+  /** Translated aria-label. Falls back to English when absent. */
+  ariaLabel?: string;
   className?: string;
 }
 
@@ -14,12 +16,12 @@ interface CartButtonProps {
  * `cart_session` cookie — the consumer (cart-container) handles that, this
  * button just renders what it's given.
  */
-export function CartButton({ count = 0, onClick, className }: CartButtonProps) {
+export function CartButton({ count = 0, onClick, ariaLabel, className }: CartButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
+      aria-label={ariaLabel ?? `Cart, ${count} item${count === 1 ? '' : 's'}`}
       className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full text-fg transition-colors duration-web-color hover:bg-surface-warm/40 ${className ?? ''}`}
     >
       <ShoppingBag size={20} strokeWidth={1.75} />

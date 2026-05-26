@@ -53,7 +53,10 @@
     "deliveryCaption": "Deliver to",
     "pickupCaption": "Pick up from",
     "dineInCaption": "Your table",
-    "tableRecorded": "Table number recorded"
+    "tableRecorded": "Table number recorded",
+    "pickupName": "Szef Donald",
+    "pickupStreet": "Ul. Ks. Piotra Ściegiennego 68a",
+    "pickupCity": "25-115 Kielce"
   },
   "activity": {
     "regionLabel": "Order activity",
@@ -64,7 +67,9 @@
     "regionLabel": "Need help",
     "title": "Need help?",
     "description": "Allergy concern, missing item, or address change? We're a quick call away.",
-    "messageUs": "Message us"
+    "messageUs": "Message us",
+    "phoneHref": "tel:+48221234567",
+    "phoneDisplay": "+48 22 123 45 67"
   },
   "summary": {
     "regionLabel": "Order summary",

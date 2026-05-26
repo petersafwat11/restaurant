@@ -62,6 +62,12 @@ export interface CartSheetProps {
     checkoutCta?: (total: string) => React.ReactNode;
     /** Optional hint shown below the checkout button. */
     footerHint?: React.ReactNode;
+    /** Forwarded to each CartLineItem for in-row strings. */
+    lineItem?: {
+      remove?: string;
+      notePrefix?: string;
+      quantityAriaLabel?: (name: string) => string;
+    };
   };
 }
 
@@ -156,6 +162,7 @@ export function CartSheet({
                     onUpdateQty={(q) => onUpdateQty(line.id, q)}
                     onRemove={() => onRemove(line.id)}
                     currency={currency}
+                    labels={labels?.lineItem}
                   />
                 ))}
                 {notes && (

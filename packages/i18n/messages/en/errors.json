@@ -6,5 +6,9 @@
   "notFound": "Not found.",
   "rateLimited": "Too many requests. Please slow down.",
   "couponInvalid": "This coupon is not valid.",
-  "outOfStock": "Some items are no longer available."
+  "outOfStock": "Some items are no longer available.",
+  "emailAlreadyRegistered": "This email is already registered.",
+  "invalidCredentials": "Incorrect email or password.",
+  "accountDisabled": "This account has been disabled.",
+  "tokenInvalid": "This link is invalid or has expired."
 }

@@ -1,0 +1,227 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4] [cursor=pointer]: OK
+      - generic [ref=e5]:
+        - text: In order to optimally design our website and to show appropriate offers we are using cookies. By continuing to use our website you agree that we set cookies.
+        - link "More Information" [ref=e6] [cursor=pointer]:
+          - /url: javascript:window.open('https://contabo.com/en/legal/privacy/', 'fenster1', 'width=785,height=700,status=yes,scrollbars=yes,resizable=yes');fenster.focus();
+    - generic [ref=e7]:
+      - img [ref=e8]
+      - link "Home" [ref=e9] [cursor=pointer]:
+        - /url: /
+      - img [ref=e10]
+      - link "not IPv6 capable (what's this?)" [ref=e11] [cursor=pointer]:
+        - /url: "#"
+      - img [ref=e12]
+      - link "Company details" [ref=e13] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/impressum/
+      - img [ref=e14]
+      - link "General terms" [ref=e15] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/terms-and-conditions/
+      - img [ref=e16]
+      - link "Data privacy" [ref=e17] [cursor=pointer]:
+        - /url: https://contabo.com/en/legal/privacy/
+      - link "Support" [ref=e18] [cursor=pointer]:
+        - /url: "#"
+        - img [ref=e19]
+        - text: Support
+      - img [ref=e20]
+      - link "log out" [ref=e21] [cursor=pointer]:
+        - /url: /account/logout
+    - generic [ref=e22]:
+      - img [ref=e23]
+      - text: "Logged in: petersafwat640@gmail.com Customer ID: 14993659"
+    - img [ref=e24]
+    - generic [ref=e26]:
+      - generic [ref=e27]: Access our New Customer Panel to Manage your Services in New Design
+      - button "Go to new.contabo.com" [ref=e28] [cursor=pointer]
+    - generic [ref=e30]:
+      - generic [ref=e31]: Enhance the security of your data and prevent misuse. Activate two-factor authentication!
+      - button "Activate" [ref=e32] [cursor=pointer]
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - heading "VPS control" [level=1] [ref=e37]
+        - paragraph [ref=e38]: This is a list of your Virtual Private Servers (VPS) and controls which are independent from the operating system of the regarding VPS.
+        - list [ref=e39]:
+          - listitem [ref=e40]: Restart - powers your VPS off and on again. If your operating system is still accessible please consider performing the reboot through it rather than using this option to avoid possible issues with a sudden cut off.
+          - listitem [ref=e41]: Start - boots your VPS if it has been stopped previously.
+          - listitem [ref=e42]: Stop - shuts down your VPS. Please be advised that this does not end or suspend the subscription of the regarding VPS.
+          - listitem [ref=e43]: Reinstall - performs a reinstallation of the regarding VPS. Please be advised that all data will be deleted in the process.
+          - listitem [ref=e44]: Rescue system - starts a rescue system to fix your operating system or recover your data.
+          - listitem [ref=e45]: Snapshots - captures the state of the regarding VPS and stores it for later rollback. Please be advised that snapshots are a feature available only for certain VPS, that they do not substitute proper backup of your data (i.e. non-scheduled, only full rollbacks, no single file recovery) and that they will be automatically deleted after 30 days (see detail view).
+          - listitem [ref=e46]: Snapshots Rollback - applies a snapshot to the regarding VPS. Accessible in the Snapshots detail view. Please be advised that all data on the VPS will be replaced with the data of the snapshot, there's no guarantee for this to be successful and in case of multiple snapshots the rollback of one snapshot will automatically delete all newer snapshots of the regarding VPS.
+      - table [ref=e47]:
+        - rowgroup [ref=e48]:
+          - row "Server Default User Host system Status Restart Start Stop Re install Rescue system Snap shots" [ref=e49]:
+            - columnheader "Server" [ref=e50]
+            - columnheader "Default User" [ref=e51]:
+              - text: Default
+              - text: User
+            - columnheader "Host system" [ref=e52]:
+              - text: Host
+              - text: system
+            - columnheader "Status" [ref=e53]
+            - columnheader "Restart" [ref=e54]
+            - columnheader "Start" [ref=e55]
+            - columnheader "Stop" [ref=e56]
+            - columnheader "Re install" [ref=e57]:
+              - text: Re
+              - text: install
+            - columnheader "Rescue system" [ref=e58]:
+              - text: Rescue
+              - text: system
+            - columnheader "Snap shots" [ref=e59]:
+              - text: Snap
+              - text: shots
+            - columnheader [ref=e60]:
+              - img [ref=e61]
+        - rowgroup [ref=e62]:
+          - row "207.180.217.159 root 18715 Running restart start start Manage Upgrade VPS Move to other Region Order Add-On Order Windows Extend SSD Storage I can't connect to this server Password reset VNC Information VNC Password Disable VNC" [ref=e172]:
+            - cell "207.180.217.159" [ref=e64]: 207.180.217.159
+            - cell "root" [ref=e173]
+            - cell "18715" [ref=e67]
+            - cell "Running" [ref=e174]:
+              - img "Running" [ref=e175]
+            - cell "restart" [ref=e70]:
+              - button "restart" [ref=e72] [cursor=pointer]
+            - cell "start" [ref=e73]:
+              - button "start" [ref=e75] [cursor=pointer]
+            - cell "start" [ref=e76]:
+              - button "start" [ref=e78] [cursor=pointer]
+            - cell [ref=e79]:
+              - link [ref=e80] [cursor=pointer]:
+                - /url: /vps/203316770/reinstall_v2
+                - img [ref=e81]
+            - cell [ref=e82]:
+              - link [ref=e83] [cursor=pointer]:
+                - /url: /vps/203316770/rescue_v2
+                - img [ref=e84]
+            - cell [ref=e85]:
+              - link [ref=e86] [cursor=pointer]:
+                - /url: /vps/0#snapshots/3316770/0
+                - img [ref=e87]
+            - cell "Manage Upgrade VPS Move to other Region Order Add-On Order Windows Extend SSD Storage I can't connect to this server Password reset VNC Information VNC Password Disable VNC" [ref=e88]:
+              - list [ref=e89]:
+                - listitem [ref=e90]:
+                  - generic [ref=e91] [cursor=pointer]: Manage
+                  - list [ref=e92]:
+                    - listitem:
+                      - generic [ref=e93] [cursor=pointer]: Upgrade VPS
+                    - listitem:
+                      - generic [ref=e94] [cursor=pointer]: Move to other Region
+                    - listitem:
+                      - generic [ref=e95] [cursor=pointer]: Order Add-On
+                    - listitem:
+                      - generic [ref=e96] [cursor=pointer]: Order Windows
+                    - listitem:
+                      - generic [ref=e97] [cursor=pointer]: Extend SSD Storage
+                    - listitem:
+                      - generic [ref=e98] [cursor=pointer]: I can't connect to this server
+                    - listitem:
+                      - link "Password reset" [ref=e99] [cursor=pointer]:
+                        - /url: /vps/203316770/password_reset_v2
+                    - listitem:
+                      - link "VNC Information" [ref=e100]:
+                        - /url: "#vncinfo/3316770"
+                    - listitem:
+                      - link "VNC Password" [ref=e101] [cursor=pointer]:
+                        - /url: "#vncpass/3316770"
+                    - listitem:
+                      - link "Disable VNC" [ref=e102] [cursor=pointer]:
+                        - /url: "#vnctoggle/3316770"
+    - generic [ref=e103]:
+      - generic [ref=e105]:
+        - generic [ref=e106]: control panel
+        - list [ref=e107]:
+          - listitem [ref=e108]:
+            - link "Your services" [ref=e109] [cursor=pointer]:
+              - /url: /abos
+          - listitem [ref=e110]:
+            - link "Customer details" [ref=e111] [cursor=pointer]:
+              - /url: /account/details
+          - listitem [ref=e112]:
+            - link "API" [ref=e113] [cursor=pointer]:
+              - /url: /api/details
+          - listitem [ref=e114]:
+            - link "Custom Images" [ref=e115] [cursor=pointer]:
+              - /url: /custom_images
+          - listitem [ref=e116]:
+            - link "Object Storage" [ref=e117] [cursor=pointer]:
+              - /url: /object_storage
+          - listitem [ref=e118]:
+            - link "Auto Backup" [ref=e119] [cursor=pointer]:
+              - /url: /auto_backup
+          - listitem [ref=e120]:
+            - link "Private Networking" [ref=e121] [cursor=pointer]:
+              - /url: /private_network
+          - listitem
+          - listitem [ref=e122]:
+            - link "Unpaid Orders" [ref=e123] [cursor=pointer]:
+              - /url: /pending_orders
+          - listitem [ref=e124]:
+            - text: Firewall
+            - img [ref=e125]
+          - listitem [ref=e126]:
+            - link "Data Processing Agreement" [ref=e127] [cursor=pointer]:
+              - /url: /dpa
+          - listitem [ref=e128]:
+            - link "Billing" [ref=e129] [cursor=pointer]:
+              - /url: /account/payment
+          - listitem [ref=e130]:
+            - link "Payment Method" [ref=e131] [cursor=pointer]:
+              - /url: /account/payment_method
+          - listitem [ref=e132]:
+            - link "Server control" [ref=e133] [cursor=pointer]:
+              - /url: /dservers
+          - listitem [ref=e134]:
+            - link "VDS control" [ref=e135] [cursor=pointer]:
+              - /url: /vds
+          - listitem [ref=e136]:
+            - link "VPS control" [ref=e137] [cursor=pointer]:
+              - /url: /vps
+          - listitem [ref=e138]:
+            - link "IP Management" [ref=e139] [cursor=pointer]:
+              - /url: /ips
+          - listitem [ref=e140]:
+            - link "OS reinstalls" [ref=e141] [cursor=pointer]:
+              - /url: /asi
+          - listitem [ref=e142]:
+            - link "Domains" [ref=e143] [cursor=pointer]:
+              - /url: /domain
+          - listitem [ref=e144]: DNS Zone Management
+          - listitem [ref=e145]: Reverse DNS Management
+          - listitem [ref=e146]:
+            - link "Tutorials" [ref=e147] [cursor=pointer]:
+              - /url: https://contabo.com/blog/tutorials/
+          - listitem [ref=e148]:
+            - link "Support" [ref=e149] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e153]:
+        - generic [ref=e154]: New Order
+        - list [ref=e155]:
+          - listitem [ref=e156]:
+            - link "VPS" [ref=e157] [cursor=pointer]:
+              - /url: /account/ecommerce/vps
+          - listitem [ref=e158]:
+            - link "Storage-VPS" [ref=e159] [cursor=pointer]:
+              - /url: /account/ecommerce/storage-vps
+          - listitem [ref=e160]:
+            - link "VDS" [ref=e161] [cursor=pointer]:
+              - /url: /account/ecommerce/vds
+          - listitem [ref=e162]:
+            - link "Object-Storage" [ref=e163] [cursor=pointer]:
+              - /url: /account/ecommerce/object-storage
+          - listitem [ref=e164]:
+            - link "Server" [ref=e165] [cursor=pointer]:
+              - /url: /account/ecommerce/dedicated-servers
+          - listitem [ref=e166]:
+            - link "Outlet-Server" [ref=e167] [cursor=pointer]:
+              - /url: /account/ecommerce/server-outlet
+          - listitem [ref=e168]:
+            - link "Domain" [ref=e169] [cursor=pointer]:
+              - /url: /domain/order
+  - iframe [ref=e171]:
+    - generic [ref=f39e1] [cursor=pointer]:
+      - img "Help" [ref=f39e2]
+      - generic [ref=f39e4]: Search Help

@@ -1,12 +1,24 @@
 {
   "title": "Twój koszyk",
+  "closeAriaLabel": "Zamknij koszyk",
   "empty": "Twój koszyk jest pusty",
+  "emptyDescription": "Przejrzyj menu i dodaj coś pysznego.",
+  "browseMenu": "Przeglądaj menu",
   "subtotal": "Suma częściowa",
   "discount": "Rabat",
+  "delivery": "Dostawa",
+  "deliveryCalculated": "Obliczane przy kasie",
+  "total": "Razem",
   "estimatedTotal": "Przewidywana suma",
   "applyCoupon": "Zastosuj kupon",
   "couponApplied": "Zastosowano kupon {code}",
   "remove": "Usuń",
+  "notePrefix": "Notatka",
+  "quantityAriaLabel": "Ilość dla {name}",
+  "notesLabel": "Uwagi dla kuchni",
+  "notesPlaceholder": "Czy jest coś, co powinniśmy wiedzieć o Twoim zamówieniu?",
   "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
-  "checkout": "Do kasy"
+  "checkout": "Do kasy",
+  "checkoutCta": "Do kasy · {total}",
+  "footerHint": "Darmowa baklawa do pierwszego zamówienia — kod przy kasie."
 }

@@ -29,6 +29,14 @@ export interface CartLineItemProps {
   variant?: 'editable' | 'readonly';
   currency: string;
   className?: string;
+  labels?: {
+    /** "Remove" button label. Defaults to English. */
+    remove?: string;
+    /** Prefix before per-line notes (e.g. "Note"). Defaults to English. */
+    notePrefix?: string;
+    /** Quantity stepper aria-label template — `{name}` is interpolated. */
+    quantityAriaLabel?: (name: string) => string;
+  };
 }
 
 export function CartLineItem({
@@ -38,7 +46,13 @@ export function CartLineItem({
   variant = 'editable',
   currency,
   className,
+  labels,
 }: CartLineItemProps) {
+  const removeLabel = labels?.remove ?? 'Remove';
+  const notePrefix = labels?.notePrefix ?? 'Note';
+  const quantityAriaLabel = labels?.quantityAriaLabel
+    ? labels.quantityAriaLabel(line.name)
+    : `Quantity for ${line.name}`;
   const lineTotal = (parseFloat(line.unitPrice) * line.quantity).toFixed(2);
 
   return (
@@ -57,7 +71,7 @@ export function CartLineItem({
           <div className="text-small text-fg-muted">{line.modifierSummary}</div>
         )}
         {line.notes && (
-          <div className="text-small text-fg-subtle">Note: {line.notes}</div>
+          <div className="text-small text-fg-subtle">{notePrefix}: {line.notes}</div>
         )}
       </div>
       <div className="flex flex-col items-end justify-between gap-2">
@@ -70,7 +84,7 @@ export function CartLineItem({
               value={line.quantity}
               onChange={onUpdateQty}
               size="sm"
-              ariaLabel={`Quantity for ${line.name}`}
+              ariaLabel={quantityAriaLabel}
             />
             {onRemove && (
               <button
@@ -78,7 +92,7 @@ export function CartLineItem({
                 onClick={onRemove}
                 className="text-[12px] text-fg-subtle transition-colors hover:text-negative"
               >
-                Remove
+                {removeLabel}
               </button>
             )}
           </>

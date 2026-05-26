@@ -49,7 +49,8 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
       variant={variant}
       logo={<Logo variant="full" size={36} />}
       links={links}
-      cart={<CartButton count={cartCount} onClick={() => router.push('/menu')} />}
+      linkComponent={Link}
+      cart={<CartButton count={cartCount} onClick={() => router.push('/menu')} ariaLabel={t('cart.ariaLabel', { count: cartCount })} />}
       langSwitcher={<LanguageSwitcher />}
       cta={
         <Link

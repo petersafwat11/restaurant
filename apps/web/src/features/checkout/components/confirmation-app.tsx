@@ -219,9 +219,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                     </div>
                   ) : order.type === 'PICKUP' ? (
                     <div className="mt-1 flex flex-col text-body leading-relaxed">
-                      <span className="font-medium text-fg">Szef Donald</span>
-                      <span className="text-fg">Marszałkowska 102</span>
-                      <span className="text-fg-muted">00-026 Warszawa</span>
+                      <span className="font-medium text-fg">{t('address.pickupName')}</span>
+                      <span className="text-fg">{t('address.pickupStreet')}</span>
+                      <span className="text-fg-muted">{t('address.pickupCity')}</span>
                     </div>
                   ) : (
                     <div className="mt-1 text-body font-medium text-fg">
@@ -248,11 +248,11 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                   </div>
                   <div className="mt-1 flex flex-wrap gap-3">
                     <a
-                      href="tel:+48221234567"
+                      href={t('help.phoneHref')}
                       className="inline-flex h-10 items-center gap-2 rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-4 text-small font-medium text-fg hover:bg-surface-warm/40"
                     >
                       <Phone size={14} />
-                      +48 22 123 45 67
+                      {t('help.phoneDisplay')}
                     </a>
                     <Link
                       href="/contact"

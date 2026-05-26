@@ -133,7 +133,11 @@ export default function RegisterPage() {
           {register.isError && (
             <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 px-3 py-2 text-small-admin text-negative">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{register.error.message}</span>
+              <span>
+                {register.error.code === 'emailAlreadyRegistered'
+                  ? t('errors.emailAlreadyRegistered')
+                  : register.error.message}
+              </span>
             </div>
           )}
 

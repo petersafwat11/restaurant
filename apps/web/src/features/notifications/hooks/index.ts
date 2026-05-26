@@ -3,6 +3,7 @@
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
+import { useTranslations } from 'next-intl';
 import type {
   NotificationListDto,
   NotificationListQuery,
@@ -53,11 +54,12 @@ export function useNotificationPreferences() {
 
 export function useUpdateNotificationPreferences() {
   const qc = useQueryClient();
+  const t = useTranslations('web.account.notifications');
   return useMutation<NotificationPreferenceDto, ApiError, UpdateNotificationPreferenceDto>({
     mutationFn: (input) => getApiClient().notifications.updatePreferences(input),
     onSuccess: (data) => {
       qc.setQueryData(['notifications', 'preferences'], data);
-      notify('success', 'Preferences updated');
+      notify('success', t('preferencesUpdated'));
     },
     onError: (err) => notify('error', err.message),
   });

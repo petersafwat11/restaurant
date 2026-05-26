@@ -77,12 +77,12 @@
       "when": "When",
       "address": {
         "line1": "Street + number",
-        "line1Placeholder": "ul. Marszałkowska 102",
+        "line1Placeholder": "ul. Ks. Piotra Ściegiennego 68a",
         "apartment": "Apt / Floor",
         "apartmentHelper": "Optional",
         "apartmentPlaceholder": "Apt 5B / Floor 3",
         "city": "City",
-        "cityPlaceholder": "Warszawa"
+        "cityPlaceholder": "Kielce"
       },
       "outOfZone": "Sorry — we don't deliver to this spot yet. Pickup is still available.",
       "switchToPickup": "Switch to pickup",

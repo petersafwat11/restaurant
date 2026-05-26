@@ -14,7 +14,7 @@ export default async function MyReservationsPage() {
         size="lg"
         icon={<CalendarClock size={56} strokeWidth={1.25} />}
         title={t('empty.title')}
-        description={t('empty.description', { phone: '+48 22 555 01 23' })}
+        description={t('empty.description', { phone: '+48 883 953 589' })}
       />
     </section>
   );

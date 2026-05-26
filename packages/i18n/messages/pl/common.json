@@ -11,10 +11,13 @@
   "loading": "Ładowanie…",
   "retry": "Spróbuj ponownie",
   "close": "Zamknij",
+  "closed": "Zamknięte",
   "yes": "Tak",
   "no": "Nie",
   "currency": "Waluta",
   "language": "Język",
+  "showPassword": "Pokaż hasło",
+  "hidePassword": "Ukryj hasło",
   "logout": "Wyloguj",
   "skipToContent": "Przejdź do treści",
   "days": {

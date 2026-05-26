@@ -1,6 +1,8 @@
 {
   "eyebrow": "Visit us",
-  "heroImageAlt": "",
+  "heroImageAlt": "Entrance to Szef Donald restaurant",
+  "mapTitle": "Map",
+  "restaurantPinTitle": "Restaurant pin",
   "status": {
     "openNow": "Open now",
     "closed": "Closed",

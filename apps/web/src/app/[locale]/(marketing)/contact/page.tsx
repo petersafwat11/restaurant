@@ -5,17 +5,36 @@ import { mockLocation } from '@/lib/mock/szef-donald';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateContactMessageDto, CreateContactMessageSchema } from '@repo/types';
 import { Container, FormField, SectionHeader } from '@repo/ui';
-import { Check, MapPin, Navigation, Phone } from 'lucide-react';
+import { Check, Mail, MapPin, Navigation, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 export default function ContactPage() {
   const t = useTranslations('web.marketing.contact');
+  const tVal = useTranslations('validation');
   const send = useSendContactMessage();
   const [sent, setSent] = React.useState(false);
+
+  const errorMap: z.ZodErrorMap = React.useCallback(
+    (issue, ctx) => {
+      if (issue.code === z.ZodIssueCode.too_small && issue.minimum === 1) {
+        return { message: tVal('required') };
+      }
+      if (issue.code === z.ZodIssueCode.invalid_string && issue.validation === 'email') {
+        return { message: tVal('invalidEmail') };
+      }
+      if (issue.code === z.ZodIssueCode.too_big && typeof issue.maximum === 'number') {
+        return { message: tVal('tooLong', { max: issue.maximum }) };
+      }
+      return { message: ctx.defaultError };
+    },
+    [tVal],
+  );
+
   const form = useForm<CreateContactMessageDto>({
-    resolver: zodResolver(CreateContactMessageSchema),
+    resolver: zodResolver(CreateContactMessageSchema, { errorMap }),
     defaultValues: { name: '', email: '', subject: '', message: '' },
   });
 
@@ -72,6 +91,21 @@ export default function ContactPage() {
                       </span>
                       <span className="text-body font-medium text-fg group-hover:text-accent">
                         {phone}
+                      </span>
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${t('email')}`} className="group flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                      <Mail size={18} strokeWidth={1.75} />
+                    </span>
+                    <div className="flex flex-col leading-snug">
+                      <span className="text-caption uppercase tracking-wide text-fg-subtle">
+                        {t('emailLabel')}
+                      </span>
+                      <span className="text-body font-medium text-fg group-hover:text-accent break-all">
+                        {t('email')}
                       </span>
                     </div>
                   </a>

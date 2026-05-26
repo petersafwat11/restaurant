@@ -40,7 +40,11 @@ export default function VerifyEmailPage() {
         <AuthFormShell title={t('failed.title')} helper={t('failed.helper')}>
           <div className="flex items-start gap-2 rounded-md border border-negative/30 bg-negative/10 px-3 py-2 text-small-admin text-negative">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{verify.error.message}</span>
+            <span>
+              {verify.error.code === 'tokenInvalid'
+                ? t('errors.tokenInvalid')
+                : verify.error.message}
+            </span>
           </div>
           <Link href="/login" className="mt-6 block">
             <Button variant="primary" size="lg" className="w-full">

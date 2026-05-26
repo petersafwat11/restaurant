@@ -13,6 +13,7 @@ interface Props {
 
 export function InviteStaffModal({ open, onOpenChange }: Props) {
   const t = useTranslations('admin.staff');
+  const tErrors = useTranslations('errors');
   const invite = useInviteStaff();
   const { reset: resetInvite } = invite;
   const [email, setEmail] = React.useState('');
@@ -101,7 +102,7 @@ export function InviteStaffModal({ open, onOpenChange }: Props) {
               ))}
             </select>
           </div>
-          {invite.error && <div className="text-xs text-negative">{invite.error.message}</div>}
+          {invite.error && <div className="text-xs text-negative">{tErrors('generic')}</div>}
         </div>
       )}
     </ActionModal>

@@ -6,6 +6,10 @@
   "resend": "Wyślij ponownie",
   "resendComingSoon": "Ponowne wysyłanie wkrótce",
   "backToLogin": "Wróć do logowania",
+  "successToast": "E-mail zweryfikowany",
+  "errors": {
+    "tokenInvalid": "Ten link weryfikacyjny jest nieprawidłowy lub wygasł."
+  },
   "otpSent": "Wysłaliśmy kod na {target}",
   "codeLabel": "Kod weryfikacyjny",
   "submit": "Potwierdź",

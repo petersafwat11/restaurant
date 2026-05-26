@@ -20,5 +20,53 @@
     "description": "Każde wybrane zamówienie zostanie przesunięte do następnego statusu. Tej operacji nie da się masowo cofnąć.",
     "primary": "Przesuń {count}",
     "secondary": "Anuluj"
+  },
+  "columns": {
+    "orderNumber": "Nr zam.",
+    "customer": "Klient",
+    "items": "Pozycje",
+    "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+    "guest": "Gość",
+    "type": "Typ",
+    "status": "Status",
+    "total": "Kwota",
+    "placed": "Złożone",
+    "elapsed": "Czas"
+  },
+  "filters": {
+    "statusAriaLabel": "Status",
+    "all": "Wszystkie",
+    "typeLabel": "Typ",
+    "paymentLabel": "Płatność",
+    "searchPlaceholder": "Szukaj nr zam., klienta…",
+    "sortPlaceholder": "Sortuj",
+    "types": {
+      "DELIVERY": "Dostawa",
+      "PICKUP": "Odbiór",
+      "DINE_IN": "Na miejscu"
+    },
+    "payments": {
+      "PAID": "Opłacone",
+      "PENDING": "Oczekujące",
+      "REFUNDED": "Zwrócone",
+      "PARTIALLY_REFUNDED": "Zwrot częściowy",
+      "FAILED": "Nieudane"
+    }
+  },
+  "sort": {
+    "newest": "Najnowsze",
+    "oldest": "Najstarsze",
+    "totalDesc": "Najwyższa kwota",
+    "waitDesc": "Najdłuższe oczekiwanie"
+  },
+  "livePulse": {
+    "newOrders": "{count, plural, one {# nowe w ostatnich 5 min} few {# nowe w ostatnich 5 min} many {# nowych w ostatnich 5 min} other {# nowych w ostatnich 5 min}}",
+    "caughtUp": "Wszystkie obsłużone"
+  },
+  "soundToggle": {
+    "muteAria": "Wycisz dźwięk nowego zamówienia",
+    "unmuteAria": "Włącz dźwięk nowego zamówienia",
+    "muteTitle": "Wycisz dźwięk",
+    "unmuteTitle": "Włącz dźwięk"
   }
 }

@@ -15,5 +15,9 @@
   "referralCode": "Kod polecający",
   "referralPlaceholder": "np. RESTOA1B2",
   "hasAccount": "Masz już konto?",
-  "login": "Zaloguj się"
+  "login": "Zaloguj się",
+  "successToast": "Konto zostało utworzone — sprawdź e-mail, aby zweryfikować",
+  "errors": {
+    "emailAlreadyRegistered": "Konto z tym adresem e-mail już istnieje."
+  }
 }

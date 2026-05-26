@@ -9,5 +9,10 @@
   "forgotPassword": "Nie pamiętasz hasła?",
   "needAccount": "Nie masz konta?",
   "requestAccess": "Poproś o dostęp",
-  "welcomeBack": "Witaj ponownie, {name}"
+  "welcomeBack": "Witaj ponownie, {name}",
+  "successToast": "Zalogowano",
+  "errors": {
+    "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+    "accountDisabled": "Twoje konto zostało wyłączone. Skontaktuj się z pomocą techniczną."
+  }
 }

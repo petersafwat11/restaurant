@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface LivePulseChipProps {
@@ -9,12 +10,9 @@ interface LivePulseChipProps {
   className?: string;
 }
 
-/**
- * Topbar chip that surfaces the count of orders that arrived via realtime
- * in the last 5 minutes. Clicking jumps the user to the top of the list and
- * resets the counter. When count is 0, shows a muted "All caught up" state.
- */
 export function LivePulseChip({ count, onClick, className }: LivePulseChipProps) {
+  const t = useTranslations('admin.orders.list');
+
   if (count > 0) {
     return (
       <button
@@ -29,9 +27,7 @@ export function LivePulseChip({ count, onClick, className }: LivePulseChipProps)
           <span className="absolute inset-0 animate-ping rounded-full bg-accent/60 motion-reduce:animate-none" />
           <span className="relative h-2 w-2 rounded-full bg-accent" />
         </span>
-        <span>
-          <span className="tabular-nums">{count}</span> new in last 5 min
-        </span>
+        <span>{t('livePulse.newOrders', { count })}</span>
       </button>
     );
   }
@@ -43,7 +39,7 @@ export function LivePulseChip({ count, onClick, className }: LivePulseChipProps)
       )}
     >
       <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-fg-subtle" />
-      All caught up
+      {t('livePulse.caughtUp')}
     </span>
   );
 }

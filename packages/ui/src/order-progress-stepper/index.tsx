@@ -10,6 +10,10 @@ export interface OrderProgressStepperProps {
   mode: OrderType;
   status: OrderStatus;
   className?: string;
+  steps?: string[];
+  cancelledLabel?: string;
+  refundedLabel?: string;
+  ariaLabel?: string;
 }
 
 /**
@@ -19,7 +23,15 @@ export interface OrderProgressStepperProps {
  * REFUNDED render a terminal-failure row (brick X + "Cancelled"/"Refunded")
  * rather than progressing the steps — these are dead-ends, not steps.
  */
-export function OrderProgressStepper({ mode, status, className }: OrderProgressStepperProps) {
+export function OrderProgressStepper({
+  mode,
+  status,
+  className,
+  steps: stepsProp,
+  cancelledLabel = 'Cancelled',
+  refundedLabel = 'Refunded',
+  ariaLabel = 'Order progress',
+}: OrderProgressStepperProps) {
   const state = trackingStateFor(mode, status);
 
   if (state.kind === 'cancelled' || state.kind === 'refunded') {
@@ -35,18 +47,18 @@ export function OrderProgressStepper({ mode, status, className }: OrderProgressS
           <X size={14} strokeWidth={3} />
         </span>
         <span className="text-body font-semibold">
-          {state.kind === 'cancelled' ? 'Cancelled' : 'Refunded'}
+          {state.kind === 'cancelled' ? cancelledLabel : refundedLabel}
         </span>
       </div>
     );
   }
 
-  const steps = ORDER_TRACKING_STEPS[mode];
+  const steps = stepsProp ?? ORDER_TRACKING_STEPS[mode];
   const current = state.index;
 
   return (
     <ol
-      aria-label="Order progress"
+      aria-label={ariaLabel}
       className={cn('flex items-center justify-between gap-3', className)}
     >
       {steps.map((label, i) => {

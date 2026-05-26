@@ -37,8 +37,12 @@
   },
   "confirmRemove": {
     "title": "Usuń dzień wolny",
-    "description": "Usunąć „{label}” ({date})?",
+    "description": "Usunąć \"{label}\" ({date})?",
     "remove": "Usuń",
     "cancel": "Anuluj"
+  },
+  "toasts": {
+    "added": "Dodano dzień wolny",
+    "removed": "Usunięto dzień wolny"
   }
 }

@@ -41,6 +41,14 @@ export default function AdminOrderDetailPage() {
   const tStatus = useTranslations('shared.orderStatus');
   const tTypes = useTranslations('admin.orders.detail.types');
 
+  const translatedTokens = React.useMemo(() => {
+    const result = { ...STATUS_TOKENS };
+    for (const key of Object.keys(STATUS_TOKENS) as OrderStatus[]) {
+      result[key] = { ...STATUS_TOKENS[key], label: tStatus(key) };
+    }
+    return result;
+  }, [tStatus]);
+
   usePageHeader({ title: order ? t('title', { number: order.orderNumber }) : t('titleFallback') });
 
   const canAdvance = has('order:status_update');
@@ -106,7 +114,7 @@ export default function AdminOrderDetailPage() {
           <TypeBadge
             label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()}
           />
-          <StatusPill status={order.status} tokens={STATUS_TOKENS} />
+          <StatusPill status={order.status} tokens={translatedTokens} />
         </div>
         <div className="flex items-center gap-2" data-print="hide">
           <span className="text-small text-fg-muted">

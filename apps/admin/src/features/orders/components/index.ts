@@ -2,7 +2,7 @@ export { CancelModal } from './cancel-modal';
 export { LivePulseChip } from './live-pulse-chip';
 export { OrderDetailDrawer } from './order-detail-drawer';
 export { OrderDrawerBody } from './order-drawer-body';
-export { buildOrderColumns } from './orders-columns';
+export { useOrderColumns } from './orders-columns';
 export {
   OrdersFilters,
   type OrdersFiltersState,

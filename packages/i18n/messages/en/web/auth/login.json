@@ -13,5 +13,8 @@
   "links": {
     "forgotPassword": "Forgot password?",
     "createAccount": "Create account"
+  },
+  "toasts": {
+    "success": "Signed in"
   }
 }

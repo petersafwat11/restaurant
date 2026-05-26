@@ -2,7 +2,7 @@ import { routing } from '@/i18n/routing';
 import { AppProviders } from '@/providers/app-providers';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Fraunces, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '../globals.css';
@@ -22,16 +22,19 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
 });
 
-export const metadata: Metadata = {
-  title: 'Szef Donald — Real kebab. Made daily.',
-  description:
-    'Kebab, falafel and tacos made fresh through the day. Order online for delivery, pickup, or eat in.',
-};
-
 type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'web.layout.meta' });
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;

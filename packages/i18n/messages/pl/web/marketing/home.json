@@ -17,7 +17,9 @@
     "openNow": "Otwarte",
     "closesAt": "Zamykamy o {time}",
     "chefName": "Szef Donald",
-    "chefLocation": "Warszawa Centrum"
+    "chefLocation": "Centrum Kielce",
+    "ratingLabel": "Bazując na {count} opiniach Google",
+    "starsAriaLabel": "{value} z 5 gwiazdek"
   },
   "categories": {
     "eyebrow": "Odkryj",
@@ -41,6 +43,8 @@
     "viewFullMenuCta": "Zobacz całe menu",
     "addedToCart": "Dodano do koszyka",
     "addedToCartDescription": "1 × {name}",
+    "addAriaLabel": "Dodaj {name} do koszyka",
+    "soldOutLabel": "Wyprzedane dziś",
     "dishes": {
       "kebab-tortilla-srodni": {
         "name": "Kebab Tortilla Średni",
@@ -90,24 +94,27 @@
   "hoursLocation": {
     "eyebrow": "Znajdź nas",
     "title": "Otwarte siedem dni w tygodniu.",
-    "mapAriaLabel": "Mapa pokazująca Szefa Donalda przy Marszałkowskiej 102 w Warszawie",
-    "addressLine1": "Marszałkowska 102",
-    "addressLine2": "00-026 Warszawa, Polska",
-    "phone": "+48 22 555 01 23",
+    "mapAriaLabel": "Mapa pokazująca Szefa Donalda przy ul. Ks. Piotra Ściegiennego 68a w Kielcach",
+    "addressLine1": "Ul. Ks. Piotra Ściegiennego 68a",
+    "addressLine2": "25-115 Kielce, Polska",
+    "phone": "+48 883 953 589",
     "getDirections": "Wyznacz trasę",
     "callUs": "Zadzwoń",
     "shareLocation": "Udostępnij lokalizację",
-    "viewLargerMap": "Zobacz większą mapę"
+    "viewLargerMap": "Zobacz większą mapę",
+    "mapTitle": "Mapa",
+    "pinTitle": "Pinezka lokalizacji"
   },
   "testimonials": {
     "eyebrow": "Opinie",
     "title": "Zaufały nam tysiące osób.",
     "description": "Średnia ocena 4,8 z 1247 opinii w Google.",
     "readAllReviews": "Przeczytaj wszystkie opinie",
+    "starsAriaLabel": "{value} z 5 gwiazdek",
     "anonymous": "Anonimowy",
     "items": {
       "0": {
-        "quote": "Najlepszy kebab w Warszawie, bez dwóch zdań. Sos tahini to inny poziom, a chleb jest wyraźnie świeży. Byłam trzy razy w tym miesiącu.",
+        "quote": "Najlepszy kebab w Kielcach, bez dwóch zdań. Sos tahini to inny poziom, a chleb jest wyraźnie świeży. Byłam trzy razy w tym miesiącu.",
         "name": "Kasia W.",
         "meta": "Lokalny przewodnik · 42 opinie"
       },
@@ -131,6 +138,11 @@
   "newsletter": {
     "eyebrow": "Bądźmy w kontakcie",
     "title": "Darmowa baklava do pierwszego zamówienia.",
-    "description": "Zapisz się — sporadyczne maile, zero spamu. Wypisanie w każdej chwili."
+    "description": "Zapisz się — sporadyczne maile, zero spamu. Wypisanie w każdej chwili.",
+    "emailPlaceholder": "Twój email",
+    "subscribe": "Zapisz się",
+    "subscribeSuccess": "Witamy! Sprawdź skrzynkę — kod już czeka.",
+    "subscribeError": "Nie udało się zapisać — spróbuj ponownie.",
+    "emailAriaLabel": "Adres email"
   }
 }

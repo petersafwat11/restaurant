@@ -676,7 +676,7 @@ export function CheckoutApp() {
                   render={({ field }) => (
                     <DeliveryLocationPicker
                       zones={zonesQuery.data?.zones ?? []}
-                      center={restaurant?.geoPoint ?? { lat: 52.2297, lng: 21.0122 }}
+                      center={restaurant?.geoPoint ?? { lat: 50.8505, lng: 20.6275 }}
                       value={field.value ?? null}
                       onChange={(v) => {
                         // Default country to PL when first pin drops.

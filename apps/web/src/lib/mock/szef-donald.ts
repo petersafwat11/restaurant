@@ -20,10 +20,11 @@ export const mockHours: HoursRow[] = [
 ];
 
 export const mockLocation = {
-  address1: 'Marszałkowska 102',
-  address2: '00-026 Warszawa, Poland',
-  phone: '+48 22 555 01 23',
-  coords: { lat: 52.2297, lng: 21.0122 },
+  address1: 'Ul. Ks. Piotra Ściegiennego 68a',
+  address2: '25-115 Kielce, Poland',
+  phone: '+48 883 953 589',
+  email: 'mahmodrasul123@gmail.com',
+  coords: { lat: 50.8505, lng: 20.6275 },
 };
 
 const U = (id: string, w = 1200) =>
@@ -101,7 +102,7 @@ export const mockTestimonials = [
   {
     rating: 5,
     quote:
-      "Best kebab in Warsaw, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
+      "Best kebab in Kielce, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
     author: { name: 'Kasia W.', meta: 'Local guide · 42 reviews' },
     source: 'google' as const,
   },
