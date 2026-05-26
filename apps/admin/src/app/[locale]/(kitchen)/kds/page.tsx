@@ -220,15 +220,15 @@ export default function KdsPage() {
             const list = ticketsByStatus(filtered, status);
             return (
               <Column key={status} title={tStatus(status)} count={list.length} empty={t('empty')}>
-                {list.map((t) => (
+                {list.map((ticket) => (
                   <KdsTicketCard
-                    key={t.orderId}
-                    orderNumber={t.orderNumber}
-                    status={t.status as 'CONFIRMED' | 'PREPARING' | 'READY'}
-                    type={t.type}
-                    confirmedAt={t.confirmedAt ?? new Date().toISOString()}
-                    specialRequests={t.specialRequests}
-                    items={t.items.map((it) => ({
+                    key={ticket.orderId}
+                    orderNumber={ticket.orderNumber}
+                    status={ticket.status as 'CONFIRMED' | 'PREPARING' | 'READY'}
+                    type={ticket.type}
+                    confirmedAt={ticket.confirmedAt ?? new Date().toISOString()}
+                    specialRequests={ticket.specialRequests}
+                    items={ticket.items.map((it) => ({
                       name: it.name,
                       quantity: it.quantity,
                       modifiers: it.modifiers,
@@ -236,9 +236,9 @@ export default function KdsPage() {
                     }))}
                     pending={advance.isPending}
                     onAdvance={
-                      t.status === 'READY'
+                      ticket.status === 'READY'
                         ? undefined
-                        : () => advance.mutate({ orderId: t.orderId, current: t.status })
+                        : () => advance.mutate({ orderId: ticket.orderId, current: ticket.status })
                     }
                     labels={{
                       typeLabels: {
