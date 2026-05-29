@@ -125,10 +125,21 @@ export async function LandingHoursLocation() {
                 <Share2 size={14} /> {t('shareLocation')}
               </button>
             </div>
-            <HoursTable hours={mockHours} highlightToday layout="list" dayLabels={dayLabels} closedLabel={closedLabel} />
+            <HoursTable
+              hours={mockHours}
+              highlightToday
+              layout="list"
+              dayLabels={dayLabels}
+              closedLabel={closedLabel}
+            />
           </div>
           <div className="flex flex-col gap-3">
-            <MapPlaceholder ariaLabel={t('mapAriaLabel')} addressBadge={t('addressLine1')} mapTitle={t('mapTitle')} pinTitle={t('pinTitle')} />
+            <MapPlaceholder
+              ariaLabel={t('mapAriaLabel')}
+              addressBadge={t('addressLine1')}
+              mapTitle={t('mapTitle')}
+              pinTitle={t('pinTitle')}
+            />
             <div className="flex justify-end">
               <Link
                 href="#"

@@ -20,9 +20,7 @@ export function useRegister(): UseMutationResult<AuthResponseDto, ApiError, Regi
     onError: (err) =>
       notify(
         'error',
-        err.code === 'emailAlreadyRegistered'
-          ? t('errors.emailAlreadyRegistered')
-          : err.message,
+        err.code === 'emailAlreadyRegistered' ? t('errors.emailAlreadyRegistered') : err.message,
       ),
   });
 }

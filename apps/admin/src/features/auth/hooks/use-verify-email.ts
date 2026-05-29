@@ -18,9 +18,6 @@ export function useVerifyEmail(): UseMutationResult<{ success: true }, ApiError,
       notify('success', t('successToast'));
     },
     onError: (err) =>
-      notify(
-        'error',
-        err.code === 'tokenInvalid' ? t('errors.tokenInvalid') : err.message,
-      ),
+      notify('error', err.code === 'tokenInvalid' ? t('errors.tokenInvalid') : err.message),
   });
 }

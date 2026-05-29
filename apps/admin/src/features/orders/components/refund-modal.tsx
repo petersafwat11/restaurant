@@ -71,9 +71,7 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
   function submit() {
     if (!order?.payment) return;
     const refundReason =
-      reason === 'other'
-        ? note.trim()
-        : reasonLabels[reason] + (note ? ` — ${note}` : '');
+      reason === 'other' ? note.trim() : reasonLabels[reason] + (note ? ` — ${note}` : '');
     refund.mutate(
       {
         orderId: order.id,
@@ -91,8 +89,16 @@ export function RefundModal({ orderId, onOpenChange }: RefundModalProps) {
     <ActionModal
       open={open}
       onOpenChange={onOpenChange}
-      title={order ? t('refundModal.title', { number: order.orderNumber }) : t('refundModal.titleFallback')}
-      description={order ? t('refundModal.description', { amount: formatMoney(order.grandTotal, order.currency) }) : ''}
+      title={
+        order
+          ? t('refundModal.title', { number: order.orderNumber })
+          : t('refundModal.titleFallback')
+      }
+      description={
+        order
+          ? t('refundModal.description', { amount: formatMoney(order.grandTotal, order.currency) })
+          : ''
+      }
       footerHelper={t('refundModal.footerHelper')}
       primary={{
         label: order

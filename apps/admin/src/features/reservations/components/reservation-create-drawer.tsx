@@ -98,9 +98,7 @@ export function ReservationCreateDrawer({
       ariaLabel={t('ariaLabel')}
       header={
         <div className="px-6 py-4">
-          <div className="text-caption uppercase tracking-wider text-fg-subtle">
-            {t('eyebrow')}
-          </div>
+          <div className="text-caption uppercase tracking-wider text-fg-subtle">{t('eyebrow')}</div>
           <div className="mt-1 flex items-center gap-2 text-h2 font-semibold text-fg">
             <CalendarPlus size={18} /> {t('title')}
           </div>

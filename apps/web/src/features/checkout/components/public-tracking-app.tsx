@@ -1,8 +1,8 @@
 'use client';
 
 import { usePublicOrderTracking } from '@/features/orders/hooks';
-import { Container, EmptyState, OrderProgressStepper, PageSpinner } from '@repo/ui';
 import type { OrderType } from '@repo/types';
+import { Container, EmptyState, OrderProgressStepper, PageSpinner } from '@repo/ui';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -71,8 +71,18 @@ export function PublicTrackingApp({ orderId, token }: PublicTrackingAppProps) {
   }
 
   const stepsByMode: Record<OrderType, string[]> = {
-    DELIVERY: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.onTheWay'), tStepper('step.delivered')],
-    PICKUP: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.readyForPickup'), tStepper('step.pickedUp')],
+    DELIVERY: [
+      tStepper('step.confirmed'),
+      tStepper('step.preparing'),
+      tStepper('step.onTheWay'),
+      tStepper('step.delivered'),
+    ],
+    PICKUP: [
+      tStepper('step.confirmed'),
+      tStepper('step.preparing'),
+      tStepper('step.readyForPickup'),
+      tStepper('step.pickedUp'),
+    ],
     DINE_IN: [tStepper('step.confirmed'), tStepper('step.preparing'), tStepper('step.served')],
   };
 

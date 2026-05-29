@@ -78,7 +78,11 @@ export function CancelModal({ orderId, onOpenChange }: CancelModalProps) {
       open={open}
       onOpenChange={onOpenChange}
       variant="destructive"
-      title={order ? t('cancelModal.title', { number: order.orderNumber }) : t('cancelModal.titleFallback')}
+      title={
+        order
+          ? t('cancelModal.title', { number: order.orderNumber })
+          : t('cancelModal.titleFallback')
+      }
       description={t('cancelModal.description')}
       primary={{
         label: t('cancelModal.primary'),

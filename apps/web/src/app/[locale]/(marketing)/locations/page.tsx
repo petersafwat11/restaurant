@@ -504,7 +504,9 @@ export default function LocationsPage() {
                     hours={hoursForTable}
                     highlightToday
                     layout="list"
-                    dayLabels={[0, 1, 2, 3, 4, 5, 6].map((d) => t(`days.short.${d}` as 'days.short.0'))}
+                    dayLabels={[0, 1, 2, 3, 4, 5, 6].map((d) =>
+                      t(`days.short.${d}` as 'days.short.0'),
+                    )}
                     closedLabel={t('weekTimeline.closed')}
                   />
                 </div>

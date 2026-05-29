@@ -89,7 +89,13 @@ export function SzefSiteFooter() {
                 {mockLocation.phone}
               </Link>
               <div className="mt-2 text-surface/80">
-                <HoursTable hours={mockHours} layout="compact" highlightToday={false} dayLabels={dayLabels} closedLabel={closedLabel} />
+                <HoursTable
+                  hours={mockHours}
+                  layout="compact"
+                  highlightToday={false}
+                  dayLabels={dayLabels}
+                  closedLabel={closedLabel}
+                />
               </div>
             </>
           ),

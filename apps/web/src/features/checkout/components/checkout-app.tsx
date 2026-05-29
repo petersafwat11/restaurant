@@ -1,7 +1,7 @@
 'use client';
 
-import { useAddresses } from '@/features/addresses/hooks';
 import { useCartSessionKey } from '@/components/cart-session-provider';
+import { useAddresses } from '@/features/addresses/hooks';
 import { useCart } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
@@ -481,10 +481,7 @@ export function CheckoutApp() {
       </h1>
 
       {user && (
-        <div
-          role="status"
-          className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-2 text-small text-fg-muted shadow-sm"
-        >
+        <output className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-2 text-small text-fg-muted shadow-sm">
           <span className="relative grid h-2 w-2 place-items-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-positive opacity-60" />
             <span className="relative h-2 w-2 rounded-full bg-positive" />
@@ -497,7 +494,7 @@ export function CheckoutApp() {
           </span>
           <span className="text-fg-subtle">·</span>
           <span className="text-fg-subtle">{t('signedInBanner.detail')}</span>
-        </div>
+        </output>
       )}
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[62fr_38fr]">

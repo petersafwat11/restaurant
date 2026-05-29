@@ -72,7 +72,9 @@ export function OrderDetailDrawer({
                 <h2 className="font-mono text-h2-admin tracking-wide text-fg">
                   {order.orderNumber}
                 </h2>
-                <TypeBadge label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()} />
+                <TypeBadge
+                  label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()}
+                />
               </div>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">

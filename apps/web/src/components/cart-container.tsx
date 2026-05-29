@@ -50,9 +50,7 @@ export function CartContainer() {
     if (lastCountRef.current !== itemCount) {
       lastCountRef.current = itemCount;
       setAnnouncement(
-        itemCount === 0
-          ? t('empty')
-          : `${t('title')} — ${t('itemCount', { count: itemCount })}`,
+        itemCount === 0 ? t('empty') : `${t('title')} — ${t('itemCount', { count: itemCount })}`,
       );
     }
   }, [itemCount, t]);

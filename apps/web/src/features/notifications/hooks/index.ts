@@ -3,7 +3,6 @@
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
-import { useTranslations } from 'next-intl';
 import type {
   NotificationListDto,
   NotificationListQuery,
@@ -12,6 +11,7 @@ import type {
   UpdateNotificationPreferenceDto,
 } from '@repo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 
 export function useNotifications(query?: NotificationListQuery) {
   return useQuery<NotificationListDto>({

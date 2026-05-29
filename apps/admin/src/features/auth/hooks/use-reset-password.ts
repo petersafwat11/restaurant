@@ -17,9 +17,6 @@ export function useResetPassword(): UseMutationResult<
     mutationFn: (input) => getApiClient().auth.resetPassword(input),
     onSuccess: () => notify('success', t('successToast')),
     onError: (err) =>
-      notify(
-        'error',
-        err.code === 'tokenInvalid' ? t('errors.tokenInvalid') : err.message,
-      ),
+      notify('error', err.code === 'tokenInvalid' ? t('errors.tokenInvalid') : err.message),
   });
 }

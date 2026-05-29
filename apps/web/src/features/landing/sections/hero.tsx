@@ -23,7 +23,9 @@ export async function LandingHero() {
         value: 4.8,
         count: 1247,
         label: t('ratingLabel', { count: 1247 }),
-        renderStars: (v) => <Stars value={v} size={16} ariaLabel={t('starsAriaLabel', { value: v })} />,
+        renderStars: (v) => (
+          <Stars value={v} size={16} ariaLabel={t('starsAriaLabel', { value: v })} />
+        ),
       }}
       media={
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-image-lg bg-surface-warm">

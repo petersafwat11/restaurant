@@ -1,7 +1,7 @@
 import { routing } from '@/i18n/routing';
-import { AppProviders } from '@/providers/app-providers';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { JsonLd, buildRestaurantSchema } from '@/lib/seo/json-ld';
+import { AppProviders } from '@/providers/app-providers';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';

@@ -50,7 +50,9 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
         const isNote = ev.kind === 'NOTE';
         return {
           id: ev.id,
-          title: isNote ? t('body.noteFallback') : (translatedTokens[ev.status as OrderStatus]?.label ?? ev.status),
+          title: isNote
+            ? t('body.noteFallback')
+            : (translatedTokens[ev.status as OrderStatus]?.label ?? ev.status),
           at: ev.createdAt,
           note: ev.note ?? undefined,
           dotClassName: isNote ? 'bg-fg-subtle' : STATUS_TOKENS[ev.status as OrderStatus]?.bg,
@@ -99,7 +101,11 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
             <PriceRow label={t('body.subtotal')} value={order.subtotal} currency={order.currency} />
             <PriceRow label={t('body.tax')} value={order.taxTotal} currency={order.currency} />
             {Number(order.deliveryFee) > 0 && (
-              <PriceRow label={t('body.deliveryFee')} value={order.deliveryFee} currency={order.currency} />
+              <PriceRow
+                label={t('body.deliveryFee')}
+                value={order.deliveryFee}
+                currency={order.currency}
+              />
             )}
             {Number(order.tipAmount) > 0 && (
               <PriceRow label={t('body.tip')} value={order.tipAmount} currency={order.currency} />
