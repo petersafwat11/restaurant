@@ -98,20 +98,26 @@ jobs:
           fi
           # web/admin /healthz is intercepted by next-intl middleware, so
           # the only universal probe is /. The API exposes /api/v1/healthz.
+          # Initial settle: the api container has `start_period: 30s` on its
+          # healthcheck (compose), and NestJS+Prisma cold boot takes 10–25s on
+          # its own. Sleep before probing so the first attempt is realistic.
+          echo "→ settling 30s for containers to come up"
+          sleep 30
           declare -A probes=(
             ["$DOMAIN"]="/"
             ["admin.$DOMAIN"]="/"
             ["api.$DOMAIN"]="/api/v1/healthz"
           )
+          MAX_ATTEMPTS=18  # 18 * 5s = 90s additional grace per host
           for host in "${!probes[@]}"; do
             url="https://$host${probes[$host]}"
             echo "→ checking $url"
-            for i in 1 2 3 4 5; do
+            for i in $(seq 1 $MAX_ATTEMPTS); do
               if curl -fsS "$url" -o /dev/null; then
                 echo "   ok"; break
               fi
-              if [[ $i -eq 5 ]]; then
-                echo "   FAIL after 5 attempts"; exit 1
+              if [[ $i -eq $MAX_ATTEMPTS ]]; then
+                echo "   FAIL after $MAX_ATTEMPTS attempts"; exit 1
               fi
               sleep 5
             done
