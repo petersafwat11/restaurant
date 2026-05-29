@@ -11,6 +11,7 @@
     "branding": "Branding",
     "contact": "Kontakt",
     "location": "Lokalizacja",
+    "discovery": "Discovery",
     "channels": "Kanały",
     "danger": "Strefa niebezpieczna"
   },
@@ -51,6 +52,17 @@
     "description": "Współrzędne zasilają mapę klienta, sprawdzanie stref dostaw oraz wyniki wyszukiwania.",
     "prompt": "Kliknij mapę lub użyj „Zlokalizuj mnie”, aby ustawić lokalizację.",
     "clear": "Wyczyść"
+  },
+  "discovery": {
+    "title": "Discovery",
+    "description": "Wpływa na to, jak restauracja pojawia się w wynikach wyszukiwania, odpowiedziach AI i podglądach w social mediach.",
+    "cuisineLabel": "Kuchnia",
+    "cuisineHint": "Rozdzielone przecinkami, np. „Polska, Bliski Wschód”. Zasila schema.org servesCuisine.",
+    "priceRangeLabel": "Zakres cenowy",
+    "priceRangeHint": "Używane w rich results Google i kafelkach na mapach.",
+    "priceRangeOptionNone": "Nie ustawiono",
+    "sameAsLabel": "Profile społecznościowe",
+    "sameAsHint": "Jeden URL na linię — Facebook, Instagram, Wizytówka Google itp. Emitowane jako schema.org sameAs."
   },
   "channels": {
     "title": "Kanały",

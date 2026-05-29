@@ -208,6 +208,13 @@ model Restaurant {
   acceptsDelivery          Boolean  @default(true)
   acceptsPickup            Boolean  @default(true)
   acceptsDineIn            Boolean  @default(true)
+  // SEO/discovery fields exposed in the public Restaurant DTO and emitted in
+  // schema.org JSON-LD. `servesCuisine` carries free-form cuisine tags
+  // (e.g. "Polish", "Middle Eastern"); `priceRange` follows schema.org's
+  // "$" – "$$$$" convention; `sameAs` is a list of canonical social URLs.
+  servesCuisine            String[] @default([])
+  priceRange               String?
+  sameAs                   String[] @default([])
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 }

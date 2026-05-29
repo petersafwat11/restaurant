@@ -56,6 +56,7 @@ export class SeoService {
         telephone: restaurant.phone,
         email: restaurant.email,
         image: restaurant.coverUrl ?? restaurant.logoUrl,
+        logo: restaurant.logoUrl,
         address: {
           line1: address?.line1 ?? undefined,
           city: address?.city ?? undefined,
@@ -67,6 +68,9 @@ export class SeoService {
           geo && typeof geo.lat === 'number' && typeof geo.lng === 'number'
             ? { lat: geo.lat, lng: geo.lng }
             : null,
+        servesCuisine: restaurant.servesCuisine,
+        priceRange: restaurant.priceRange,
+        sameAs: restaurant.sameAs,
       },
       aggregateRating: {
         ratingValue:

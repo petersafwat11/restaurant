@@ -12,6 +12,7 @@
     "wrapsValue": "~1200 / tydz.",
     "wrapsLabel": "Zawijańców w sezonie",
     "ratingValue": "4,8",
-    "ratingLabel": "Średnia z 1247 opinii"
+    "ratingLabel": "Średnia z 1247 opinii",
+    "ratingLabelDynamic": "Średnia z {count} opinii"
   }
 }

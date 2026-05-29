@@ -40,6 +40,12 @@ export type UpdateOperatingHoursDto = z.infer<typeof UpdateOperatingHoursSchema>
 
 const MoneyStringSchema = z.string().regex(/^-?\d+(\.\d{1,2})?$/);
 
+// Schema.org `priceRange` convention — empty string is invalid, but we accept
+// `null` (i.e., "not set") so the DTO can pass through the field unset.
+const PriceRangeSchema = z
+  .enum(['$', '$$', '$$$', '$$$$'], { message: 'priceRange must be $, $$, $$$, or $$$$' })
+  .nullable();
+
 export const RestaurantPublicSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -62,6 +68,10 @@ export const RestaurantPublicSchema = z.object({
   acceptsDelivery: z.boolean().default(true),
   acceptsPickup: z.boolean().default(true),
   acceptsDineIn: z.boolean().default(true),
+  // Discovery fields surfaced in schema.org JSON-LD on public pages.
+  servesCuisine: z.array(z.string().min(1).max(60)).default([]),
+  priceRange: PriceRangeSchema.default(null),
+  sameAs: z.array(z.string().url()).default([]),
   hours: z.array(OperatingHoursSchema).optional(),
 });
 export type RestaurantPublicDto = z.infer<typeof RestaurantPublicSchema>;
@@ -88,6 +98,9 @@ export const CreateRestaurantSchema = z.object({
   geoPoint: GeoPointSchema.optional(),
   timezone: z.string().optional(),
   currency: z.string().min(3).max(3).optional(),
+  servesCuisine: z.array(z.string().min(1).max(60)).optional(),
+  priceRange: PriceRangeSchema.optional(),
+  sameAs: z.array(z.string().url()).optional(),
 });
 export type CreateRestaurantDto = z.infer<typeof CreateRestaurantSchema>;
 

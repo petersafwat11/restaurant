@@ -7,7 +7,7 @@ import type { ApiError } from '@repo/api-client';
 import type { RestaurantAdminDto, UpdateRestaurantDto } from '@repo/types';
 import { EmptyState, PageSpinner, SettingsAnchorNav, SettingsSectionCard, Switch } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Compass, Mail, Palette, ShieldAlert, ToggleRight } from 'lucide-react';
+import { Building2, Compass, Mail, Palette, Search, ShieldAlert, ToggleRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
@@ -56,6 +56,27 @@ interface FormState {
   acceptsDelivery: boolean;
   acceptsPickup: boolean;
   acceptsDineIn: boolean;
+  // SEO / discovery
+  cuisineRaw: string; // comma-separated input; split on submit
+  priceRange: '' | '$' | '$$' | '$$$' | '$$$$';
+  sameAsRaw: string; // one URL per line; split on submit
+}
+
+type PriceRangeOption = NonNullable<UpdateRestaurantDto['priceRange']> | '';
+const PRICE_RANGE_OPTIONS: PriceRangeOption[] = ['', '$', '$$', '$$$', '$$$$'];
+
+function splitCsv(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function splitLines(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function fromDto(r: RestaurantAdminDto): FormState {
@@ -81,6 +102,9 @@ function fromDto(r: RestaurantAdminDto): FormState {
     acceptsDelivery: r.acceptsDelivery,
     acceptsPickup: r.acceptsPickup,
     acceptsDineIn: r.acceptsDineIn,
+    cuisineRaw: r.servesCuisine.join(', '),
+    priceRange: (r.priceRange ?? '') as PriceRangeOption,
+    sameAsRaw: r.sameAs.join('\n'),
   };
 }
 
@@ -125,6 +149,15 @@ function diff(initial: FormState, current: FormState): UpdateRestaurantDto {
       'geoPoint',
       current.lat !== null && current.lng !== null ? { lat: current.lat, lng: current.lng } : null,
     );
+  }
+  if (initial.cuisineRaw !== current.cuisineRaw) {
+    set('servesCuisine', splitCsv(current.cuisineRaw));
+  }
+  if (initial.priceRange !== current.priceRange) {
+    set('priceRange', current.priceRange === '' ? null : current.priceRange);
+  }
+  if (initial.sameAsRaw !== current.sameAsRaw) {
+    set('sameAs', splitLines(current.sameAsRaw));
   }
   return patch;
 }
@@ -210,6 +243,7 @@ export default function RestaurantProfilePage() {
       { id: 'branding', label: t('nav.branding'), icon: <Palette className="h-4 w-4" /> },
       { id: 'contact', label: t('nav.contact'), icon: <Mail className="h-4 w-4" /> },
       { id: 'location', label: t('nav.location'), icon: <Compass className="h-4 w-4" /> },
+      { id: 'discovery', label: t('nav.discovery'), icon: <Search className="h-4 w-4" /> },
       { id: 'channels', label: t('nav.channels'), icon: <ToggleRight className="h-4 w-4" /> },
       { id: 'danger', label: t('nav.danger'), icon: <ShieldAlert className="h-4 w-4" /> },
     ],
@@ -436,6 +470,41 @@ export default function RestaurantProfilePage() {
               </button>
             )}
           </div>
+        </SettingsSectionCard>
+
+        <SettingsSectionCard
+          id="discovery"
+          title={t('discovery.title')}
+          description={t('discovery.description')}
+        >
+          <Field label={t('discovery.cuisineLabel')} hint={t('discovery.cuisineHint')}>
+            <Input
+              value={draft.cuisineRaw}
+              onChange={(e) => patch('cuisineRaw', e.target.value)}
+              placeholder="Polish, Middle Eastern"
+            />
+          </Field>
+          <Field label={t('discovery.priceRangeLabel')} hint={t('discovery.priceRangeHint')}>
+            <select
+              value={draft.priceRange}
+              onChange={(e) => patch('priceRange', e.target.value as FormState['priceRange'])}
+              className="h-9 w-full rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+            >
+              {PRICE_RANGE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt === '' ? t('discovery.priceRangeOptionNone') : opt}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={t('discovery.sameAsLabel')} hint={t('discovery.sameAsHint')}>
+            <Textarea
+              value={draft.sameAsRaw}
+              rows={4}
+              onChange={(e) => patch('sameAsRaw', e.target.value)}
+              placeholder={'https://facebook.com/…\nhttps://instagram.com/…'}
+            />
+          </Field>
         </SettingsSectionCard>
 
         <SettingsSectionCard

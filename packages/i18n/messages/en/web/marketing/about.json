@@ -12,6 +12,7 @@
     "wrapsValue": "~1,200 / week",
     "wrapsLabel": "Wraps in high season",
     "ratingValue": "4.8",
-    "ratingLabel": "Average across 1,247 reviews"
+    "ratingLabel": "Average across 1,247 reviews",
+    "ratingLabelDynamic": "Average across {count} reviews"
   }
 }

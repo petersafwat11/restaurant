@@ -83,6 +83,9 @@ export class RestaurantsService {
         ...(dto.acceptsDelivery !== undefined ? { acceptsDelivery: dto.acceptsDelivery } : {}),
         ...(dto.acceptsPickup !== undefined ? { acceptsPickup: dto.acceptsPickup } : {}),
         ...(dto.acceptsDineIn !== undefined ? { acceptsDineIn: dto.acceptsDineIn } : {}),
+        ...(dto.servesCuisine !== undefined ? { servesCuisine: dto.servesCuisine } : {}),
+        ...(dto.priceRange !== undefined ? { priceRange: dto.priceRange } : {}),
+        ...(dto.sameAs !== undefined ? { sameAs: dto.sameAs } : {}),
       },
     });
     await this.cache.invalidate(PUBLIC_KEY);
@@ -166,6 +169,9 @@ function toPublic(row: Restaurant, hours?: OperatingHours[]): RestaurantPublicDt
     acceptsDelivery: row.acceptsDelivery,
     acceptsPickup: row.acceptsPickup,
     acceptsDineIn: row.acceptsDineIn,
+    servesCuisine: row.servesCuisine,
+    priceRange: (row.priceRange ?? null) as RestaurantPublicDto['priceRange'],
+    sameAs: row.sameAs,
     ...(hours ? { hours: hours.map(toHoursDto) } : {}),
   };
 }

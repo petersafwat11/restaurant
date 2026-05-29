@@ -11,6 +11,7 @@
     "branding": "Branding",
     "contact": "Contact",
     "location": "Location",
+    "discovery": "Discovery",
     "channels": "Channels",
     "danger": "Danger zone"
   },
@@ -51,6 +52,17 @@
     "description": "Coordinates power the customer map, delivery-zone checks, and search results.",
     "prompt": "Click the map or use Locate me to set a location.",
     "clear": "Clear"
+  },
+  "discovery": {
+    "title": "Discovery",
+    "description": "Shapes how the restaurant appears in search results, AI answers, and social previews.",
+    "cuisineLabel": "Cuisine",
+    "cuisineHint": "Comma-separated, e.g. \"Polish, Middle Eastern\". Drives schema.org servesCuisine.",
+    "priceRangeLabel": "Price range",
+    "priceRangeHint": "Used by Google rich results and map cards.",
+    "priceRangeOptionNone": "Not set",
+    "sameAsLabel": "Social profiles",
+    "sameAsHint": "One URL per line — Facebook, Instagram, Google Business, etc. Emitted as schema.org sameAs."
   },
   "channels": {
     "title": "Channels",

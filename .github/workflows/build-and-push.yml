@@ -74,6 +74,7 @@ jobs:
               echo "build_args<<EOF"
               echo "APP_URL_API=https://api.${DOMAIN}"
               echo "NEXT_PUBLIC_API_URL=https://api.${DOMAIN}/api/v1"
+              echo "NEXT_PUBLIC_APP_URL=https://${DOMAIN}"
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
           fi

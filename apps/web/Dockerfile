@@ -29,8 +29,10 @@ RUN pnpm install --frozen-lockfile
 FROM installer AS builder
 ARG APP_URL_API=http://localhost:4000
 ARG NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ENV APP_URL_API=${APP_URL_API} \
-    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
+    NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm --filter @repo/web build
 

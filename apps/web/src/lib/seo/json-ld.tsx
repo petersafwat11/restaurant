@@ -71,11 +71,13 @@ function buildOpeningHours(hours: OperatingHoursDto[] | undefined) {
 interface BuildRestaurantSchemaOptions {
   /** Absolute site URL, e.g. `https://example.com` (no trailing slash). */
   siteUrl: string;
-  /** Optional cuisine list — populate once `servesCuisine` lives on the DTO. */
+  /**
+   * Per-call overrides. By default the helper reads `servesCuisine`,
+   * `priceRange`, and `sameAs` from the DTO; pass these only to add or
+   * override what's stored.
+   */
   servesCuisine?: string[];
-  /** Optional `priceRange` — schema.org expects "$" / "$$" / "$$$" / "$$$$". */
   priceRange?: string;
-  /** Optional social URLs that map to schema.org `sameAs`. */
   sameAs?: string[];
 }
 
@@ -119,16 +121,71 @@ export function buildRestaurantSchema(
     node.openingHoursSpecification = openingHours;
   }
 
-  if (opts.servesCuisine && opts.servesCuisine.length > 0) {
-    node.servesCuisine = opts.servesCuisine;
+  const servesCuisine = opts.servesCuisine ?? restaurant.servesCuisine;
+  if (servesCuisine && servesCuisine.length > 0) {
+    node.servesCuisine = servesCuisine.length === 1 ? servesCuisine[0] : servesCuisine;
   }
-  if (opts.priceRange) node.priceRange = opts.priceRange;
-  if (opts.sameAs && opts.sameAs.length > 0) node.sameAs = opts.sameAs;
+  const priceRange = opts.priceRange ?? restaurant.priceRange;
+  if (priceRange) node.priceRange = priceRange;
+  const sameAs = opts.sameAs ?? restaurant.sameAs;
+  if (sameAs && sameAs.length > 0) node.sameAs = sameAs;
 
   node.currenciesAccepted = restaurant.currency;
   node.acceptsReservations = restaurant.acceptsReservations;
 
   return node;
+}
+
+/**
+ * Build a `Restaurant + potentialAction: ReserveAction` schema. Used on the
+ * `/reservations` page so search engines and AI extractors recognise the
+ * phone-based reservation entry point.
+ */
+export function buildReservationSchema(
+  restaurant: RestaurantPublicDto,
+  opts: BuildRestaurantSchemaOptions & { reservationUrl: string },
+): Record<string, unknown> {
+  const base = buildRestaurantSchema(restaurant, opts);
+  // Even without an online reservation system, the `ReserveAction` node
+  // declares the entry point. We use the canonical `/reservations` page as
+  // the target — Google + Bing extract it as the action URL.
+  base.potentialAction = {
+    '@type': 'ReserveAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: opts.reservationUrl,
+      inLanguage: ['pl-PL', 'en-US'],
+      actionPlatform: [
+        'https://schema.org/DesktopWebPlatform',
+        'https://schema.org/MobileWebPlatform',
+      ],
+    },
+    result: {
+      '@type': 'Reservation',
+      name: 'Table reservation',
+    },
+  };
+  return base;
+}
+
+/**
+ * Build an `AggregateRating` JSON-LD node. Emit ONLY when the page renders
+ * the rating value as visible content (Google's structured-data policy).
+ */
+export function buildAggregateRatingSchema(
+  restaurant: RestaurantPublicDto,
+  agg: { ratingValue: number; reviewCount: number },
+  opts: BuildRestaurantSchemaOptions,
+): Record<string, unknown> {
+  const base = buildRestaurantSchema(restaurant, opts);
+  base.aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: agg.ratingValue,
+    reviewCount: agg.reviewCount,
+    bestRating: 5,
+    worstRating: 1,
+  };
+  return base;
 }
 
 /**

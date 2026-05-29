@@ -20,8 +20,10 @@ export interface StructuredDataInput {
       country?: string;
     };
     geo: { lat: number; lng: number } | null;
-    servesCuisine?: string | null;
+    servesCuisine?: string[] | null;
     priceRange?: string | null;
+    sameAs?: string[] | null;
+    logo?: string | null;
   };
   aggregateRating: { ratingValue: number | null; reviewCount: number };
   menu: {
@@ -59,8 +61,17 @@ export function buildStructuredData(input: StructuredDataInput): {
   };
   if (r.description) restaurantNode.description = r.description;
   if (r.image) restaurantNode.image = r.image;
-  if (r.servesCuisine) restaurantNode.servesCuisine = r.servesCuisine;
+  if (r.logo) restaurantNode.logo = r.logo;
+  // schema.org accepts either a string or string[] for `servesCuisine`. We
+  // emit a single value when only one cuisine is set, an array otherwise —
+  // both forms are valid, but downstream tooling parses single values more
+  // consistently.
+  if (r.servesCuisine && r.servesCuisine.length > 0) {
+    restaurantNode.servesCuisine =
+      r.servesCuisine.length === 1 ? r.servesCuisine[0] : r.servesCuisine;
+  }
   if (r.priceRange) restaurantNode.priceRange = r.priceRange;
+  if (r.sameAs && r.sameAs.length > 0) restaurantNode.sameAs = r.sameAs;
   if (r.geo) {
     restaurantNode.geo = {
       '@type': 'GeoCoordinates',
