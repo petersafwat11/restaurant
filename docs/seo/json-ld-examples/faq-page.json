@@ -1,0 +1,38 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Czy macie opcje wegańskie?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak. Mamy wegański kebab (seitan + hummus), wegański falafel i wegańskie tacos. Wszystkie oznaczone w menu."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do której godziny dowozicie?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pn–Cz do 23:00, Pt–Sb do 01:00, Nd do 22:00. Ostatnie zamówienie 30 minut przed zamknięciem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy mięso jest halal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak — jagnięcina i kurczak są certyfikowane halal. Wołowina nie."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Czy można zarezerwować stolik?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tak, online na /reservations lub telefonicznie. Rekomendujemy rezerwację dla grup powyżej 4 osób."
+      }
+    }
+  ]
+}

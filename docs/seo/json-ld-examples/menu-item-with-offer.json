@@ -1,0 +1,27 @@
+{
+  "@context": "https://schema.org",
+  "@type": "MenuItem",
+  "@id": "https://example.com/menu/kebaby/kebab-z-jagnieciny",
+  "name": "Kebab z jagnięciny",
+  "description": "Pieczona jagnięcina, surówka colesław, sos czosnkowy. Wszystko świeże, robione codziennie.",
+  "image": [
+    "https://example.com/images/menu/kebab-jagnieciny.jpg",
+    "https://example.com/images/menu/kebab-jagnieciny-2.jpg"
+  ],
+  "menuAddOn": [
+    { "@type": "MenuItem", "name": "Sos ostry", "offers": { "@type": "Offer", "price": "2.00", "priceCurrency": "PLN" } },
+    { "@type": "MenuItem", "name": "Dodatkowy ser", "offers": { "@type": "Offer", "price": "4.00", "priceCurrency": "PLN" } }
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "32.00",
+    "priceCurrency": "PLN",
+    "availability": "https://schema.org/InStock",
+    "url": "https://example.com/menu/kebaby/kebab-z-jagnieciny"
+  },
+  "suitableForDiet": ["https://schema.org/HalalDiet"],
+  "nutrition": {
+    "@type": "NutritionInformation",
+    "calories": "780 kcal"
+  }
+}

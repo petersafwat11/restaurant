@@ -1,7 +1,13 @@
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+
+// Public-but-private pages (signed-token order tracking deep links). Not for SERPs.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Public route group — pages that need full site chrome but aren't part of

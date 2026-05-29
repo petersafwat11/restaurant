@@ -1,7 +1,13 @@
 import { Logo } from '@/components/logo';
 import { Link } from '@/i18n/navigation';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+
+// Auth pages — discoverable from links but should not appear in SERPs.
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 /**
  * Auth route group — login, register, forgot-password, reset-password,

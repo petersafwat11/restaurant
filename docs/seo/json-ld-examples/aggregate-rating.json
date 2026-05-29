@@ -1,0 +1,30 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "@id": "https://example.com#restaurant",
+  "name": "Szef Donald",
+  "url": "https://example.com",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": 4.7,
+    "reviewCount": 312,
+    "bestRating": 5,
+    "worstRating": 1
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Anna K." },
+      "datePublished": "2026-05-10",
+      "reviewRating": { "@type": "Rating", "ratingValue": 5, "bestRating": 5 },
+      "reviewBody": "Najlepszy kebab w Śródmieściu. Świeże składniki, szybka dostawa."
+    },
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Marek W." },
+      "datePublished": "2026-05-08",
+      "reviewRating": { "@type": "Rating", "ratingValue": 5, "bestRating": 5 },
+      "reviewBody": "Wegański falafel jest świetny. Polecam."
+    }
+  ]
+}

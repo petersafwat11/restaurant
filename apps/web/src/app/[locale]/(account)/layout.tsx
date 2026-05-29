@@ -2,8 +2,14 @@ import { AccountNav } from '@/components/account-nav';
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
 import { Container } from '@repo/ui';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
+
+// Auth-gated pages — never indexed.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Account route group. Middleware (apps/web/src/middleware.ts) guards

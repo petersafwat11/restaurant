@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type RenderHookOptions, renderHook as rtlRenderHook } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 import { type ReactNode, useState } from 'react';
 
 export function renderHookWithProviders<TResult, TProps>(
@@ -16,7 +17,16 @@ export function renderHookWithProviders<TResult, TProps>(
           },
         }),
     );
-    return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+    return (
+      <NextIntlClientProvider
+        locale="en"
+        messages={{}}
+        onError={() => {}}
+        getMessageFallback={({ key }) => key}
+      >
+        <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+      </NextIntlClientProvider>
+    );
   }
 
   return rtlRenderHook(callback, { wrapper: Wrapper, ...options });

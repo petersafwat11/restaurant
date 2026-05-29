@@ -1,0 +1,67 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Restaurant",
+      "@id": "https://example.com#restaurant",
+      "name": "Szef Donald",
+      "url": "https://example.com"
+    },
+    {
+      "@type": "Menu",
+      "@id": "https://example.com#menu",
+      "name": "Szef Donald Menu",
+      "inLanguage": "pl-PL",
+      "hasMenuSection": [
+        {
+          "@type": "MenuSection",
+          "name": "Kebaby",
+          "hasMenuItem": [
+            {
+              "@type": "MenuItem",
+              "name": "Kebab z jagnięciny",
+              "description": "Pieczona jagnięcina, surówka colesław, sos czosnkowy.",
+              "offers": {
+                "@type": "Offer",
+                "price": "32.00",
+                "priceCurrency": "PLN"
+              },
+              "suitableForDiet": ["https://schema.org/HalalDiet"],
+              "nutrition": {
+                "@type": "NutritionInformation",
+                "calories": "780 kcal"
+              }
+            },
+            {
+              "@type": "MenuItem",
+              "name": "Kebab wegański",
+              "description": "Seitan, hummus, marynowane warzywa.",
+              "offers": {
+                "@type": "Offer",
+                "price": "28.00",
+                "priceCurrency": "PLN"
+              },
+              "suitableForDiet": ["https://schema.org/VeganDiet"]
+            }
+          ]
+        },
+        {
+          "@type": "MenuSection",
+          "name": "Falafele",
+          "hasMenuItem": [
+            {
+              "@type": "MenuItem",
+              "name": "Falafel klasyczny",
+              "offers": {
+                "@type": "Offer",
+                "price": "24.00",
+                "priceCurrency": "PLN"
+              },
+              "suitableForDiet": ["https://schema.org/VeganDiet"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
