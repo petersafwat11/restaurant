@@ -306,7 +306,7 @@ const SiteFooter = ({ lang, setLang }) => (
         </div>
       </div>
       <div className="site-footer__bottom">
-        <div>© 2026 Szef Donald sp. z o.o. · NIP 1234567890</div>
+        <div>© 2026 Szef Donald sp. z o.o. · NIP 6572959741</div>
         <div className="site-footer__legal">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
