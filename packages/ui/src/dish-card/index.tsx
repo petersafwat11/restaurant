@@ -1,10 +1,10 @@
 'use client';
 
-import { Flame, Leaf, Plus, Sparkles, WheatOff } from 'lucide-react';
+import { formatMoney } from '@repo/utils';
+import { Flame, Leaf, Plus, Sparkles, Weight, WheatOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
-import { formatMoney } from '@repo/utils';
 import { cn } from '../lib/cn';
 import { DISH_FLAG_CLASSES, DISH_FLAG_TOKENS, type DishFlag } from '../tokens/dish-flags';
 
@@ -22,6 +22,10 @@ export interface DishCardProps {
   name: string;
   description?: string;
   price: { amount: string; currency: string };
+  /** Net portion / meat weight in grams. Rendered as a subtle metadata line when > 0. */
+  grams?: number | null;
+  /** Formats the weight for display (i18n). Defaults to `${grams} g`. */
+  formatWeight?: (grams: number) => string;
   flags?: DishFlag[];
   /** Quick-add `+` button — when present, button is visible; absent hides it. */
   onAdd?: () => void;
@@ -72,6 +76,8 @@ export function DishCard({
   name,
   description,
   price,
+  grams,
+  formatWeight,
   flags,
   onAdd,
   unavailable,
@@ -115,29 +121,27 @@ export function DishCard({
             aria-hidden
             className="flex h-full w-full items-center justify-center text-fg-subtle/50 text-4xl font-display"
           >
-            {/* No photo configured — render a soft brand placeholder. */}
-            ◍
+            {/* No photo configured — render a soft brand placeholder. */}◍
           </div>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <div
-          className={cn(
-            'flex flex-wrap items-center gap-1.5',
-            reserveFlagSpace && 'min-h-6',
-          )}
-        >
+        <div className={cn('flex flex-wrap items-center gap-1.5', reserveFlagSpace && 'min-h-6')}>
           {unavailable ? (
             <span className="inline-flex items-center rounded-md bg-surface-warm px-1.5 py-0.5 text-[11px] font-medium text-fg-subtle">
               {soldOutLabel}
             </span>
           ) : (
-            flags?.map((f) => (
-              <FlagChip key={f} flag={f} label={flagLabels?.[f]} />
-            ))
+            flags?.map((f) => <FlagChip key={f} flag={f} label={flagLabels?.[f]} />)
           )}
         </div>
         <h3 className="text-h3 font-semibold leading-snug text-fg">{name}</h3>
+        {typeof grams === 'number' && grams > 0 && (
+          <p className="flex items-center gap-1 text-caption font-medium text-fg-subtle">
+            <Weight size={12} strokeWidth={2} aria-hidden />
+            {formatWeight ? formatWeight(grams) : `${grams} g`}
+          </p>
+        )}
         {description && (
           <p
             className="text-small text-fg-muted"
@@ -159,9 +163,7 @@ export function DishCard({
             <button
               type="button"
               onClick={handleAdd}
-              aria-label={
-                formatAddAriaLabel ? formatAddAriaLabel(name) : `Add ${name} to cart`
-              }
+              aria-label={formatAddAriaLabel ? formatAddAriaLabel(name) : `Add ${name} to cart`}
               className="grid h-10 w-10 place-items-center rounded-input bg-accent text-text-on-accent transition-colors hover:bg-accent-hover"
             >
               <Plus size={18} strokeWidth={2.4} />

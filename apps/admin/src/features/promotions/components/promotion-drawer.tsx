@@ -3,11 +3,13 @@
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import {
   useArchivePromotion,
+  useCreatePromotion,
   useDeletePromotion,
   useUpdatePromotion,
 } from '@/features/promotions/hooks';
 import {
   PROMOTION_TYPES,
+  type CreatePromotionDto,
   type PromotionDto,
   type PromotionType,
   type UpdatePromotionDto,
@@ -26,11 +28,12 @@ import {
 import { CalendarRange, Settings, Tag, Ticket } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
-import { PromotionCoupons } from './promotion-coupons';
 
 interface Props {
   promotion: PromotionDto | null;
+  creating: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreated: (id: string) => void;
 }
 
 type Draft = {
@@ -42,6 +45,9 @@ type Draft = {
   startsAt: string;
   endsAt: string;
   isActive: boolean;
+  code: string;
+  maxRedemptions: string;
+  perUserLimit: string;
 };
 
 function toLocalInput(iso: string | null): string {
@@ -56,6 +62,22 @@ function fromLocalInput(local: string): string | null {
   return new Date(local).toISOString();
 }
 
+function emptyDraft(): Draft {
+  return {
+    name: '',
+    description: '',
+    type: 'PERCENT',
+    value: '',
+    minSubtotal: '',
+    startsAt: '',
+    endsAt: '',
+    isActive: true,
+    code: '',
+    maxRedemptions: '',
+    perUserLimit: '',
+  };
+}
+
 function draftFromPromotion(p: PromotionDto): Draft {
   return {
     name: p.name,
@@ -66,14 +88,18 @@ function draftFromPromotion(p: PromotionDto): Draft {
     startsAt: toLocalInput(p.startsAt),
     endsAt: toLocalInput(p.endsAt),
     isActive: p.isActive,
+    code: p.code ?? '',
+    maxRedemptions: p.maxRedemptions === null ? '' : String(p.maxRedemptions),
+    perUserLimit: p.perUserLimit === null ? '' : String(p.perUserLimit),
   };
 }
 
-export function PromotionDrawer({ promotion, onOpenChange }: Props) {
+export function PromotionDrawer({ promotion, creating, onOpenChange, onCreated }: Props) {
   const t = useTranslations('admin.promotions.detail');
   const tList = useTranslations('admin.promotions.list');
   const { has } = usePermissions();
   const canWrite = has('promotion:write');
+  const create = useCreatePromotion();
   const update = useUpdatePromotion(promotion?.id ?? '');
   const remove = useDeletePromotion();
   const archive = useArchivePromotion();
@@ -82,36 +108,60 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
   const [draft, setDraft] = React.useState<Draft | null>(null);
   const [confirmDelete, setConfirmDelete] = React.useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-seed draft only on promotion change, not after save mutation rewrites the cached object
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-seed draft only on identity change, not after save mutation rewrites the cached object
   React.useEffect(() => {
-    setDraft(promotion ? draftFromPromotion(promotion) : null);
-  }, [promotion?.id]);
+    if (creating) setDraft(emptyDraft());
+    else if (promotion) setDraft(draftFromPromotion(promotion));
+    else setDraft(null);
+  }, [creating, promotion?.id]);
 
-  const open = promotion !== null;
+  const open = creating || promotion !== null;
 
-  function save() {
-    if (!promotion || !draft) return;
-    const input: UpdatePromotionDto = {
-      name: draft.name,
+  function buildPayload(): CreatePromotionDto | null {
+    if (!draft) return null;
+    const name = draft.name.trim();
+    if (name.length === 0) return null;
+    const value =
+      draft.type === 'FREE_DELIVERY' || draft.type === 'BOGO'
+        ? null
+        : draft.value
+          ? draft.value
+          : null;
+    const code = draft.code.trim().toUpperCase();
+    return {
+      name,
       description: draft.description || null,
       type: draft.type,
-      value:
-        draft.type === 'FREE_DELIVERY' || draft.type === 'BOGO'
-          ? null
-          : draft.value
-            ? draft.value
-            : null,
+      value,
       minSubtotal: draft.minSubtotal || null,
       startsAt: fromLocalInput(draft.startsAt),
       endsAt: fromLocalInput(draft.endsAt),
       isActive: draft.isActive,
+      code: code.length > 0 ? code : null,
+      maxRedemptions: draft.maxRedemptions ? Number(draft.maxRedemptions) : null,
+      perUserLimit: draft.perUserLimit ? Number(draft.perUserLimit) : null,
     };
-    update.mutate(input);
+  }
+
+  function save() {
+    const payload = buildPayload();
+    if (!payload) return;
+    if (creating) {
+      create.mutate(payload, {
+        onSuccess: (created) => onCreated(created.id),
+      });
+    } else if (promotion) {
+      update.mutate(payload as UpdatePromotionDto);
+    }
   }
 
   function updateField<K extends keyof Draft>(key: K, v: Draft[K]) {
     setDraft((d) => (d ? { ...d, [key]: v } : d));
   }
+
+  const saving = creating ? create.isPending : update.isPending;
+  const saveDisabled = !canWrite || saving || !draft || draft.name.trim().length === 0;
+  const headerTitle = creating ? t('newTitle') : promotion?.name ?? '';
 
   return (
     <>
@@ -122,11 +172,10 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
         ariaLabel={t('ariaLabel')}
         flushBody
         header={
-          promotion &&
           draft && (
             <div className="px-6 py-4">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="text-h2-admin text-fg">{promotion.name}</h2>
+                <h2 className="text-h2-admin text-fg">{headerTitle}</h2>
                 <span
                   className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] ${
                     draft.isActive
@@ -137,15 +186,14 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                   {draft.isActive ? t('active') : t('paused')}
                 </span>
               </div>
-              <div className="mt-1 text-xs text-fg-muted">{tList(`types.${promotion.type}`)}</div>
+              <div className="mt-1 text-xs text-fg-muted">{tList(`types.${draft.type}`)}</div>
             </div>
           )
         }
         footer={
-          promotion &&
           draft && (
             <div className="flex w-full items-center gap-2">
-              {canWrite && (
+              {canWrite && !creating && promotion && (
                 <Button
                   variant="ghost"
                   className="text-negative hover:text-negative"
@@ -154,7 +202,7 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                   {t('actions.delete')}
                 </Button>
               )}
-              {canArchive && (
+              {canArchive && !creating && promotion && (
                 <Button
                   variant="ghost"
                   disabled={archive.isPending}
@@ -168,16 +216,22 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
               <Button
                 variant="primary"
                 className="ml-auto"
-                disabled={!canWrite || update.isPending}
+                disabled={saveDisabled}
                 onClick={save}
               >
-                {update.isPending ? t('actions.saving') : t('actions.save')}
+                {saving
+                  ? creating
+                    ? t('actions.creating')
+                    : t('actions.saving')
+                  : creating
+                    ? t('actions.create')
+                    : t('actions.save')}
               </Button>
             </div>
           )
         }
       >
-        {promotion && draft && (
+        {draft && (
           <SectionedDrawerBody
             sections={[
               {
@@ -190,8 +244,10 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                       <Label htmlFor="promo-name">{t('fields.name')}</Label>
                       <Input
                         id="promo-name"
+                        autoFocus={creating}
                         value={draft.name}
                         onChange={(e) => updateField('name', e.target.value)}
+                        placeholder={t('fields.namePlaceholder')}
                         disabled={!canWrite}
                       />
                     </div>
@@ -320,10 +376,61 @@ export function PromotionDrawer({ promotion, onOpenChange }: Props) {
                 ),
               },
               {
-                id: 'coupons',
-                label: t('sections.coupons'),
+                id: 'coupon',
+                label: t('sections.coupon'),
                 icon: Ticket,
-                children: <PromotionCoupons promotionId={promotion.id} />,
+                children: (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="promo-code">{t('coupon.code')}</Label>
+                      <Input
+                        id="promo-code"
+                        value={draft.code}
+                        onChange={(e) =>
+                          updateField(
+                            'code',
+                            e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''),
+                          )
+                        }
+                        placeholder={t('coupon.codePlaceholder')}
+                        className="font-mono text-sm"
+                        disabled={!canWrite}
+                      />
+                      <p className="text-xs text-fg-subtle">{t('coupon.codeHint')}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="promo-max">{t('coupon.maxRedemptions')}</Label>
+                        <Input
+                          id="promo-max"
+                          type="number"
+                          min={0}
+                          value={draft.maxRedemptions}
+                          onChange={(e) => updateField('maxRedemptions', e.target.value)}
+                          placeholder={t('coupon.unlimited')}
+                          disabled={!canWrite}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="promo-peruser">{t('coupon.perUserLimit')}</Label>
+                        <Input
+                          id="promo-peruser"
+                          type="number"
+                          min={0}
+                          value={draft.perUserLimit}
+                          onChange={(e) => updateField('perUserLimit', e.target.value)}
+                          placeholder={t('coupon.unlimited')}
+                          disabled={!canWrite}
+                        />
+                      </div>
+                    </div>
+                    {!creating && promotion && (
+                      <div className="rounded-md border-hairline bg-surface-2 px-3 py-2 text-xs text-fg-muted">
+                        {t('coupon.used', { count: promotion.redemptionsCount })}
+                      </div>
+                    )}
+                  </div>
+                ),
               },
             ]}
           />

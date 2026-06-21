@@ -3,7 +3,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Calendar,
   Cog,
-  FileBarChart,
   History,
   Home,
   Inbox,
@@ -132,13 +131,6 @@ export const NAV_GROUPS: NavGroup[] = [
     id: 'insights',
     labelKey: 'groups.insights',
     items: [
-      {
-        id: 'reports',
-        labelKey: 'items.reports',
-        href: '/reports/exports',
-        icon: FileBarChart,
-        permission: 'report:read',
-      },
       {
         id: 'audit',
         labelKey: 'items.audit',

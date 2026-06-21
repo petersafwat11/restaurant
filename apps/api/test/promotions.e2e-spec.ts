@@ -39,30 +39,17 @@ describe('promotions (e2e)', () => {
         name: 'Test 10',
         type: 'PERCENT',
         value: '10',
+        code: 'TEST10',
         ...extra,
       },
       ownerToken,
     );
-    return promo.json().id as string;
-  }
-
-  async function makeCoupon(promotionId: string, code: string, opts: Record<string, unknown> = {}) {
-    const c = await inject(
-      'POST',
-      `/api/v1/promotions/${promotionId}/coupons`,
-      {
-        code,
-        ...opts,
-      },
-      ownerToken,
-    );
-    return c.json();
+    return promo.json();
   }
 
   it('rejects an expired promotion', async () => {
     const past = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
-    const promoId = await makePromotion({ endsAt: past });
-    await makeCoupon(promoId, 'EXPIRED');
+    await makePromotion({ endsAt: past, code: 'EXPIRED' });
 
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'EXPIRED',
@@ -74,8 +61,7 @@ describe('promotions (e2e)', () => {
   });
 
   it('rejects unimplemented BOGO / FREE_DELIVERY coupons (no bogus flat discount)', async () => {
-    const bogoId = await makePromotion({ name: 'BOGO', type: 'BOGO', value: '15' });
-    await makeCoupon(bogoId, 'BOGOX');
+    await makePromotion({ name: 'BOGO', type: 'BOGO', value: '15', code: 'BOGOX' });
     const bogo = await inject('POST', '/api/v1/coupons/validate', {
       code: 'BOGOX',
       subtotal: '80.00',
@@ -84,8 +70,7 @@ describe('promotions (e2e)', () => {
     expect(bogo.json().valid).toBe(false);
     expect(bogo.json().reason).toBe('PROMOTION_INACTIVE');
 
-    const fdId = await makePromotion({ name: 'FreeDel', type: 'FREE_DELIVERY' });
-    await makeCoupon(fdId, 'FREEDELX');
+    await makePromotion({ name: 'FreeDel', type: 'FREE_DELIVERY', code: 'FREEDELX' });
     const fd = await inject('POST', '/api/v1/coupons/validate', {
       code: 'FREEDELX',
       subtotal: '80.00',
@@ -95,8 +80,7 @@ describe('promotions (e2e)', () => {
   });
 
   it('rejects when minSubtotal is not met', async () => {
-    const promoId = await makePromotion({ minSubtotal: '100' });
-    await makeCoupon(promoId, 'MIN100');
+    await makePromotion({ minSubtotal: '100', code: 'MIN100' });
 
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'MIN100',
@@ -107,16 +91,14 @@ describe('promotions (e2e)', () => {
   });
 
   it('rejects after per-user limit is reached', async () => {
-    const promoId = await makePromotion();
-    const coupon = await makeCoupon(promoId, 'ONCE', { perUserLimit: 1 });
+    const promo = await makePromotion({ code: 'ONCE', perUserLimit: 1 });
 
-    // Need a redemption row to simulate "already used"; use the owner user.
     const me = await inject('GET', '/api/v1/auth/me', undefined, ownerToken);
     const userId = me.json().id as string;
 
     const prisma = app.get(PrismaService);
     await prisma.couponRedemption.create({
-      data: { couponId: coupon.id, userId },
+      data: { promotionId: promo.id, userId },
     });
 
     const res = await inject('POST', '/api/v1/coupons/validate', {
@@ -129,12 +111,11 @@ describe('promotions (e2e)', () => {
   });
 
   it('rejects after maxRedemptions is exhausted', async () => {
-    const promoId = await makePromotion();
-    const coupon = await makeCoupon(promoId, 'MAX1', { maxRedemptions: 1 });
+    const promo = await makePromotion({ code: 'MAX1', maxRedemptions: 1 });
 
     const prisma = app.get(PrismaService);
     await prisma.couponRedemption.create({
-      data: { couponId: coupon.id },
+      data: { promotionId: promo.id },
     });
 
     const res = await inject('POST', '/api/v1/coupons/validate', {
@@ -146,8 +127,7 @@ describe('promotions (e2e)', () => {
   });
 
   it('accepts a valid PERCENT coupon and returns the discount amount', async () => {
-    const promoId = await makePromotion({ value: '10' }); // 10% off
-    await makeCoupon(promoId, 'TENOFF');
+    await makePromotion({ value: '10', code: 'TENOFF' });
 
     const res = await inject('POST', '/api/v1/coupons/validate', {
       code: 'TENOFF',
@@ -157,32 +137,28 @@ describe('promotions (e2e)', () => {
     expect(res.json().discountAmount).toBe('10.00');
   });
 
-  it('hard-deleting a coupon nulls out Cart.appliedCouponId (SET NULL cascade)', async () => {
+  it('deleting a promotion nulls out Cart.appliedPromotionId (SET NULL cascade)', async () => {
     const prisma = app.get(PrismaService);
 
-    const promoId = await makePromotion();
-    const coupon = await makeCoupon(promoId, 'CASCADE1');
+    const promo = await makePromotion({ code: 'CASCADE1' });
 
-    // Create a guest cart that points at this coupon directly via Prisma —
-    // we don't need to go through the cart controller for this assertion.
     const cart = await prisma.cart.create({
       data: {
         sessionKey: `cascade-session-${Date.now()}`,
-        appliedCouponId: coupon.id,
+        appliedPromotionId: promo.id,
       },
     });
-    expect(cart.appliedCouponId).toBe(coupon.id);
+    expect(cart.appliedPromotionId).toBe(promo.id);
 
-    // Hard-delete the coupon (no redemption history → service deletes the row).
     const del = await inject(
       'DELETE',
-      `/api/v1/coupons/${coupon.id}`,
+      `/api/v1/promotions/${promo.id}`,
       undefined,
       ownerToken,
     );
     expect([200, 204]).toContain(del.statusCode);
 
     const after = await prisma.cart.findUniqueOrThrow({ where: { id: cart.id } });
-    expect(after.appliedCouponId).toBeNull();
+    expect(after.appliedPromotionId).toBeNull();
   });
 });

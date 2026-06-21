@@ -42,6 +42,7 @@
     "clear": "Wyczyść filtry"
   },
   "categoryItemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+  "weight": "{grams} g",
   "toastAdded": {
     "title": "Dodano do koszyka",
     "description": "{quantity} × {name}"

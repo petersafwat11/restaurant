@@ -1,5 +1,6 @@
 {
   "ariaLabel": "Promotion editor",
+  "newTitle": "New promotion",
   "active": "Active",
   "paused": "Paused",
   "actions": {
@@ -7,16 +8,19 @@
     "archive": "Archive",
     "restore": "Restore",
     "save": "Save changes",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "create": "Create promotion",
+    "creating": "Creating…"
   },
   "sections": {
     "overview": "Overview",
     "typeValue": "Type & value",
     "schedule": "Schedule",
-    "coupons": "Coupons"
+    "coupon": "Coupon code"
   },
   "fields": {
     "name": "Name",
+    "namePlaceholder": "Summer 10% off",
     "description": "Description",
     "active": "Active",
     "type": "Type",
@@ -27,42 +31,23 @@
     "endsAt": "Ends"
   },
   "hints": {
-    "bogo": "BOGO promotions don't take a value here. Eligibility is configured per coupon (v1).",
+    "bogo": "BOGO promotions don't take a value here (item-level rules are configured separately).",
     "freeDelivery": "Free delivery has no extra inputs."
+  },
+  "coupon": {
+    "code": "Code",
+    "codePlaceholder": "SUMMER10",
+    "codeHint": "Customers enter this at checkout. Leave blank to save as a draft.",
+    "maxRedemptions": "Max total uses",
+    "perUserLimit": "Max uses per customer",
+    "unlimited": "∞",
+    "used": "Redeemed {count, plural, =0 {0 times} =1 {once} other {# times}}"
   },
   "confirmDelete": {
     "title": "Delete promotion?",
-    "description": "This removes the promotion and all its coupons. Active redemptions are preserved in order history.",
+    "description": "This removes the promotion and its coupon code. Active redemptions are preserved in order history.",
     "delete": "Delete",
     "deleting": "Deleting…",
     "cancel": "Cancel"
-  },
-  "coupons": {
-    "empty": "No coupons yet.",
-    "columns": {
-      "code": "Code",
-      "used": "Used",
-      "max": "Max",
-      "perUser": "Per user"
-    },
-    "unlimited": "∞",
-    "deleteAriaLabel": "Delete coupon",
-    "add": {
-      "code": "Code",
-      "codePlaceholder": "SUMMER10",
-      "max": "Max",
-      "perUser": "Per user",
-      "submit": "Add coupon",
-      "bulk": "Bulk generate"
-    },
-    "bulk": {
-      "quantity": "Quantity",
-      "prefix": "Prefix (optional)",
-      "prefixPlaceholder": "SUMMER",
-      "codeLength": "Code length",
-      "maxUses": "Max uses",
-      "perUser": "Per user",
-      "generate": "Generate"
-    }
   }
 }

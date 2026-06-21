@@ -28,7 +28,6 @@ export const PERMISSION_KEYS = [
   'review:moderate',
   'staff:read',
   'staff:write',
-  'reports:read',
   'settings:read',
   'settings:write',
   'payment:create',
@@ -39,14 +38,11 @@ export const PERMISSION_KEYS = [
   'customer:tag',
   'customer:email',
   'analytics:read',
-  'report:read',
-  'report:export',
   'audit:read',
   'contact:read',
   'contact:reply',
   'contact:notes',
   'promotion:archive',
-  'promotion:bulk_coupons',
   'flags:write',
 ] as const;
 

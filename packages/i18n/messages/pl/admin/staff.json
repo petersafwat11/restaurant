@@ -41,7 +41,6 @@
     "staff:write": "Zarządzanie pracownikami",
     "settings:read": "Podgląd ustawień",
     "settings:write": "Zarządzanie ustawieniami",
-    "reports:read": "Podgląd raportów",
     "customers:read": "Podgląd klientów",
     "customers:write": "Zarządzanie klientami",
     "reservations:read": "Podgląd rezerwacji",

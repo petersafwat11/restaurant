@@ -5,10 +5,11 @@
   "empty": "No promotions yet. Create one to start offering discounts.",
   "columns": {
     "name": "Name",
+    "code": "Code",
     "type": "Type",
     "value": "Value",
     "window": "Window",
-    "min": "Min",
+    "used": "Used",
     "status": "Status"
   },
   "value": {
@@ -34,15 +35,5 @@
     "FIXED": "Fixed amount",
     "BOGO": "Buy-one-get-one",
     "FREE_DELIVERY": "Free delivery"
-  },
-  "create": {
-    "title": "New promotion",
-    "description": "You can configure value, schedule, and coupons after creating it.",
-    "name": "Name",
-    "namePlaceholder": "Summer 10% off",
-    "type": "Type",
-    "submit": "Create",
-    "submitting": "Creating…",
-    "cancel": "Cancel"
   }
 }

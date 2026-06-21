@@ -47,24 +47,14 @@ import {
   ContactNoteSchema,
   type ContactReplyDto,
   ContactReplySchema,
-  type BulkGenerateCouponsDto,
-  type BulkGenerateCouponsResponseDto,
-  BulkGenerateCouponsResponseSchema,
-  BulkGenerateCouponsSchema,
-  type CouponDto,
-  CouponListSchema,
   type CreateAddressDto,
   CreateAddressSchema,
   type CreateContactMessageDto,
   CreateContactMessageSchema,
   type CreateContactNoteDto,
   CreateContactNoteSchema,
-  type CreateCouponDto,
-  CreateCouponSchema,
   type CreateCustomerNoteDto,
   CreateCustomerNoteSchema,
-  type CreateExportDto,
-  CreateExportSchema,
   type CreateMenuCategoryDto,
   CreateMenuCategorySchema,
   type CreateMenuItemDto,
@@ -119,9 +109,6 @@ import {
   DeliveryZoneCheckResponseSchema,
   type PublicDeliveryZonesResponseDto,
   PublicDeliveryZonesResponseSchema,
-  type ExportDto,
-  ExportListSchema,
-  ExportSchema,
   type FeatureFlagAdminDto,
   FeatureFlagAdminSchema,
   type FeatureFlagListDto,
@@ -1030,42 +1017,10 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'DELETE',
         responseSchema: z.object({ success: z.literal(true) }),
       }),
-    listCoupons: (promotionId: string): Promise<CouponDto[]> =>
-      request(`/promotions/${encodeURIComponent(promotionId)}/coupons`, {
-        method: 'GET',
-        responseSchema: CouponListSchema,
-      }),
-    createCoupon: (promotionId: string, input: CreateCouponDto): Promise<CouponDto> =>
-      request(`/promotions/${encodeURIComponent(promotionId)}/coupons`, {
-        method: 'POST',
-        body: CreateCouponSchema.parse(input),
-        responseSchema: z.object({
-          id: z.string(),
-          promotionId: z.string(),
-          code: z.string(),
-          maxRedemptions: z.number().int().nullable(),
-          perUserLimit: z.number().int().nullable(),
-          redemptionsCount: z.number().int(),
-        }),
-      }),
-    bulkGenerateCoupons: (
-      promotionId: string,
-      input: BulkGenerateCouponsDto,
-    ): Promise<BulkGenerateCouponsResponseDto> =>
-      request(`/promotions/${encodeURIComponent(promotionId)}/coupons/bulk`, {
-        method: 'POST',
-        body: BulkGenerateCouponsSchema.parse(input),
-        responseSchema: BulkGenerateCouponsResponseSchema,
-      }),
   };
 
   // ---- coupons ----------------------------------------------------------
   const coupons = {
-    delete: (id: string): Promise<{ success: true }> =>
-      request(`/coupons/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        responseSchema: z.object({ success: z.literal(true) }),
-      }),
     validate: (input: ValidateCouponDto): Promise<ValidateCouponResponseDto> =>
       request('/coupons/validate', {
         method: 'POST',
@@ -1714,30 +1669,6 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
-  // ---- reports --------------------------------------------------------
-  const reports = {
-    createExport: (input: CreateExportDto): Promise<ExportDto> =>
-      request('/reports/exports', {
-        method: 'POST',
-        body: CreateExportSchema.parse(input),
-        responseSchema: ExportSchema,
-      }),
-    listExports: (): Promise<ExportDto[]> =>
-      request('/reports/exports', {
-        method: 'GET',
-        responseSchema: ExportListSchema,
-      }),
-    getExport: (id: string): Promise<ExportDto> =>
-      request(`/reports/exports/${encodeURIComponent(id)}`, {
-        method: 'GET',
-        responseSchema: ExportSchema,
-      }),
-    download: (
-      id: string,
-    ): Promise<{ blob: Blob; filename: string; contentType: string }> =>
-      downloadFile(`/reports/exports/${encodeURIComponent(id)}/download`),
-  };
-
   // ---- audit-log ------------------------------------------------------
   const audit = {
     list: (q?: AuditLogListQuery): Promise<AuditLogListDto> =>
@@ -1779,7 +1710,6 @@ export function createApiClient(opts: ApiClientOptions) {
     staff,
     settings,
     analytics,
-    reports,
     audit,
   };
 }

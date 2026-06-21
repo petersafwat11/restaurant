@@ -41,11 +41,18 @@ export default function AddressesPage() {
     defaultValues: {
       label: '',
       line1: '',
-      city: 'Kielce',
+      city: '',
       country: 'PL',
       geoPoint: undefined as unknown as { lat: number; lng: number },
     },
   });
+
+  // Pre-fill the delivery city from the restaurant's own city (DB) rather than
+  // hardcoding it — most deliveries are local to the restaurant.
+  React.useEffect(() => {
+    const city = restaurantQuery.data?.address.city;
+    if (city && !form.getValues('city')) form.setValue('city', city);
+  }, [restaurantQuery.data, form]);
 
   const geoPoint = form.watch('geoPoint');
   const zoneCheck = useZoneCheck(geoPoint ?? null);
@@ -163,22 +170,23 @@ export default function AddressesPage() {
             control={form.control}
             render={({ field, fieldState }) => (
               <>
-                <DeliveryLocationPicker
-                  zones={zonesQuery.data?.zones ?? []}
-                  center={
-                    restaurantQuery.data?.geoPoint ?? {
-                      lat: 50.8505,
-                      lng: 20.6275,
-                    }
-                  }
-                  value={field.value ?? null}
-                  onChange={(v) => {
-                    form.clearErrors('geoPoint');
-                    field.onChange(v);
-                  }}
-                  status={pickerStatus}
-                  height={320}
-                />
+                {restaurantQuery.data?.geoPoint ? (
+                  <DeliveryLocationPicker
+                    zones={zonesQuery.data?.zones ?? []}
+                    center={restaurantQuery.data.geoPoint}
+                    value={field.value ?? null}
+                    onChange={(v) => {
+                      form.clearErrors('geoPoint');
+                      field.onChange(v);
+                    }}
+                    status={pickerStatus}
+                    height={320}
+                  />
+                ) : (
+                  <div className="grid h-[320px] place-items-center rounded-card border border-border/[var(--border-alpha)] bg-surface text-small text-fg-muted">
+                    {t('picker.loading')}
+                  </div>
+                )}
                 {fieldState.error && (
                   <p role="alert" className="text-small text-negative">
                     {fieldState.error.message}

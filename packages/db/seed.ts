@@ -35,14 +35,12 @@ const ALL_PERMISSIONS = [
   'promotion:read',
   'promotion:write',
   'promotion:archive',
-  'promotion:bulk_coupons',
   'reservation:read',
   'reservation:write',
   'review:read',
   'review:moderate',
   'staff:read',
   'staff:write',
-  'reports:read',
   'settings:read',
   'settings:write',
   'payment:create',
@@ -50,8 +48,6 @@ const ALL_PERMISSIONS = [
   'payment:refund',
   'kitchen:read',
   'analytics:read',
-  'report:read',
-  'report:export',
   'audit:read',
   'contact:read',
   'contact:reply',
@@ -256,6 +252,7 @@ interface SeedItem {
   isFeatured?: boolean;
   calories?: number;
   prepMinutes?: number;
+  grams?: number;
   modifierGroups?: Array<{
     name: string;
     isRequired?: boolean;
@@ -327,6 +324,7 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '21.00',
         isFeatured: true,
         prepMinutes: 8,
+        grams: 200,
         modifierGroups: [
           sizeGroup([
             { name: 'Mały', priceDelta: '0.00', isDefault: true },
@@ -343,6 +341,7 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Kebab w picie — mięso, surówki i sos.',
         basePrice: '21.00',
         prepMinutes: 8,
+        grams: 200,
         modifierGroups: [
           sizeGroup([
             { name: 'Mały', priceDelta: '0.00', isDefault: true },
@@ -359,6 +358,7 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Kebab w bułce — mięso, surówki i sos.',
         basePrice: '22.00',
         prepMinutes: 8,
+        grams: 180,
         modifierGroups: [
           sizeGroup([
             { name: 'Mały', priceDelta: '0.00', isDefault: true },
@@ -376,6 +376,7 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '36.00',
         isFeatured: true,
         prepMinutes: 12,
+        grams: 300,
         modifierGroups: [
           sizeGroup([
             { name: 'Duży', priceDelta: '0.00', isDefault: true },
@@ -390,6 +391,7 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Kebab na talerzu — mięso, surówki i sos.',
         basePrice: '29.00',
         prepMinutes: 10,
+        grams: 250,
         modifierGroups: [
           sizeGroup([
             { name: 'Standard', priceDelta: '0.00', isDefault: true },
@@ -531,7 +533,13 @@ const CATEGORIES: SeedCategory[] = [
             { name: 'Mega (5 szt)', priceDelta: '11.00' },
           ]),
           { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
-          { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
+          {
+            name: 'Dodatki',
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 4,
+            options: ADDONS_OPTIONS,
+          },
         ],
       },
       {
@@ -542,7 +550,13 @@ const CATEGORIES: SeedCategory[] = [
         prepMinutes: 10,
         modifierGroups: [
           { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
-          { name: 'Dodatki', isRequired: false, minSelect: 0, maxSelect: 4, options: ADDONS_OPTIONS },
+          {
+            name: 'Dodatki',
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 4,
+            options: ADDONS_OPTIONS,
+          },
         ],
       },
     ],
@@ -706,7 +720,9 @@ async function seedMenu() {
   await prisma.menuCategory.deleteMany({});
 
   const itemCount = CATEGORIES.reduce((n, c) => n + c.items.length, 0);
-  console.log(`▸ Seeding ${CATEGORIES.length} categories + ${itemCount} menu items + modifier groups`);
+  console.log(
+    `▸ Seeding ${CATEGORIES.length} categories + ${itemCount} menu items + modifier groups`,
+  );
 
   for (const [cIdx, cat] of CATEGORIES.entries()) {
     const category = await prisma.menuCategory.upsert({
@@ -742,6 +758,7 @@ async function seedMenu() {
           isFeatured: it.isFeatured ?? false,
           calories: it.calories ?? null,
           prepMinutes: it.prepMinutes ?? null,
+          grams: it.grams ?? null,
           position: iIdx,
           isAvailable: true,
         },
@@ -758,6 +775,7 @@ async function seedMenu() {
           isFeatured: it.isFeatured ?? false,
           calories: it.calories ?? null,
           prepMinutes: it.prepMinutes ?? null,
+          grams: it.grams ?? null,
           position: iIdx,
           isAvailable: true,
         },
@@ -820,10 +838,9 @@ async function seedMenu() {
 }
 
 async function seedPromotions() {
-  console.log('▸ Seeding 2 promotions + coupons (WELCOME10, FREEDEL)');
+  console.log('▸ Seeding 2 promotions (WELCOME10, FREEDEL)');
 
-  // Remove legacy BOGO Pizza promo from earlier seeds (cascade deletes its
-  // coupon + redemptions).
+  // Remove legacy BOGO Pizza promo from earlier seeds.
   const legacyBogo = await prisma.promotion.findFirst({
     where: { name: 'BOGO Pizza' },
   });
@@ -832,23 +849,27 @@ async function seedPromotions() {
   }
 
   // WELCOME10 — 10% off, first-order only (perUserLimit: 1).
-  const welcome = await upsertPromotionByName('Welcome 10%', {
+  await upsertPromotionByName('Welcome 10%', {
     description: 'Welcome offer — 10% off your first order',
     type: 'PERCENT',
     value: new Prisma.Decimal('10'),
     isActive: true,
+    code: 'WELCOME10',
+    perUserLimit: 1,
+    maxRedemptions: null,
   });
-  await ensureCoupon(welcome.id, 'WELCOME10', { perUserLimit: 1, maxRedemptions: null });
 
   // FREEDEL — free delivery, min 100 PLN subtotal.
-  const freedel = await upsertPromotionByName('Free Delivery', {
+  await upsertPromotionByName('Free Delivery', {
     description: 'Free delivery on orders over 100 PLN',
     type: 'FREE_DELIVERY',
     value: null,
     minSubtotal: new Prisma.Decimal('100'),
     isActive: true,
+    code: 'FREEDEL',
+    perUserLimit: null,
+    maxRedemptions: null,
   });
-  await ensureCoupon(freedel.id, 'FREEDEL', { perUserLimit: null, maxRedemptions: null });
 }
 
 async function upsertPromotionByName(
@@ -859,6 +880,9 @@ async function upsertPromotionByName(
     value: import('@prisma/client').Prisma.Decimal | null;
     minSubtotal?: import('@prisma/client').Prisma.Decimal | null;
     isActive: boolean;
+    code: string;
+    perUserLimit: number | null;
+    maxRedemptions: number | null;
   },
 ) {
   const existing = await prisma.promotion.findFirst({
@@ -873,6 +897,9 @@ async function upsertPromotionByName(
         value: data.value,
         minSubtotal: data.minSubtotal ?? null,
         isActive: data.isActive,
+        code: data.code,
+        perUserLimit: data.perUserLimit,
+        maxRedemptions: data.maxRedemptions,
       },
     });
   }
@@ -884,27 +911,9 @@ async function upsertPromotionByName(
       value: data.value,
       minSubtotal: data.minSubtotal ?? null,
       isActive: data.isActive,
-    },
-  });
-}
-
-async function ensureCoupon(
-  promotionId: string,
-  code: string,
-  opts: { perUserLimit: number | null; maxRedemptions: number | null },
-) {
-  await prisma.coupon.upsert({
-    where: { code },
-    update: {
-      promotionId,
-      perUserLimit: opts.perUserLimit,
-      maxRedemptions: opts.maxRedemptions,
-    },
-    create: {
-      code,
-      promotionId,
-      perUserLimit: opts.perUserLimit,
-      maxRedemptions: opts.maxRedemptions,
+      code: data.code,
+      perUserLimit: data.perUserLimit,
+      maxRedemptions: data.maxRedemptions,
     },
   });
 }
@@ -1156,11 +1165,11 @@ async function seedDeliveryZones() {
         type: 'Polygon',
         coordinates: [
           [
-            [20.55, 50.80],
-            [20.71, 50.80],
+            [20.55, 50.8],
+            [20.71, 50.8],
             [20.71, 50.92],
             [20.55, 50.92],
-            [20.55, 50.80],
+            [20.55, 50.8],
           ],
         ],
       },

@@ -42,6 +42,7 @@
     "clear": "Clear filters"
   },
   "categoryItemCount": "{count, plural, one {# item} other {# items}}",
+  "weight": "{grams} g",
   "toastAdded": {
     "title": "Added to cart",
     "description": "{quantity} × {name}"

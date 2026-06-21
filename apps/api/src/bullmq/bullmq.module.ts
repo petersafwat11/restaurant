@@ -6,7 +6,6 @@ import {
   QUEUE_EMAIL,
   QUEUE_PUSH,
   QUEUE_RECEIPT,
-  QUEUE_REPORTS,
   QUEUE_SMS,
 } from '@repo/jobs';
 import { ENV, type ENV_TYPE } from '../config/config.module';
@@ -24,7 +23,6 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
       { name: QUEUE_SMS },
       { name: QUEUE_PUSH },
       { name: QUEUE_RECEIPT },
-      { name: QUEUE_REPORTS },
       { name: QUEUE_ANALYTICS },
       { name: QUEUE_AUDIT },
     ),

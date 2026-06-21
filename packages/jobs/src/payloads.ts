@@ -155,12 +155,7 @@ export const PushTokenCleanupPayloadSchema = z.object({
 });
 export type PushTokenCleanupPayload = z.infer<typeof PushTokenCleanupPayloadSchema>;
 
-// Sprint 8 — reports + analytics + audit.
-export const ReportsGeneratePayloadSchema = z.object({
-  exportId: z.string(),
-});
-export type ReportsGeneratePayload = z.infer<typeof ReportsGeneratePayloadSchema>;
-
+// Sprint 8 — analytics + audit.
 export const AnalyticsRollupPayloadSchema = z.object({
   date: z.string().optional(),
 });

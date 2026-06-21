@@ -165,20 +165,13 @@ describe('orders (e2e)', () => {
 
   it('applies the coupon discount correctly when present on the cart', async () => {
     // Create a 10%-off promotion and apply to alice's cart.
-    const promo = await inject(
+    await inject(
       'POST',
       '/api/v1/promotions',
       {
         name: 'Order10',
         type: 'PERCENT',
         value: '10',
-      },
-      ownerToken,
-    );
-    await inject(
-      'POST',
-      `/api/v1/promotions/${promo.json().id}/coupons`,
-      {
         code: 'ORDER10',
       },
       ownerToken,

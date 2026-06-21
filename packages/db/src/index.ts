@@ -35,7 +35,6 @@ export type {
 	LoyaltyAccount,
 	LoyaltyTransaction,
 	Promotion,
-	Coupon,
 	CouponRedemption,
 	Table,
 	Reservation,

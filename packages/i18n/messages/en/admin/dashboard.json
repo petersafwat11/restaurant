@@ -38,8 +38,7 @@
     "byQuantity": "By quantity",
     "colItem": "Item",
     "colQty": "Qty",
-    "colRevenue": "Revenue",
-    "viewFullReport": "View full report"
+    "colRevenue": "Revenue"
   },
   "livePanel": {
     "title": "Live",

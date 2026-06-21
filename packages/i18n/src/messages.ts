@@ -23,7 +23,6 @@ import enAdminOrdersDetail from '../messages/en/admin/orders/detail.json';
 import enAdminOrdersList from '../messages/en/admin/orders/list.json';
 import enAdminPromotionsDetail from '../messages/en/admin/promotions/detail.json';
 import enAdminPromotionsList from '../messages/en/admin/promotions/list.json';
-import enAdminReportsExports from '../messages/en/admin/reports/exports.json';
 import enAdminReservationsDetail from '../messages/en/admin/reservations/detail.json';
 import enAdminReservationsList from '../messages/en/admin/reservations/list.json';
 import enAdminRestaurant from '../messages/en/admin/restaurant.json';
@@ -92,7 +91,6 @@ import plAdminOrdersDetail from '../messages/pl/admin/orders/detail.json';
 import plAdminOrdersList from '../messages/pl/admin/orders/list.json';
 import plAdminPromotionsDetail from '../messages/pl/admin/promotions/detail.json';
 import plAdminPromotionsList from '../messages/pl/admin/promotions/list.json';
-import plAdminReportsExports from '../messages/pl/admin/reports/exports.json';
 import plAdminReservationsDetail from '../messages/pl/admin/reservations/detail.json';
 import plAdminReservationsList from '../messages/pl/admin/reservations/list.json';
 import plAdminRestaurant from '../messages/pl/admin/restaurant.json';
@@ -170,9 +168,6 @@ const EN_MESSAGES = {
     promotions: {
       detail: enAdminPromotionsDetail,
       list: enAdminPromotionsList,
-    },
-    reports: {
-      exports: enAdminReportsExports,
     },
     reservations: {
       detail: enAdminReservationsDetail,
@@ -273,9 +268,6 @@ const PL_MESSAGES = {
     promotions: {
       detail: plAdminPromotionsDetail,
       list: plAdminPromotionsList,
-    },
-    reports: {
-      exports: plAdminReportsExports,
     },
     reservations: {
       detail: plAdminReservationsDetail,

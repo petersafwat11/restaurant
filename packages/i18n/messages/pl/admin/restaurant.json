@@ -12,8 +12,7 @@
     "contact": "Kontakt",
     "location": "Lokalizacja",
     "discovery": "Discovery",
-    "channels": "Kanały",
-    "danger": "Strefa niebezpieczna"
+    "channels": "Kanały"
   },
   "identity": {
     "title": "Tożsamość",
@@ -74,13 +73,6 @@
     "acceptsDelivery": "Przyjmuje dostawy",
     "acceptsPickup": "Przyjmuje odbiór",
     "acceptsDineIn": "Przyjmuje gości na miejscu"
-  },
-  "danger": {
-    "title": "Strefa niebezpieczna",
-    "description": "Wyłączenie publikacji natychmiast ukrywa restaurację na stronie publicznej.",
-    "unpublishLabel": "Wyłącz publikację restauracji",
-    "unpublishHint": "Odpowiednik wyłączenia przełącznika „Opublikowano”",
-    "unpublishButton": "Wyłącz publikację"
   },
   "saveBar": {
     "unsavedHint": "Niezapisane zmiany — {shortcut}, aby zapisać.",

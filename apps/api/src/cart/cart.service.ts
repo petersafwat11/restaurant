@@ -164,7 +164,7 @@ export class CartService {
     await this.prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
     await this.prisma.cart.update({
       where: { id: cart.id },
-      data: { appliedCouponId: null },
+      data: { appliedPromotionId: null },
     });
     return this.toDto(cart.id);
   }
@@ -182,7 +182,7 @@ export class CartService {
     }
     await this.prisma.cart.update({
       where: { id: cart.id },
-      data: { appliedCouponId: result.couponId },
+      data: { appliedPromotionId: result.promotionId },
     });
     return this.toDto(cart.id);
   }
@@ -191,7 +191,7 @@ export class CartService {
     const cart = await this.findOrCreateCart(identity);
     await this.prisma.cart.update({
       where: { id: cart.id },
-      data: { appliedCouponId: null },
+      data: { appliedPromotionId: null },
     });
     return this.toDto(cart.id);
   }
@@ -250,10 +250,10 @@ export class CartService {
         });
       }
 
-      if (!userCart.appliedCouponId && guestCart.appliedCouponId) {
+      if (!userCart.appliedPromotionId && guestCart.appliedPromotionId) {
         await tx.cart.update({
           where: { id: userCart.id },
-          data: { appliedCouponId: guestCart.appliedCouponId },
+          data: { appliedPromotionId: guestCart.appliedPromotionId },
         });
       }
 
@@ -304,7 +304,7 @@ export class CartService {
       where: { id: cartId },
       include: {
         items: true,
-        appliedCoupon: { include: { promotion: true } },
+        appliedPromotion: true,
         user: { select: { id: true } },
       },
     });
@@ -335,24 +335,24 @@ export class CartService {
     let discountAmount: Decimal | undefined;
     let appliedCouponDto: CartDto['appliedCoupon'] = null;
 
-    if (cart.appliedCoupon) {
+    if (cart.appliedPromotion?.code) {
       const subtotal = calculateCartTotals({ items: cart.items }).subtotal;
       const result = await this.promotions.validate({
-        code: cart.appliedCoupon.code,
+        code: cart.appliedPromotion.code,
         subtotal,
         userId: cart.userId ?? undefined,
       });
       if (result.valid) {
         discountAmount = toDecimal(result.discountAmount);
         appliedCouponDto = {
-          id: cart.appliedCoupon.id,
-          code: cart.appliedCoupon.code,
+          id: cart.appliedPromotion.id,
+          code: cart.appliedPromotion.code,
           discountAmount: result.discountAmount,
         };
       } else {
         await this.prisma.cart.update({
           where: { id: cart.id },
-          data: { appliedCouponId: null },
+          data: { appliedPromotionId: null },
         });
       }
     }

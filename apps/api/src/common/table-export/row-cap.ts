@@ -6,8 +6,6 @@ export const PDF_ROW_CAP = 1_000;
 /**
  * Validate an export's row count against the per-format cap. Throws
  * PayloadTooLargeException with a structured hint payload if exceeded.
- *
- * Hint suggests narrowing filters / using analytics exports for big datasets.
  */
 export function assertWithinRowCap(
   count: number,
@@ -23,7 +21,7 @@ export function assertWithinRowCap(
     hint:
       format === 'pdf'
         ? 'PDF exports are limited to 1,000 rows for readability. Narrow your filters or download CSV instead.'
-        : 'Narrow your filters, or queue an analytics export from /reports/exports for larger datasets.',
+        : 'Narrow your filters and try again.',
     resource,
     count,
     cap,

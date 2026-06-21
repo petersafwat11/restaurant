@@ -151,7 +151,20 @@ export function PolygonMapEditor({
       weight: 2,
     }).addTo(map);
 
+    // Keep the map sized to its container. When this editor lives inside a
+    // responsive layout (e.g. the admin TwoPaneLayout that stacks/un-stacks
+    // around 1100px, or a collapsing sidebar), the container can resize AFTER
+    // Leaflet initialised. Without invalidateSize() the cached pixel origin
+    // goes stale and clicks map to the wrong lat/lng — making it impossible to
+    // draw or reshape a zone. A ResizeObserver fixes this robustly.
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    if (containerRef.current) ro.observe(containerRef.current);
+    // One deferred pass for the first paint (dynamic import + layout settle).
+    const raf = requestAnimationFrame(() => map.invalidateSize());
+
     return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
       map.remove();
       mapRef.current = null;
     };
@@ -333,13 +346,17 @@ export function PolygonMapEditor({
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* Search box (top-left) — pans the map to the picked location so the
-          admin can frame an area before drawing. */}
-      <div className="absolute left-3 top-3 z-[1000] w-[calc(100%-13rem)] sm:w-80">
-        <MapSearchBox
-          onPick={(r) => {
-            mapRef.current?.flyTo([r.lat, r.lng], 16, { duration: 0.5 });
-          }}
-        />
+          admin can frame an area before drawing. The wrapper is
+          pointer-events-none so it never steals map clicks/drags outside the
+          actual input (matches the toolbar wrapper below). */}
+      <div className="pointer-events-none absolute left-3 top-3 z-[1000] w-[calc(100%-13rem)] sm:w-80">
+        <div className="pointer-events-auto">
+          <MapSearchBox
+            onPick={(r) => {
+              mapRef.current?.flyTo([r.lat, r.lng], 16, { duration: 0.5 });
+            }}
+          />
+        </div>
       </div>
 
       <div className="pointer-events-none absolute right-3 top-3 z-[1000] flex flex-col gap-1">
@@ -408,9 +425,7 @@ function ToolbarButton({
       title={label}
       className={cn(
         'inline-flex h-8 items-center gap-1.5 px-2.5 text-small font-medium transition-colors',
-        active
-          ? 'bg-accent-muted text-fg'
-          : 'text-fg-muted hover:bg-surface-warm/30 hover:text-fg',
+        active ? 'bg-accent-muted text-fg' : 'text-fg-muted hover:bg-surface-warm/30 hover:text-fg',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >

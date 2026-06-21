@@ -5,10 +5,11 @@
   "empty": "Brak promocji. Utwórz pierwszą, aby zacząć oferować rabaty.",
   "columns": {
     "name": "Nazwa",
+    "code": "Kod",
     "type": "Typ",
     "value": "Wartość",
     "window": "Okres",
-    "min": "Min",
+    "used": "Użyto",
     "status": "Status"
   },
   "value": {
@@ -34,15 +35,5 @@
     "FIXED": "Kwota rabatu",
     "BOGO": "Kup jeden, drugi gratis",
     "FREE_DELIVERY": "Darmowa dostawa"
-  },
-  "create": {
-    "title": "Nowa promocja",
-    "description": "Po utworzeniu możesz skonfigurować wartość, harmonogram i kupony.",
-    "name": "Nazwa",
-    "namePlaceholder": "Letnia promocja -10%",
-    "type": "Typ",
-    "submit": "Utwórz",
-    "submitting": "Tworzenie…",
-    "cancel": "Anuluj"
   }
 }

@@ -9,10 +9,12 @@ import { formatMoney } from '@repo/utils';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
-import { CreatePromotionModal } from './create-promotion-modal';
 import { PromotionDrawer } from './promotion-drawer';
 
 type PromotionStatusKey = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'EXPIRED' | 'PAUSED';
+
+// Sentinel id used to signal "drawer is open in create mode" without a persisted row.
+const NEW_PROMOTION_ID = '__new__';
 
 function promotionStatus(p: PromotionDto): PromotionStatusKey {
   if (!p.isActive) return p.startsAt ? 'PAUSED' : 'DRAFT';
@@ -34,20 +36,22 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
   const t = useTranslations('admin.promotions.list');
   const { has } = usePermissions();
   const canWrite = has('promotion:write');
-  const [createOpen, setCreateOpen] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<string | null>(initialPromotionId ?? null);
 
   const q = usePromotions();
   const rows = q.data ?? [];
-  const fromList = rows.find((r) => r.id === selectedId) ?? null;
+  const isCreating = selectedId === NEW_PROMOTION_ID;
+  const fromList = !isCreating && selectedId ? rows.find((r) => r.id === selectedId) ?? null : null;
   // Deep-link fallback: if the id isn't in the list result, fetch it directly.
-  const directFetch = usePromotion(selectedId && !fromList ? selectedId : null);
+  const directFetch = usePromotion(
+    !isCreating && selectedId && !fromList ? selectedId : null,
+  );
   const selected = fromList ?? directFetch.data ?? null;
 
   usePageHeader({
     title: t('title'),
     rightExtras: canWrite ? (
-      <Button variant="primary" onClick={() => setCreateOpen(true)}>
+      <Button variant="primary" onClick={() => setSelectedId(NEW_PROMOTION_ID)}>
         <Plus size={14} /> {t('newPromotion')}
       </Button>
     ) : null,
@@ -91,6 +95,16 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         ),
       },
       {
+        id: 'code',
+        header: t('columns.code'),
+        cell: ({ row }) =>
+          row.original.code ? (
+            <span className="font-mono text-fg-muted">{row.original.code}</span>
+          ) : (
+            <span className="text-fg-subtle">{t('value.none')}</span>
+          ),
+      },
+      {
         id: 'type',
         header: t('columns.type'),
         cell: ({ row }) => (
@@ -112,17 +126,12 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         ),
       },
       {
-        id: 'min',
-        header: t('columns.min'),
+        id: 'used',
+        header: t('columns.used'),
         meta: { align: 'right' },
-        cell: ({ row }) =>
-          row.original.minSubtotal ? (
-            <span className="tabular-nums text-fg-muted">
-              {formatMoney(row.original.minSubtotal, 'USD')}
-            </span>
-          ) : (
-            <span className="text-fg-subtle">{t('value.none')}</span>
-          ),
+        cell: ({ row }) => (
+          <span className="tabular-nums text-fg-muted">{row.original.redemptionsCount}</span>
+        ),
       },
       {
         id: 'status',
@@ -160,8 +169,12 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         onRowClick={(r) => setSelectedId(r.id)}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
       />
-      <PromotionDrawer promotion={selected} onOpenChange={(o) => !o && setSelectedId(null)} />
-      <CreatePromotionModal open={createOpen} onOpenChange={setCreateOpen} />
+      <PromotionDrawer
+        promotion={selected}
+        creating={isCreating}
+        onOpenChange={(o) => !o && setSelectedId(null)}
+        onCreated={(id) => setSelectedId(id)}
+      />
     </>
   );
 }

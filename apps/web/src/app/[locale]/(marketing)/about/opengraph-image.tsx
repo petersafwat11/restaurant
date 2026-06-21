@@ -9,6 +9,6 @@ export default function AboutOgImage() {
   return renderBrandOgImage({
     eyebrow: 'Our story',
     title: 'Kebab the way it should be.',
-    description: 'Open since 2014. Three cooks. One counter. Nothing from a freezer.',
+    description: 'Open since 2019. Three cooks. One counter. Nothing from a freezer.',
   });
 }

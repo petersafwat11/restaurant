@@ -48,9 +48,9 @@ export async function LandingStory() {
             <div className="absolute -bottom-6 -right-6 flex flex-col gap-3 rounded-card bg-surface-elevated p-4 shadow-md">
               <div>
                 <div className="font-display text-[28px] font-medium text-fg">
-                  {t('yearsValue', { years: 11 })}
+                  {t('yearsValue', { years: 7 })}
                 </div>
-                <div className="text-small text-fg-subtle">{t('yearsLabel', { since: 2014 })}</div>
+                <div className="text-small text-fg-subtle">{t('yearsLabel', { since: 2019 })}</div>
               </div>
               <div className="h-px bg-border/[var(--border-alpha)]" />
               <div>

@@ -25,6 +25,5 @@ export * from './customer';
 export * from './staff';
 export * from './settings';
 export * from './analytics';
-export * from './reports';
 export * from './audit';
 export * from './checkout';

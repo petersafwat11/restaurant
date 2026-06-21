@@ -1,7 +1,8 @@
 'use client';
 
 import { useSendContactMessage } from '@/features/contact/hooks';
-import { mockLocation } from '@/lib/mock/szef-donald';
+import { useRestaurant } from '@/features/restaurants/hooks';
+import { directionsHref, formatAddressLine2 } from '@/features/restaurants/lib/restaurant-info';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateContactMessageDto, CreateContactMessageSchema } from '@repo/types';
 import { Container, FormField, SectionHeader } from '@repo/ui';
@@ -15,6 +16,7 @@ export default function ContactApp() {
   const t = useTranslations('web.marketing.contact');
   const tVal = useTranslations('validation');
   const send = useSendContactMessage();
+  const { data: restaurant } = useRestaurant();
   const [sent, setSent] = React.useState(false);
 
   const errorMap: z.ZodErrorMap = React.useCallback(
@@ -46,8 +48,12 @@ export default function ContactApp() {
     }
   });
 
-  const phone = t('phone');
+  const phone = restaurant?.phone ?? '';
   const tel = phone.replace(/\s/g, '');
+  const email = restaurant?.email ?? '';
+  const address1 = restaurant?.address.line1 ?? '';
+  const address2 = restaurant ? formatAddressLine2(restaurant.address) : '';
+  const mapsHref = restaurant ? directionsHref(restaurant) : '#';
 
   return (
     <>
@@ -76,8 +82,8 @@ export default function ContactApp() {
                     <span className="text-caption uppercase tracking-wide text-fg-subtle">
                       {t('addressLabel')}
                     </span>
-                    <span className="text-body font-medium text-fg">{t('address1')}</span>
-                    <span className="text-small text-fg-muted">{t('address2')}</span>
+                    <span className="text-body font-medium text-fg">{address1}</span>
+                    <span className="text-small text-fg-muted">{address2}</span>
                   </div>
                 </li>
                 <li>
@@ -96,7 +102,7 @@ export default function ContactApp() {
                   </a>
                 </li>
                 <li>
-                  <a href={`mailto:${t('email')}`} className="group flex items-start gap-3">
+                  <a href={`mailto:${email}`} className="group flex items-start gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
                       <Mail size={18} strokeWidth={1.75} />
                     </span>
@@ -105,14 +111,14 @@ export default function ContactApp() {
                         {t('emailLabel')}
                       </span>
                       <span className="text-body font-medium text-fg group-hover:text-accent break-all">
-                        {t('email')}
+                        {email}
                       </span>
                     </div>
                   </a>
                 </li>
                 <li>
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${mockLocation.coords.lat},${mockLocation.coords.lng}`}
+                    href={mapsHref}
                     target="_blank"
                     rel="noreferrer"
                     className="group flex items-start gap-3"

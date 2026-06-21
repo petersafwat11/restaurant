@@ -105,7 +105,7 @@ export class OrdersService {
         : { sessionKey: dto.sessionKey ?? actor.sessionKey ?? '' },
       include: {
         items: true,
-        appliedCoupon: true,
+        appliedPromotion: true,
       },
     });
     if (!cart || cart.items.length === 0) {
@@ -156,10 +156,10 @@ export class OrdersService {
     // Coupon: re-validate at order time.
     let couponDiscount = toDecimal(0);
     let couponCode: string | null = null;
-    let couponRedemption: { couponId: string } | null = null;
-    if (cart.appliedCoupon) {
+    let couponRedemption: { promotionId: string } | null = null;
+    if (cart.appliedPromotion?.code) {
       const result = await this.promotions.validate({
-        code: cart.appliedCoupon.code,
+        code: cart.appliedPromotion.code,
         subtotal: decimalToString(subtotalPreview),
         userId: actor.userId ?? undefined,
       });
@@ -167,8 +167,8 @@ export class OrdersService {
         throw new BadRequestException(`Coupon: ${result.message}`);
       }
       couponDiscount = toDecimal(result.discountAmount);
-      couponCode = cart.appliedCoupon.code;
-      couponRedemption = { couponId: cart.appliedCoupon.id };
+      couponCode = cart.appliedPromotion.code;
+      couponRedemption = { promotionId: cart.appliedPromotion.id };
     }
 
     // Loyalty redemption: server recomputes the discount from the points the
@@ -345,7 +345,7 @@ export class OrdersService {
         if (couponRedemption) {
           await tx.couponRedemption.create({
             data: {
-              couponId: couponRedemption.couponId,
+              promotionId: couponRedemption.promotionId,
               userId: actor.userId,
               orderId: order.id,
             },
@@ -362,7 +362,7 @@ export class OrdersService {
         await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
         await tx.cart.update({
           where: { id: cart.id },
-          data: { appliedCouponId: null, loyaltyPointsToRedeem: 0 },
+          data: { appliedPromotionId: null, loyaltyPointsToRedeem: 0 },
         });
 
         return order;

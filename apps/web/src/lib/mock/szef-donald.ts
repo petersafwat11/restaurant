@@ -3,29 +3,10 @@
  *
  * NOTE: this is *not* DB seed data — the real menu comes from `useMenuTree()`
  * (which reads The Test Kitchen). These constants drive the design language
- * showcase (hero copy, testimonials, hours, location). Replace per-restaurant
- * when we onboard a real Szef Donald instance.
+ * showcase (hero copy, testimonials, featured dishes). Hours, address, phone
+ * and coordinates are NOT here anymore — they are read live from the restaurant
+ * settings in the DB via `useRestaurant()`.
  */
-
-import type { DayOfWeek, HoursRow } from '@repo/ui';
-
-export const mockHours: HoursRow[] = [
-  { dayOfWeek: 1 as DayOfWeek, opensAt: '11:00', closesAt: '22:00' },
-  { dayOfWeek: 2 as DayOfWeek, opensAt: '11:00', closesAt: '22:00' },
-  { dayOfWeek: 3 as DayOfWeek, opensAt: '11:00', closesAt: '22:00' },
-  { dayOfWeek: 4 as DayOfWeek, opensAt: '11:00', closesAt: '22:00' },
-  { dayOfWeek: 5 as DayOfWeek, opensAt: '11:00', closesAt: '23:00' },
-  { dayOfWeek: 6 as DayOfWeek, opensAt: '12:00', closesAt: '23:00' },
-  { dayOfWeek: 0 as DayOfWeek, opensAt: '12:00', closesAt: '21:00' },
-];
-
-export const mockLocation = {
-  address1: 'Ul. Ks. Piotra Ściegiennego 68a',
-  address2: '25-115 Kielce, Poland',
-  phone: '+48 883 953 589',
-  email: 'mahmodrasul123@gmail.com',
-  coords: { lat: 50.8505, lng: 20.6275 },
-};
 
 const U = (id: string, w = 1200) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;

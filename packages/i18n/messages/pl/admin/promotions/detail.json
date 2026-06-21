@@ -1,5 +1,6 @@
 {
   "ariaLabel": "Edytor promocji",
+  "newTitle": "Nowa promocja",
   "active": "Aktywna",
   "paused": "Wstrzymana",
   "actions": {
@@ -7,16 +8,19 @@
     "archive": "Archiwizuj",
     "restore": "Przywróć",
     "save": "Zapisz zmiany",
-    "saving": "Zapisywanie…"
+    "saving": "Zapisywanie…",
+    "create": "Utwórz promocję",
+    "creating": "Tworzenie…"
   },
   "sections": {
     "overview": "Przegląd",
     "typeValue": "Typ i wartość",
     "schedule": "Harmonogram",
-    "coupons": "Kupony"
+    "coupon": "Kod kuponu"
   },
   "fields": {
     "name": "Nazwa",
+    "namePlaceholder": "Letnia promocja -10%",
     "description": "Opis",
     "active": "Aktywna",
     "type": "Typ",
@@ -27,42 +31,23 @@
     "endsAt": "Koniec"
   },
   "hints": {
-    "bogo": "Promocje BOGO nie przyjmują tutaj wartości. Kwalifikowalność konfigurowana jest per kupon (v1).",
+    "bogo": "Promocje BOGO nie przyjmują tutaj wartości (reguły na poziomie pozycji konfigurowane osobno).",
     "freeDelivery": "Darmowa dostawa nie wymaga dodatkowych pól."
+  },
+  "coupon": {
+    "code": "Kod",
+    "codePlaceholder": "LATO10",
+    "codeHint": "Klienci wpisują ten kod przy kasie. Zostaw puste, aby zapisać jako szkic.",
+    "maxRedemptions": "Maks. liczba użyć",
+    "perUserLimit": "Maks. użyć na klienta",
+    "unlimited": "∞",
+    "used": "Wykorzystano {count, plural, =0 {0 razy} =1 {raz} few {# razy} many {# razy} other {# razy}}"
   },
   "confirmDelete": {
     "title": "Usunąć promocję?",
-    "description": "Spowoduje to usunięcie promocji i wszystkich jej kuponów. Aktywne wykorzystania zostaną zachowane w historii zamówień.",
+    "description": "Spowoduje to usunięcie promocji i jej kodu kuponu. Aktywne wykorzystania zostaną zachowane w historii zamówień.",
     "delete": "Usuń",
     "deleting": "Usuwanie…",
     "cancel": "Anuluj"
-  },
-  "coupons": {
-    "empty": "Brak kuponów.",
-    "columns": {
-      "code": "Kod",
-      "used": "Użyto",
-      "max": "Maks.",
-      "perUser": "Na użytkownika"
-    },
-    "unlimited": "∞",
-    "deleteAriaLabel": "Usuń kupon",
-    "add": {
-      "code": "Kod",
-      "codePlaceholder": "LATO10",
-      "max": "Maks.",
-      "perUser": "Na użytkownika",
-      "submit": "Dodaj kupon",
-      "bulk": "Generuj masowo"
-    },
-    "bulk": {
-      "quantity": "Ilość",
-      "prefix": "Prefiks (opcjonalnie)",
-      "prefixPlaceholder": "LATO",
-      "codeLength": "Długość kodu",
-      "maxUses": "Maks. użyć",
-      "perUser": "Na użytkownika",
-      "generate": "Generuj"
-    }
   }
 }

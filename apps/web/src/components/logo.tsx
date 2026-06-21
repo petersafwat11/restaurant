@@ -65,7 +65,7 @@ export function Logo({ variant = 'full', size = 40, className }: LogoProps) {
         fill="rgba(255,255,255,0.7)"
         letterSpacing="0.3em"
       >
-        EST · 2014
+        EST · 2019
       </text>
     </svg>
   );

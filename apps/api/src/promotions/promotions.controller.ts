@@ -11,10 +11,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
-  type BulkGenerateCouponsDto,
-  BulkGenerateCouponsSchema,
-  type CreateCouponDto,
-  CreateCouponSchema,
   type CreatePromotionDto,
   CreatePromotionSchema,
   type UpdatePromotionDto,
@@ -92,40 +88,8 @@ export class PromotionsController {
     return { success: true as const, ...removed };
   }
 
-  @Get('promotions/:id/coupons')
-  @Permissions('promotion:read')
-  listCoupons(@Param('id') id: string) {
-    return this.promotions.listCoupons(id);
-  }
-
-  @Post('promotions/:id/coupons')
-  @Permissions('promotion:write')
-  createCoupon(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(CreateCouponSchema)) dto: CreateCouponDto,
-  ) {
-    return this.promotions.createCoupon(id, dto);
-  }
-
-  @Post('promotions/:id/coupons/bulk')
-  @Permissions('promotion:write')
-  bulkGenerateCoupons(
-    @Param('id') id: string,
-    @Body(new ZodValidationPipe(BulkGenerateCouponsSchema)) dto: BulkGenerateCouponsDto,
-  ) {
-    return this.promotions.bulkGenerateCoupons(id, dto);
-  }
-
-  @Delete('coupons/:id')
-  @HttpCode(200)
-  @Permissions('promotion:write')
-  async removeCoupon(@Param('id') id: string) {
-    await this.promotions.removeCoupon(id);
-    return { success: true as const };
-  }
-
   // Public so the cart-side `applyCoupon` flow can validate before binding
-  // the coupon to the cart, and so guest carts can preview the discount.
+  // the promotion to the cart, and so guest carts can preview the discount.
   @Public()
   @Post('coupons/validate')
   @HttpCode(200)

@@ -1,17 +1,12 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common';
-import {
-  JOB_PUSH_TOKEN_CLEANUP,
-  JOB_REPORTS_CLEANUP,
-  QUEUE_PUSH,
-  QUEUE_REPORTS,
-} from '@repo/jobs';
+import { JOB_PUSH_TOKEN_CLEANUP, QUEUE_PUSH } from '@repo/jobs';
 import type { Queue } from 'bullmq';
 
 /**
  * Registers the platform's repeatable jobs at boot. Prior sprints deferred
  * this ("scheduler bootstrap" in the Sprints 7+8 report); Sprint 9 needs it for
- * push-token cleanup and reports cleanup.
+ * push-token cleanup.
  *
  * Scope is deliberately limited to jobs that have **no** self-registration.
  * The analytics rollup/finalize repeatables are owned by
@@ -27,10 +22,7 @@ import type { Queue } from 'bullmq';
 export class SchedulerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SchedulerService.name);
 
-  constructor(
-    @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
-    @InjectQueue(QUEUE_REPORTS) private readonly reportsQueue: Queue,
-  ) {}
+  constructor(@InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue) {}
 
   async onApplicationBootstrap(): Promise<void> {
     if (process.env.DISABLE_SCHEDULERS === '1') {
@@ -44,17 +36,6 @@ export class SchedulerService implements OnApplicationBootstrap {
         {
           jobId: 'repeat:push-token-cleanup',
           repeat: { pattern: '30 3 * * *' }, // daily 03:30 UTC
-          removeOnComplete: true,
-          removeOnFail: 100,
-        },
-      );
-
-      await this.reportsQueue.add(
-        JOB_REPORTS_CLEANUP,
-        {},
-        {
-          jobId: 'repeat:reports-cleanup',
-          repeat: { pattern: '0 4 * * *' }, // daily 04:00 UTC
           removeOnComplete: true,
           removeOnFail: 100,
         },

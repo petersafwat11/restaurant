@@ -82,6 +82,7 @@ function adaptToDishDetail(
     },
     prepMinutes: item.prepMinutes ?? undefined,
     calories: item.calories ?? undefined,
+    grams: item.grams ?? undefined,
     flags: itemFlagsOf(item) as DishDetail['flags'],
     modifierGroups: item.modifierGroups.map(adaptModifierGroup),
     unavailable: !item.isAvailable,
@@ -141,6 +142,31 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
   const [activeCat, setActiveCat] = React.useState<string>('all');
   const [sheetItem, setSheetItem] = React.useState<DishDetail | null>(null);
 
+  // The sticky chrome (site nav + search/filters/subnav) is much taller on
+  // mobile (rows stack) than on desktop, so a hardcoded scroll offset hides
+  // category headings behind it. Measure it live and reuse for both the
+  // category-jump scroll and the scroll-spy/scroll-margin.
+  const stickyRef = React.useRef<HTMLDivElement | null>(null);
+  const [scrollOffset, setScrollOffset] = React.useState(208);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: treeQuery.data is listed so the measurement re-runs once the sticky chrome mounts after the loading state clears.
+  React.useEffect(() => {
+    function measure() {
+      const navH = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+      const stickyH = stickyRef.current?.getBoundingClientRect().height ?? 0;
+      setScrollOffset(Math.round(navH + stickyH + 8));
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (stickyRef.current) ro.observe(stickyRef.current);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+    // Re-run once the tree loads — the sticky chrome (and stickyRef) only
+    // mounts after the loading state clears, so the first measure sees no chrome.
+  }, [treeQuery.data]);
+
   const tree: MenuTreeDto | undefined = treeQuery.data;
 
   const filteredCategories = React.useMemo(() => {
@@ -167,27 +193,30 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
           setActiveCat(id);
         }
       },
-      { rootMargin: '-200px 0px -60% 0px', threshold: 0 },
+      { rootMargin: `-${scrollOffset}px 0px -55% 0px`, threshold: 0 },
     );
     for (const c of filteredCategories) {
       const el = document.getElementById(`cat-${c.id}`);
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, [filteredCategories]);
+  }, [filteredCategories, scrollOffset]);
 
-  const goToCategory = React.useCallback((id: string) => {
-    setActiveCat(id);
-    if (id === 'all') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    const el = document.getElementById(`cat-${id}`);
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 200;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  }, []);
+  const goToCategory = React.useCallback(
+    (id: string) => {
+      setActiveCat(id);
+      if (id === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      const el = document.getElementById(`cat-${id}`);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    },
+    [scrollOffset],
+  );
 
   const handleAdd = React.useCallback(
     (item: MenuItemDto & { modifierGroups: ModifierGroupDto[] }) => {
@@ -278,7 +307,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         </p>
       </Container>
 
-      <div className="sticky top-site-nav z-20">
+      <div ref={stickyRef} className="sticky top-site-nav z-20">
         <div className="bg-bg">
           <Container className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
             <SearchInput
@@ -339,7 +368,8 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
             key={cat.id}
             id={`cat-${cat.id}`}
             aria-labelledby={`h-${cat.id}`}
-            className="scroll-mt-[12rem] pt-16"
+            className="pt-16"
+            style={{ scrollMarginTop: scrollOffset }}
           >
             <div className="mb-6 flex items-baseline justify-between gap-3">
               <h2 id={`h-${cat.id}`} className="font-display text-h2 text-fg">
@@ -362,6 +392,8 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                   name={item.name}
                   description={item.description ?? undefined}
                   price={{ amount: item.basePrice, currency }}
+                  grams={item.grams}
+                  formatWeight={(g) => t('weight', { grams: g })}
                   flags={itemFlagsOf(item) as never}
                   flagLabels={flagLabels}
                   soldOutLabel={t('soldOutToday')}

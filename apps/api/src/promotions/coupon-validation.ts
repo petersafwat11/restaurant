@@ -1,9 +1,9 @@
-import type { Coupon, Promotion } from '@repo/db';
+import type { Promotion } from '@repo/db';
 import { type ValidateCouponResponseDto, type ValidationFailureReason } from '@repo/types';
 import { clampNonNegative, decimalToString, multiply, toDecimal } from '@repo/utils/money';
 
 export interface ValidationContext {
-  coupon: Coupon & { promotion: Promotion };
+  promotion: Promotion;
   subtotal: string;
   redemptionCount: number;
   perUserRedemptions: number;
@@ -23,14 +23,14 @@ export function fail(reason: ValidationFailureReason): ValidateCouponResponseDto
 }
 
 /**
- * Apply the coupon's promotion rules + compute the discount amount for the
- * given subtotal. Returns either a discriminated-valid response (with
+ * Apply the promotion rules + compute the discount amount for the given
+ * subtotal. Returns either a discriminated-valid response (with
  * discountAmount) or a typed failure response. Pure — no DB access.
  */
 export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDto {
-  const { coupon, subtotal, redemptionCount, perUserRedemptions } = ctx;
-  const promo = coupon.promotion;
+  const { promotion: promo, subtotal, redemptionCount, perUserRedemptions } = ctx;
 
+  if (!promo.code) return fail('NOT_FOUND');
   if (!promo.isActive) return fail('PROMOTION_INACTIVE');
 
   const now = new Date();
@@ -42,17 +42,17 @@ export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDt
     return fail('MIN_SUBTOTAL_NOT_MET');
   }
 
-  if (coupon.perUserLimit !== null && perUserRedemptions >= coupon.perUserLimit) {
+  if (promo.perUserLimit !== null && perUserRedemptions >= promo.perUserLimit) {
     return fail('PER_USER_LIMIT_REACHED');
   }
-  if (coupon.maxRedemptions !== null && redemptionCount >= coupon.maxRedemptions) {
+  if (promo.maxRedemptions !== null && redemptionCount >= promo.maxRedemptions) {
     return fail('MAX_REDEMPTIONS_REACHED');
   }
 
   // Item-level BOGO and delivery-fee waiver are NOT implemented yet. Returning
-  // a flat `promo.value` for BOGO (or silently 0 for FREE_DELIVERY) let an
-  // unimplemented promo type discount real money off `grandTotal` at order
-  // creation regardless of cart contents. Reject until properly implemented.
+  // a flat `promo.value` for BOGO (or silently 0 for FREE_DELIVERY) would
+  // discount real money off `grandTotal` at order creation regardless of cart
+  // contents. Reject until properly implemented.
   if (promo.type === 'BOGO' || promo.type === 'FREE_DELIVERY') {
     return fail('PROMOTION_INACTIVE');
   }
@@ -61,7 +61,6 @@ export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDt
   let discount = toDecimal(0);
   switch (promo.type) {
     case 'PERCENT': {
-      // value is treated as a percentage (e.g. 10 = 10%)
       const pct = toDecimal(promo.value ?? 0).div(100);
       discount = multiply(subtotalDec, pct);
       break;
@@ -70,33 +69,16 @@ export function validateCoupon(ctx: ValidationContext): ValidateCouponResponseDt
       discount = toDecimal(promo.value ?? 0);
       break;
     }
-    case 'FREE_DELIVERY': {
-      // The discount is the delivery fee; cart endpoint applies it on top of
-      // its own pricing (returning 0 here is fine — orders.service will fold
-      // the free-delivery effect in at checkout).
-      discount = toDecimal(0);
-      break;
-    }
-    case 'BOGO': {
-      // Simple shared-cart application: discount equals one slot at half
-      // off. Full BOGO logic with item targeting lives in
-      // orders.service; for the cart-side preview we model it as a small
-      // fixed estimate to communicate that a discount is applied.
-      discount = toDecimal(promo.value ?? 0);
-      break;
-    }
   }
 
-  // Clamp discount to ≤ subtotal.
   const clamped = clampNonNegative(discount).gt(subtotalDec)
     ? subtotalDec
     : clampNonNegative(discount);
 
   return {
     valid: true,
-    couponId: coupon.id,
     promotionId: promo.id,
-    code: coupon.code,
+    code: promo.code,
     discountAmount: decimalToString(clamped),
     type: promo.type as ValidateCouponResponseDto extends { type: infer T } ? T : never,
   };

@@ -18,6 +18,10 @@ const promotions = [
     isActive: true,
     isArchived: false,
     archivedAt: null,
+    code: 'SPRING20',
+    maxRedemptions: null,
+    perUserLimit: 1,
+    redemptionsCount: 0,
   },
   {
     id: 'promo_2',
@@ -31,6 +35,10 @@ const promotions = [
     isActive: false,
     isArchived: false,
     archivedAt: null,
+    code: null,
+    maxRedemptions: null,
+    perUserLimit: null,
+    redemptionsCount: 0,
   },
 ];
 

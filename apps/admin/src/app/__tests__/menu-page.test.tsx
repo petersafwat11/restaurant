@@ -26,6 +26,7 @@ const menuTree = {
           compareAt: null,
           calories: 650,
           prepMinutes: 10,
+          grams: 220,
           isAvailable: true,
           isFeatured: true,
           isVegetarian: false,

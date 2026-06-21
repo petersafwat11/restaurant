@@ -43,7 +43,6 @@ import { PromotionsModule } from './promotions/promotions.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RedisModule } from './redis/redis.module';
 import { ReferralsModule } from './referrals/referrals.module';
-import { ReportsModule } from './reports/reports.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -85,7 +84,6 @@ import { UsersModule } from './users/users.module';
     SettingsModule,
     AuditModule,
     AnalyticsModule,
-    ReportsModule,
     LoyaltyModule,
     ReferralsModule,
     I18nModule.forRoot({

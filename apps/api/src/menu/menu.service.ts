@@ -49,10 +49,8 @@ export class MenuService {
   // ---- Public reads -------------------------------------------------------
 
   async getTree(): Promise<MenuTreeDto> {
-    const tree = await this.cache.getOrSet<MenuTreeDto>(
-      TREE_KEY,
-      TREE_TTL_SECONDS,
-      async () => this.loadTreeFromDb(),
+    const tree = await this.cache.getOrSet<MenuTreeDto>(TREE_KEY, TREE_TTL_SECONDS, async () =>
+      this.loadTreeFromDb(),
     );
     return this.applyAvailabilityOverrides(tree);
   }
@@ -167,6 +165,7 @@ export class MenuService {
           compareAt: dto.compareAt ?? null,
           calories: dto.calories ?? null,
           prepMinutes: dto.prepMinutes ?? null,
+          grams: dto.grams ?? null,
           isAvailable: dto.isAvailable ?? true,
           isFeatured: dto.isFeatured ?? false,
           isVegetarian: dto.isVegetarian ?? false,
@@ -202,6 +201,7 @@ export class MenuService {
         ...(dto.compareAt !== undefined ? { compareAt: dto.compareAt } : {}),
         ...(dto.calories !== undefined ? { calories: dto.calories } : {}),
         ...(dto.prepMinutes !== undefined ? { prepMinutes: dto.prepMinutes } : {}),
+        ...(dto.grams !== undefined ? { grams: dto.grams } : {}),
         ...(dto.isAvailable !== undefined ? { isAvailable: dto.isAvailable } : {}),
         ...(dto.isFeatured !== undefined ? { isFeatured: dto.isFeatured } : {}),
         ...(dto.isVegetarian !== undefined ? { isVegetarian: dto.isVegetarian } : {}),
@@ -527,6 +527,7 @@ function toItemDto(row: MenuItemWithImages): MenuItemDto {
     compareAt: row.compareAt !== null ? decimalToString(row.compareAt.toString()) : null,
     calories: row.calories,
     prepMinutes: row.prepMinutes,
+    grams: row.grams,
     isAvailable: row.isAvailable,
     isFeatured: row.isFeatured,
     isVegetarian: row.isVegetarian,

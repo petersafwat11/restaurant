@@ -12,8 +12,7 @@
     "contact": "Contact",
     "location": "Location",
     "discovery": "Discovery",
-    "channels": "Channels",
-    "danger": "Danger zone"
+    "channels": "Channels"
   },
   "identity": {
     "title": "Identity",
@@ -74,13 +73,6 @@
     "acceptsDelivery": "Accepts delivery",
     "acceptsPickup": "Accepts pickup",
     "acceptsDineIn": "Accepts dine-in"
-  },
-  "danger": {
-    "title": "Danger zone",
-    "description": "Unpublishing hides the restaurant from the public site immediately.",
-    "unpublishLabel": "Unpublish restaurant",
-    "unpublishHint": "Equivalent to flipping the Published switch off",
-    "unpublishButton": "Unpublish"
   },
   "saveBar": {
     "unsavedHint": "Unsaved changes — {shortcut} to save.",

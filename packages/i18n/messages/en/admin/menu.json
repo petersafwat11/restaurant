@@ -84,6 +84,8 @@
       "compareAtHelper": "Original price — shown struck-through next to base.",
       "caloriesLabel": "Calories",
       "prepMinutesLabel": "Prep time (min)",
+      "gramsLabel": "Weight (g)",
+      "gramsHelper": "Net portion / meat weight in grams — shown on the menu card.",
       "spiceLevelLabel": "Spice level",
       "spiceNone": "None"
     },

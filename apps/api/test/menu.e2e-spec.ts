@@ -1,6 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import {
+  createTestApp,
+  ensureOwnerToken,
+  ensureRestaurant,
+  resetDb,
+  resetMenuDb,
+} from './setup-e2e';
 
 describe('menu (e2e)', () => {
   let app: NestFastifyApplication;
@@ -74,6 +80,38 @@ describe('menu (e2e)', () => {
     expect(body.categories[0].slug).toBe('starters');
     expect(body.categories[0].items).toHaveLength(1);
     expect(body.categories[0].items[0].basePrice).toBe('22.00');
+  });
+
+  it('persists and exposes the grams (portion weight) field', async () => {
+    const cat = await inject(
+      'POST',
+      '/api/v1/menu/categories',
+      { slug: 'kebab', name: 'Kebab' },
+      ownerToken,
+    );
+    const categoryId = cat.json().id;
+
+    const item = await inject(
+      'POST',
+      '/api/v1/menu/items',
+      { categoryId, slug: 'kebab-pita', name: 'Kebab Pita', basePrice: '21.00', grams: 200 },
+      ownerToken,
+    );
+    expect(item.statusCode).toBe(201);
+    expect(item.json().grams).toBe(200);
+    const itemId = item.json().id;
+
+    // Surfaces on the public tree.
+    const tree = await inject('GET', `/api/v1/menu`);
+    expect(tree.json().categories[0].items[0].grams).toBe(200);
+
+    // Updatable.
+    const upd = await inject('PATCH', `/api/v1/menu/items/${itemId}`, { grams: 250 }, ownerToken);
+    expect(upd.statusCode).toBe(200);
+    expect(upd.json().grams).toBe(250);
+
+    const after = await inject('GET', `/api/v1/menu`);
+    expect(after.json().categories[0].items[0].grams).toBe(250);
   });
 
   it('forbids non-admin from creating categories', async () => {

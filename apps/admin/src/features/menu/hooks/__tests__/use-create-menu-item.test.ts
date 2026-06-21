@@ -25,6 +25,7 @@ const sampleItem = {
   compareAt: null,
   calories: null,
   prepMinutes: null,
+  grams: null,
   isAvailable: true,
   isFeatured: false,
   isVegetarian: false,

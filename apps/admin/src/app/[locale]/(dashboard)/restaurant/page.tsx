@@ -7,7 +7,7 @@ import type { ApiError } from '@repo/api-client';
 import type { RestaurantAdminDto, UpdateRestaurantDto } from '@repo/types';
 import { EmptyState, PageSpinner, SettingsAnchorNav, SettingsSectionCard, Switch } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Compass, Mail, Palette, Search, ShieldAlert, ToggleRight } from 'lucide-react';
+import { Building2, Compass, Mail, Palette, Search, ToggleRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
@@ -245,7 +245,6 @@ export default function RestaurantProfilePage() {
       { id: 'location', label: t('nav.location'), icon: <Compass className="h-4 w-4" /> },
       { id: 'discovery', label: t('nav.discovery'), icon: <Search className="h-4 w-4" /> },
       { id: 'channels', label: t('nav.channels'), icon: <ToggleRight className="h-4 w-4" /> },
-      { id: 'danger', label: t('nav.danger'), icon: <ShieldAlert className="h-4 w-4" /> },
     ],
     [t],
   );
@@ -539,30 +538,6 @@ export default function RestaurantProfilePage() {
             checked={draft.acceptsDineIn}
             onChange={(b) => patch('acceptsDineIn', b)}
           />
-        </SettingsSectionCard>
-
-        <SettingsSectionCard
-          id="danger"
-          title={t('danger.title')}
-          description={t('danger.description')}
-          tone="danger"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-small text-fg">{t('danger.unpublishLabel')}</p>
-              <p className="text-caption uppercase tracking-wider text-fg-subtle">
-                {t('danger.unpublishHint')}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => patch('isActive', false)}
-              disabled={!draft.isActive}
-              className="h-9 rounded-button border border-negative/40 px-4 text-small text-negative hover:bg-negative/10 disabled:opacity-50"
-            >
-              {t('danger.unpublishButton')}
-            </button>
-          </div>
         </SettingsSectionCard>
       </div>
 

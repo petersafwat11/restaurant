@@ -84,6 +84,8 @@
       "compareAtHelper": "Cena pierwotna — pokazywana z przekreśleniem obok bazowej.",
       "caloriesLabel": "Kalorie",
       "prepMinutesLabel": "Czas przygotowania (min)",
+      "gramsLabel": "Waga (g)",
+      "gramsHelper": "Waga porcji / mięsa w gramach — pokazywana na karcie menu.",
       "spiceLevelLabel": "Poziom ostrości",
       "spiceNone": "Brak"
     },

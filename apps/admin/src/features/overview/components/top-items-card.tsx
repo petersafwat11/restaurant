@@ -1,11 +1,9 @@
 'use client';
 
 import { useTopItems } from '@/features/analytics/hooks';
-import { Link } from '@/i18n/navigation';
 import type { AnalyticsPeriod } from '@repo/types';
 import { Spinner, cn } from '@repo/ui';
 import { fmtInt, formatMoney } from '@repo/utils';
-import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -51,7 +49,7 @@ export function TopItemsCard({ period, currency = 'USD' }: TopItemsCardProps) {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto pb-3">
         <table className="w-full text-sm">
           <thead className="text-left text-caption-admin text-fg-subtle">
             <tr>
@@ -91,15 +89,6 @@ export function TopItemsCard({ period, currency = 'USD' }: TopItemsCardProps) {
             )}
           </tbody>
         </table>
-      </div>
-
-      <div className="mt-3 border-t-hairline pt-3">
-        <Link
-          href="/reports/exports"
-          className="inline-flex items-center gap-1 text-xs text-accent hover:opacity-80"
-        >
-          {t('viewFullReport')} <ArrowRight size={12} />
-        </Link>
       </div>
     </div>
   );

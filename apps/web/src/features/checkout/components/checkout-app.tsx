@@ -670,24 +670,28 @@ export function CheckoutApp() {
                 <Controller
                   name="address.geoPoint"
                   control={form.control}
-                  render={({ field }) => (
-                    <DeliveryLocationPicker
-                      zones={zonesQuery.data?.zones ?? []}
-                      center={restaurant?.geoPoint ?? { lat: 50.8505, lng: 20.6275 }}
-                      value={field.value ?? null}
-                      onChange={(v) => {
-                        // Default country to PL when first pin drops.
-                        if (!form.getValues('address.country')) {
-                          form.setValue('address.country', 'PL', {
-                            shouldValidate: false,
-                          });
-                        }
-                        field.onChange(v);
-                      }}
-                      status={pickerStatus}
-                      height={360}
-                    />
-                  )}
+                  render={({ field }) =>
+                    restaurant?.geoPoint ? (
+                      <DeliveryLocationPicker
+                        zones={zonesQuery.data?.zones ?? []}
+                        center={restaurant.geoPoint}
+                        value={field.value ?? null}
+                        onChange={(v) => {
+                          // Default country to PL when first pin drops.
+                          if (!form.getValues('address.country')) {
+                            form.setValue('address.country', 'PL', {
+                              shouldValidate: false,
+                            });
+                          }
+                          field.onChange(v);
+                        }}
+                        status={pickerStatus}
+                        height={360}
+                      />
+                    ) : (
+                      <div className="h-[360px] animate-pulse rounded-card border border-border/[var(--border-alpha)] bg-surface" />
+                    )
+                  }
                 />
 
                 {/* Hidden country — defaulted to PL on first pin. */}

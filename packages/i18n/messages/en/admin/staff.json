@@ -41,7 +41,6 @@
     "staff:write": "Manage staff",
     "settings:read": "View settings",
     "settings:write": "Manage settings",
-    "reports:read": "View reports",
     "customers:read": "View customers",
     "customers:write": "Manage customers",
     "reservations:read": "View reservations",

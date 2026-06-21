@@ -59,6 +59,7 @@ type Draft = Pick<
   | 'compareAt'
   | 'calories'
   | 'prepMinutes'
+  | 'grams'
   | 'spiceLevel'
   | 'isVegetarian'
   | 'isVegan'
@@ -76,6 +77,7 @@ const EMPTY_DRAFT: Draft = {
   compareAt: null,
   calories: null,
   prepMinutes: null,
+  grams: null,
   spiceLevel: 0,
   isVegetarian: false,
   isVegan: false,
@@ -122,6 +124,7 @@ export function ItemEditorDrawer({
         compareAt: item.compareAt,
         calories: item.calories,
         prepMinutes: item.prepMinutes,
+        grams: item.grams,
         spiceLevel: item.spiceLevel,
         isVegetarian: item.isVegetarian,
         isVegan: item.isVegan,
@@ -363,6 +366,15 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
           min={0}
           value={draft.prepMinutes ?? ''}
           onChange={(e) => set('prepMinutes', parseIntOrNull(e.target.value))}
+          className="tabular-nums"
+        />
+      </FormField>
+      <FormField label={t('gramsLabel')} helper={t('gramsHelper')}>
+        <Input
+          type="number"
+          min={0}
+          value={draft.grams ?? ''}
+          onChange={(e) => set('grams', parseIntOrNull(e.target.value))}
           className="tabular-nums"
         />
       </FormField>

@@ -92,7 +92,6 @@ export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   await prisma.refund.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.couponRedemption.deleteMany();
-  await prisma.coupon.deleteMany();
   await prisma.promotion.deleteMany();
   await prisma.review.deleteMany();
   await prisma.orderStatusEvent.deleteMany();
@@ -112,7 +111,6 @@ export async function resetMenuDb(app: NestFastifyApplication): Promise<void> {
   await prisma.staffInvite.deleteMany();
   await prisma.customerNote.deleteMany();
   await prisma.dailyMetric.deleteMany();
-  await prisma.export.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.contactNote.deleteMany();
   await prisma.contactMessage.deleteMany();
@@ -139,14 +137,12 @@ const ALL_PERMISSIONS = [
   'promotion:read',
   'promotion:write',
   'promotion:archive',
-  'promotion:bulk_coupons',
   'reservation:read',
   'reservation:write',
   'review:read',
   'review:moderate',
   'staff:read',
   'staff:write',
-  'reports:read',
   'settings:read',
   'settings:write',
   'payment:create',
@@ -154,8 +150,6 @@ const ALL_PERMISSIONS = [
   'payment:refund',
   'kitchen:read',
   'analytics:read',
-  'report:read',
-  'report:export',
   'audit:read',
   'contact:read',
   'contact:reply',

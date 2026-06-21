@@ -149,16 +149,10 @@ describe('loyalty earn/redeem (e2e)', () => {
 
     // 80%-off coupon on a 50.00 subtotal → 40.00 coupon discount,
     // leaving only 10.00 of subtotal for loyalty to discount.
-    const promo = await inject(
-      'POST',
-      '/api/v1/promotions',
-      { name: '80 off', type: 'PERCENT', value: '80' },
-      ownerToken,
-    );
     await inject(
       'POST',
-      `/api/v1/promotions/${promo.json().id}/coupons`,
-      { code: 'EIGHTY' },
+      '/api/v1/promotions',
+      { name: '80 off', type: 'PERCENT', value: '80', code: 'EIGHTY' },
       ownerToken,
     );
 

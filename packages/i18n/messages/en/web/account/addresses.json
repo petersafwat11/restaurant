@@ -35,7 +35,8 @@
   "picker": {
     "deliveryAreaFallback": "Delivery area",
     "checkError": "Could not check this address.",
-    "outOfZoneError": "Pin must be inside our delivery area."
+    "outOfZoneError": "Pin must be inside our delivery area.",
+    "loading": "Loading map…"
   },
   "empty": {
     "title": "No saved addresses",

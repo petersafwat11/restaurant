@@ -38,8 +38,7 @@
     "byQuantity": "Wg ilości",
     "colItem": "Pozycja",
     "colQty": "Ilość",
-    "colRevenue": "Przychód",
-    "viewFullReport": "Zobacz pełny raport"
+    "colRevenue": "Przychód"
   },
   "livePanel": {
     "title": "Na żywo",
