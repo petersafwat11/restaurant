@@ -27,3 +27,4 @@ export * from './settings';
 export * from './analytics';
 export * from './audit';
 export * from './checkout';
+export * from './newsletter';

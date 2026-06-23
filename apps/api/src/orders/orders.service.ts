@@ -320,6 +320,7 @@ export class OrdersService {
             deliveryAddress: deliveryAddress ?? Prisma.JsonNull,
             pickupAt: dto.pickupAt ? new Date(dto.pickupAt) : null,
             notes: dto.notes ?? null,
+            acceptedTermsAt: dto.acceptedTermsAt ? new Date(dto.acceptedTermsAt) : null,
             couponCode,
             items: {
               create: lineSnapshots.map((l) => ({

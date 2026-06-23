@@ -68,6 +68,8 @@ export interface ItemDetailSheetProps {
     closeAriaLabel?: string;
     /** Header above the allergen chips. Defaults to "Allergens". */
     allergensLabel?: React.ReactNode;
+    /** Small disclaimer rendered under the allergen chips (e.g. cross-contamination note). */
+    allergenNote?: React.ReactNode;
     /** Label above the special-instructions textarea. Defaults to "Special instructions". */
     specialInstructionsLabel?: React.ReactNode;
     /**
@@ -155,6 +157,7 @@ export function ItemDetailSheet({
   const {
     closeAriaLabel = 'Close',
     allergensLabel = 'Allergens',
+    allergenNote,
     specialInstructionsLabel = 'Special instructions',
     specialInstructionsPlaceholder = 'Anything we should know? (no onions, extra sauce…)',
     quantityLabel = 'Quantity',
@@ -308,6 +311,7 @@ export function ItemDetailSheet({
                     </span>
                   ))}
                 </div>
+                {allergenNote && <p className="m-0 text-caption text-fg-subtle">{allergenNote}</p>}
               </div>
             )}
 

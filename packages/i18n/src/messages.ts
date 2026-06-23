@@ -57,11 +57,13 @@ import enWebAuthResetPassword from '../messages/en/web/auth/reset-password.json'
 import enWebAuthVerifyEmail from '../messages/en/web/auth/verify-email.json';
 import enWebFooter from '../messages/en/web/footer.json';
 import enWebLayout from '../messages/en/web/layout.json';
+import enWebLegal from '../messages/en/web/legal.json';
 import enWebMarketingAbout from '../messages/en/web/marketing/about.json';
 import enWebMarketingContact from '../messages/en/web/marketing/contact.json';
 import enWebMarketingHome from '../messages/en/web/marketing/home.json';
 import enWebMarketingLocations from '../messages/en/web/marketing/locations.json';
 import enWebMarketingReservations from '../messages/en/web/marketing/reservations.json';
+import enWebNewsletter from '../messages/en/web/newsletter.json';
 import enWebPublicTrack from '../messages/en/web/public/track.json';
 import enWebShopCart from '../messages/en/web/shop/cart.json';
 import enWebShopCheckoutSuccess from '../messages/en/web/shop/checkout-success.json';
@@ -125,11 +127,13 @@ import plWebAuthResetPassword from '../messages/pl/web/auth/reset-password.json'
 import plWebAuthVerifyEmail from '../messages/pl/web/auth/verify-email.json';
 import plWebFooter from '../messages/pl/web/footer.json';
 import plWebLayout from '../messages/pl/web/layout.json';
+import plWebLegal from '../messages/pl/web/legal.json';
 import plWebMarketingAbout from '../messages/pl/web/marketing/about.json';
 import plWebMarketingContact from '../messages/pl/web/marketing/contact.json';
 import plWebMarketingHome from '../messages/pl/web/marketing/home.json';
 import plWebMarketingLocations from '../messages/pl/web/marketing/locations.json';
 import plWebMarketingReservations from '../messages/pl/web/marketing/reservations.json';
+import plWebNewsletter from '../messages/pl/web/newsletter.json';
 import plWebPublicTrack from '../messages/pl/web/public/track.json';
 import plWebShopCart from '../messages/pl/web/shop/cart.json';
 import plWebShopCheckoutSuccess from '../messages/pl/web/shop/checkout-success.json';
@@ -215,6 +219,7 @@ const EN_MESSAGES = {
     },
     footer: enWebFooter,
     layout: enWebLayout,
+    legal: enWebLegal,
     marketing: {
       about: enWebMarketingAbout,
       contact: enWebMarketingContact,
@@ -222,6 +227,7 @@ const EN_MESSAGES = {
       locations: enWebMarketingLocations,
       reservations: enWebMarketingReservations,
     },
+    newsletter: enWebNewsletter,
     public: {
       track: enWebPublicTrack,
     },
@@ -315,6 +321,7 @@ const PL_MESSAGES = {
     },
     footer: plWebFooter,
     layout: plWebLayout,
+    legal: plWebLegal,
     marketing: {
       about: plWebMarketingAbout,
       contact: plWebMarketingContact,
@@ -322,6 +329,7 @@ const PL_MESSAGES = {
       locations: plWebMarketingLocations,
       reservations: plWebMarketingReservations,
     },
+    newsletter: plWebNewsletter,
     public: {
       track: plWebPublicTrack,
     },

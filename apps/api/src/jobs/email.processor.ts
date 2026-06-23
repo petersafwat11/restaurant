@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import {
   EmailContactPayloadSchema,
   EmailContactReplyPayloadSchema,
+  EmailNewsletterConfirmPayloadSchema,
   EmailOrderStatusPayloadSchema,
   EmailPromoPayloadSchema,
   EmailReceiptPayloadSchema,
@@ -10,6 +11,7 @@ import {
   EmailVerificationPayloadSchema,
   JOB_EMAIL_CONTACT,
   JOB_EMAIL_CONTACT_REPLY,
+  JOB_EMAIL_NEWSLETTER_CONFIRM,
   JOB_EMAIL_ORDER_STATUS,
   JOB_EMAIL_PASSWORD_RESET,
   JOB_EMAIL_PROMO,
@@ -150,6 +152,23 @@ export class EmailProcessor extends WorkerHost {
             );
           }
         }
+        return;
+      }
+      case JOB_EMAIL_NEWSLETTER_CONFIRM: {
+        const payload = EmailNewsletterConfirmPayloadSchema.parse(job.data);
+        await this.mailer.send({
+          to: payload.email,
+          subject: 'Confirm your Szef Donald newsletter subscription',
+          html:
+            `<p>Thanks for signing up to the Szef Donald newsletter!</p>` +
+            `<p>Please confirm your subscription:</p>` +
+            `<p><a href="${payload.confirmUrl}" style="display:inline-block;padding:10px 18px;background:#111;color:#fff;border-radius:8px;text-decoration:none">Confirm subscription</a></p>` +
+            `<p>If you didn't request this, ignore this email — or <a href="${payload.unsubscribeUrl}">unsubscribe here</a>. You won't receive anything until you confirm.</p>`,
+          text:
+            `Thanks for signing up to the Szef Donald newsletter!\n\n` +
+            `Confirm your subscription: ${payload.confirmUrl}\n\n` +
+            `If you didn't request this, ignore this email or unsubscribe: ${payload.unsubscribeUrl}`,
+        });
         return;
       }
       case JOB_EMAIL_CONTACT: {

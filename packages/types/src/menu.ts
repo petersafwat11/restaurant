@@ -6,6 +6,28 @@ const MoneyStringSchema = z
   .string()
   .regex(/^-?\d+(\.\d{1,2})?$/, 'Money must be a decimal string with ≤2dp');
 
+// ---- Allergens (EU FIC 1169/2011) -----------------------------------------
+// The 14 allergens that must be declared for food sold (incl. online). Stored
+// as stable keys; human labels are localized in packages/i18n.
+export const ALLERGENS = [
+  'gluten',
+  'crustaceans',
+  'eggs',
+  'fish',
+  'peanuts',
+  'soybeans',
+  'milk',
+  'nuts',
+  'celery',
+  'mustard',
+  'sesame',
+  'sulphites',
+  'lupin',
+  'molluscs',
+] as const;
+export type AllergenKey = (typeof ALLERGENS)[number];
+export const AllergenSchema = z.enum(ALLERGENS);
+
 // ---- Modifier options ------------------------------------------------------
 
 export const ModifierOptionSchema = z.object({
@@ -81,6 +103,7 @@ export const MenuItemSchema = z.object({
   calories: z.number().int().nullable(),
   prepMinutes: z.number().int().nullable(),
   grams: z.number().int().nullable(),
+  allergens: z.array(AllergenSchema).default([]),
   isAvailable: z.boolean(),
   isFeatured: z.boolean(),
   isVegetarian: z.boolean(),
@@ -111,6 +134,7 @@ export const CreateMenuItemSchema = z.object({
   calories: z.number().int().min(0).nullish(),
   prepMinutes: z.number().int().min(0).nullish(),
   grams: z.number().int().min(0).nullish(),
+  allergens: z.array(AllergenSchema).optional(),
   isAvailable: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   isVegetarian: z.boolean().optional(),

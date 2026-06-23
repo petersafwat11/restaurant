@@ -87,7 +87,25 @@
       "gramsLabel": "Waga (g)",
       "gramsHelper": "Waga porcji / mięsa w gramach — pokazywana na karcie menu.",
       "spiceLevelLabel": "Poziom ostrości",
-      "spiceNone": "Brak"
+      "spiceNone": "Brak",
+      "allergensLabel": "Alergeny (UE)",
+      "allergensHelper": "Wymagane przy sprzedaży online — pokazywane klientom przed zamówieniem.",
+      "allergen": {
+        "gluten": "Gluten",
+        "crustaceans": "Skorupiaki",
+        "eggs": "Jaja",
+        "fish": "Ryby",
+        "peanuts": "Orzeszki ziemne",
+        "soybeans": "Soja",
+        "milk": "Mleko",
+        "nuts": "Orzechy",
+        "celery": "Seler",
+        "mustard": "Gorczyca",
+        "sesame": "Sezam",
+        "sulphites": "Dwutlenek siarki i siarczyny",
+        "lupin": "Łubin",
+        "molluscs": "Mięczaki"
+      }
     },
     "dietary": {
       "vegetarian": "Wegetariańskie",

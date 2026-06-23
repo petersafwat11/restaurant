@@ -254,6 +254,7 @@ model MenuItem {
   calories     Int?
   prepMinutes  Int?
   grams        Int? // net weight / portion size in grams (e.g. meat weight on a kebab)
+  allergens    String[] // EU FIC 1169/2011 allergen keys (see packages/types ALLERGENS)
   isAvailable  Boolean  @default(true)
   isFeatured   Boolean  @default(false)
   isVegetarian Boolean  @default(false)
@@ -399,6 +400,9 @@ model Order {
   couponCode          String?
   loyaltyPointsUsed   Int         @default(0)
   loyaltyPointsEarned Int         @default(0)
+  // Consumer-law: timestamp the customer accepted the Regulamin + Privacy
+  // Policy at checkout (proof of informed consent before purchase).
+  acceptedTermsAt     DateTime?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
@@ -783,4 +787,32 @@ model FeatureFlag {
   enabled        Boolean  @default(false)
   rolloutPercent Int      @default(0)
   updatedAt      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Marketing — newsletter (GDPR double opt-in)
+// ---------------------------------------------------------------------------
+
+enum NewsletterStatus {
+  PENDING // signed up, awaiting email confirmation (double opt-in)
+  CONFIRMED // confirmed via email link — may receive marketing
+  UNSUBSCRIBED // opted out
+}
+
+model NewsletterSubscriber {
+  id    String           @id @default(cuid())
+  email String           @unique
+  locale String          @default("pl")
+  status NewsletterStatus @default(PENDING)
+  // Single-use token for the confirm + unsubscribe links (regenerated on resub).
+  token String           @unique
+  // Where the consent was given (e.g. "landing"), kept as proof of consent.
+  source String?
+  consentAt      DateTime  @default(now())
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
 }

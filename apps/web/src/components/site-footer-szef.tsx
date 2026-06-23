@@ -4,15 +4,27 @@ import { Logo } from '@/components/logo';
 import { useRestaurant } from '@/features/restaurants/hooks';
 import { formatAddressLine2, hoursToRows } from '@/features/restaurants/lib/restaurant-info';
 import { HoursTable, SiteFooter } from '@repo/ui';
-import { Facebook, Instagram } from 'lucide-react';
+import { Facebook, Globe, Instagram } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
+/** Pick an icon + accessible label for a social/profile URL (from `sameAs`). */
+function socialMeta(url: string): { Icon: typeof Instagram; label: string } {
+  const u = url.toLowerCase();
+  if (u.includes('instagram')) return { Icon: Instagram, label: 'Instagram' };
+  if (u.includes('facebook') || u.includes('fb.com')) return { Icon: Facebook, label: 'Facebook' };
+  try {
+    return { Icon: Globe, label: new URL(url).hostname.replace(/^www\./, '') };
+  } catch {
+    return { Icon: Globe, label: 'Website' };
+  }
+}
+
 /**
- * Brand-bound SiteFooter — Szef Donald copy. Address, phone and operating
- * hours are pulled live from the restaurant settings in the DB (via
- * `useRestaurant()`), not from static mock data. Wraps the theme-agnostic
- * `<SiteFooter>` primitive.
+ * Brand-bound SiteFooter — Szef Donald copy. Address, phone, operating hours
+ * and social links are pulled live from the restaurant settings in the DB (via
+ * `useRestaurant()` — social links come from the `sameAs` field, set in admin),
+ * not from static mock data. Wraps the theme-agnostic `<SiteFooter>` primitive.
  */
 export function SzefSiteFooter() {
   const t = useTranslations('web.footer');
@@ -34,22 +46,25 @@ export function SzefSiteFooter() {
         <div className="flex flex-col gap-4">
           <Logo variant="inverse" size={40} />
           <p className="text-body text-surface/80">{t('tagline')}</p>
-          <div className="flex items-center gap-3">
-            <Link
-              href="#"
-              aria-label={t('social.instagram')}
-              className="text-surface/60 transition-colors hover:text-accent"
-            >
-              <Instagram size={20} strokeWidth={1.5} />
-            </Link>
-            <Link
-              href="#"
-              aria-label={t('social.facebook')}
-              className="text-surface/60 transition-colors hover:text-accent"
-            >
-              <Facebook size={20} strokeWidth={1.5} />
-            </Link>
-          </div>
+          {restaurant?.sameAs && restaurant.sameAs.length > 0 && (
+            <div className="flex items-center gap-3">
+              {restaurant.sameAs.map((url) => {
+                const { Icon, label } = socialMeta(url);
+                return (
+                  <Link
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={label}
+                    className="text-surface/60 transition-colors hover:text-accent"
+                  >
+                    <Icon size={20} strokeWidth={1.5} />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       }
       columns={[
@@ -133,9 +148,9 @@ export function SzefSiteFooter() {
       bottom={{
         copyright: t('bottom.copyright'),
         legal: [
-          { href: '#', label: t('bottom.legal.privacy') },
-          { href: '#', label: t('bottom.legal.terms') },
-          { href: '#', label: t('bottom.legal.cookies') },
+          { href: '/privacy', label: t('bottom.legal.privacy') },
+          { href: '/terms', label: t('bottom.legal.terms') },
+          { href: '/cookies', label: t('bottom.legal.cookies') },
         ],
       }}
     />

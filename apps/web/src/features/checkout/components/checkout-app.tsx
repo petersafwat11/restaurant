@@ -177,6 +177,7 @@ export function CheckoutApp() {
       orderNotes: '',
       paymentMethod: 'card',
       tipAmount: '0.00',
+      acceptedTerms: false,
     },
   });
 
@@ -398,6 +399,7 @@ export function CheckoutApp() {
         pickupAt: values.timeSlot.kind === 'scheduled' ? values.timeSlot.iso : null,
         notes: values.orderNotes || null,
         tipAmount: values.tipAmount,
+        acceptedTermsAt: new Date().toISOString(),
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
@@ -933,6 +935,33 @@ export function CheckoutApp() {
             }
             ctaSlot={
               <div className="flex flex-col gap-3">
+                {/* biome-ignore lint/a11y/noLabelWithoutControl: the checkbox is the control */}
+                <label className="flex items-start gap-2 text-[12px] text-fg-muted">
+                  <input
+                    type="checkbox"
+                    {...form.register('acceptedTerms')}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-border/[var(--border-strong-alpha)] accent-accent"
+                  />
+                  <span>
+                    {t.rich('cta.terms', {
+                      termsLink: (chunks) => (
+                        <Link href="/terms" className="underline">
+                          {chunks}
+                        </Link>
+                      ),
+                      privacyLink: (chunks) => (
+                        <Link href="/privacy" className="underline">
+                          {chunks}
+                        </Link>
+                      ),
+                    })}
+                  </span>
+                </label>
+                {form.formState.errors.acceptedTerms && (
+                  <p role="alert" className="text-[12px] text-negative">
+                    {form.formState.errors.acceptedTerms.message}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={onSubmit}
@@ -952,20 +981,6 @@ export function CheckoutApp() {
                     </>
                   )}
                 </button>
-                <p className="text-center text-[12px] text-fg-subtle">
-                  {t.rich('cta.terms', {
-                    termsLink: (chunks) => (
-                      <Link href="#" className="underline">
-                        {chunks}
-                      </Link>
-                    ),
-                    privacyLink: (chunks) => (
-                      <Link href="#" className="underline">
-                        {chunks}
-                      </Link>
-                    ),
-                  })}
-                </p>
                 <PaymentLogos />
               </div>
             }

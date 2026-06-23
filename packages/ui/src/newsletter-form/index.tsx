@@ -13,6 +13,13 @@ export interface NewsletterFormProps {
   errorMessage?: string;
   /** Accessible label for the email input. Falls back to English when absent. */
   emailAriaLabel?: string;
+  /**
+   * Marketing-consent label (with links). When provided, an unticked-by-default
+   * consent checkbox is required before the form can be submitted (GDPR opt-in).
+   */
+  consentLabel?: React.ReactNode;
+  /** Error shown when the consent box is required but unchecked. */
+  consentRequiredMessage?: string;
   className?: string;
 }
 
@@ -25,9 +32,13 @@ export function NewsletterForm({
   successMessage = 'Welcome! Check your inbox for the code.',
   errorMessage = "Couldn't subscribe — try again.",
   emailAriaLabel = 'Email address',
+  consentLabel,
+  consentRequiredMessage = 'Please accept to receive the newsletter.',
   className,
 }: NewsletterFormProps) {
   const [email, setEmail] = React.useState('');
+  const [consent, setConsent] = React.useState(false);
+  const [consentError, setConsentError] = React.useState(false);
   const [state, setState] = React.useState<State>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +47,11 @@ export function NewsletterForm({
       setState('error');
       return;
     }
+    if (consentLabel && !consent) {
+      setConsentError(true);
+      return;
+    }
+    setConsentError(false);
     setState('loading');
     try {
       await onSubmit(email);
@@ -65,10 +81,7 @@ export function NewsletterForm({
     <form
       noValidate
       onSubmit={handleSubmit}
-      className={cn(
-        'mx-auto flex w-full max-w-[480px] flex-col gap-2',
-        className,
-      )}
+      className={cn('mx-auto flex w-full max-w-[480px] flex-col gap-2', className)}
     >
       <div className="flex h-14 items-center overflow-hidden rounded-button border border-border/[var(--border-strong-alpha)] bg-surface-2 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/30">
         <input
@@ -91,6 +104,26 @@ export function NewsletterForm({
           {state === 'loading' ? '…' : ctaLabel}
         </button>
       </div>
+      {consentLabel && (
+        // biome-ignore lint/a11y/noLabelWithoutControl: the checkbox is the control
+        <label className="flex items-start gap-2 px-1 text-left text-small text-fg-muted">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => {
+              setConsent(e.target.checked);
+              if (e.target.checked) setConsentError(false);
+            }}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-border/[var(--border-strong-alpha)] accent-accent"
+          />
+          <span>{consentLabel}</span>
+        </label>
+      )}
+      {consentError && (
+        <p role="alert" className="px-1 text-small text-negative">
+          {consentRequiredMessage}
+        </p>
+      )}
       {state === 'error' && (
         <p role="alert" className="px-1 text-small text-negative">
           {errorMessage}

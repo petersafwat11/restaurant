@@ -2,7 +2,13 @@
 
 import { useAddToCart } from '@/features/cart/hooks';
 import { useMenuTree } from '@/features/menu/hooks';
-import type { MenuItemDto, MenuTreeDto, ModifierGroupDto } from '@repo/types';
+import {
+  ALLERGENS,
+  type AllergenKey,
+  type MenuItemDto,
+  type MenuTreeDto,
+  type ModifierGroupDto,
+} from '@repo/types';
 import {
   Container,
   DishCard,
@@ -68,6 +74,7 @@ function adaptModifierGroup(g: ModifierGroupDto): ModifierGroupShape {
 function adaptToDishDetail(
   item: MenuItemDto & { modifierGroups: ModifierGroupDto[] },
   currency: string,
+  allergenLabels: Record<AllergenKey, string>,
 ): DishDetail {
   return {
     id: item.id,
@@ -83,6 +90,7 @@ function adaptToDishDetail(
     prepMinutes: item.prepMinutes ?? undefined,
     calories: item.calories ?? undefined,
     grams: item.grams ?? undefined,
+    allergens: item.allergens.map((a) => allergenLabels[a]),
     flags: itemFlagsOf(item) as DishDetail['flags'],
     modifierGroups: item.modifierGroups.map(adaptModifierGroup),
     unavailable: !item.isAvailable,
@@ -110,10 +118,19 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     [t],
   );
 
+  const allergenLabels = React.useMemo(
+    () =>
+      Object.fromEntries(
+        ALLERGENS.map((a) => [a, t(`allergen.${a}` as 'allergen.gluten')]),
+      ) as Record<AllergenKey, string>,
+    [t],
+  );
+
   const sheetLabels = React.useMemo(
     () => ({
       closeAriaLabel: t('sheet.close'),
       allergensLabel: t('sheet.allergens'),
+      allergenNote: t('sheet.allergenNote'),
       specialInstructionsLabel: t('sheet.specialInstructions'),
       specialInstructionsPlaceholder: t('sheet.specialInstructionsPlaceholder'),
       quantityLabel: t('sheet.quantity'),
@@ -222,7 +239,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     (item: MenuItemDto & { modifierGroups: ModifierGroupDto[] }) => {
       if (!item.isAvailable) return;
       if (item.modifierGroups.length > 0) {
-        setSheetItem(adaptToDishDetail(item, currency));
+        setSheetItem(adaptToDishDetail(item, currency, allergenLabels));
         return;
       }
       addMutation.mutate({
@@ -231,7 +248,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         modifierSelections: [],
       });
     },
-    [addMutation, currency],
+    [addMutation, currency, allergenLabels],
   );
 
   const handleSheetAdd = React.useCallback(
@@ -402,7 +419,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                   onAdd={() => handleAdd(item)}
                   onClick={(e) => {
                     e.preventDefault();
-                    setSheetItem(adaptToDishDetail(item, currency));
+                    setSheetItem(adaptToDishDetail(item, currency, allergenLabels));
                   }}
                 />
               ))}

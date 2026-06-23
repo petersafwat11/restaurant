@@ -19,7 +19,7 @@
     "closesAt": "Zamykamy o {time}",
     "chefName": "Szef Donald",
     "chefLocation": "Centrum Kielce",
-    "ratingLabel": "Bazując na {count} opiniach Google",
+    "ratingLabel": "Ocena w Google",
     "starsAriaLabel": "{value} z 5 gwiazdek"
   },
   "categories": {
@@ -147,8 +147,10 @@
     "description": "Zapisz się — sporadyczne maile, zero spamu. Wypisanie w każdej chwili.",
     "emailPlaceholder": "Twój email",
     "subscribe": "Zapisz się",
-    "subscribeSuccess": "Witamy! Sprawdź skrzynkę — kod już czeka.",
+    "subscribeSuccess": "Prawie gotowe — sprawdź skrzynkę i potwierdź subskrypcję.",
     "subscribeError": "Nie udało się zapisać — spróbuj ponownie.",
-    "emailAriaLabel": "Adres email"
+    "emailAriaLabel": "Adres email",
+    "consentLabel": "Wyrażam zgodę na otrzymywanie newslettera Szef Donald na e-mail i zapoznałem(-am) się z <privacyLink>Polityką Prywatności</privacyLink>. Mogę zrezygnować w każdej chwili.",
+    "consentRequired": "Zaznacz zgodę, aby otrzymywać newsletter."
   }
 }

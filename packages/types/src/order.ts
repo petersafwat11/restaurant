@@ -48,14 +48,13 @@ export const CreateOrderSchema = z
     pickupAt: z.string().datetime().nullish(),
     notes: z.string().max(1000).nullish(),
     tipAmount: MoneyStringSchema.default('0'),
+    // When the customer accepted the Regulamin + Privacy Policy at checkout.
+    acceptedTermsAt: z.string().datetime().nullish(),
   })
-  .refine(
-    (d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress,
-    {
-      message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
-      path: ['deliveryAddressId'],
-    },
-  )
+  .refine((d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress, {
+    message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
+    path: ['deliveryAddressId'],
+  })
   .refine((d) => !(d.deliveryAddressId && d.deliveryAddress), {
     message: 'Provide either deliveryAddressId or deliveryAddress, not both',
     path: ['deliveryAddress'],
@@ -146,10 +145,7 @@ export const OrderSchema = z.object({
       city: z.string(),
       state: z.string().nullable(),
       country: z.string(),
-      geoPoint: z
-        .object({ lat: z.number(), lng: z.number() })
-        .nullable()
-        .optional(),
+      geoPoint: z.object({ lat: z.number(), lng: z.number() }).nullable().optional(),
     })
     .nullable(),
   pickupAt: z.string().nullable(),

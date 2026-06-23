@@ -133,6 +133,14 @@ export const EmailPromoPayloadSchema = z.object({
 });
 export type EmailPromoPayload = z.infer<typeof EmailPromoPayloadSchema>;
 
+// Marketing — newsletter double opt-in confirmation email.
+export const EmailNewsletterConfirmPayloadSchema = z.object({
+  email: z.string().email(),
+  confirmUrl: z.string().url(),
+  unsubscribeUrl: z.string().url(),
+});
+export type EmailNewsletterConfirmPayload = z.infer<typeof EmailNewsletterConfirmPayloadSchema>;
+
 // Sprint 11 — loyalty / referral reward push + referral invite email.
 export const PushLoyaltyPayloadSchema = z.object({
   userId: z.string(),

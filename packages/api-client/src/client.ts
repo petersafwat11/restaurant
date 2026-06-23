@@ -30,6 +30,14 @@ import {
   AuthTokensSchema,
   type AvailabilityQueryDto,
   AvailabilityResponseSchema,
+  type BroadcastEmailDto,
+  type BroadcastEmailResponseDto,
+  BroadcastEmailResponseSchema,
+  BroadcastEmailSchema,
+  type BulkTagCustomersDto,
+  type BulkTagCustomersResponseDto,
+  BulkTagCustomersResponseSchema,
+  BulkTagCustomersSchema,
   type CancelReservationDto,
   CancelReservationSchema,
   type CartDto,
@@ -55,6 +63,8 @@ import {
   CreateContactNoteSchema,
   type CreateCustomerNoteDto,
   CreateCustomerNoteSchema,
+  type CreateCustomerTagDto,
+  CreateCustomerTagSchema,
   type CreateMenuCategoryDto,
   CreateMenuCategorySchema,
   type CreateMenuItemDto,
@@ -77,16 +87,6 @@ import {
   CreateReviewSchema,
   type CreateTableDto,
   CreateTableSchema,
-  type BroadcastEmailDto,
-  type BroadcastEmailResponseDto,
-  BroadcastEmailResponseSchema,
-  BroadcastEmailSchema,
-  type BulkTagCustomersDto,
-  type BulkTagCustomersResponseDto,
-  BulkTagCustomersResponseSchema,
-  BulkTagCustomersSchema,
-  type CreateCustomerTagDto,
-  CreateCustomerTagSchema,
   type CustomerDetailDto,
   CustomerDetailSchema,
   type CustomerExportQuery,
@@ -96,19 +96,17 @@ import {
   CustomerListQuerySchema,
   CustomerListSchema,
   CustomerNoteSchema,
-  type CustomerTagDto,
-  CustomerTagListSchema,
-  CustomerTagSchema,
   type CustomerRetentionDto,
   type CustomerRetentionQuery,
   CustomerRetentionQuerySchema,
   CustomerRetentionSchema,
+  type CustomerTagDto,
+  CustomerTagListSchema,
+  CustomerTagSchema,
   type DeliveryZoneCheckQuery,
   DeliveryZoneCheckQuerySchema,
   type DeliveryZoneCheckResponseDto,
   DeliveryZoneCheckResponseSchema,
-  type PublicDeliveryZonesResponseDto,
-  PublicDeliveryZonesResponseSchema,
   type FeatureFlagAdminDto,
   FeatureFlagAdminSchema,
   type FeatureFlagListDto,
@@ -157,6 +155,13 @@ import {
   ModifierGroupSchema,
   type ModifierOptionDto,
   ModifierOptionSchema,
+  type MoveReservationDto,
+  MoveReservationSchema,
+  type NewsletterResultDto,
+  NewsletterResultSchema,
+  type NewsletterSubscribeDto,
+  NewsletterSubscribeSchema,
+  NewsletterTokenSchema,
   type NotificationListDto,
   type NotificationListQuery,
   NotificationListQuerySchema,
@@ -187,12 +192,11 @@ import {
   type PaymentMethodsBreakdownDto,
   PaymentMethodsBreakdownSchema,
   PaymentSchema,
-  type UploadKind,
-  type UploadResponseDto,
-  UploadResponseSchema,
   type PromotionDto,
   PromotionListSchema,
   PromotionSchema,
+  type PublicDeliveryZonesResponseDto,
+  PublicDeliveryZonesResponseSchema,
   type ReferralListDto,
   type ReferralListQuery,
   ReferralListQuerySchema,
@@ -245,8 +249,6 @@ import {
   SalesByDayOfWeekSchema,
   type SalesByHourDto,
   SalesByHourSchema,
-  type MoveReservationDto,
-  MoveReservationSchema,
   type SeatReservationDto,
   SeatReservationSchema,
   type SeoMetaDto,
@@ -309,6 +311,9 @@ import {
   UpdateStaffRoleSchema,
   type UpdateTableDto,
   UpdateTableSchema,
+  type UploadKind,
+  type UploadResponseDto,
+  UploadResponseSchema,
   type ValidateCouponDto,
   type ValidateCouponResponseDto,
   ValidateCouponResponseSchema,
@@ -394,12 +399,7 @@ export function createApiClient(opts: ApiClientOptions) {
 
     const res = await fetchImpl(url, init);
 
-    if (
-      res.status === 401 &&
-      !options.skipRefresh &&
-      !isCookieClient &&
-      opts.refreshAccessToken
-    ) {
+    if (res.status === 401 && !options.skipRefresh && !isCookieClient && opts.refreshAccessToken) {
       const newToken = await opts.refreshAccessToken();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
@@ -822,10 +822,7 @@ export function createApiClient(opts: ApiClientOptions) {
         query: { sessionKey: params.sessionKey },
         responseSchema: CartSchema,
       }),
-    addItem: (
-      params: { sessionKey?: string },
-      input: AddCartItemDto,
-    ): Promise<CartDto> =>
+    addItem: (params: { sessionKey?: string }, input: AddCartItemDto): Promise<CartDto> =>
       request('/cart/items', {
         method: 'POST',
         auth: false,
@@ -865,10 +862,7 @@ export function createApiClient(opts: ApiClientOptions) {
         body: MergeCartSchema.parse(input),
         responseSchema: CartSchema,
       }),
-    applyCoupon: (
-      params: { sessionKey?: string },
-      input: ApplyCouponDto,
-    ): Promise<CartDto> =>
+    applyCoupon: (params: { sessionKey?: string }, input: ApplyCouponDto): Promise<CartDto> =>
       request('/cart/coupon', {
         method: 'POST',
         auth: false,
@@ -1416,6 +1410,31 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- newsletter ------------------------------------------------------
+  const newsletter = {
+    subscribe: (input: NewsletterSubscribeDto): Promise<NewsletterResultDto> =>
+      request('/newsletter/subscribe', {
+        method: 'POST',
+        auth: false,
+        body: NewsletterSubscribeSchema.parse(input),
+        responseSchema: NewsletterResultSchema,
+      }),
+    confirm: (token: string): Promise<NewsletterResultDto> =>
+      request('/newsletter/confirm', {
+        method: 'POST',
+        auth: false,
+        body: NewsletterTokenSchema.parse({ token }),
+        responseSchema: NewsletterResultSchema,
+      }),
+    unsubscribe: (token: string): Promise<NewsletterResultDto> =>
+      request('/newsletter/unsubscribe', {
+        method: 'POST',
+        auth: false,
+        body: NewsletterTokenSchema.parse({ token }),
+        responseSchema: NewsletterResultSchema,
+      }),
+  };
+
   // ---- seo -------------------------------------------------------------
   const seo = {
     structuredData: (slug: string): Promise<StructuredDataDto> =>
@@ -1705,6 +1724,7 @@ export function createApiClient(opts: ApiClientOptions) {
     featureFlags,
     marketing,
     contact,
+    newsletter,
     seo,
     customers,
     staff,

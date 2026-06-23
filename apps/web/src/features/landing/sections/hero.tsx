@@ -1,3 +1,4 @@
+import { GOOGLE_RATING } from '@/lib/brand';
 import { Hero, Stars } from '@repo/ui';
 import { getTranslations } from 'next-intl/server';
 import { HeroLiveBadges } from './hero-live-badges';
@@ -20,9 +21,9 @@ export async function LandingHero() {
       primaryCta={{ label: t('primaryCta'), href: '/menu' }}
       secondaryCta={{ label: t('secondaryCta'), href: '/menu' }}
       rating={{
-        value: 4.8,
-        count: 1247,
-        label: t('ratingLabel', { count: 1247 }),
+        value: GOOGLE_RATING,
+        count: 0,
+        label: t('ratingLabel'),
         renderStars: (v) => (
           <Stars value={v} size={16} ariaLabel={t('starsAriaLabel', { value: v })} />
         ),

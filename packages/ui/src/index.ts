@@ -34,7 +34,7 @@ export {
   type DataTableSortState,
   type ColumnDef,
 } from './data-table';
-export { type PaginationState } from './data-table/pagination';
+export type { PaginationState } from './data-table/pagination';
 export { DetailDrawer, type DetailDrawerProps } from './detail-drawer';
 export {
   DragReorderList,
@@ -70,6 +70,7 @@ export {
   type MapZone,
   type GeoJsonPolygon,
 } from './polygon-map-editor';
+export { Prose, type ProseProps } from './prose';
 export { RelativeTime, type RelativeTimeProps } from './relative-time';
 export {
   ReservationCalendar,

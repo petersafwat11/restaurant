@@ -58,6 +58,12 @@ export const CheckoutFormSchema = z
       .regex(/^-?\d+(\.\d{1,2})?$/, 'Invalid tip amount.')
       .default('0'),
     promoCode: z.string().max(60).optional(),
+    // Consumer-law: the customer must accept the Regulamin + Privacy Policy
+    // before placing the order. Boolean (so the form default can be `false`)
+    // refined to require an explicit tick.
+    acceptedTerms: z.boolean().refine((v) => v === true, {
+      message: 'Please accept the Terms and Privacy Policy to continue.',
+    }),
   })
   .superRefine((data, ctx) => {
     if (data.orderType === 'DELIVERY') {

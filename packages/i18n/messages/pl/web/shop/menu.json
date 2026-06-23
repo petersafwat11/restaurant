@@ -50,6 +50,7 @@
   "sheet": {
     "close": "Zamknij",
     "allergens": "Alergeny",
+    "allergenNote": "Przygotowywane w kuchni, w której występuje wszystkie 14 głównych alergenów — mogą wystąpić śladowe ilości.",
     "specialInstructions": "Uwagi specjalne",
     "specialInstructionsPlaceholder": "Coś powinniśmy wiedzieć? (bez cebuli, więcej sosu…)",
     "quantity": "Ilość",
@@ -57,5 +58,21 @@
     "soldOut": "Wyprzedane na dziś — wracamy jutro.",
     "minChoice": "Wybierz co najmniej {min, plural, one {jeden} few {#} many {#} other {#}}.",
     "chooseGroups": "Wybierz: {names}"
+  },
+  "allergen": {
+    "gluten": "Gluten",
+    "crustaceans": "Skorupiaki",
+    "eggs": "Jaja",
+    "fish": "Ryby",
+    "peanuts": "Orzeszki ziemne",
+    "soybeans": "Soja",
+    "milk": "Mleko",
+    "nuts": "Orzechy",
+    "celery": "Seler",
+    "mustard": "Gorczyca",
+    "sesame": "Sezam",
+    "sulphites": "Dwutlenek siarki i siarczyny",
+    "lupin": "Łubin",
+    "molluscs": "Mięczaki"
   }
 }

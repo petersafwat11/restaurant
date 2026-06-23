@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Informacje prawne",
+  "lastUpdated": "Ostatnia aktualizacja: {date}",
+  "footerQuestion": "Masz pytania dotyczące tej polityki?",
+  "footerLink": "Skontaktuj się z nami",
+  "privacy": {
+    "title": "Polityka Prywatności"
+  },
+  "terms": {
+    "title": "Regulamin"
+  },
+  "cookies": {
+    "title": "Polityka plików cookie"
+  }
+}

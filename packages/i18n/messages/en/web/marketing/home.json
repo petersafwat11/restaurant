@@ -19,7 +19,7 @@
     "closesAt": "Closes at {time}",
     "chefName": "Szef Donald",
     "chefLocation": "Kielce Centrum",
-    "ratingLabel": "Based on {count} Google reviews",
+    "ratingLabel": "Rated on Google",
     "starsAriaLabel": "{value} out of 5 stars"
   },
   "categories": {
@@ -147,8 +147,10 @@
     "description": "Join the list — occasional emails, never spam. Unsubscribe whenever.",
     "emailPlaceholder": "Your email",
     "subscribe": "Subscribe",
-    "subscribeSuccess": "Welcome! Check your inbox for the code.",
+    "subscribeSuccess": "Almost there — check your inbox to confirm your subscription.",
     "subscribeError": "Couldn't subscribe — try again.",
-    "emailAriaLabel": "Email address"
+    "emailAriaLabel": "Email address",
+    "consentLabel": "I agree to receive the Szef Donald newsletter by email and have read the <privacyLink>Privacy Policy</privacyLink>. I can unsubscribe anytime.",
+    "consentRequired": "Please tick the box to receive the newsletter."
   }
 }

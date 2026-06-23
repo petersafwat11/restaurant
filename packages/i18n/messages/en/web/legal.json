@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Legal",
+  "lastUpdated": "Last updated {date}",
+  "footerQuestion": "Questions about this policy?",
+  "footerLink": "Contact us",
+  "privacy": {
+    "title": "Privacy Policy"
+  },
+  "terms": {
+    "title": "Terms of Service"
+  },
+  "cookies": {
+    "title": "Cookie Policy"
+  }
+}

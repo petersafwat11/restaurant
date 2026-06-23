@@ -253,6 +253,7 @@ interface SeedItem {
   calories?: number;
   prepMinutes?: number;
   grams?: number;
+  allergens?: string[];
   modifierGroups?: Array<{
     name: string;
     isRequired?: boolean;
@@ -325,6 +326,7 @@ const CATEGORIES: SeedCategory[] = [
         isFeatured: true,
         prepMinutes: 8,
         grams: 200,
+        allergens: ['gluten', 'milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
             { name: 'Mały', priceDelta: '0.00', isDefault: true },
@@ -359,6 +361,7 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '22.00',
         prepMinutes: 8,
         grams: 180,
+        allergens: ['gluten', 'milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
             { name: 'Mały', priceDelta: '0.00', isDefault: true },
@@ -377,6 +380,7 @@ const CATEGORIES: SeedCategory[] = [
         isFeatured: true,
         prepMinutes: 12,
         grams: 300,
+        allergens: ['gluten', 'milk'],
         modifierGroups: [
           sizeGroup([
             { name: 'Duży', priceDelta: '0.00', isDefault: true },
@@ -392,6 +396,7 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '29.00',
         prepMinutes: 10,
         grams: 250,
+        allergens: ['milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
             { name: 'Standard', priceDelta: '0.00', isDefault: true },
@@ -759,6 +764,7 @@ async function seedMenu() {
           calories: it.calories ?? null,
           prepMinutes: it.prepMinutes ?? null,
           grams: it.grams ?? null,
+          allergens: it.allergens ?? [],
           position: iIdx,
           isAvailable: true,
         },
@@ -776,6 +782,7 @@ async function seedMenu() {
           calories: it.calories ?? null,
           prepMinutes: it.prepMinutes ?? null,
           grams: it.grams ?? null,
+          allergens: it.allergens ?? [],
           position: iIdx,
           isAvailable: true,
         },

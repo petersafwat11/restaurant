@@ -1,0 +1,18 @@
+{
+  "confirm": {
+    "loadingTitle": "Potwierdzamy subskrypcję…",
+    "successTitle": "Subskrypcja potwierdzona! 🎉",
+    "successDescription": "Dziękujemy za potwierdzenie. Od teraz będziesz otrzymywać newsletter Szef Donald.",
+    "errorTitle": "Link wygasł lub jest nieprawidłowy",
+    "errorDescription": "Ten link potwierdzający jest już nieaktualny. Spróbuj zapisać się ponownie na stronie głównej.",
+    "backHome": "Wróć na stronę główną"
+  },
+  "unsubscribe": {
+    "loadingTitle": "Wypisujemy…",
+    "successTitle": "Zostałeś wypisany",
+    "successDescription": "Nie będziesz już otrzymywać newslettera. Przykro nam, że odchodzisz!",
+    "errorTitle": "Link wygasł lub jest nieprawidłowy",
+    "errorDescription": "Ten link do wypisania jest już nieaktualny.",
+    "backHome": "Wróć na stronę główną"
+  }
+}

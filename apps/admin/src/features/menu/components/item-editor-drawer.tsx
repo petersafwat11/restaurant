@@ -11,7 +11,7 @@ import {
   useUpdateMenuItem,
 } from '@/features/menu/hooks';
 import { useUploadImage } from '@/features/uploads/hooks/use-upload-image';
-import type { MenuCategoryDto, MenuItemDto } from '@repo/types';
+import { ALLERGENS, type MenuCategoryDto, type MenuItemDto } from '@repo/types';
 import {
   Button,
   CurrencyInput,
@@ -60,6 +60,7 @@ type Draft = Pick<
   | 'calories'
   | 'prepMinutes'
   | 'grams'
+  | 'allergens'
   | 'spiceLevel'
   | 'isVegetarian'
   | 'isVegan'
@@ -78,6 +79,7 @@ const EMPTY_DRAFT: Draft = {
   calories: null,
   prepMinutes: null,
   grams: null,
+  allergens: [],
   spiceLevel: 0,
   isVegetarian: false,
   isVegan: false,
@@ -125,6 +127,7 @@ export function ItemEditorDrawer({
         calories: item.calories,
         prepMinutes: item.prepMinutes,
         grams: item.grams,
+        allergens: item.allergens,
         spiceLevel: item.spiceLevel,
         isVegetarian: item.isVegetarian,
         isVegan: item.isVegan,
@@ -396,6 +399,38 @@ function DetailsSection({ draft, set, categories, currency }: DetailsSectionProp
               {n === 0 ? t('spiceNone') : '🌶'.repeat(n)}
             </button>
           ))}
+        </div>
+      </FormField>
+      <FormField
+        label={t('allergensLabel')}
+        helper={t('allergensHelper')}
+        className="sm:col-span-2"
+      >
+        <div className="flex flex-wrap gap-1.5">
+          {ALLERGENS.map((a) => {
+            const active = draft.allergens.includes(a);
+            return (
+              <button
+                key={a}
+                type="button"
+                aria-pressed={active}
+                onClick={() =>
+                  set(
+                    'allergens',
+                    active ? draft.allergens.filter((x) => x !== a) : [...draft.allergens, a],
+                  )
+                }
+                className={cn(
+                  'inline-flex h-7 items-center rounded-md border px-2.5 text-xs font-medium transition-colors',
+                  active
+                    ? 'border-accent bg-accent/[0.10] text-accent'
+                    : 'border-border/[var(--border-strong-alpha)] bg-surface text-fg-muted hover:text-fg',
+                )}
+              >
+                {t(`allergen.${a}` as 'allergen.gluten')}
+              </button>
+            );
+          })}
         </div>
       </FormField>
     </div>

@@ -1,10 +1,13 @@
 'use client';
 
+import { Link } from '@/i18n/navigation';
+import { getApiClient } from '@/lib/api-client';
 import { Container, NewsletterForm, SectionHeader } from '@repo/ui';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export function LandingNewsletter() {
   const t = useTranslations('web.marketing.home.newsletter');
+  const locale = useLocale();
   return (
     <section
       id="newsletter"
@@ -20,14 +23,27 @@ export function LandingNewsletter() {
           align="center"
         />
         <NewsletterForm
-          onSubmit={async () => {
-            await new Promise((r) => setTimeout(r, 600));
+          onSubmit={async (email) => {
+            await getApiClient().newsletter.subscribe({
+              email,
+              consent: true,
+              locale,
+              source: 'landing',
+            });
           }}
           placeholder={t('emailPlaceholder')}
           ctaLabel={t('subscribe')}
           successMessage={t('subscribeSuccess')}
           errorMessage={t('subscribeError')}
           emailAriaLabel={t('emailAriaLabel')}
+          consentRequiredMessage={t('consentRequired')}
+          consentLabel={t.rich('consentLabel', {
+            privacyLink: (chunks) => (
+              <Link href="/privacy" className="text-accent underline underline-offset-2">
+                {chunks}
+              </Link>
+            ),
+          })}
         />
       </Container>
     </section>

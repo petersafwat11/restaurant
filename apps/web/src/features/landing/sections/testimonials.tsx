@@ -1,7 +1,7 @@
 'use client';
 
 import { useReviews } from '@/features/reviews/hooks';
-import { Link } from '@/i18n/navigation';
+import { GOOGLE_REVIEWS_URL } from '@/lib/brand';
 import { mockTestimonials } from '@/lib/mock/szef-donald';
 import { Container, SectionHeader, TestimonialCard } from '@repo/ui';
 import { ArrowUpRight } from 'lucide-react';
@@ -65,13 +65,15 @@ export function LandingTestimonials() {
           ))}
         </div>
         <div className="mt-10 flex justify-center">
-          <Link
-            href="#"
+          <a
+            href={GOOGLE_REVIEWS_URL}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-1 text-[15px] font-medium text-fg hover:text-accent"
           >
             {t('readAllReviews')}
             <ArrowUpRight size={14} />
-          </Link>
+          </a>
         </div>
       </Container>
     </section>

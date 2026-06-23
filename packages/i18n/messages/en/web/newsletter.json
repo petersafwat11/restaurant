@@ -1,0 +1,18 @@
+{
+  "confirm": {
+    "loadingTitle": "Confirming your subscription…",
+    "successTitle": "You're subscribed! 🎉",
+    "successDescription": "Thanks for confirming. You'll now receive the Szef Donald newsletter.",
+    "errorTitle": "Link expired or invalid",
+    "errorDescription": "This confirmation link is no longer valid. Try subscribing again from our home page.",
+    "backHome": "Back to home"
+  },
+  "unsubscribe": {
+    "loadingTitle": "Unsubscribing…",
+    "successTitle": "You've been unsubscribed",
+    "successDescription": "You won't receive the newsletter anymore. Sorry to see you go!",
+    "errorTitle": "Link expired or invalid",
+    "errorDescription": "This unsubscribe link is no longer valid.",
+    "backHome": "Back to home"
+  }
+}

@@ -11,8 +11,8 @@
     "yearsLabel": "Open since 2019",
     "wrapsValue": "~1,200 / week",
     "wrapsLabel": "Wraps in high season",
-    "ratingValue": "4.8",
-    "ratingLabel": "Average across 1,247 reviews",
+    "ratingValue": "4.1",
+    "ratingLabel": "Rated on Google",
     "ratingLabelDynamic": "Average across {count} reviews"
   }
 }

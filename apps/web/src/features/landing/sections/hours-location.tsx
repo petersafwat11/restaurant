@@ -15,133 +15,58 @@ function MapCard({
   ariaLabel,
   addressBadge,
   addressFooter,
-  mapTitle,
-  pinTitle,
-  tramAnnotation,
-  metroAnnotation,
   directionsHref,
   openInMaps,
+  geoPoint,
 }: {
   ariaLabel: string;
   addressBadge: string;
   addressFooter: string;
-  mapTitle: string;
-  pinTitle: string;
-  tramAnnotation: string;
-  metroAnnotation: string;
   directionsHref: string;
   openInMaps: string;
+  /** Real restaurant coordinates from the DB. Null → show a placeholder. */
+  geoPoint: { lat: number; lng: number } | null;
 }) {
+  // Real OpenStreetMap embed centred on the DB coordinates. OSM is used (not
+  // Google Maps) because its embed sets no tracking cookies — keeps the page
+  // free of consent-requiring third parties.
+  const embedSrc = geoPoint
+    ? (() => {
+        const d = 0.004; // ~±450 m window
+        const bbox = [geoPoint.lng - d, geoPoint.lat - d, geoPoint.lng + d, geoPoint.lat + d].join(
+          ',',
+        );
+        return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
+          bbox,
+        )}&layer=mapnik&marker=${geoPoint.lat},${geoPoint.lng}`;
+      })()
+    : null;
+
   return (
     <div className="relative overflow-hidden rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated">
-      <div
-        role="img"
-        aria-label={ariaLabel}
-        className="relative aspect-[5/4] w-full bg-[radial-gradient(circle_at_30%_30%,rgb(var(--surface-warm))_0%,rgb(var(--surface-2))_60%,rgb(var(--surface))_100%)]"
-      >
-        <svg
-          viewBox="0 0 500 400"
-          preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 h-full w-full"
-          aria-hidden
-          role="presentation"
-        >
-          <title>{mapTitle}</title>
-          <defs>
-            <pattern id="landingGridFine" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path
-                d="M0 16 H32 M16 0 V32"
-                stroke="rgba(0,0,0,0.05)"
-                strokeWidth="0.6"
-                fill="none"
-              />
-            </pattern>
-          </defs>
-
-          <rect width="500" height="400" fill="url(#landingGridFine)" />
-
-          {/* Park / green block */}
-          <path
-            d="M40 280 Q 90 240 160 260 Q 210 280 200 340 L 60 360 Z"
-            fill="rgb(79 123 60 / 0.18)"
+      <div className="relative aspect-[5/4] w-full bg-surface-warm/40">
+        {embedSrc ? (
+          <iframe
+            title={ariaLabel}
+            src={embedSrc}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="absolute inset-0 h-full w-full border-0"
           />
-
-          {/* River */}
-          <path
-            d="M-20 90 Q 120 80 220 130 T 540 110"
-            stroke="rgb(73 130 168 / 0.35)"
-            strokeWidth={28}
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* Avenues */}
-          <path
-            d="M-20 200 Q 150 180 260 220 T 540 240"
-            stroke="rgba(255,255,255,0.95)"
-            strokeWidth={6}
-            fill="none"
-          />
-          <path
-            d="M260 -20 Q 250 130 280 240 T 320 420"
-            stroke="rgba(255,255,255,0.95)"
-            strokeWidth={6}
-            fill="none"
-          />
-          <path d="M-20 320 H 540" stroke="rgba(255,255,255,0.85)" strokeWidth={4} fill="none" />
-          <path d="M80 -20 V 420" stroke="rgba(255,255,255,0.7)" strokeWidth={3} fill="none" />
-
-          {/* Tram stop dot */}
-          <g transform="translate(208, 210)">
-            <circle r={7} fill="#fff" stroke="rgb(var(--accent))" strokeWidth={2} />
-            <circle r={3} fill="rgb(var(--accent))" />
-          </g>
-
-          {/* Metro station marker */}
-          <g transform="translate(370, 326)">
-            <rect x={-9} y={-9} width={18} height={18} rx={3} fill="#1d4ed8" />
-            <text
-              x={0}
-              y={4}
-              textAnchor="middle"
-              fontSize={11}
-              fontWeight={700}
-              fill="#fff"
-              fontFamily="system-ui"
-            >
-              M
-            </text>
-          </g>
-        </svg>
-
-        {/* Restaurant pin */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[68%]">
-          <span className="absolute -inset-3 animate-ping rounded-full bg-accent/40" />
-          <svg width={46} height={58} viewBox="0 0 44 56" aria-hidden role="presentation">
-            <title>{pinTitle}</title>
-            <path
-              d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
-              fill="rgb(var(--accent))"
-            />
-            <circle cx={22} cy={20} r={7} fill="white" />
-            <circle cx={22} cy={20} r={3} fill="rgb(var(--accent))" />
-          </svg>
-        </div>
-
-        {/* Annotation chips */}
-        <div className="absolute left-[36%] top-[44%] -translate-y-full">
-          <span className="block whitespace-nowrap rounded-md bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-fg shadow-sm">
-            {tramAnnotation}
-          </span>
-        </div>
-        <div className="absolute left-[68%] top-[78%]">
-          <span className="block whitespace-nowrap rounded-md bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-fg shadow-sm">
-            {metroAnnotation}
-          </span>
-        </div>
-        <div className="absolute left-4 top-4 rounded-md bg-surface-elevated px-3 py-1.5 text-small font-medium text-fg shadow-sm">
-          {addressBadge}
-        </div>
+        ) : (
+          <div
+            role="img"
+            aria-label={ariaLabel}
+            className="absolute inset-0 grid place-items-center text-fg-subtle"
+          >
+            <MapPin size={32} aria-hidden />
+          </div>
+        )}
+        {addressBadge && (
+          <div className="pointer-events-none absolute left-4 top-4 rounded-md bg-surface-elevated px-3 py-1.5 text-small font-medium text-fg shadow-sm">
+            {addressBadge}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between gap-4 border-t border-border/[var(--border-alpha)] px-5 py-3">
@@ -256,12 +181,9 @@ export function LandingHoursLocation() {
               })}
               addressBadge={addressLine1}
               addressFooter={addressLine2}
-              mapTitle={t('mapTitle')}
-              pinTitle={t('pinTitle')}
-              tramAnnotation={t('tramAnnotation')}
-              metroAnnotation={t('metroAnnotation')}
               directionsHref={href}
               openInMaps={t('openInMaps')}
+              geoPoint={restaurant?.geoPoint ?? null}
             />
             <div className="flex justify-end">
               <Link

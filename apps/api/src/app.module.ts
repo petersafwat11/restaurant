@@ -19,6 +19,7 @@ import { ContactModule } from './contact/contact.module';
 import { CustomersModule } from './customers/customers.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { HealthController } from './health/health.controller';
+import { NewsletterModule } from './newsletter/newsletter.module';
 import path from 'node:path';
 import {
   AcceptLanguageResolver,
@@ -110,6 +111,7 @@ import { UsersModule } from './users/users.module';
     AnalyticsProductModule,
     FeatureFlagsModule,
     ContactModule,
+    NewsletterModule,
     MarketingModule,
     SeoModule,
     JobsModule,

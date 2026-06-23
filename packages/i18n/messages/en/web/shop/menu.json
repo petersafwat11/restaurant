@@ -50,6 +50,7 @@
   "sheet": {
     "close": "Close",
     "allergens": "Allergens",
+    "allergenNote": "Prepared in a kitchen that handles all 14 major allergens — traces may be present.",
     "specialInstructions": "Special instructions",
     "specialInstructionsPlaceholder": "Anything we should know? (no onions, extra sauce…)",
     "quantity": "Quantity",
@@ -57,5 +58,21 @@
     "soldOut": "Sold out today — back tomorrow.",
     "minChoice": "Please choose at least {min, plural, one {one} other {#}}.",
     "chooseGroups": "Choose: {names}"
+  },
+  "allergen": {
+    "gluten": "Gluten",
+    "crustaceans": "Crustaceans",
+    "eggs": "Eggs",
+    "fish": "Fish",
+    "peanuts": "Peanuts",
+    "soybeans": "Soybeans",
+    "milk": "Milk",
+    "nuts": "Tree nuts",
+    "celery": "Celery",
+    "mustard": "Mustard",
+    "sesame": "Sesame",
+    "sulphites": "Sulphites",
+    "lupin": "Lupin",
+    "molluscs": "Molluscs"
   }
 }
