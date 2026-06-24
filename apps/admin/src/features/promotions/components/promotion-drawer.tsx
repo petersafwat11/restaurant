@@ -8,8 +8,8 @@ import {
   useUpdatePromotion,
 } from '@/features/promotions/hooks';
 import {
-  PROMOTION_TYPES,
   type CreatePromotionDto,
+  PROMOTION_TYPES,
   type PromotionDto,
   type PromotionType,
   type UpdatePromotionDto,
@@ -161,7 +161,7 @@ export function PromotionDrawer({ promotion, creating, onOpenChange, onCreated }
 
   const saving = creating ? create.isPending : update.isPending;
   const saveDisabled = !canWrite || saving || !draft || draft.name.trim().length === 0;
-  const headerTitle = creating ? t('newTitle') : promotion?.name ?? '';
+  const headerTitle = creating ? t('newTitle') : (promotion?.name ?? '');
 
   return (
     <>
@@ -213,12 +213,7 @@ export function PromotionDrawer({ promotion, creating, onOpenChange, onCreated }
                   {promotion.isArchived ? t('actions.restore') : t('actions.archive')}
                 </Button>
               )}
-              <Button
-                variant="primary"
-                className="ml-auto"
-                disabled={saveDisabled}
-                onClick={save}
-              >
+              <Button variant="primary" className="ml-auto" disabled={saveDisabled} onClick={save}>
                 {saving
                   ? creating
                     ? t('actions.creating')

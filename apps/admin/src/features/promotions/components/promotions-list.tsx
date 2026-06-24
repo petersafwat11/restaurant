@@ -41,11 +41,10 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
   const q = usePromotions();
   const rows = q.data ?? [];
   const isCreating = selectedId === NEW_PROMOTION_ID;
-  const fromList = !isCreating && selectedId ? rows.find((r) => r.id === selectedId) ?? null : null;
+  const fromList =
+    !isCreating && selectedId ? (rows.find((r) => r.id === selectedId) ?? null) : null;
   // Deep-link fallback: if the id isn't in the list result, fetch it directly.
-  const directFetch = usePromotion(
-    !isCreating && selectedId && !fromList ? selectedId : null,
-  );
+  const directFetch = usePromotion(!isCreating && selectedId && !fromList ? selectedId : null);
   const selected = fromList ?? directFetch.data ?? null;
 
   usePageHeader({
