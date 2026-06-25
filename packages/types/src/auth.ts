@@ -1,5 +1,18 @@
 import { z } from 'zod';
-import { PERMISSION_KEYS } from './permissions';
+import { PERMISSION_KEYS, type PermissionKey } from './permissions';
+
+const KNOWN_PERMISSIONS = new Set<string>(PERMISSION_KEYS);
+
+/**
+ * Permissions are advisory on the client — they drive UI gating only, while
+ * the API always re-checks via PermissionsGuard. So tolerate permission keys
+ * this build does not recognise (e.g. one seeded server-side before the
+ * frontend is redeployed) by dropping unknowns, rather than failing the whole
+ * auth response and locking every user out of login.
+ */
+const PermissionsSchema = z
+  .array(z.string())
+  .transform((perms) => perms.filter((p): p is PermissionKey => KNOWN_PERMISSIONS.has(p)));
 
 export const EmailSchema = z.string().email().max(255).toLowerCase().trim();
 export const PhoneSchema = z
@@ -94,7 +107,7 @@ export const MeSchema = z.object({
   emailVerifiedAt: z.string().nullable(),
   phoneVerifiedAt: z.string().nullable(),
   roles: z.array(z.string()),
-  permissions: z.array(z.enum(PERMISSION_KEYS)),
+  permissions: PermissionsSchema,
 });
 export type MeDto = z.infer<typeof MeSchema>;
 
