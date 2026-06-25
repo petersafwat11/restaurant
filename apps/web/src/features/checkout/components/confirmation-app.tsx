@@ -1,16 +1,12 @@
 'use client';
 
 import { cartItemToDisplay } from '@/features/cart/to-display';
+import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
 import { useRestaurant } from '@/features/restaurants/hooks';
 import { ReviewCta } from '@/features/reviews/components/review-cta';
 import { Link } from '@/i18n/navigation';
-import {
-  type OrderDto,
-  type OrderItemDto,
-  type OrderType,
-  type RestaurantPublicDto,
-} from '@repo/types';
+import { type OrderDto, type OrderItemDto } from '@repo/types';
 import {
   Container,
   type DeliveryRow,
@@ -51,25 +47,6 @@ function CopyButton({ value }: { value: string }) {
       {copied ? <Check size={16} strokeWidth={2.6} className="text-accent" /> : <Copy size={16} />}
     </button>
   );
-}
-
-/**
- * The admin-configured indicative ready-time range (minutes) for an order type,
- * or null when not configured (or DINE_IN, which has no range). `max` is null
- * when only a single value was set.
- */
-function estimatedRangeFor(
-  restaurant: RestaurantPublicDto | undefined,
-  type: OrderType,
-): { min: number; max: number | null } | null {
-  if (!restaurant) return null;
-  const [min, max] =
-    type === 'DELIVERY'
-      ? [restaurant.estimatedDeliveryMinutesMin, restaurant.estimatedDeliveryMinutesMax]
-      : type === 'PICKUP'
-        ? [restaurant.estimatedPickupMinutesMin, restaurant.estimatedPickupMinutesMax]
-        : [null, null];
-  return min != null ? { min, max } : null;
 }
 
 function orderItemToDisplay(item: OrderItemDto) {
@@ -127,20 +104,12 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   if (order.pickupAt != null) {
     // Scheduled-ahead order — show the exact requested clock time.
     etaText = format.dateTime(new Date(order.pickupAt), { hour: '2-digit', minute: '2-digit' });
-  } else if (estRange) {
-    etaText =
-      estRange.max != null && estRange.max !== estRange.min
-        ? t('eta.minutesRange', { min: estRange.min, max: estRange.max })
-        : t('eta.minutesSingle', { min: estRange.min });
-  } else if (restaurantQuery.isFetched) {
-    // No configured estimate (or DINE_IN) — fall back to the static default,
-    // but only once the restaurant query settles, to avoid a value flash.
-    etaText =
-      order.type === 'DELIVERY'
-        ? t('eta.deliveryDefault')
-        : order.type === 'PICKUP'
-          ? t('eta.pickupDefault')
-          : t('eta.dineInDefault');
+  } else if (estRange || restaurantQuery.isFetched) {
+    // Configured range/single, or the static default once the restaurant query
+    // settles (the isFetched gate avoids a value flash). The same helper drives
+    // the checkout order-type cards so both surfaces show the same number.
+    const eta = estimateEtaKey(estRange, order.type);
+    etaText = t(eta.key, eta.values);
   } else {
     etaText = null;
   }

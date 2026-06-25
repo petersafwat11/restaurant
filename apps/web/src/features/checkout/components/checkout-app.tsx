@@ -6,6 +6,7 @@ import { useCart, useSetCartLoyalty } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
 import { StripePaymentForm } from '@/features/checkout/components/stripe-payment-form';
+import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useFeatureFlag } from '@/features/feature-flags/hooks';
 import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
 import { useCreateOrder } from '@/features/orders/hooks';
@@ -129,6 +130,10 @@ function computeSummary(
 
 export function CheckoutApp() {
   const t = useTranslations('web.shop.checkout');
+  // The indicative ETA strings (eta.*) live in the success-page namespace, which
+  // is the single source so the order-type cards and the success page never
+  // diverge. See features/checkout/estimate.ts.
+  const tEta = useTranslations('web.shop.checkoutSuccess');
   const router = useRouter();
   const cartQuery = useCart();
   const createOrder = useCreateOrder();
@@ -249,18 +254,28 @@ export function CheckoutApp() {
     }
   }, [t, currency]);
 
+  // Indicative ready-time, derived from the live restaurant config (same source
+  // as the success page) rather than a hardcoded string.
+  const etaDescription = React.useCallback(
+    (type: OrderType) => {
+      const eta = estimateEtaKey(estimatedRangeFor(restaurant, type), type);
+      return tEta(eta.key, eta.values);
+    },
+    [tEta, restaurant],
+  );
+
   const ORDER_TYPE_OPTIONS: RadioCardOption<OrderType>[] = React.useMemo(
     () => [
       {
         id: 'DELIVERY',
         label: t('sections.orderType.options.DELIVERY.label'),
-        description: t('sections.orderType.options.DELIVERY.description'),
+        description: etaDescription('DELIVERY'),
         icon: <Truck size={22} strokeWidth={1.75} />,
       },
       {
         id: 'PICKUP',
         label: t('sections.orderType.options.PICKUP.label'),
-        description: t('sections.orderType.options.PICKUP.description'),
+        description: etaDescription('PICKUP'),
         icon: <ShoppingBag size={22} strokeWidth={1.75} />,
         badge: t('sections.orderType.options.PICKUP.badge'),
         badgeTone: 'positive',
@@ -272,7 +287,7 @@ export function CheckoutApp() {
         icon: <Utensils size={22} strokeWidth={1.75} />,
       },
     ],
-    [t],
+    [t, etaDescription],
   );
 
   // Online payments (card / BLIK via Stripe) are "ready" only when the

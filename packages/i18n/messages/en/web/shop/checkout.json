@@ -41,12 +41,10 @@
       },
       "options": {
         "DELIVERY": {
-          "label": "Delivery",
-          "description": "20–40 min"
+          "label": "Delivery"
         },
         "PICKUP": {
           "label": "Pickup",
-          "description": "Ready in 10–15 min",
           "badge": "No fee"
         },
         "DINE_IN": {
