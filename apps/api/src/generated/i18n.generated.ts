@@ -18,10 +18,13 @@ export type I18nTranslations = {
         "loading": string;
         "retry": string;
         "close": string;
+        "closed": string;
         "yes": string;
         "no": string;
         "currency": string;
         "language": string;
+        "showPassword": string;
+        "hidePassword": string;
         "logout": string;
         "skipToContent": string;
         "days": {
@@ -52,6 +55,10 @@ export type I18nTranslations = {
         "rateLimited": string;
         "couponInvalid": string;
         "outOfStock": string;
+        "emailAlreadyRegistered": string;
+        "invalidCredentials": string;
+        "accountDisabled": string;
+        "tokenInvalid": string;
     };
     "validation": {
         "required": string;
@@ -61,6 +68,2637 @@ export type I18nTranslations = {
         "passwordsDoNotMatch": string;
         "invalidPhone": string;
         "tooLong": string;
+    };
+    "admin": {
+        "audit-log": {
+            "title": string;
+            "filters": {
+                "actorPlaceholder": string;
+                "actionAll": string;
+                "resourceAll": string;
+                "fromLabel": string;
+                "toLabel": string;
+                "clear": string;
+                "resources": {
+                    "order": string;
+                    "payment": string;
+                    "menu_item": string;
+                    "menu_category": string;
+                    "promotion": string;
+                    "staff": string;
+                    "review": string;
+                    "reservation": string;
+                    "settings": string;
+                };
+            };
+            "columns": {
+                "when": string;
+                "actor": string;
+                "action": string;
+                "resource": string;
+                "ip": string;
+            };
+            "row": {
+                "noIp": string;
+            };
+            "empty": string;
+            "drawer": {
+                "ariaLabel": string;
+                "actor": string;
+                "ip": string;
+                "before": string;
+                "after": string;
+                "empty": string;
+            };
+        };
+        "contact": {
+            "title": string;
+            "filters": {
+                "all": string;
+                "status": {
+                    "new": string;
+                    "read": string;
+                    "archived": string;
+                };
+            };
+            "columns": {
+                "subject": string;
+                "from": string;
+                "status": string;
+                "createdAt": string;
+            };
+            "row": {
+                "noSubject": string;
+            };
+            "empty": string;
+            "drawer": {
+                "ariaLabel": string;
+                "noSubject": string;
+                "messageLabel": string;
+                "handledBy": string;
+                "activityLabel": string;
+                "activityEmpty": string;
+                "kind": {
+                    "reply": string;
+                    "note": string;
+                };
+                "replyLabel": string;
+                "replyPlaceholder": string;
+                "replySend": string;
+                "replySending": string;
+                "noteLabel": string;
+                "notePlaceholder": string;
+                "noteAdd": string;
+                "markStatus": string;
+                "openInClient": string;
+                "status": {
+                    "new": string;
+                    "read": string;
+                    "archived": string;
+                };
+            };
+        };
+        "dashboard": {
+            "title": string;
+            "period": {
+                "today": string;
+                "7d": string;
+                "30d": string;
+                "custom": string;
+            };
+            "kpi": {
+                "revenue": string;
+                "orders": string;
+                "aov": string;
+                "completionRate": string;
+                "newCustomers": string;
+                "vsPrevPeriod": string;
+            };
+            "revenue": {
+                "title": string;
+                "seriesAriaLabel": string;
+                "seriesRevenue": string;
+                "seriesOrders": string;
+                "tableAriaLabel": string;
+                "tableTime": string;
+                "tableRevenue": string;
+                "tableOrders": string;
+            };
+            "statusDonut": {
+                "title": string;
+                "centerLabel": string;
+                "tableAriaLabel": string;
+                "tableStatus": string;
+                "tableCount": string;
+                "tablePercent": string;
+            };
+            "topItems": {
+                "title": string;
+                "byRevenue": string;
+                "byQuantity": string;
+                "colItem": string;
+                "colQty": string;
+                "colRevenue": string;
+            };
+            "livePanel": {
+                "title": string;
+                "subtitle": string;
+                "activeOrders": string;
+                "activeOrdersSub": string;
+                "avgPrepTime": string;
+                "avgPrepTimeSub": string;
+                "repeatRate": string;
+                "repeatRateSub": string;
+                "openOrders": string;
+                "kitchenView": string;
+            };
+            "recentOrders": {
+                "title": string;
+                "viewAll": string;
+                "colOrderNumber": string;
+                "colCustomer": string;
+                "colItems": string;
+                "colType": string;
+                "colStatus": string;
+                "colTotal": string;
+                "colPlaced": string;
+                "empty": string;
+                "items": string;
+            };
+            "orderType": {
+                "DELIVERY": string;
+                "PICKUP": string;
+                "DINE_IN": string;
+            };
+        };
+        "kds": {
+            "title": string;
+            "backToAdmin": string;
+            "backAria": string;
+            "tickets": string;
+            "late": string;
+            "filters": {
+                "ALL": string;
+                "DELIVERY": string;
+                "PICKUP": string;
+                "DINE_IN": string;
+            };
+            "muteAria": string;
+            "unmuteAria": string;
+            "fullscreenAria": string;
+            "empty": string;
+            "loadError": {
+                "title": string;
+                "fallback": string;
+                "retry": string;
+            };
+            "ticket": {
+                "back": string;
+                "advance": {
+                    "CONFIRMED": string;
+                    "PREPARING": string;
+                    "READY": string;
+                };
+                "waiting": string;
+                "types": {
+                    "DELIVERY": string;
+                    "PICKUP": string;
+                    "DINE_IN": string;
+                };
+            };
+        };
+        "keyboard-shortcuts": {
+            "title": string;
+            "description": string;
+            "close": string;
+            "then": string;
+            "groups": {
+                "searchNav": string;
+                "filtering": string;
+                "selectionActions": string;
+            };
+            "shortcuts": {
+                "focusSearch": string;
+                "focusSearchAlt": string;
+                "moveFocusDown": string;
+                "moveFocusUp": string;
+                "allOrders": string;
+                "pending": string;
+                "confirmed": string;
+                "preparing": string;
+                "ready": string;
+                "outForDelivery": string;
+                "delivered": string;
+                "cancelled": string;
+                "toggleRowSelection": string;
+                "openFocusedOrder": string;
+                "selectAllVisible": string;
+                "clearSelection": string;
+                "showCheatsheet": string;
+            };
+        };
+        "layout": {
+            "topbar": {
+                "searchPlaceholder": string;
+                "searchAriaLabel": string;
+                "accountAriaLabel": string;
+                "notificationsAriaLabel": string;
+                "profile": string;
+                "settings": string;
+                "logout": string;
+                "realtime": {
+                    "connected": string;
+                    "connecting": string;
+                    "idle": string;
+                    "disconnected": string;
+                    "unknown": string;
+                };
+            };
+            "sidebar": {
+                "ariaLabel": string;
+                "brandName": string;
+                "expand": string;
+                "collapse": string;
+                "overview": string;
+                "groups": {
+                    "operate": string;
+                    "catalog": string;
+                    "people": string;
+                    "insights": string;
+                    "configure": string;
+                };
+                "items": {
+                    "orders": string;
+                    "kitchen": string;
+                    "reservations": string;
+                    "menu": string;
+                    "promotions": string;
+                    "customers": string;
+                    "reviews": string;
+                    "staff": string;
+                    "audit": string;
+                    "restaurant": string;
+                    "contact": string;
+                    "settings": string;
+                };
+            };
+            "permissionDenied": {
+                "title": string;
+                "requiresLabel": string;
+                "askAdmin": string;
+            };
+        };
+        "menu": {
+            "title": string;
+            "categories": {
+                "heading": string;
+                "addAriaLabel": string;
+                "empty": string;
+                "dragAriaLabel": string;
+                "deleteAriaLabel": string;
+                "nameAriaLabel": string;
+                "nameRequired": string;
+            };
+            "categoryCreate": {
+                "title": string;
+                "description": string;
+                "submit": string;
+                "submitting": string;
+                "cancel": string;
+                "nameLabel": string;
+                "namePlaceholder": string;
+                "slugLabel": string;
+                "slugHelper": string;
+            };
+            "categoryDelete": {
+                "titleNamed": string;
+                "titleFallback": string;
+                "descriptionWithItems": string;
+                "descriptionEmpty": string;
+                "submit": string;
+                "cancel": string;
+                "moveToLabel": string;
+                "moveToPlaceholder": string;
+                "moveError": string;
+            };
+            "items": {
+                "selectCategoryPrompt": string;
+                "filterAriaLabel": string;
+                "filters": {
+                    "all": string;
+                    "available": string;
+                    "unavailable": string;
+                    "featured": string;
+                };
+                "newItem": string;
+                "columns": {
+                    "item": string;
+                    "price": string;
+                    "dietary": string;
+                    "available": string;
+                };
+                "dietaryTags": {
+                    "vegan": string;
+                    "vegetarian": string;
+                    "glutenFree": string;
+                };
+                "toggleAvailabilityAriaLabel": string;
+                "emptyAll": string;
+                "emptyFiltered": string;
+            };
+            "itemEditor": {
+                "newItemTitle": string;
+                "editItemTitle": string;
+                "untitled": string;
+                "delete": string;
+                "cancel": string;
+                "close": string;
+                "create": string;
+                "save": string;
+                "confirmDelete": string;
+                "sections": {
+                    "details": string;
+                    "dietary": string;
+                    "images": string;
+                    "modifiers": string;
+                };
+                "details": {
+                    "nameLabel": string;
+                    "slugLabel": string;
+                    "slugHelper": string;
+                    "categoryLabel": string;
+                    "categoryPlaceholder": string;
+                    "descriptionLabel": string;
+                    "basePriceLabel": string;
+                    "compareAtLabel": string;
+                    "compareAtHelper": string;
+                    "caloriesLabel": string;
+                    "prepMinutesLabel": string;
+                    "gramsLabel": string;
+                    "gramsHelper": string;
+                    "spiceLevelLabel": string;
+                    "spiceNone": string;
+                    "allergensLabel": string;
+                    "allergensHelper": string;
+                    "allergen": {
+                        "gluten": string;
+                        "crustaceans": string;
+                        "eggs": string;
+                        "fish": string;
+                        "peanuts": string;
+                        "soybeans": string;
+                        "milk": string;
+                        "nuts": string;
+                        "celery": string;
+                        "mustard": string;
+                        "sesame": string;
+                        "sulphites": string;
+                        "lupin": string;
+                        "molluscs": string;
+                    };
+                };
+                "dietary": {
+                    "vegetarian": string;
+                    "vegetarianHint": string;
+                    "vegan": string;
+                    "veganHint": string;
+                    "glutenFree": string;
+                    "glutenFreeHint": string;
+                    "featured": string;
+                    "featuredHint": string;
+                };
+                "images": {
+                    "saveFirst": string;
+                };
+                "modifiers": {
+                    "saveFirst": string;
+                    "loadError": string;
+                    "retry": string;
+                };
+            };
+            "modifierGroups": {
+                "empty": string;
+                "addGroup": string;
+                "newGroupName": string;
+                "groupNameAriaLabel": string;
+                "groupNameRequired": string;
+                "required": string;
+                "min": string;
+                "max": string;
+                "minAriaLabel": string;
+                "maxAriaLabel": string;
+                "deleteGroupAriaLabel": string;
+                "addOption": string;
+                "newOptionName": string;
+                "optionNameAriaLabel": string;
+                "deleteOptionAriaLabel": string;
+            };
+        };
+        "restaurant": {
+            "title": string;
+            "loading": string;
+            "loadingMap": string;
+            "errorTitle": string;
+            "errorDescriptionFallback": string;
+            "retry": string;
+            "updated": string;
+            "nav": {
+                "identity": string;
+                "branding": string;
+                "contact": string;
+                "location": string;
+                "discovery": string;
+                "channels": string;
+            };
+            "identity": {
+                "title": string;
+                "description": string;
+                "nameLabel": string;
+                "slugLabel": string;
+                "slugHint": string;
+                "descriptionLabel": string;
+                "descriptionPlaceholder": string;
+            };
+            "branding": {
+                "title": string;
+                "description": string;
+                "logoLabel": string;
+                "logoHint": string;
+                "coverLabel": string;
+                "coverHint": string;
+            };
+            "contact": {
+                "title": string;
+                "description": string;
+                "phoneLabel": string;
+                "emailLabel": string;
+                "addressLineLabel": string;
+                "cityLabel": string;
+                "stateLabel": string;
+                "zipLabel": string;
+                "countryLabel": string;
+                "countryHint": string;
+                "timezoneLabel": string;
+                "currencyLabel": string;
+                "currencyHint": string;
+            };
+            "location": {
+                "title": string;
+                "description": string;
+                "prompt": string;
+                "clear": string;
+            };
+            "discovery": {
+                "title": string;
+                "description": string;
+                "cuisineLabel": string;
+                "cuisineHint": string;
+                "priceRangeLabel": string;
+                "priceRangeHint": string;
+                "priceRangeOptionNone": string;
+                "sameAsLabel": string;
+                "sameAsHint": string;
+            };
+            "channels": {
+                "title": string;
+                "description": string;
+                "published": string;
+                "publishedHint": string;
+                "acceptsReservations": string;
+                "acceptsReservationsHint": string;
+                "acceptsDelivery": string;
+                "acceptsPickup": string;
+                "acceptsDineIn": string;
+                "estimatedDeliveryLabel": string;
+                "estimatedPickupLabel": string;
+                "estimatedTimeHint": string;
+                "rangeMinPlaceholder": string;
+                "rangeMaxPlaceholder": string;
+                "rangeMinAria": string;
+                "rangeMaxAria": string;
+                "rangeError": {
+                    "incomplete": string;
+                    "order": string;
+                };
+            };
+            "saveBar": {
+                "unsavedHint": string;
+                "discard": string;
+                "save": string;
+                "saving": string;
+            };
+        };
+        "reviews": {
+            "title": string;
+            "filters": {
+                "status": {
+                    "all": string;
+                    "PUBLISHED": string;
+                    "HIDDEN": string;
+                    "FLAGGED": string;
+                };
+                "ratingLabel": string;
+                "ratingAll": string;
+                "ratingStars": string;
+            };
+            "columns": {
+                "rating": string;
+                "author": string;
+                "comment": string;
+                "status": string;
+                "reply": string;
+                "createdAt": string;
+            };
+            "moderation": {
+                "PUBLISHED": string;
+                "HIDDEN": string;
+                "FLAGGED": string;
+                "PENDING": string;
+            };
+            "row": {
+                "anonymous": string;
+                "noComment": string;
+                "replied": string;
+                "noReply": string;
+            };
+            "empty": string;
+            "drawer": {
+                "ariaLabel": string;
+                "anonymous": string;
+                "order": string;
+                "commentLabel": string;
+                "noComment": string;
+                "photosLabel": string;
+                "flagReasonLabel": string;
+                "flagReasonPlaceholder": string;
+                "currentFlag": string;
+                "ownerReplyLabel": string;
+                "ownerReplyPlaceholder": string;
+                "lastReplied": string;
+                "actions": {
+                    "publish": string;
+                    "hide": string;
+                    "flag": string;
+                    "sendReply": string;
+                    "updateReply": string;
+                };
+            };
+        };
+        "staff": {
+            "title": string;
+            "invite": string;
+            "empty": string;
+            "columns": {
+                "name": string;
+                "phone": string;
+                "role": string;
+                "status": string;
+                "added": string;
+                "actions": string;
+            };
+            "missing": string;
+            "status": {
+                "invited": string;
+                "active": string;
+                "disabled": string;
+            };
+            "actions": {
+                "disable": string;
+                "enable": string;
+            };
+            "roles": {
+                "owner": string;
+                "manager": string;
+                "kitchen": string;
+                "cashier": string;
+            };
+            "permissions": {
+                "order:read": string;
+                "order:write": string;
+                "order:status_update": string;
+                "order:cancel": string;
+                "order:refund": string;
+                "menu:read": string;
+                "menu:write": string;
+                "promotion:read": string;
+                "promotion:write": string;
+                "promotion:archive": string;
+                "staff:read": string;
+                "staff:write": string;
+                "settings:read": string;
+                "settings:write": string;
+                "customers:read": string;
+                "customers:write": string;
+                "reservations:read": string;
+                "reservations:write": string;
+                "reviews:read": string;
+                "reviews:write": string;
+                "audit:read": string;
+            };
+            "inviteModal": {
+                "titleSent": string;
+                "titleDefault": string;
+                "descriptionSent": string;
+                "descriptionDefault": string;
+                "done": string;
+                "submit": string;
+                "submitting": string;
+                "cancel": string;
+                "token": string;
+                "copy": string;
+                "email": string;
+                "emailPlaceholder": string;
+                "role": string;
+            };
+        };
+        "auth": {
+            "forgot-password": {
+                "title": string;
+                "helper": string;
+                "email": string;
+                "emailPlaceholder": string;
+                "submit": string;
+                "backToLogin": string;
+                "successToast": string;
+                "success": {
+                    "title": string;
+                    "helper": string;
+                    "description": string;
+                };
+            };
+            "layout": {
+                "redirecting": string;
+                "brandName": string;
+                "brandLogoLabel": string;
+                "languageSwitcherLabel": string;
+            };
+            "login": {
+                "title": string;
+                "helper": string;
+                "submit": string;
+                "email": string;
+                "emailPlaceholder": string;
+                "password": string;
+                "rememberMe": string;
+                "forgotPassword": string;
+                "needAccount": string;
+                "requestAccess": string;
+                "welcomeBack": string;
+                "successToast": string;
+                "errors": {
+                    "invalidCredentials": string;
+                    "accountDisabled": string;
+                };
+            };
+            "password-strength": {
+                "tooWeak": string;
+                "weak": string;
+                "okay": string;
+                "good": string;
+                "strong": string;
+            };
+            "register": {
+                "title": string;
+                "helper": string;
+                "submit": string;
+                "firstName": string;
+                "lastName": string;
+                "email": string;
+                "emailPlaceholder": string;
+                "phone": string;
+                "phonePlaceholder": string;
+                "optional": string;
+                "password": string;
+                "passwordHelper": string;
+                "haveReferralCode": string;
+                "referralCode": string;
+                "referralPlaceholder": string;
+                "hasAccount": string;
+                "login": string;
+                "successToast": string;
+                "errors": {
+                    "emailAlreadyRegistered": string;
+                };
+            };
+            "reset-password": {
+                "title": string;
+                "helper": string;
+                "password": string;
+                "confirmPassword": string;
+                "submit": string;
+                "backToLogin": string;
+                "successToast": string;
+                "errors": {
+                    "tokenInvalid": string;
+                };
+                "expired": {
+                    "title": string;
+                    "helper": string;
+                    "description": string;
+                    "requestNew": string;
+                };
+            };
+            "verify-email": {
+                "title": string;
+                "helperWithEmail": string;
+                "helperGeneric": string;
+                "instruction": string;
+                "resend": string;
+                "resendComingSoon": string;
+                "backToLogin": string;
+                "successToast": string;
+                "errors": {
+                    "tokenInvalid": string;
+                };
+                "otpSent": string;
+                "codeLabel": string;
+                "submit": string;
+                "verifying": {
+                    "title": string;
+                    "helper": string;
+                    "working": string;
+                };
+                "failed": {
+                    "title": string;
+                    "helper": string;
+                    "backToLogin": string;
+                };
+                "verified": {
+                    "title": string;
+                    "helper": string;
+                    "allSet": string;
+                    "continue": string;
+                };
+            };
+        };
+        "customers": {
+            "detail": {
+                "ariaLabel": string;
+                "anonymous": string;
+                "segment": {
+                    "vip": string;
+                    "frequent": string;
+                    "dormant": string;
+                    "new": string;
+                    "active": string;
+                };
+                "sections": {
+                    "overview": string;
+                    "orders": string;
+                    "addresses": string;
+                    "payment": string;
+                    "notes": string;
+                };
+                "stats": {
+                    "lifetimeOrders": string;
+                    "lifetimeSpend": string;
+                    "firstOrder": string;
+                    "lastOrder": string;
+                    "reviews": string;
+                    "joined": string;
+                    "empty": string;
+                };
+                "orders": {
+                    "empty": string;
+                };
+                "addresses": {
+                    "empty": string;
+                };
+                "payment": {
+                    "empty": string;
+                    "cardFallback": string;
+                    "last4Fallback": string;
+                };
+                "notes": {
+                    "empty": string;
+                    "placeholder": string;
+                    "add": string;
+                    "saving": string;
+                };
+            };
+            "list": {
+                "title": string;
+                "search": {
+                    "placeholder": string;
+                };
+                "segment": {
+                    "all": string;
+                    "vip": string;
+                    "frequent": string;
+                    "dormant": string;
+                    "new": string;
+                    "active": string;
+                };
+                "columns": {
+                    "name": string;
+                    "phone": string;
+                    "orders": string;
+                    "spend": string;
+                    "last": string;
+                    "segment": string;
+                };
+                "export": {
+                    "button": string;
+                    "ariaLabel": string;
+                    "csv": string;
+                    "pdf": string;
+                };
+                "empty": string;
+                "permissionDenied": string;
+                "bulk": {
+                    "clear": string;
+                    "selected": string;
+                    "tag": string;
+                    "email": string;
+                };
+                "tagModal": {
+                    "title": string;
+                    "description": string;
+                    "primary": string;
+                    "primaryLoading": string;
+                    "secondary": string;
+                    "tagLabel": string;
+                    "tagPlaceholder": string;
+                    "noTags": string;
+                };
+                "emailModal": {
+                    "title": string;
+                    "description": string;
+                    "primary": string;
+                    "primaryLoading": string;
+                    "secondary": string;
+                    "subjectLabel": string;
+                    "bodyLabel": string;
+                    "footnote": string;
+                };
+            };
+        };
+        "orders": {
+            "detail": {
+                "title": string;
+                "titleFallback": string;
+                "loading": string;
+                "notFound": {
+                    "title": string;
+                    "description": string;
+                    "back": string;
+                };
+                "back": string;
+                "advanceTo": string;
+                "noNextState": string;
+                "orderComplete": string;
+                "refund": string;
+                "cancel": string;
+                "print": string;
+                "noPermissionAdvance": string;
+                "noPermissionAdvanceLong": string;
+                "addNote": {
+                    "heading": string;
+                    "placeholder": string;
+                    "focusHint": string;
+                    "submit": string;
+                    "submitting": string;
+                };
+                "keyboard": {
+                    "heading": string;
+                    "back": string;
+                    "addNote": string;
+                    "refund": string;
+                    "cancel": string;
+                };
+                "drawer": {
+                    "ariaLabel": string;
+                    "loadError": string;
+                    "unknownError": string;
+                    "retry": string;
+                };
+                "body": {
+                    "itemsHeading": string;
+                    "pricingHeading": string;
+                    "paymentHeading": string;
+                    "customerHeading": string;
+                    "timelineHeading": string;
+                    "noteFallback": string;
+                    "subtotal": string;
+                    "tax": string;
+                    "deliveryFee": string;
+                    "tip": string;
+                    "discount": string;
+                    "grandTotal": string;
+                    "refund": string;
+                    "guest": string;
+                    "typeLabel": string;
+                    "types": {
+                        "DELIVERY": string;
+                        "PICKUP": string;
+                        "DINE_IN": string;
+                    };
+                    "paymentMethods": {
+                        "STRIPE_CARD": string;
+                        "APPLE_PAY": string;
+                        "GOOGLE_PAY": string;
+                        "COD": string;
+                        "WALLET": string;
+                        "P24": string;
+                        "BLIK": string;
+                    };
+                };
+                "types": {
+                    "DELIVERY": string;
+                    "PICKUP": string;
+                    "DINE_IN": string;
+                };
+                "refundModal": {
+                    "title": string;
+                    "titleFallback": string;
+                    "description": string;
+                    "footerHelper": string;
+                    "primary": string;
+                    "primaryFallback": string;
+                    "secondary": string;
+                    "amountAria": string;
+                    "fullRefund": string;
+                    "partialRefund": string;
+                    "amountLabel": string;
+                    "reasonLabel": string;
+                    "notesLabel": string;
+                    "pickReason": string;
+                    "notesPlaceholder": string;
+                    "reasons": {
+                        "customerRequested": string;
+                        "itemOutOfStock": string;
+                        "wrongItem": string;
+                        "qualityIssue": string;
+                        "duplicateOrder": string;
+                        "other": string;
+                    };
+                };
+                "cancelModal": {
+                    "title": string;
+                    "titleFallback": string;
+                    "description": string;
+                    "primary": string;
+                    "secondary": string;
+                    "reasonLabel": string;
+                    "notesLabel": string;
+                    "notesHelper": string;
+                    "pickReason": string;
+                    "notesPlaceholderOther": string;
+                    "notesPlaceholder": string;
+                    "reasons": {
+                        "customerRequested": string;
+                        "outOfStock": string;
+                        "outOfRange": string;
+                        "restaurantClosed": string;
+                        "paymentFailed": string;
+                        "other": string;
+                    };
+                };
+            };
+            "list": {
+                "title": string;
+                "exportButton": string;
+                "exportAriaLabel": string;
+                "exportCsv": string;
+                "exportPdf": string;
+                "empty": {
+                    "all": string;
+                    "filtered": string;
+                    "clearFilters": string;
+                };
+                "bulk": {
+                    "advance": string;
+                    "cancel": string;
+                    "cancelOneTooltip": string;
+                    "selectedMoney": string;
+                };
+                "confirmBulkAdvance": {
+                    "title": string;
+                    "description": string;
+                    "primary": string;
+                    "secondary": string;
+                };
+                "columns": {
+                    "orderNumber": string;
+                    "customer": string;
+                    "items": string;
+                    "itemCount": string;
+                    "guest": string;
+                    "type": string;
+                    "status": string;
+                    "total": string;
+                    "placed": string;
+                    "elapsed": string;
+                };
+                "filters": {
+                    "statusAriaLabel": string;
+                    "all": string;
+                    "typeLabel": string;
+                    "paymentLabel": string;
+                    "searchPlaceholder": string;
+                    "sortPlaceholder": string;
+                    "types": {
+                        "DELIVERY": string;
+                        "PICKUP": string;
+                        "DINE_IN": string;
+                    };
+                    "payments": {
+                        "PAID": string;
+                        "PENDING": string;
+                        "REFUNDED": string;
+                        "PARTIALLY_REFUNDED": string;
+                        "FAILED": string;
+                    };
+                };
+                "sort": {
+                    "newest": string;
+                    "oldest": string;
+                    "totalDesc": string;
+                    "waitDesc": string;
+                };
+                "livePulse": {
+                    "newOrders": string;
+                    "caughtUp": string;
+                };
+                "soundToggle": {
+                    "muteAria": string;
+                    "unmuteAria": string;
+                    "muteTitle": string;
+                    "unmuteTitle": string;
+                };
+            };
+        };
+        "promotions": {
+            "detail": {
+                "ariaLabel": string;
+                "newTitle": string;
+                "active": string;
+                "paused": string;
+                "actions": {
+                    "delete": string;
+                    "archive": string;
+                    "restore": string;
+                    "save": string;
+                    "saving": string;
+                    "create": string;
+                    "creating": string;
+                };
+                "sections": {
+                    "overview": string;
+                    "typeValue": string;
+                    "schedule": string;
+                    "coupon": string;
+                };
+                "fields": {
+                    "name": string;
+                    "namePlaceholder": string;
+                    "description": string;
+                    "active": string;
+                    "type": string;
+                    "percentValue": string;
+                    "amountValue": string;
+                    "minSubtotal": string;
+                    "startsAt": string;
+                    "endsAt": string;
+                };
+                "hints": {
+                    "bogo": string;
+                    "freeDelivery": string;
+                };
+                "coupon": {
+                    "code": string;
+                    "codePlaceholder": string;
+                    "codeHint": string;
+                    "maxRedemptions": string;
+                    "perUserLimit": string;
+                    "unlimited": string;
+                    "used": string;
+                };
+                "confirmDelete": {
+                    "title": string;
+                    "description": string;
+                    "delete": string;
+                    "deleting": string;
+                    "cancel": string;
+                };
+            };
+            "list": {
+                "title": string;
+                "newPromotion": string;
+                "noPermission": string;
+                "empty": string;
+                "columns": {
+                    "name": string;
+                    "code": string;
+                    "type": string;
+                    "value": string;
+                    "window": string;
+                    "used": string;
+                    "status": string;
+                };
+                "value": {
+                    "percentOff": string;
+                    "fixedOff": string;
+                    "bogo": string;
+                    "freeDelivery": string;
+                    "none": string;
+                };
+                "window": {
+                    "range": string;
+                    "none": string;
+                };
+                "status": {
+                    "DRAFT": string;
+                    "SCHEDULED": string;
+                    "ACTIVE": string;
+                    "EXPIRED": string;
+                    "PAUSED": string;
+                };
+                "types": {
+                    "PERCENT": string;
+                    "FIXED": string;
+                    "BOGO": string;
+                    "FREE_DELIVERY": string;
+                };
+            };
+        };
+        "reservations": {
+            "detail": {
+                "title": string;
+                "titleWithName": string;
+                "loading": string;
+                "notFound": {
+                    "title": string;
+                    "description": string;
+                    "back": string;
+                };
+                "backLink": string;
+                "status": {
+                    "confirmed": string;
+                    "seated": string;
+                    "completed": string;
+                    "cancelled": string;
+                    "no_show": string;
+                };
+                "actions": {
+                    "seat": string;
+                    "complete": string;
+                    "noShow": string;
+                };
+                "booking": {
+                    "title": string;
+                    "description": string;
+                    "start": string;
+                    "end": string;
+                    "party": string;
+                    "guests": string;
+                    "table": string;
+                    "unseated": string;
+                    "reassignLabel": string;
+                    "pickTable": string;
+                    "tableOption": string;
+                };
+                "customer": {
+                    "title": string;
+                    "description": string;
+                    "name": string;
+                    "phone": string;
+                    "notes": string;
+                    "empty": string;
+                };
+                "timeline": {
+                    "title": string;
+                    "description": string;
+                    "created": string;
+                    "updated": string;
+                };
+                "cancel": {
+                    "title": string;
+                    "description": string;
+                    "reasonPlaceholder": string;
+                    "cta": string;
+                };
+                "completeModal": {
+                    "title": string;
+                    "description": string;
+                    "primary": string;
+                    "secondary": string;
+                };
+                "noShowModal": {
+                    "title": string;
+                    "description": string;
+                    "primary": string;
+                    "secondary": string;
+                };
+            };
+            "list": {
+                "title": string;
+                "inViewCount": string;
+                "views": {
+                    "day": string;
+                    "week": string;
+                    "month": string;
+                    "list": string;
+                };
+                "actions": {
+                    "new": string;
+                    "dismiss": string;
+                    "retry": string;
+                };
+                "errors": {
+                    "loadTitle": string;
+                    "conflict": string;
+                };
+                "status": {
+                    "CONFIRMED": string;
+                    "SEATED": string;
+                    "COMPLETED": string;
+                    "CANCELLED": string;
+                    "NO_SHOW": string;
+                };
+                "listTable": {
+                    "when": string;
+                    "guest": string;
+                    "party": string;
+                    "table": string;
+                    "status": string;
+                    "notes": string;
+                    "empty": {
+                        "title": string;
+                        "description": string;
+                    };
+                    "unseated": string;
+                    "noNotes": string;
+                };
+                "createDrawer": {
+                    "ariaLabel": string;
+                    "eyebrow": string;
+                    "title": string;
+                    "fields": {
+                        "when": string;
+                        "partySize": string;
+                        "occasion": string;
+                        "occasionHelper": string;
+                        "guestName": string;
+                        "phone": string;
+                        "email": string;
+                        "notes": string;
+                        "notesHelper": string;
+                    };
+                    "cancel": string;
+                    "submit": string;
+                    "submitLoading": string;
+                };
+            };
+        };
+        "settings": {
+            "general": {
+                "title": string;
+                "loading": string;
+                "error": {
+                    "title": string;
+                    "description": string;
+                    "retry": string;
+                };
+                "hub": {
+                    "manage": string;
+                    "hours": {
+                        "title": string;
+                        "preview": string;
+                    };
+                    "holidays": {
+                        "title": string;
+                        "preview": string;
+                        "next": string;
+                        "trailing": string;
+                    };
+                };
+                "financials": {
+                    "title": string;
+                    "description": string;
+                    "taxRate": string;
+                    "defaultDeliveryFee": string;
+                    "minOrder": string;
+                    "effectiveMinimum": string;
+                };
+                "reservations": {
+                    "title": string;
+                    "description": string;
+                    "slotLength": string;
+                    "slotLengthHelp": string;
+                    "slotLengthAria": string;
+                    "buffer": string;
+                    "bufferHelp": string;
+                    "bufferAria": string;
+                    "minSuffix": string;
+                    "increase": string;
+                    "decrease": string;
+                };
+                "locale": {
+                    "title": string;
+                    "description": string;
+                    "timezone": string;
+                    "currency": string;
+                    "editLink": string;
+                };
+                "toasts": {
+                    "saved": string;
+                };
+            };
+            "holidays": {
+                "title": string;
+                "backToSettings": string;
+                "add": {
+                    "title": string;
+                    "description": string;
+                    "date": string;
+                    "label": string;
+                    "labelPlaceholder": string;
+                    "dateUsed": string;
+                    "mode": string;
+                    "closedAllDay": string;
+                    "modifiedHours": string;
+                    "openOverrideAria": string;
+                    "closeOverrideAria": string;
+                    "submit": string;
+                    "submitting": string;
+                };
+                "upcoming": {
+                    "title": string;
+                    "description": string;
+                    "empty": {
+                        "title": string;
+                        "description": string;
+                    };
+                    "error": {
+                        "title": string;
+                        "retry": string;
+                    };
+                    "closedLabel": string;
+                    "hoursRange": string;
+                    "inDays": string;
+                    "removeAria": string;
+                };
+                "past": {
+                    "title": string;
+                };
+                "confirmRemove": {
+                    "title": string;
+                    "description": string;
+                    "remove": string;
+                    "cancel": string;
+                };
+                "toasts": {
+                    "added": string;
+                    "removed": string;
+                };
+            };
+            "hours": {
+                "title": string;
+                "backToSettings": string;
+                "card": {
+                    "title": string;
+                    "description": string;
+                };
+                "open": string;
+                "closed": string;
+                "openTimeAria": string;
+                "closeTimeAria": string;
+                "errors": {
+                    "invalidTime": string;
+                    "closeAfterOpen": string;
+                };
+                "error": {
+                    "title": string;
+                    "fallback": string;
+                    "retry": string;
+                };
+                "toasts": {
+                    "saved": string;
+                };
+                "unsaved": {
+                    "message": string;
+                    "discard": string;
+                    "save": string;
+                    "saving": string;
+                };
+            };
+        };
+    };
+    "shared": {
+        "order-notify": {
+            "placed": string;
+            "confirmed": string;
+            "ready": string;
+            "outForDelivery": string;
+            "delivered": string;
+            "cancelled": string;
+            "refunded": string;
+        };
+        "order-status": {
+            "PENDING": string;
+            "CONFIRMED": string;
+            "PREPARING": string;
+            "READY": string;
+            "OUT_FOR_DELIVERY": string;
+            "DELIVERED": string;
+            "COMPLETED": string;
+            "CANCELLED": string;
+            "REFUNDED": string;
+        };
+        "order-tracking": {
+            "ariaLabel": string;
+            "cancelled": string;
+            "refunded": string;
+            "step": {
+                "confirmed": string;
+                "preparing": string;
+                "onTheWay": string;
+                "delivered": string;
+                "readyForPickup": string;
+                "pickedUp": string;
+                "served": string;
+            };
+        };
+        "order": {
+            "title": string;
+            "history": string;
+            "trackOrder": string;
+            "reorder": string;
+            "estimatedArrival": string;
+            "placedOn": string;
+        };
+    };
+    "web": {
+        "footer": {
+            "tagline": string;
+            "social": {
+                "instagram": string;
+                "facebook": string;
+            };
+            "columns": {
+                "menu": {
+                    "heading": string;
+                    "kebab": string;
+                    "falafel": string;
+                    "tacos": string;
+                    "boxAndPlates": string;
+                    "drinks": string;
+                    "viewFullMenu": string;
+                };
+                "visit": {
+                    "heading": string;
+                };
+                "company": {
+                    "heading": string;
+                    "about": string;
+                    "contact": string;
+                    "loyalty": string;
+                    "referrals": string;
+                };
+            };
+            "bottom": {
+                "copyright": string;
+                "legal": {
+                    "privacy": string;
+                    "terms": string;
+                    "cookies": string;
+                };
+            };
+        };
+        "layout": {
+            "nav": {
+                "home": string;
+                "menu": string;
+                "about": string;
+                "locations": string;
+                "contact": string;
+            };
+            "cta": {
+                "orderNow": string;
+            };
+            "mobileMenuTitle": string;
+            "languageSwitcherLabel": string;
+            "meta": {
+                "title": string;
+                "description": string;
+            };
+            "cart": {
+                "ariaLabel": string;
+            };
+            "notifications": {
+                "ariaLabel": string;
+            };
+        };
+        "legal": {
+            "eyebrow": string;
+            "lastUpdated": string;
+            "footerQuestion": string;
+            "footerLink": string;
+            "privacy": {
+                "title": string;
+            };
+            "terms": {
+                "title": string;
+            };
+            "cookies": {
+                "title": string;
+            };
+        };
+        "newsletter": {
+            "confirm": {
+                "loadingTitle": string;
+                "successTitle": string;
+                "successDescription": string;
+                "errorTitle": string;
+                "errorDescription": string;
+                "backHome": string;
+            };
+            "unsubscribe": {
+                "loadingTitle": string;
+                "successTitle": string;
+                "successDescription": string;
+                "errorTitle": string;
+                "errorDescription": string;
+                "backHome": string;
+            };
+        };
+        "account": {
+            "addresses": {
+                "title": string;
+                "subtitle": string;
+                "loading": string;
+                "badges": {
+                    "default": string;
+                };
+                "actions": {
+                    "add": string;
+                    "save": string;
+                    "saving": string;
+                    "cancel": string;
+                    "setDefault": string;
+                    "deleteAria": string;
+                };
+                "fields": {
+                    "label": {
+                        "label": string;
+                        "helper": string;
+                        "placeholder": string;
+                    };
+                    "line1": {
+                        "label": string;
+                        "placeholder": string;
+                    };
+                    "line2": {
+                        "label": string;
+                        "helper": string;
+                        "placeholder": string;
+                    };
+                    "city": {
+                        "label": string;
+                    };
+                };
+                "picker": {
+                    "outOfZoneError": string;
+                    "loading": string;
+                };
+                "empty": {
+                    "title": string;
+                    "description": string;
+                };
+            };
+            "layout": {
+                "title": string;
+                "navAriaLabel": string;
+                "nav": {
+                    "profile": string;
+                    "orders": string;
+                    "addresses": string;
+                    "loyalty": string;
+                    "referrals": string;
+                    "reservations": string;
+                    "reviews": string;
+                    "notifications": string;
+                };
+                "logout": string;
+                "preferences": string;
+                "paymentMethods": string;
+            };
+            "loyalty": {
+                "title": string;
+                "subtitle": string;
+                "empty": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "availablePoints": string;
+                "pointsUnit": string;
+                "pointsCount": string;
+                "tierProgress": string;
+                "lifetime": string;
+                "activity": string;
+                "noActivity": string;
+                "balance": string;
+                "tier": string;
+                "redeem": string;
+                "redeemDiscount": string;
+                "earned": string;
+                "history": string;
+                "tiers": {
+                    "bronze": string;
+                    "silver": string;
+                    "gold": string;
+                    "platinum": string;
+                };
+                "kinds": {
+                    "EARN": string;
+                    "REDEEM": string;
+                    "REVOKE": string;
+                    "EXPIRE": string;
+                    "REFERRAL": string;
+                    "ADJUST": string;
+                };
+            };
+            "notifications": {
+                "title": string;
+                "subtitle": string;
+                "empty": {
+                    "title": string;
+                    "description": string;
+                };
+                "markAllRead": string;
+                "markRead": string;
+                "unreadCount": string;
+                "preferencesUpdated": string;
+                "prefs": {
+                    "toggle": string;
+                    "title": string;
+                    "subtitle": string;
+                    "orderUpdates": string;
+                    "promotions": string;
+                    "email": string;
+                    "sms": string;
+                    "push": string;
+                    "comingSoon": string;
+                };
+            };
+            "order-detail": {
+                "title": string;
+            };
+            "orders": {
+                "title": string;
+                "subtitle": string;
+                "empty": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "type": {
+                    "DELIVERY": string;
+                    "PICKUP": string;
+                    "DINE_IN": string;
+                };
+                "itemCount": string;
+                "summaryLine": string;
+            };
+            "profile": {
+                "title": string;
+                "fields": {
+                    "firstName": string;
+                    "lastName": string;
+                    "phone": string;
+                    "phonePrefix": string;
+                    "phonePlaceholder": string;
+                };
+                "actions": {
+                    "save": string;
+                    "saving": string;
+                };
+            };
+            "referrals": {
+                "title": string;
+                "subtitle": string;
+                "signInPrompt": string;
+                "yourCode": string;
+                "copyCode": string;
+                "copied": string;
+                "shareLink": string;
+                "stats": {
+                    "invited": string;
+                    "completed": string;
+                    "earned": string;
+                };
+                "pointsUnit": string;
+                "recent": string;
+                "emptyList": string;
+                "anonymousFriend": string;
+                "howItWorks": string;
+                "share": string;
+                "invitedCount": string;
+                "referredCount": string;
+            };
+            "reservations": {
+                "title": string;
+                "subtitle": string;
+                "empty": {
+                    "title": string;
+                    "description": string;
+                };
+            };
+            "reviews": {
+                "title": string;
+                "subtitle": string;
+                "empty": {
+                    "title": string;
+                    "description": string;
+                };
+                "ownerName": string;
+                "writeReview": string;
+                "reviewed": string;
+                "rating": string;
+                "comment": string;
+                "submit": string;
+                "modal": {
+                    "title": string;
+                    "description": string;
+                    "cancel": string;
+                    "starLabel": string;
+                    "commentHelper": string;
+                    "commentPlaceholder": string;
+                    "photosLabel": string;
+                    "photosHelper": string;
+                    "photosDropzone": string;
+                    "uploading": string;
+                };
+                "ownerReply": string;
+                "averageRating": string;
+                "reviewsCount": string;
+                "thanks": string;
+            };
+        };
+        "auth": {
+            "forgot-password": {
+                "title": string;
+                "subtitle": string;
+                "fields": {
+                    "email": string;
+                    "emailPlaceholder": string;
+                };
+                "actions": {
+                    "submit": string;
+                    "submitting": string;
+                };
+                "links": {
+                    "backToLogin": string;
+                };
+                "sent": {
+                    "title": string;
+                    "description": string;
+                };
+                "toasts": {
+                    "success": string;
+                };
+            };
+            "layout": {
+                "brandHome": string;
+            };
+            "login": {
+                "eyebrow": string;
+                "title": string;
+                "fields": {
+                    "email": string;
+                    "emailPlaceholder": string;
+                    "password": string;
+                };
+                "actions": {
+                    "submit": string;
+                    "submitting": string;
+                };
+                "links": {
+                    "forgotPassword": string;
+                    "createAccount": string;
+                };
+                "toasts": {
+                    "success": string;
+                };
+            };
+            "register": {
+                "eyebrow": string;
+                "title": string;
+                "subtitle": string;
+                "fields": {
+                    "firstName": string;
+                    "firstNamePlaceholder": string;
+                    "lastName": string;
+                    "lastNamePlaceholder": string;
+                    "email": string;
+                    "emailPlaceholder": string;
+                    "password": string;
+                    "passwordHelper": string;
+                };
+                "referralApplied": string;
+                "actions": {
+                    "submit": string;
+                    "submitting": string;
+                };
+                "links": {
+                    "hasAccount": string;
+                    "signIn": string;
+                };
+                "toasts": {
+                    "success": string;
+                };
+            };
+            "reset-password": {
+                "title": string;
+                "fields": {
+                    "password": string;
+                    "passwordHelper": string;
+                };
+                "actions": {
+                    "submit": string;
+                    "submitting": string;
+                };
+                "invalid": {
+                    "title": string;
+                    "description": string;
+                    "requestNew": string;
+                };
+                "toasts": {
+                    "success": string;
+                };
+            };
+            "verify-email": {
+                "pending": {
+                    "title": string;
+                };
+                "success": {
+                    "title": string;
+                    "description": string;
+                    "signIn": string;
+                };
+                "error": {
+                    "title": string;
+                    "description": string;
+                    "backToLogin": string;
+                };
+                "toasts": {
+                    "success": string;
+                };
+            };
+        };
+        "marketing": {
+            "about": {
+                "eyebrow": string;
+                "title": string;
+                "description": string;
+                "imageAlt": string;
+                "paragraph1": string;
+                "paragraph2": string;
+                "paragraph3": string;
+                "stats": {
+                    "yearsValue": string;
+                    "yearsLabel": string;
+                    "wrapsValue": string;
+                    "wrapsLabel": string;
+                    "ratingValue": string;
+                    "ratingLabel": string;
+                    "ratingLabelDynamic": string;
+                };
+            };
+            "contact": {
+                "meta": {
+                    "title": string;
+                    "description": string;
+                };
+                "eyebrow": string;
+                "title": string;
+                "description": string;
+                "findUs": string;
+                "addressLabel": string;
+                "phoneLabel": string;
+                "directionsLabel": string;
+                "openInGoogleMaps": string;
+                "address1": string;
+                "address2": string;
+                "phone": string;
+                "email": string;
+                "emailLabel": string;
+                "form": {
+                    "nameLabel": string;
+                    "namePlaceholder": string;
+                    "emailLabel": string;
+                    "emailPlaceholder": string;
+                    "subjectLabel": string;
+                    "subjectPlaceholder": string;
+                    "messageLabel": string;
+                    "messagePlaceholder": string;
+                    "submit": string;
+                    "submitting": string;
+                };
+                "success": {
+                    "title": string;
+                    "description": string;
+                    "sendAnother": string;
+                };
+            };
+            "home": {
+                "heroCta": string;
+                "specials": string;
+                "ourStory": string;
+                "locations": string;
+                "contactUs": string;
+                "reserveTable": string;
+                "hero": {
+                    "eyebrow": string;
+                    "titleLine1": string;
+                    "titleEmphasis": string;
+                    "titleLine3": string;
+                    "description": string;
+                    "primaryCta": string;
+                    "secondaryCta": string;
+                    "imageAlt": string;
+                    "openNow": string;
+                    "closed": string;
+                    "closesAt": string;
+                    "chefName": string;
+                    "chefLocation": string;
+                    "ratingLabel": string;
+                    "starsAriaLabel": string;
+                };
+                "categories": {
+                    "eyebrow": string;
+                    "title": string;
+                    "viewFullMenu": string;
+                    "categoryAlt": string;
+                    "itemCount": string;
+                    "labels": {
+                        "kebab": string;
+                        "falafel": string;
+                        "tacos": string;
+                        "box": string;
+                        "drinks": string;
+                    };
+                };
+                "featured": {
+                    "eyebrow": string;
+                    "title": string;
+                    "description": string;
+                    "seeFullMenu": string;
+                    "viewFullMenuCta": string;
+                    "addedToCart": string;
+                    "addedToCartDescription": string;
+                    "addAriaLabel": string;
+                    "soldOutLabel": string;
+                    "dishes": {
+                        "kebab-tortilla-srodni": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                        "falafel-pita-duzy": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                        "kapsalon-duzy": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                        "tacos-x3": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                        "box-strips-mega": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                        "salatka-kebab-duzy": {
+                            "name": string;
+                            "description": string;
+                            "imageAlt": string;
+                        };
+                    };
+                };
+                "story": {
+                    "eyebrow": string;
+                    "titleLine1": string;
+                    "titleLine2": string;
+                    "lead": string;
+                    "body": string;
+                    "readMore": string;
+                    "imageAlt": string;
+                    "yearsValue": string;
+                    "yearsLabel": string;
+                    "wrapsValue": string;
+                    "wrapsLabel": string;
+                };
+                "hoursLocation": {
+                    "eyebrow": string;
+                    "title": string;
+                    "mapAriaLabel": string;
+                    "addressLine1": string;
+                    "addressLine2": string;
+                    "email": string;
+                    "phone": string;
+                    "getDirections": string;
+                    "callUs": string;
+                    "shareLocation": string;
+                    "viewLargerMap": string;
+                    "openInMaps": string;
+                    "mapTitle": string;
+                    "pinTitle": string;
+                    "tramAnnotation": string;
+                    "metroAnnotation": string;
+                    "hoursLabel": string;
+                };
+                "testimonials": {
+                    "eyebrow": string;
+                    "title": string;
+                    "description": string;
+                    "readAllReviews": string;
+                    "starsAriaLabel": string;
+                    "anonymous": string;
+                    "items": {
+                        "0": {
+                            "quote": string;
+                            "name": string;
+                            "meta": string;
+                        };
+                        "1": {
+                            "quote": string;
+                            "name": string;
+                            "meta": string;
+                        };
+                        "2": {
+                            "quote": string;
+                            "name": string;
+                            "meta": string;
+                        };
+                        "3": {
+                            "quote": string;
+                            "name": string;
+                            "meta": string;
+                        };
+                    };
+                };
+                "newsletter": {
+                    "eyebrow": string;
+                    "title": string;
+                    "description": string;
+                    "emailPlaceholder": string;
+                    "subscribe": string;
+                    "subscribeSuccess": string;
+                    "subscribeError": string;
+                    "emailAriaLabel": string;
+                    "consentLabel": string;
+                    "consentRequired": string;
+                };
+            };
+            "locations": {
+                "meta": {
+                    "title": string;
+                    "description": string;
+                };
+                "eyebrow": string;
+                "heroImageAlt": string;
+                "mapTitle": string;
+                "restaurantPinTitle": string;
+                "status": {
+                    "openNow": string;
+                    "closed": string;
+                    "closingIn": string;
+                    "openUntil": string;
+                    "opensTodayAt": string;
+                    "opensTomorrowAt": string;
+                    "opensOnAt": string;
+                    "hoursUnavailable": string;
+                };
+                "clock": string;
+                "ctas": {
+                    "orderOnline": string;
+                    "getDirections": string;
+                    "callUs": string;
+                    "share": string;
+                };
+                "address": {
+                    "eyebrow": string;
+                    "title": string;
+                    "openInMaps": string;
+                    "mapAriaLabel": string;
+                    "tramAnnotation": string;
+                    "metroAnnotation": string;
+                };
+                "hours": {
+                    "label": string;
+                };
+                "weekTimeline": {
+                    "eyebrow": string;
+                    "title": string;
+                    "subtitle": string;
+                    "closed": string;
+                };
+                "stickyBar": {
+                    "orderOnline": string;
+                    "callAria": string;
+                    "directionsAria": string;
+                };
+                "empty": {
+                    "title": string;
+                    "description": string;
+                    "browseMenu": string;
+                };
+                "days": {
+                    "short": {
+                        "0": string;
+                        "1": string;
+                        "2": string;
+                        "3": string;
+                        "4": string;
+                        "5": string;
+                        "6": string;
+                    };
+                    "long": {
+                        "0": string;
+                        "1": string;
+                        "2": string;
+                        "3": string;
+                        "4": string;
+                        "5": string;
+                        "6": string;
+                    };
+                };
+            };
+            "reservations": {
+                "title": string;
+                "description": string;
+                "browseMenu": string;
+                "phone": string;
+            };
+        };
+        "public": {
+            "track": {
+                "requireLink": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "loading": string;
+                "invalidLink": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "mismatch": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "hero": {
+                    "orderNumber": string;
+                    "title": string;
+                    "eta": string;
+                };
+                "terminal": string;
+            };
+        };
+        "shop": {
+            "cart": {
+                "title": string;
+                "closeAriaLabel": string;
+                "empty": string;
+                "emptyDescription": string;
+                "browseMenu": string;
+                "subtotal": string;
+                "discount": string;
+                "delivery": string;
+                "deliveryCalculated": string;
+                "total": string;
+                "estimatedTotal": string;
+                "applyCoupon": string;
+                "couponApplied": string;
+                "remove": string;
+                "notePrefix": string;
+                "quantityAriaLabel": string;
+                "notesLabel": string;
+                "notesPlaceholder": string;
+                "itemCount": string;
+                "checkout": string;
+                "checkoutCta": string;
+                "footerHint": string;
+            };
+            "checkout-success": {
+                "loading": string;
+                "notFound": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "hero": {
+                    "title": string;
+                    "description": string;
+                    "orderNumber": string;
+                    "live": string;
+                    "reconnecting": string;
+                };
+                "copy": {
+                    "ariaLabel": string;
+                    "toast": string;
+                };
+                "status": {
+                    "PENDING": string;
+                    "CONFIRMED": string;
+                    "PREPARING": string;
+                    "READY": string;
+                    "OUT_FOR_DELIVERY": string;
+                    "DELIVERED": string;
+                    "COMPLETED": string;
+                    "CANCELLED": string;
+                    "REFUNDED": string;
+                };
+                "eta": {
+                    "DELIVERY": {
+                        "caption": string;
+                        "sub": string;
+                    };
+                    "PICKUP": {
+                        "caption": string;
+                        "sub": string;
+                    };
+                    "DINE_IN": {
+                        "caption": string;
+                        "sub": string;
+                    };
+                    "deliveryDefault": string;
+                    "pickupDefault": string;
+                    "dineInDefault": string;
+                    "minutesRange": string;
+                    "minutesSingle": string;
+                };
+                "now": {
+                    "regionLabel": string;
+                    "label": string;
+                };
+                "address": {
+                    "regionLabel": string;
+                    "deliveryCaption": string;
+                    "pickupCaption": string;
+                    "dineInCaption": string;
+                    "tableRecorded": string;
+                    "pickupName": string;
+                    "pickupStreet": string;
+                    "pickupCity": string;
+                };
+                "activity": {
+                    "regionLabel": string;
+                    "heading": string;
+                    "live": string;
+                };
+                "help": {
+                    "regionLabel": string;
+                    "title": string;
+                    "description": string;
+                    "messageUs": string;
+                    "phoneHref": string;
+                    "phoneDisplay": string;
+                };
+                "summary": {
+                    "regionLabel": string;
+                    "title": string;
+                    "subtotal": string;
+                    "delivery": string;
+                    "tip": string;
+                    "total": string;
+                    "notePrefix": string;
+                    "free": string;
+                };
+                "backToMenu": string;
+            };
+            "checkout": {
+                "title": string;
+                "orderType": string;
+                "delivery": string;
+                "pickup": string;
+                "dineIn": string;
+                "deliveryAddress": string;
+                "pickupTime": string;
+                "payment": string;
+                "tip": string;
+                "reviewOrder": string;
+                "placeOrder": string;
+                "tax": string;
+                "deliveryFee": string;
+                "grandTotal": string;
+                "backToMenu": string;
+                "heading": string;
+                "signedInBanner": {
+                    "prefix": string;
+                    "detail": string;
+                };
+                "continue": string;
+                "skip": string;
+                "noFee": string;
+                "free": string;
+                "currencySymbol": {
+                    "PLN": string;
+                };
+                "empty": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "sections": {
+                    "orderType": {
+                        "title": string;
+                        "summary": {
+                            "DELIVERY": string;
+                            "PICKUP": string;
+                            "DINE_IN": string;
+                        };
+                        "options": {
+                            "DELIVERY": {
+                                "label": string;
+                                "description": string;
+                            };
+                            "PICKUP": {
+                                "label": string;
+                                "description": string;
+                                "badge": string;
+                            };
+                            "DINE_IN": {
+                                "label": string;
+                                "description": string;
+                            };
+                        };
+                        "ariaLabel": string;
+                    };
+                    "contact": {
+                        "title": string;
+                        "alreadyCustomer": string;
+                        "fields": {
+                            "name": string;
+                            "namePlaceholder": string;
+                            "phone": string;
+                            "phonePlaceholder": string;
+                            "phoneHelper": string;
+                            "email": string;
+                            "emailPlaceholder": string;
+                            "emailHelper": string;
+                        };
+                    };
+                    "whereWhen": {
+                        "delivery": string;
+                        "pickup": string;
+                        "dineIn": string;
+                        "when": string;
+                        "address": {
+                            "line1": string;
+                            "line1Placeholder": string;
+                            "apartment": string;
+                            "apartmentHelper": string;
+                            "apartmentPlaceholder": string;
+                            "city": string;
+                            "cityPlaceholder": string;
+                        };
+                        "outOfZone": string;
+                        "switchToPickup": string;
+                        "table": {
+                            "label": string;
+                            "helper": string;
+                            "placeholder": string;
+                        };
+                        "errors": {
+                            "needPinInZone": string;
+                        };
+                    };
+                    "notes": {
+                        "title": string;
+                        "helper": string;
+                        "placeholder": string;
+                    };
+                    "payment": {
+                        "title": string;
+                        "ariaLabel": string;
+                        "comingSoon": string;
+                        "options": {
+                            "card": {
+                                "label": string;
+                                "description": string;
+                            };
+                            "blik": {
+                                "label": string;
+                                "description": string;
+                            };
+                            "cod": {
+                                "delivery": {
+                                    "label": string;
+                                    "description": string;
+                                };
+                                "pickup": {
+                                    "label": string;
+                                    "description": string;
+                                };
+                                "dineIn": {
+                                    "label": string;
+                                    "description": string;
+                                };
+                            };
+                        };
+                    };
+                    "tip": {
+                        "title": string;
+                        "noTip": string;
+                        "other": string;
+                        "disclaimer": string;
+                        "groupLabel": string;
+                    };
+                };
+                "summary": {
+                    "title": string;
+                    "regionLabel": string;
+                    "subtotal": string;
+                    "delivery": string;
+                    "tip": string;
+                    "total": string;
+                    "notePrefix": string;
+                    "discount": string;
+                    "editCart": string;
+                };
+                "promo": {
+                    "trigger": string;
+                    "placeholder": string;
+                    "apply": string;
+                    "applying": string;
+                    "inputAriaLabel": string;
+                    "removeAriaLabel": string;
+                    "notValid": string;
+                    "mock": {
+                        "baklava": string;
+                        "student": string;
+                    };
+                };
+                "loyalty": {
+                    "trigger": string;
+                    "balance": string;
+                    "placeholder": string;
+                    "apply": string;
+                    "applying": string;
+                    "useMax": string;
+                    "inputAriaLabel": string;
+                    "removeAriaLabel": string;
+                    "invalid": string;
+                    "cannotApply": string;
+                    "error": string;
+                    "applied": string;
+                    "discountLabel": string;
+                };
+                "cta": {
+                    "placing": string;
+                    "placeOrderTotal": string;
+                    "payNow": string;
+                    "terms": string;
+                };
+                "errors": {
+                    "minOrderInline": string;
+                    "minOrderToast": string;
+                    "confirmAddress": string;
+                    "stripeNotInit": string;
+                    "createOrderFallback": string;
+                };
+                "return": {
+                    "confirming": string;
+                };
+                "stripe": {
+                    "notConfigured": string;
+                    "willAppear": string;
+                    "preparing": string;
+                    "notReady": string;
+                    "declined": string;
+                    "initFailed": string;
+                };
+            };
+            "menu-category": {
+                "title": string;
+                "backToMenu": string;
+                "itemCount": string;
+            };
+            "menu-item": {
+                "title": string;
+                "backToMenu": string;
+                "viewFullMenu": string;
+            };
+            "menu": {
+                "title": string;
+                "eyebrow": string;
+                "heroTitle": string;
+                "heroSummary": string;
+                "categories": string;
+                "featured": string;
+                "allItems": string;
+                "addToCart": string;
+                "outOfStock": string;
+                "calories": string;
+                "vegetarian": string;
+                "vegan": string;
+                "glutenFree": string;
+                "spicy": string;
+                "chips": {
+                    "vegetarian": string;
+                    "vegan": string;
+                    "glutenFree": string;
+                    "spicy": string;
+                    "featured": string;
+                };
+                "soldOutToday": string;
+                "all": string;
+                "noResults": string;
+                "searchPlaceholder": string;
+                "dietaryFiltersAria": string;
+                "loadingMenu": string;
+                "error": {
+                    "title": string;
+                    "description": string;
+                    "reload": string;
+                };
+                "emptySearch": {
+                    "title": string;
+                    "description": string;
+                    "clear": string;
+                };
+                "emptyFilter": {
+                    "title": string;
+                    "description": string;
+                    "clear": string;
+                };
+                "categoryItemCount": string;
+                "weight": string;
+                "toastAdded": {
+                    "title": string;
+                    "description": string;
+                };
+                "sheet": {
+                    "close": string;
+                    "allergens": string;
+                    "allergenNote": string;
+                    "specialInstructions": string;
+                    "specialInstructionsPlaceholder": string;
+                    "quantity": string;
+                    "total": string;
+                    "soldOut": string;
+                    "minChoice": string;
+                    "chooseGroups": string;
+                };
+                "allergen": {
+                    "gluten": string;
+                    "crustaceans": string;
+                    "eggs": string;
+                    "fish": string;
+                    "peanuts": string;
+                    "soybeans": string;
+                    "milk": string;
+                    "nuts": string;
+                    "celery": string;
+                    "mustard": string;
+                    "sesame": string;
+                    "sulphites": string;
+                    "lupin": string;
+                    "molluscs": string;
+                };
+            };
+        };
+        "staff": {
+            "accept-invite": {
+                "eyebrow": string;
+                "title": string;
+                "subtitle": string;
+                "missingToken": {
+                    "title": string;
+                    "description": string;
+                    "action": string;
+                };
+                "fields": {
+                    "firstName": string;
+                    "firstNamePlaceholder": string;
+                    "lastName": string;
+                    "lastNamePlaceholder": string;
+                    "password": string;
+                    "passwordHelper": string;
+                };
+                "actions": {
+                    "submit": string;
+                    "submitting": string;
+                };
+                "success": {
+                    "title": string;
+                    "description": string;
+                    "signIn": string;
+                };
+            };
+        };
     };
 };
 /* prettier-ignore */

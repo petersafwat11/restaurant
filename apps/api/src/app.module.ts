@@ -96,6 +96,10 @@ import { UsersModule } from './users/users.module';
             'messages',
           ),
           watch: process.env.NODE_ENV !== 'production',
+          // Translations live in nested folders (shared/, web/, admin/). Without
+          // this, nestjs-i18n only loads the top-level *.json files and silently
+          // ignores the subfolders, so e.g. `shared.order-status.*` never resolves.
+          includeSubfolders: true,
         }),
       ],
       resolvers: [

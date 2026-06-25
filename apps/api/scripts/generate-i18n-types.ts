@@ -26,6 +26,9 @@ import { I18nJsonLoader, I18nModule } from 'nestjs-i18n';
             'messages',
           ),
           watch: false,
+          // Must mirror the runtime loader in app.module.ts so the generated
+          // types include the nested (shared/web/admin) namespaces.
+          includeSubfolders: true,
         }),
       ],
       resolvers: [],
