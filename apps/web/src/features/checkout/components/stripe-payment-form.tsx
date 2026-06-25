@@ -1,6 +1,7 @@
 'use client';
 
 import { getApiClient } from '@/lib/api-client';
+import type { PaymentMethodKind } from '@repo/types';
 import { Spinner } from '@repo/ui';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { type Stripe, loadStripe } from '@stripe/stripe-js';
@@ -26,6 +27,13 @@ interface StripePaymentFormProps {
   orderId: string | null;
   /** Submit handle: the parent calls this; returns null on success, error string on failure. */
   submitRef: React.MutableRefObject<(() => Promise<string | null>) | null>;
+  /**
+   * Which Stripe method the customer picked. Mostly a label on the intent —
+   * `automatic_payment_methods` means the PaymentElement still surfaces every
+   * configured method (card, BLIK, P24…) as tabs — but it keeps the recorded
+   * Payment.method aligned with the customer's choice. Defaults to card.
+   */
+  methodKind?: PaymentMethodKind;
   /** Called when the publishable key + clientSecret are both ready. */
   onReady?: () => void;
 }
@@ -40,6 +48,7 @@ export function StripePaymentForm({
   publishableKey,
   orderId,
   submitRef,
+  methodKind = 'STRIPE_CARD',
   onReady,
 }: StripePaymentFormProps) {
   const t = useTranslations('web.shop.checkout.stripe');
@@ -54,7 +63,7 @@ export function StripePaymentForm({
         const res = await getApiClient().payments.createIntent({
           orderId,
           provider: 'stripe',
-          methodKind: 'STRIPE_CARD',
+          methodKind,
         });
         if (!mounted) return;
         if (!res.clientSecret) {
@@ -71,7 +80,7 @@ export function StripePaymentForm({
     return () => {
       mounted = false;
     };
-  }, [orderId, onReady, t]);
+  }, [orderId, onReady, t, methodKind]);
 
   if (intentError) {
     return (
@@ -98,15 +107,17 @@ export function StripePaymentForm({
       stripe={getStripe(publishableKey)}
       options={{ clientSecret, appearance: { theme: 'stripe' } }}
     >
-      <StripeInner submitRef={submitRef} />
+      <StripeInner submitRef={submitRef} orderId={orderId} />
     </Elements>
   );
 }
 
 function StripeInner({
   submitRef,
+  orderId,
 }: {
   submitRef: React.MutableRefObject<(() => Promise<string | null>) | null>;
+  orderId: string | null;
 }) {
   const t = useTranslations('web.shop.checkout.stripe');
   const stripe = useStripe();
@@ -115,10 +126,15 @@ function StripeInner({
   React.useEffect(() => {
     submitRef.current = async () => {
       if (!stripe || !elements) return t('notReady');
+      // Methods that need a redirect (e.g. BLIK) bounce the browser to this
+      // return_url; carry the orderId so /checkout/return can route to the
+      // confirmation page. Card payments resolve inline (no redirect).
+      const returnUrl = new URL('/checkout/return', window.location.origin);
+      if (orderId) returnUrl.searchParams.set('orderId', orderId);
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/checkout/return`,
+          return_url: returnUrl.toString(),
         },
         redirect: 'if_required',
       });

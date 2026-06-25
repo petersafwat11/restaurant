@@ -8,12 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Order, Payment, Refund } from '@repo/db';
-import {
-  JOB_EMAIL_REFUND,
-  JOB_RECEIPT_GENERATE,
-  QUEUE_EMAIL,
-  QUEUE_RECEIPT,
-} from '@repo/jobs';
+import { JOB_EMAIL_REFUND, QUEUE_EMAIL } from '@repo/jobs';
 import type {
   CreatePaymentIntentDto,
   CreateRefundDto,
@@ -50,7 +45,6 @@ export class PaymentsService {
     private readonly codProvider: CodProvider,
     private readonly webhookEvents: WebhookEventsService,
     private readonly orders: OrdersService,
-    @InjectQueue(QUEUE_RECEIPT) private readonly receiptQueue: Queue,
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
   ) {}
 
@@ -305,25 +299,13 @@ export class PaymentsService {
   }
 
   private async confirmOrderFromPayment(order: Order, paymentId: string): Promise<void> {
-    // Idempotent + state-safe: the conditional update only matches a still
-    // PENDING order, so concurrent duplicate webhook deliveries (or a racing
-    // cancel) can't double-confirm, resurrect a terminal order, or enqueue a
-    // second receipt.
-    const { count } = await this.prisma.order.updateMany({
-      where: { id: order.id, status: 'PENDING' },
-      data: { status: 'CONFIRMED' },
-    });
-    if (count === 0) {
-      this.logger.log(
-        `Order ${order.orderNumber} not PENDING — skipping confirm (payment ${paymentId})`,
-      );
-      return;
+    // Delegate to OrdersService so the payment-driven confirm (Stripe webhook /
+    // COD intent) and the COD-at-checkout path share one implementation:
+    // idempotent PENDING→CONFIRMED guard, status event, receipt enqueue.
+    const confirmed = await this.orders.confirmPendingOrder(order.id, 'Payment confirmed');
+    if (confirmed) {
+      this.logger.log(`Order ${order.orderNumber} confirmed via payment ${paymentId}`);
     }
-    await this.prisma.orderStatusEvent.create({
-      data: { orderId: order.id, status: 'CONFIRMED', note: 'Payment confirmed' },
-    });
-    this.logger.log(`Order ${order.orderNumber} confirmed via payment ${paymentId}`);
-    await this.receiptQueue.add(JOB_RECEIPT_GENERATE, { orderId: order.id });
   }
 
   private async dispatchEvent(event: ParsedWebhookEvent): Promise<void> {

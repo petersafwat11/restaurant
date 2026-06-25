@@ -1,5 +1,9 @@
 import type { RestaurantAddressDto, RestaurantPublicDto } from '@repo/types';
 import type { DayOfWeek, HoursRow } from '@repo/ui';
+import { zonedParts } from '@repo/utils';
+
+/** The restaurant lives in Poland; never trust the visitor's browser clock. */
+export const FALLBACK_TIMEZONE = 'Europe/Warsaw';
 
 type HourDto = NonNullable<RestaurantPublicDto['hours']>[number];
 
@@ -40,15 +44,20 @@ function toMinutes(hhmm: string): number {
  * Lightweight "is the restaurant open right now and when does it close" for the
  * hero badge. Returns null when hours aren't loaded yet. The locations page has
  * a richer status (next-open lookahead); this only needs today.
+ *
+ * `tz` is the restaurant's IANA zone — the day-of-week and minutes are computed
+ * there, not in the visitor's browser timezone.
  */
 export function todayStatus(
   hours: HourDto[] | undefined | null,
   now: Date,
+  tz: string = FALLBACK_TIMEZONE,
 ): { isOpen: boolean; closesAt: string | null } | null {
   if (!hours || hours.length === 0) return null;
-  const todayRow = hours.find((h) => h.dayOfWeek === now.getDay());
+  const parts = zonedParts(now, tz);
+  const todayRow = hours.find((h) => h.dayOfWeek === parts.weekday);
   if (!todayRow || todayRow.isClosed) return { isOpen: false, closesAt: null };
-  const mins = now.getHours() * 60 + now.getMinutes();
+  const mins = parts.hour * 60 + parts.minute;
   const open = toMinutes(todayRow.opensAt);
   const close = toMinutes(todayRow.closesAt);
   return { isOpen: mins >= open && mins < close, closesAt: todayRow.closesAt };

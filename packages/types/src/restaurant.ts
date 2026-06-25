@@ -63,6 +63,16 @@ export const RestaurantPublicSchema = z.object({
   // show them without hitting an admin endpoint.
   defaultDeliveryFee: MoneyStringSchema,
   minOrderAmount: MoneyStringSchema,
+  // Delivery coverage radius (km) for the circle centred on geoPoint. Read-only:
+  // the map draws this circle and checks the dropped pin against it.
+  deliveryRadiusKm: z.number().positive(),
+  // Indicative order-ready time ranges (minutes); null when not configured.
+  // Surfaced publicly (checkout success ETA, the Terms "Delivery & pickup"
+  // section). Min/Max are set together with Min <= Max (enforced server-side).
+  estimatedDeliveryMinutesMin: z.number().int().min(1).max(600).nullable(),
+  estimatedDeliveryMinutesMax: z.number().int().min(1).max(600).nullable(),
+  estimatedPickupMinutesMin: z.number().int().min(1).max(600).nullable(),
+  estimatedPickupMinutesMax: z.number().int().min(1).max(600).nullable(),
   isActive: z.boolean(),
   acceptsReservations: z.boolean().default(true),
   acceptsDelivery: z.boolean().default(true),
@@ -101,6 +111,10 @@ export const CreateRestaurantSchema = z.object({
   servesCuisine: z.array(z.string().min(1).max(60)).optional(),
   priceRange: PriceRangeSchema.optional(),
   sameAs: z.array(z.string().url()).optional(),
+  estimatedDeliveryMinutesMin: z.number().int().min(1).max(600).nullable().optional(),
+  estimatedDeliveryMinutesMax: z.number().int().min(1).max(600).nullable().optional(),
+  estimatedPickupMinutesMin: z.number().int().min(1).max(600).nullable().optional(),
+  estimatedPickupMinutesMax: z.number().int().min(1).max(600).nullable().optional(),
 });
 export type CreateRestaurantDto = z.infer<typeof CreateRestaurantSchema>;
 

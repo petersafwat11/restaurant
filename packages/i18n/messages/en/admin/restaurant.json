@@ -72,7 +72,18 @@
     "acceptsReservationsHint": "Show the reservation widget",
     "acceptsDelivery": "Accepts delivery",
     "acceptsPickup": "Accepts pickup",
-    "acceptsDineIn": "Accepts dine-in"
+    "acceptsDineIn": "Accepts dine-in",
+    "estimatedDeliveryLabel": "Estimated delivery time (minutes)",
+    "estimatedPickupLabel": "Estimated pickup time (minutes)",
+    "estimatedTimeHint": "Shown to customers as an indicative range (e.g. 30–45 min). Leave both blank to hide.",
+    "rangeMinPlaceholder": "Min",
+    "rangeMaxPlaceholder": "Max",
+    "rangeMinAria": "Minimum minutes",
+    "rangeMaxAria": "Maximum minutes",
+    "rangeError": {
+      "incomplete": "Set both a min and a max, or leave both blank.",
+      "order": "Minimum must be less than or equal to maximum."
+    }
   },
   "saveBar": {
     "unsavedHint": "Unsaved changes — {shortcut} to save.",

@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import type { HolidayDto, RestaurantSettingsDto } from '@repo/types';
 import { EmptyState, PageSpinner, SettingsSectionCard } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
-import { Calendar, Clock, Globe, MapPin, ReceiptText } from 'lucide-react';
+import { Calendar, Clock, Globe, ReceiptText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -247,19 +247,6 @@ export default function AdminSettingsPage() {
                 ? t('hub.holidays.next', { label: holidaySummary.nextLabel })
                 : ''}
               {t('hub.holidays.trailing')}
-            </p>
-          }
-        />
-        <HubCard
-          icon={<MapPin className="h-5 w-5" />}
-          title={t('hub.deliveryZones.title')}
-          href="/settings/delivery-zones"
-          manageLabel={t('hub.manage')}
-          preview={
-            <p>
-              <span className="text-fg">
-                {t('hub.deliveryZones.preview', { count: s.deliveryZones.length })}
-              </span>
             </p>
           }
         />

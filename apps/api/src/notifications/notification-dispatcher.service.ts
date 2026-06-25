@@ -1,6 +1,6 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { I18nService } from 'nestjs-i18n';
 import {
   JOB_EMAIL_ORDER_STATUS,
@@ -26,6 +26,7 @@ export class NotificationDispatcherService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly i18n: I18nService,
+    private readonly events: EventEmitter2,
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
     @InjectQueue(QUEUE_SMS) private readonly smsQueue: Queue,
     @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
@@ -90,13 +91,25 @@ export class NotificationDispatcherService {
     const copy = notificationCopyFor(this.i18n, input.to, input.orderNumber, locale);
 
     if (channels.inApp && user) {
-      await this.prisma.notification.create({
+      const notification = await this.prisma.notification.create({
         data: {
           userId: user.id,
           type: 'order_status',
           title: copy.title,
           body: copy.body,
           data: { orderId: input.orderId, toStatus: input.to } as never,
+        },
+      });
+      // Push the new in-app notification to the user's realtime room so the
+      // feed + unread badge update live (the gateway forwards this to socket.io).
+      this.events.emit('notification.created', {
+        userId: user.id,
+        notification: {
+          id: notification.id,
+          type: notification.type,
+          title: notification.title,
+          body: notification.body,
+          createdAt: notification.createdAt.toISOString(),
         },
       });
     }

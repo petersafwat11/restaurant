@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { OperatingHours, Prisma, Restaurant } from '@repo/db';
 import type {
   OperatingHoursDto,
@@ -12,8 +17,10 @@ import { CacheService } from '../redis/cache.service';
 
 const CACHE_TTL_SECONDS = 300;
 // Single-restaurant project — one cached entry covers all reads. v3 = post
-// restaurantId drop (cart/menu/etc. no longer carry it).
-const PUBLIC_KEY = 'restaurant:public:v3';
+// restaurantId drop (cart/menu/etc. no longer carry it). v4 = estimated*Minutes
+// split into Min/Max range pairs (DTO shape changed; bump avoids serving a stale
+// v3 object missing the new keys during the post-deploy TTL window).
+const PUBLIC_KEY = 'restaurant:public:v4';
 
 /**
  * Single-restaurant project (decision: drop restaurantId everywhere).
@@ -62,6 +69,35 @@ export class RestaurantsService {
       }
     }
 
+    // Estimated-time ranges are set as a Min/Max pair: both-or-neither, Min <= Max.
+    // Validate against the *resulting* state (dto value if present, else current).
+    const pick = <K extends keyof UpdateRestaurantDto>(key: K, fallback: number | null) =>
+      dto[key] !== undefined ? (dto[key] as number | null) : fallback;
+    const ranges: Array<[string, number | null, number | null]> = [
+      [
+        'delivery',
+        pick('estimatedDeliveryMinutesMin', current.estimatedDeliveryMinutesMin),
+        pick('estimatedDeliveryMinutesMax', current.estimatedDeliveryMinutesMax),
+      ],
+      [
+        'pickup',
+        pick('estimatedPickupMinutesMin', current.estimatedPickupMinutesMin),
+        pick('estimatedPickupMinutesMax', current.estimatedPickupMinutesMax),
+      ],
+    ];
+    for (const [label, min, max] of ranges) {
+      if ((min === null) !== (max === null)) {
+        throw new BadRequestException(
+          `Estimated ${label} time needs both a min and a max, or neither.`,
+        );
+      }
+      if (min !== null && max !== null && min > max) {
+        throw new BadRequestException(
+          `Estimated ${label} time min must be less than or equal to max.`,
+        );
+      }
+    }
+
     const updated = await this.prisma.restaurant.update({
       where: { id: current.id },
       data: {
@@ -86,6 +122,18 @@ export class RestaurantsService {
         ...(dto.servesCuisine !== undefined ? { servesCuisine: dto.servesCuisine } : {}),
         ...(dto.priceRange !== undefined ? { priceRange: dto.priceRange } : {}),
         ...(dto.sameAs !== undefined ? { sameAs: dto.sameAs } : {}),
+        ...(dto.estimatedDeliveryMinutesMin !== undefined
+          ? { estimatedDeliveryMinutesMin: dto.estimatedDeliveryMinutesMin }
+          : {}),
+        ...(dto.estimatedDeliveryMinutesMax !== undefined
+          ? { estimatedDeliveryMinutesMax: dto.estimatedDeliveryMinutesMax }
+          : {}),
+        ...(dto.estimatedPickupMinutesMin !== undefined
+          ? { estimatedPickupMinutesMin: dto.estimatedPickupMinutesMin }
+          : {}),
+        ...(dto.estimatedPickupMinutesMax !== undefined
+          ? { estimatedPickupMinutesMax: dto.estimatedPickupMinutesMax }
+          : {}),
       },
     });
     await this.cache.invalidate(PUBLIC_KEY);
@@ -164,6 +212,11 @@ function toPublic(row: Restaurant, hours?: OperatingHours[]): RestaurantPublicDt
     currency: row.currency,
     defaultDeliveryFee: row.defaultDeliveryFee.toFixed(2),
     minOrderAmount: row.minOrderAmount.toFixed(2),
+    deliveryRadiusKm: row.deliveryRadiusKm,
+    estimatedDeliveryMinutesMin: row.estimatedDeliveryMinutesMin,
+    estimatedDeliveryMinutesMax: row.estimatedDeliveryMinutesMax,
+    estimatedPickupMinutesMin: row.estimatedPickupMinutesMin,
+    estimatedPickupMinutesMax: row.estimatedPickupMinutesMax,
     isActive: row.isActive,
     acceptsReservations: row.acceptsReservations,
     acceptsDelivery: row.acceptsDelivery,

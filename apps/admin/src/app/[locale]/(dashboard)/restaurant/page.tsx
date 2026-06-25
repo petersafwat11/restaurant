@@ -56,6 +56,12 @@ interface FormState {
   acceptsDelivery: boolean;
   acceptsPickup: boolean;
   acceptsDineIn: boolean;
+  // Indicative order-ready time ranges (minutes); null = not set. Min/Max are
+  // set together with Min <= Max.
+  estimatedDeliveryMinutesMin: number | null;
+  estimatedDeliveryMinutesMax: number | null;
+  estimatedPickupMinutesMin: number | null;
+  estimatedPickupMinutesMax: number | null;
   // SEO / discovery
   cuisineRaw: string; // comma-separated input; split on submit
   priceRange: '' | '$' | '$$' | '$$$' | '$$$$';
@@ -77,6 +83,17 @@ function splitLines(raw: string): string[] {
     .split(/\r?\n/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+/**
+ * Validates an estimated-time range pair. Returns the error kind, or null when
+ * the pair is valid (both blank, or both set with min <= max). Mirrors the
+ * server-side guard in `restaurants.service.update`.
+ */
+function rangeError(min: number | null, max: number | null): 'incomplete' | 'order' | null {
+  if ((min === null) !== (max === null)) return 'incomplete';
+  if (min !== null && max !== null && min > max) return 'order';
+  return null;
 }
 
 function fromDto(r: RestaurantAdminDto): FormState {
@@ -102,6 +119,10 @@ function fromDto(r: RestaurantAdminDto): FormState {
     acceptsDelivery: r.acceptsDelivery,
     acceptsPickup: r.acceptsPickup,
     acceptsDineIn: r.acceptsDineIn,
+    estimatedDeliveryMinutesMin: r.estimatedDeliveryMinutesMin,
+    estimatedDeliveryMinutesMax: r.estimatedDeliveryMinutesMax,
+    estimatedPickupMinutesMin: r.estimatedPickupMinutesMin,
+    estimatedPickupMinutesMax: r.estimatedPickupMinutesMax,
     cuisineRaw: r.servesCuisine.join(', '),
     priceRange: (r.priceRange ?? '') as PriceRangeOption,
     sameAsRaw: r.sameAs.join('\n'),
@@ -128,6 +149,14 @@ function diff(initial: FormState, current: FormState): UpdateRestaurantDto {
     set('acceptsDelivery', current.acceptsDelivery);
   if (initial.acceptsPickup !== current.acceptsPickup) set('acceptsPickup', current.acceptsPickup);
   if (initial.acceptsDineIn !== current.acceptsDineIn) set('acceptsDineIn', current.acceptsDineIn);
+  if (initial.estimatedDeliveryMinutesMin !== current.estimatedDeliveryMinutesMin)
+    set('estimatedDeliveryMinutesMin', current.estimatedDeliveryMinutesMin);
+  if (initial.estimatedDeliveryMinutesMax !== current.estimatedDeliveryMinutesMax)
+    set('estimatedDeliveryMinutesMax', current.estimatedDeliveryMinutesMax);
+  if (initial.estimatedPickupMinutesMin !== current.estimatedPickupMinutesMin)
+    set('estimatedPickupMinutesMin', current.estimatedPickupMinutesMin);
+  if (initial.estimatedPickupMinutesMax !== current.estimatedPickupMinutesMax)
+    set('estimatedPickupMinutesMax', current.estimatedPickupMinutesMax);
   const addressChanged =
     initial.addrLine1 !== current.addrLine1 ||
     initial.city !== current.city ||
@@ -194,6 +223,54 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
         props.className ?? ''
       }`}
     />
+  );
+}
+
+/** A min–max pair of minute inputs. Empty string maps to null (not set). */
+function RangeInput({
+  min,
+  max,
+  onMin,
+  onMax,
+  minLabel,
+  maxLabel,
+  minPlaceholder,
+  maxPlaceholder,
+}: {
+  min: number | null;
+  max: number | null;
+  onMin: (v: number | null) => void;
+  onMax: (v: number | null) => void;
+  minLabel: string;
+  maxLabel: string;
+  minPlaceholder: string;
+  maxPlaceholder: string;
+}) {
+  const toNum = (s: string) => (s === '' ? null : Number(s));
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        type="number"
+        min={1}
+        max={600}
+        aria-label={minLabel}
+        placeholder={minPlaceholder}
+        value={min ?? ''}
+        onChange={(e) => onMin(toNum(e.target.value))}
+      />
+      <span aria-hidden className="text-fg-subtle">
+        –
+      </span>
+      <Input
+        type="number"
+        min={1}
+        max={600}
+        aria-label={maxLabel}
+        placeholder={maxPlaceholder}
+        value={max ?? ''}
+        onChange={(e) => onMax(toNum(e.target.value))}
+      />
+    </div>
   );
 }
 
@@ -271,6 +348,14 @@ export default function RestaurantProfilePage() {
     return Object.keys(diff(initial, draft)).length > 0;
   }, [initial, draft]);
 
+  const deliveryRangeErr = draft
+    ? rangeError(draft.estimatedDeliveryMinutesMin, draft.estimatedDeliveryMinutesMax)
+    : null;
+  const pickupRangeErr = draft
+    ? rangeError(draft.estimatedPickupMinutesMin, draft.estimatedPickupMinutesMax)
+    : null;
+  const rangesValid = !deliveryRangeErr && !pickupRangeErr;
+
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
@@ -288,7 +373,7 @@ export default function RestaurantProfilePage() {
   }
 
   function submit() {
-    if (!initial || !draft) return;
+    if (!initial || !draft || !rangesValid) return;
     const payload = diff(initial, draft);
     if (Object.keys(payload).length === 0) return;
     update.mutate(payload);
@@ -435,7 +520,6 @@ export default function RestaurantProfilePage() {
           description={t('location.description')}
         >
           <DeliveryLocationPicker
-            zones={[]}
             showRestaurantMarker={false}
             center={
               draft.lat !== null && draft.lng !== null
@@ -538,6 +622,54 @@ export default function RestaurantProfilePage() {
             checked={draft.acceptsDineIn}
             onChange={(b) => patch('acceptsDineIn', b)}
           />
+          <div className="grid grid-cols-1 gap-3 border-t border-border/[var(--border-alpha)] pt-4 md:grid-cols-2">
+            <Field
+              label={t('channels.estimatedDeliveryLabel')}
+              hint={
+                deliveryRangeErr ? (
+                  <span className="text-negative">
+                    {t(`channels.rangeError.${deliveryRangeErr}`)}
+                  </span>
+                ) : (
+                  t('channels.estimatedTimeHint')
+                )
+              }
+            >
+              <RangeInput
+                min={draft.estimatedDeliveryMinutesMin}
+                max={draft.estimatedDeliveryMinutesMax}
+                onMin={(v) => patch('estimatedDeliveryMinutesMin', v)}
+                onMax={(v) => patch('estimatedDeliveryMinutesMax', v)}
+                minLabel={t('channels.rangeMinAria')}
+                maxLabel={t('channels.rangeMaxAria')}
+                minPlaceholder={t('channels.rangeMinPlaceholder')}
+                maxPlaceholder={t('channels.rangeMaxPlaceholder')}
+              />
+            </Field>
+            <Field
+              label={t('channels.estimatedPickupLabel')}
+              hint={
+                pickupRangeErr ? (
+                  <span className="text-negative">
+                    {t(`channels.rangeError.${pickupRangeErr}`)}
+                  </span>
+                ) : (
+                  t('channels.estimatedTimeHint')
+                )
+              }
+            >
+              <RangeInput
+                min={draft.estimatedPickupMinutesMin}
+                max={draft.estimatedPickupMinutesMax}
+                onMin={(v) => patch('estimatedPickupMinutesMin', v)}
+                onMax={(v) => patch('estimatedPickupMinutesMax', v)}
+                minLabel={t('channels.rangeMinAria')}
+                maxLabel={t('channels.rangeMaxAria')}
+                minPlaceholder={t('channels.rangeMinPlaceholder')}
+                maxPlaceholder={t('channels.rangeMaxPlaceholder')}
+              />
+            </Field>
+          </div>
         </SettingsSectionCard>
       </div>
 
@@ -564,7 +696,7 @@ export default function RestaurantProfilePage() {
               <button
                 type="button"
                 onClick={submit}
-                disabled={update.isPending}
+                disabled={update.isPending || !rangesValid}
                 className="h-9 rounded-button bg-accent px-4 text-small font-medium text-bg hover:bg-accent-hover disabled:opacity-50"
               >
                 {update.isPending ? t('saveBar.saving') : t('saveBar.save')}

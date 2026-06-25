@@ -2,7 +2,7 @@
 
 import 'leaflet/dist/leaflet.css';
 
-import L, { type LatLngExpression, type Map as LeafletMap } from 'leaflet';
+import L, { type Map as LeafletMap } from 'leaflet';
 import { Crosshair, Loader2, MapPin } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../lib/cn';
@@ -13,32 +13,21 @@ export interface DeliveryLocationValue {
   lng: number;
 }
 
-export interface DeliveryZoneShape {
-  id: string;
-  name: string;
-  polygon: {
-    type: 'Polygon';
-    coordinates: [number, number][][]; // [lng, lat] outer ring first
-  };
-}
-
 export type DeliveryLocationStatus =
   | { kind: 'idle' }
-  | { kind: 'checking' }
-  | { kind: 'in-zone'; zoneName: string }
-  | { kind: 'out-of-zone' }
-  | { kind: 'error'; message: string };
+  | { kind: 'in-range' }
+  | { kind: 'out-of-range' };
 
 export interface DeliveryLocationPickerProps {
-  /** Zones to render as read-only colored fills. Customer can see where we deliver. */
-  zones: DeliveryZoneShape[];
-  /** Restaurant location — marker + initial map center. */
+  /** Restaurant location — marker, circle centre, and initial map center. */
   center: DeliveryLocationValue;
+  /** Delivery coverage radius in kilometres. Drawn as a circle around `center`. */
+  radiusKm?: number;
   /** Current pin. `null` means no pin dropped yet. */
   value: DeliveryLocationValue | null;
   /** Fired when the customer drops/drags the pin or uses Locate-me. */
   onChange: (next: DeliveryLocationValue) => void;
-  /** Status badge content driven by the parent (which runs the zone check). */
+  /** Status badge content driven by the parent (which runs the radius check). */
   status?: DeliveryLocationStatus;
   zoom?: number;
   height?: number;
@@ -52,22 +41,18 @@ export interface DeliveryLocationPickerProps {
   showRestaurantMarker?: boolean;
 }
 
-const ZONE_FILL = 'rgba(127, 232, 200, 0.18)';
-const ZONE_STROKE = 'rgba(127, 232, 200, 0.7)';
-
-function ringToLatLngs(ring: [number, number][]): LatLngExpression[] {
-  return ring.map(([lng, lat]) => [lat, lng]);
-}
+const CIRCLE_FILL = 'rgba(127, 232, 200, 0.12)';
+const CIRCLE_STROKE = 'rgba(127, 232, 200, 0.7)';
 
 /**
- * Customer-facing map picker. Renders delivery-zone polygons as read-only
- * coverage fills, drops a single draggable pin, and exposes a Locate-me
- * button. Coordinate emission is throttled (200ms) so dragging doesn't
- * spam the parent's zone-check API.
+ * Customer-facing map picker. Renders the delivery coverage as a single circle
+ * of `radiusKm` around the restaurant, drops a single draggable pin, and
+ * exposes a Locate-me button. The map defaults to the restaurant; the customer
+ * searches/drops their own pin from there.
  */
 export function DeliveryLocationPicker({
-  zones,
   center,
+  radiusKm,
   value,
   onChange,
   status = { kind: 'idle' },
@@ -79,7 +64,7 @@ export function DeliveryLocationPicker({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const mapRef = React.useRef<LeafletMap | null>(null);
   const pinRef = React.useRef<L.Marker | null>(null);
-  const zonesRef = React.useRef<L.Polygon[]>([]);
+  const circleRef = React.useRef<L.Circle | null>(null);
   const onChangeRef = React.useRef(onChange);
   const [locating, setLocating] = React.useState(false);
   const [locateError, setLocateError] = React.useState<string | null>(null);
@@ -127,30 +112,29 @@ export function DeliveryLocationPicker({
       map.remove();
       mapRef.current = null;
       pinRef.current = null;
-      zonesRef.current = [];
+      circleRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Render zones whenever the zones list changes.
+  // Draw / update the coverage circle when center or radius changes.
   React.useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    for (const layer of zonesRef.current) layer.remove();
-    zonesRef.current = [];
-    for (const z of zones) {
-      const outer = z.polygon.coordinates[0];
-      if (!outer || outer.length < 4) continue;
-      const layer = L.polygon(ringToLatLngs(outer), {
-        color: ZONE_STROKE,
-        weight: 1.5,
-        fillColor: ZONE_FILL,
-        fillOpacity: 1,
-        interactive: false,
-      }).addTo(map);
-      zonesRef.current.push(layer);
+    if (circleRef.current) {
+      circleRef.current.remove();
+      circleRef.current = null;
     }
-  }, [zones]);
+    if (!radiusKm || radiusKm <= 0) return;
+    circleRef.current = L.circle([center.lat, center.lng], {
+      radius: radiusKm * 1000, // Leaflet circle radius is in metres.
+      color: CIRCLE_STROKE,
+      weight: 1.5,
+      fillColor: CIRCLE_FILL,
+      fillOpacity: 1,
+      interactive: false,
+    }).addTo(map);
+  }, [center.lat, center.lng, radiusKm]);
 
   // Render / move the pin when `value` changes.
   React.useEffect(() => {
@@ -218,7 +202,7 @@ export function DeliveryLocationPicker({
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <div
-        className="relative overflow-hidden rounded-card border border-border/[var(--border-alpha)]"
+        className="relative isolate overflow-hidden rounded-card border border-border/[var(--border-alpha)]"
         style={{ height }}
       >
         <div ref={containerRef} className="absolute inset-0 cursor-crosshair" />
@@ -275,16 +259,12 @@ export function DeliveryLocationPicker({
 function StatusBadge({ status }: { status: DeliveryLocationStatus }) {
   if (status.kind === 'idle') return null;
   const tone = {
-    checking: 'border-border/[var(--border-alpha)] bg-surface-2 text-fg-muted',
-    'in-zone': 'border-positive/30 bg-positive/10 text-positive',
-    'out-of-zone': 'border-negative/30 bg-negative/10 text-negative',
-    error: 'border-warning/30 bg-warning/10 text-warning',
+    'in-range': 'border-positive/30 bg-positive/10 text-positive',
+    'out-of-range': 'border-negative/30 bg-negative/10 text-negative',
   }[status.kind];
   const label = {
-    checking: 'Checking delivery area…',
-    'in-zone': `Delivers here${status.kind === 'in-zone' ? ` · ${status.zoneName}` : ''}`,
-    'out-of-zone': "We don't deliver to this location yet.",
-    error: status.kind === 'error' ? status.message : '',
+    'in-range': 'Delivers here',
+    'out-of-range': "We don't deliver to this location yet.",
   }[status.kind];
 
   return (
@@ -295,11 +275,10 @@ function StatusBadge({ status }: { status: DeliveryLocationStatus }) {
         tone,
       )}
     >
-      {status.kind === 'checking' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-      {status.kind === 'in-zone' && (
+      {status.kind === 'in-range' && (
         <span aria-hidden className="h-2 w-2 rounded-full bg-positive" />
       )}
-      {status.kind === 'out-of-zone' && (
+      {status.kind === 'out-of-range' && (
         <span aria-hidden className="h-2 w-2 rounded-full bg-negative" />
       )}
       <span>{label}</span>

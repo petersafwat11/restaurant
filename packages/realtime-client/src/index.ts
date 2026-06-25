@@ -1,5 +1,6 @@
 import type {
   KitchenTicketEvent,
+  NotificationCreatedEvent,
   OrderCancelledEvent,
   OrderCreatedEvent,
   OrderRefundedEvent,
@@ -28,6 +29,7 @@ export type RealtimeEventMap = {
   'order.refunded': OrderRefundedEvent;
   'kitchen.ticket_added': KitchenTicketEvent;
   'kitchen.ticket_removed': KitchenTicketEvent;
+  'notification.created': NotificationCreatedEvent;
 };
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'disconnected';
@@ -70,7 +72,7 @@ export function createRealtimeClient(opts: CreateRealtimeClientOptions): Realtim
     if (socket?.connected) return;
     setStatus('connecting');
     const isCookieAudience = opts.audience === 'web' || opts.audience === 'admin';
-    const token = isCookieAudience ? null : (await opts.getAccessToken?.()) ?? null;
+    const token = isCookieAudience ? null : ((await opts.getAccessToken?.()) ?? null);
     // Lazy-load socket.io-client — it references `window` at module init time
     // which breaks Next.js static prerender. Importing here defers evaluation
     // to client-side runtime.

@@ -6,7 +6,66 @@ import {
   fmtPct,
   fmtPrep,
   formatMoney,
+  zonedParts,
+  zonedTimeToUtc,
 } from './format';
+
+describe('zonedParts (restaurant-zone wall clock)', () => {
+  it('reads Warsaw summer (CEST, UTC+2) wall clock from a UTC instant', () => {
+    // 2026-06-24 19:19:00Z → 21:19 in Warsaw (summer). The reported bug: a
+    // UTC+3 browser showed 22:19; we must always report Poland's clock.
+    const p = zonedParts(new Date('2026-06-24T19:19:00Z'), 'Europe/Warsaw');
+    expect(p.hour).toBe(21);
+    expect(p.minute).toBe(19);
+    expect(p.weekday).toBe(3); // Wednesday
+    expect(p).toMatchObject({ year: 2026, month: 6, day: 24 });
+  });
+
+  it('reads Warsaw winter (CET, UTC+1)', () => {
+    const p = zonedParts(new Date('2026-01-15T23:30:00Z'), 'Europe/Warsaw');
+    expect(p.hour).toBe(0); // next local day
+    expect(p.minute).toBe(30);
+    expect(p.day).toBe(16);
+    expect(p.weekday).toBe(5); // Friday
+  });
+
+  it('handles midnight without the ICU "24" overflow', () => {
+    const p = zonedParts(new Date('2026-06-23T22:00:00Z'), 'Europe/Warsaw');
+    expect(p.hour).toBe(0);
+    expect(p.day).toBe(24);
+  });
+
+  it('falls back to UTC parts for an unknown zone instead of throwing', () => {
+    const p = zonedParts(new Date('2026-06-24T19:19:00Z'), 'Not/AZone');
+    expect(p.hour).toBe(19);
+    expect(p.minute).toBe(19);
+  });
+});
+
+describe('zonedTimeToUtc (inverse of zonedParts)', () => {
+  it('round-trips a Warsaw wall clock back to the correct UTC instant', () => {
+    const utc = zonedTimeToUtc(
+      { year: 2026, month: 6, day: 24, hour: 21, minute: 19 },
+      'Europe/Warsaw',
+    );
+    expect(utc.toISOString()).toBe('2026-06-24T19:19:00.000Z');
+  });
+
+  it('round-trips across DST boundaries (winter)', () => {
+    const utc = zonedTimeToUtc(
+      { year: 2026, month: 1, day: 16, hour: 0, minute: 30 },
+      'Europe/Warsaw',
+    );
+    expect(utc.toISOString()).toBe('2026-01-15T23:30:00.000Z');
+  });
+
+  it('is the exact inverse of zonedParts', () => {
+    const original = new Date('2026-06-24T17:45:00Z');
+    const p = zonedParts(original, 'Europe/Warsaw');
+    const back = zonedTimeToUtc(p, 'Europe/Warsaw');
+    expect(back.getTime()).toBe(original.getTime());
+  });
+});
 
 describe('formatMoney (carry-over fix #7 — 2-decimal enforcement)', () => {
   it('always pads to 2 decimal places', () => {

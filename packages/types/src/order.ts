@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PaymentSchema, RefundSchema } from './payment';
+import { PAYMENT_METHOD_KINDS, PaymentSchema, RefundSchema } from './payment';
 
 const MoneyStringSchema = z
   .string()
@@ -48,6 +48,11 @@ export const CreateOrderSchema = z
     pickupAt: z.string().datetime().nullish(),
     notes: z.string().max(1000).nullish(),
     tipAmount: MoneyStringSchema.default('0'),
+    // Chosen payment method. The server acts only on 'COD' — it records a COD
+    // Payment row and confirms the order at creation time (guest-safe, since
+    // /payments/intent requires an authed owner). Online methods (card/BLIK)
+    // leave the order PENDING for the Stripe Elements flow to finalize.
+    paymentMethod: z.enum(PAYMENT_METHOD_KINDS).optional(),
     // When the customer accepted the Regulamin + Privacy Policy at checkout.
     acceptedTermsAt: z.string().datetime().nullish(),
   })

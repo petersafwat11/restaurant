@@ -12,6 +12,7 @@
     "password": "Password",
     "passwordHelper": "At least 10 characters, with a number."
   },
+  "referralApplied": "Referral code {code} applied — you'll both earn points after your first order.",
   "actions": {
     "submit": "Create account",
     "submitting": "Creating account…"

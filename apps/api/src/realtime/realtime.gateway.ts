@@ -13,6 +13,7 @@ import { verifyAccessToken } from '@repo/auth-core';
 import type {
   AuthAudience,
   KitchenTicketEvent,
+  NotificationCreatedEvent,
   OrderCancelledEvent,
   OrderCreatedEvent,
   OrderRefundedEvent,
@@ -188,6 +189,11 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.server?.to(ROOMS.kitchen).emit('kitchen.ticket_removed', ticket);
   }
 
+  @OnEvent('notification.created')
+  onNotificationCreated(event: NotificationCreatedEvent): void {
+    this.server?.to(ROOMS.user(event.userId)).emit('notification.created', event);
+  }
+
   // ---- Permission checks ----------------------------------------------
 
   private async canJoin(user: SocketUser, room: string): Promise<SubscribeAck> {
@@ -218,6 +224,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         return { ok: false, reason: 'Forbidden' };
       }
       return { ok: true, room };
+    }
+
+    // Per-user notification room: a user may only join their own.
+    const userMatch = /^user:(.+)$/.exec(room);
+    if (userMatch) {
+      return userMatch[1] === user.id
+        ? { ok: true, room }
+        : { ok: false, reason: 'Forbidden' };
     }
 
     return { ok: false, reason: 'Unknown room' };

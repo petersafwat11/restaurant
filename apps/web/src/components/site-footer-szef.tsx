@@ -1,12 +1,13 @@
 'use client';
 
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
 import { useRestaurant } from '@/features/restaurants/hooks';
 import { formatAddressLine2, hoursToRows } from '@/features/restaurants/lib/restaurant-info';
+import { Link } from '@/i18n/navigation';
 import { HoursTable, SiteFooter } from '@repo/ui';
 import { Facebook, Globe, Instagram } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 
 /** Pick an icon + accessible label for a social/profile URL (from `sameAs`). */
 function socialMeta(url: string): { Icon: typeof Instagram; label: string } {
@@ -51,7 +52,7 @@ export function SzefSiteFooter() {
               {restaurant.sameAs.map((url) => {
                 const { Icon, label } = socialMeta(url);
                 return (
-                  <Link
+                  <a
                     key={url}
                     href={url}
                     target="_blank"
@@ -60,7 +61,7 @@ export function SzefSiteFooter() {
                     className="text-surface/60 transition-colors hover:text-accent"
                   >
                     <Icon size={20} strokeWidth={1.5} />
-                  </Link>
+                  </a>
                 );
               })}
             </div>
@@ -104,12 +105,12 @@ export function SzefSiteFooter() {
                 </div>
               )}
               {restaurant?.phone && (
-                <Link
+                <a
                   href={`tel:${restaurant.phone.replace(/\s/g, '')}`}
                   className="hover:text-accent"
                 >
                   {restaurant.phone}
-                </Link>
+                </a>
               )}
               {restaurant?.hours && restaurant.hours.length > 0 && (
                 <div className="mt-2 text-surface/80">
@@ -152,7 +153,11 @@ export function SzefSiteFooter() {
           { href: '/terms', label: t('bottom.legal.terms') },
           { href: '/cookies', label: t('bottom.legal.cookies') },
         ],
+        rightSlot: <LanguageSwitcher />,
       }}
+      // Locale-aware Link so legal links respect the active locale (EN stays on
+      // /en/... instead of falling back to the default Polish route).
+      LinkComponent={Link}
     />
   );
 }

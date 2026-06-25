@@ -3,13 +3,7 @@
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
-import type {
-  DeliveryZoneCheckQuery,
-  DeliveryZoneCheckResponseDto,
-  HolidayDto,
-  RestaurantSettingsDto,
-  UpdateRestaurantSettingsDto,
-} from '@repo/types';
+import type { HolidayDto, RestaurantSettingsDto, UpdateRestaurantSettingsDto } from '@repo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
@@ -61,11 +55,5 @@ export function useRemoveHoliday() {
       notify('success', t('toasts.removed'));
     },
     onError: (err) => notify('error', err.message),
-  });
-}
-
-export function useCheckDeliveryZone() {
-  return useMutation<DeliveryZoneCheckResponseDto, ApiError, DeliveryZoneCheckQuery>({
-    mutationFn: (q) => getApiClient().settings.checkDeliveryZone(q),
   });
 }

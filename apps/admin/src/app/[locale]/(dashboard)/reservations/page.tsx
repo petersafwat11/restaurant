@@ -189,6 +189,7 @@ export default function AdminReservationsPage() {
             date={anchor}
             blocks={blocks}
             tables={calTables}
+            timezone={tz ?? undefined}
             onDateChange={setAnchor}
             onBlockClick={(id) => {
               window.location.href = `/reservations/${id}`;

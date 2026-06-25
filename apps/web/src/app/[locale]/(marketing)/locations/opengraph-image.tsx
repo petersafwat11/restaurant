@@ -9,6 +9,6 @@ export default function LocationsOgImage() {
   return renderBrandOgImage({
     eyebrow: 'Visit us',
     title: 'Find your nearest Szef.',
-    description: 'Hours, address, and the delivery zone — at a glance.',
+    description: 'Hours, address, and the delivery area — at a glance.',
   });
 }

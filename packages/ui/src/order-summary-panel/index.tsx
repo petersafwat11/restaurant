@@ -1,13 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import { formatMoney } from '@repo/utils';
+import * as React from 'react';
 import { type CartLineDisplay } from '../cart-line-item';
 import { cn } from '../lib/cn';
 
-export type DeliveryRow =
-  | { amount: string }
-  | { label: string };
+export type DeliveryRow = { amount: string } | { label: string };
 
 export interface OrderSummaryPanelProps {
   lines: CartLineDisplay[];
@@ -16,12 +14,16 @@ export interface OrderSummaryPanelProps {
   subtotal: string;
   delivery: DeliveryRow;
   discount?: { amount: string; label: string };
+  /** Loyalty-points redemption, shown as its own positive row. */
+  loyaltyDiscount?: { amount: string; label: string };
   tip?: string;
   total: string;
   showEditCart?: boolean;
   onEditCart?: () => void;
   /** Slot for <PromoCodeInput />. */
   promoInput?: React.ReactNode;
+  /** Slot for <LoyaltyRedeemInput />, rendered under the promo input. */
+  loyaltyInput?: React.ReactNode;
   /** Slot for the Place-order CTA + terms + payment-logos row. */
   ctaSlot?: React.ReactNode;
   /** 'sticky-rail' = right column on desktop checkout; 'inline' = full-width on confirmation. */
@@ -59,11 +61,13 @@ export function OrderSummaryPanel({
   subtotal,
   delivery,
   discount,
+  loyaltyDiscount,
   tip,
   total,
   showEditCart = true,
   onEditCart,
   promoInput,
+  loyaltyInput,
   ctaSlot,
   variant = 'sticky-rail',
   className,
@@ -104,7 +108,7 @@ export function OrderSummaryPanel({
 
       <div className="flex flex-col gap-3">
         {lines.map((line) => {
-          const lineTotal = (parseFloat(line.unitPrice) * line.quantity).toFixed(2);
+          const lineTotal = (Number.parseFloat(line.unitPrice) * line.quantity).toFixed(2);
           return (
             <div key={line.id} className="flex items-start gap-3">
               {line.image && (
@@ -138,10 +142,13 @@ export function OrderSummaryPanel({
         })}
       </div>
 
-      {promoInput && (
+      {(promoInput || loyaltyInput) && (
         <>
           <div className="my-4 border-t border-border/[var(--border-alpha)]" />
-          {promoInput}
+          <div className="flex flex-col gap-3">
+            {promoInput}
+            {loyaltyInput}
+          </div>
         </>
       )}
 
@@ -154,22 +161,25 @@ export function OrderSummaryPanel({
         </div>
         {discount && (
           <div className="flex items-baseline justify-between text-positive">
-            <span>{formatDiscount ? formatDiscount(discount.label) : `Discount · ${discount.label}`}</span>
+            <span>
+              {formatDiscount ? formatDiscount(discount.label) : `Discount · ${discount.label}`}
+            </span>
             <span className="tabular-nums">−{formatMoney(discount.amount, currency)}</span>
+          </div>
+        )}
+        {loyaltyDiscount && (
+          <div className="flex items-baseline justify-between text-positive">
+            <span>{loyaltyDiscount.label}</span>
+            <span className="tabular-nums">−{formatMoney(loyaltyDiscount.amount, currency)}</span>
           </div>
         )}
         <div className="flex items-baseline justify-between text-fg">
           <span className="text-fg-muted">{deliveryLabel}</span>
-          <span
-            className={cn(
-              'tabular-nums',
-              'label' in delivery && 'italic text-fg-subtle',
-            )}
-          >
+          <span className={cn('tabular-nums', 'label' in delivery && 'italic text-fg-subtle')}>
             {'label' in delivery ? delivery.label : formatMoney(delivery.amount, currency)}
           </span>
         </div>
-        {tip && parseFloat(tip) > 0 && (
+        {tip && Number.parseFloat(tip) > 0 && (
           <div className="flex items-baseline justify-between text-fg">
             <span className="text-fg-muted">{tipLabel}</span>
             <span className="tabular-nums">{formatMoney(tip, currency)}</span>

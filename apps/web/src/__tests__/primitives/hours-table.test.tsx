@@ -1,6 +1,6 @@
 import { HoursTable } from '@repo/ui';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const week = [
   { dayOfWeek: 1 as const, opensAt: '11:00', closesAt: '22:00' },
@@ -46,4 +46,27 @@ describe('HoursTable (ISO day numbers)', () => {
       ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][today],
     );
   });
+
+  it('with a timezone, highlights the restaurant-zone day, not the browser day', () => {
+    // 2026-06-23T21:30:00Z → Warsaw (UTC+2) = Tue 23:30, but Tokyo (UTC+9) is
+    // already Wed 06:30. With a fake system clock in Tokyo's frame, the table
+    // must still follow Warsaw and highlight Tuesday.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-23T21:30:00Z'));
+    try {
+      const { container } = render(
+        <HoursTable hours={week} highlightToday timezone="Europe/Warsaw" />,
+      );
+      const th = container
+        .querySelector('tr[aria-current="date"]')
+        ?.querySelector('th')?.textContent;
+      expect(th).toBe('Tue');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });

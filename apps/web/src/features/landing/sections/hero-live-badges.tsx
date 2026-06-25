@@ -23,7 +23,7 @@ export function HeroLiveBadges() {
     return () => clearInterval(id);
   }, []);
 
-  const status = now ? todayStatus(restaurant?.hours, now) : null;
+  const status = now ? todayStatus(restaurant?.hours, now, restaurant?.timezone) : null;
   const city = restaurant?.address.city ?? '';
 
   return (

@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
 import { Link } from '@/i18n/navigation';
 import type { Metadata } from 'next';
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
  * Auth route group — login, register, forgot-password, reset-password,
  * verify-email.
  *
- * Minimal chrome: logo only (no nav links, no cart, no language switcher).
+ * Minimal chrome: logo + language switcher only (no nav links, no cart).
  * Content is centered with a narrow max-width — auth forms breathe.
  */
 export default async function AuthLayout({
@@ -33,10 +34,11 @@ export default async function AuthLayout({
       <a href="#main" className="skip-link">
         {tCommon('skipToContent')}
       </a>
-      <header className="flex h-[72px] items-center px-6 sm:px-10">
+      <header className="flex h-[72px] items-center justify-between px-6 sm:px-10">
         <Link href="/" aria-label={tLayout('brandHome')}>
           <Logo variant="full" size={36} />
         </Link>
+        <LanguageSwitcher />
       </header>
       <main
         id="main"

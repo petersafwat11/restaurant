@@ -1,16 +1,29 @@
 'use client';
 
 import { useLoyaltyAccount, useLoyaltyHistory } from '@/features/loyalty/hooks';
+import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { EmptyState, Spinner } from '@repo/ui';
+import { formatRestaurantDateTime } from '@repo/utils';
 import { Gift, Sparkles } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+
+const DATETIME_OPTS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+};
 
 export default function LoyaltyPage() {
   const t = useTranslations('web.account.loyalty');
+  const locale = useLocale();
   const accountQuery = useLoyaltyAccount();
   const historyQuery = useLoyaltyHistory();
   const account = accountQuery.data;
   const history = historyQuery.data?.items ?? [];
+  // Transaction timestamps in the restaurant's zone (Poland), not the visitor's.
+  const tz = useRestaurant().data?.timezone ?? 'Europe/Warsaw';
 
   return (
     <section className="flex flex-col gap-8">
@@ -86,7 +99,7 @@ export default function LoyaltyPage() {
                         {t(`kinds.${tx.kind}`)}
                       </span>
                       <span className="text-[12px] text-fg-subtle">
-                        {new Date(tx.createdAt).toLocaleString()}
+                        {formatRestaurantDateTime(tx.createdAt, tz, DATETIME_OPTS, locale)}
                       </span>
                     </div>
                     <span

@@ -19,6 +19,7 @@ export default async function CookiesPage({ params }: { params: Promise<{ locale
   const t = await getTranslations({ locale, namespace: 'web.legal' });
   const date = new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-GB', {
     dateStyle: 'long',
+    timeZone: 'Europe/Warsaw',
   }).format(new Date(LEGAL_LAST_UPDATED));
 
   return (
@@ -52,7 +53,7 @@ function CookiesEN() {
       <table>
         <thead>
           <tr>
-            <th>Cookie</th>
+            <th>Category</th>
             <th>Purpose</th>
             <th>Type</th>
             <th>Duration</th>
@@ -60,25 +61,19 @@ function CookiesEN() {
         </thead>
         <tbody>
           <tr>
-            <td>web_at</td>
-            <td>Keeps you signed in (access token)</td>
+            <td>Authentication</td>
+            <td>Keeps you securely signed in</td>
             <td>Strictly necessary</td>
-            <td>Session / short-lived</td>
+            <td>Session – up to ~30 days</td>
           </tr>
           <tr>
-            <td>web_rt</td>
-            <td>Refreshes your sign-in (refresh token)</td>
-            <td>Strictly necessary</td>
-            <td>~30 days</td>
-          </tr>
-          <tr>
-            <td>cart_session</td>
+            <td>Shopping cart</td>
             <td>Remembers a guest cart between visits</td>
             <td>Strictly necessary</td>
             <td>30 days</td>
           </tr>
           <tr>
-            <td>NEXT_LOCALE</td>
+            <td>Language</td>
             <td>Remembers your language choice</td>
             <td>Functional</td>
             <td>~1 year</td>
@@ -123,7 +118,7 @@ function CookiesPL() {
       <table>
         <thead>
           <tr>
-            <th>Cookie</th>
+            <th>Kategoria</th>
             <th>Cel</th>
             <th>Rodzaj</th>
             <th>Czas</th>
@@ -131,25 +126,19 @@ function CookiesPL() {
         </thead>
         <tbody>
           <tr>
-            <td>web_at</td>
-            <td>Utrzymuje zalogowanie (token dostępu)</td>
+            <td>Uwierzytelnianie</td>
+            <td>Utrzymuje bezpieczne zalogowanie</td>
             <td>Niezbędny</td>
-            <td>Sesja / krótki</td>
+            <td>Sesja – do ~30 dni</td>
           </tr>
           <tr>
-            <td>web_rt</td>
-            <td>Odświeża zalogowanie (token odświeżający)</td>
-            <td>Niezbędny</td>
-            <td>~30 dni</td>
-          </tr>
-          <tr>
-            <td>cart_session</td>
+            <td>Koszyk</td>
             <td>Zapamiętuje koszyk gościa między wizytami</td>
             <td>Niezbędny</td>
             <td>30 dni</td>
           </tr>
           <tr>
-            <td>NEXT_LOCALE</td>
+            <td>Język</td>
             <td>Zapamiętuje wybór języka</td>
             <td>Funkcjonalny</td>
             <td>~1 rok</td>

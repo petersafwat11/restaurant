@@ -4,8 +4,10 @@ import { CartButton } from '@/components/cart-button';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
 import { MobileNav } from '@/components/mobile-nav';
+import { NotificationBell } from '@/components/notification-bell';
 import { useCart } from '@/features/cart/hooks';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { useAuthStore } from '@/stores/auth-store';
 import { SiteNav } from '@repo/ui';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -38,6 +40,7 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
 
   const cartQuery = useCart();
   const cartCount = cartQuery.data?.items.reduce((s, i) => s + i.quantity, 0) ?? 0;
+  const user = useAuthStore((s) => s.user);
 
   const variant = initialVariant === 'transparent-on-hero' && !scrolled ? 'transparent' : 'solid';
 
@@ -70,6 +73,11 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
         links={links}
         linkComponent={Link}
         onOpenMobile={() => setMobileOpen(true)}
+        notifications={
+          user ? (
+            <NotificationBell userId={user.id} ariaLabel={t('notifications.ariaLabel')} />
+          ) : undefined
+        }
         cart={
           <CartButton
             count={cartCount}

@@ -5,3 +5,4 @@ export { useRemoveCartItem } from './use-remove-cart-item';
 export { useClearCart } from './use-clear-cart';
 export { useApplyCoupon } from './use-apply-coupon';
 export { useRemoveCoupon } from './use-remove-coupon';
+export { useSetCartLoyalty } from './use-set-loyalty';

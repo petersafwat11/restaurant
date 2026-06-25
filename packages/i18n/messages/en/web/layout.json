@@ -17,5 +17,8 @@
   },
   "cart": {
     "ariaLabel": "{count, plural, =0 {Cart, empty} one {Cart, # item} other {Cart, # items}}"
+  },
+  "notifications": {
+    "ariaLabel": "Notifications"
   }
 }

@@ -64,10 +64,107 @@ export function formatRestaurantDateTime(
 ): string {
   const date = iso instanceof Date ? iso : new Date(iso);
   if (Number.isNaN(date.getTime())) return '—';
-  const opts: Intl.DateTimeFormatOptions = timezone
-    ? { ...options, timeZone: timezone }
-    : options;
+  const opts: Intl.DateTimeFormatOptions = timezone ? { ...options, timeZone: timezone } : options;
   return new Intl.DateTimeFormat(locale, opts).format(date);
+}
+
+/** The wall-clock fields of an instant, evaluated in a specific IANA zone. */
+export interface ZonedParts {
+  year: number;
+  month: number; // 1–12
+  day: number; // 1–31
+  hour: number; // 0–23
+  minute: number; // 0–59
+  second: number; // 0–59
+  /** ISO weekday, 0=Sunday … 6=Saturday — matches `Date.getDay()` semantics. */
+  weekday: number;
+}
+
+const WEEKDAY_INDEX: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+/**
+ * Break an instant into its wall-clock parts **in the given IANA timezone**.
+ *
+ * Use this anywhere the UI needs "what time / day is it for the restaurant"
+ * instead of trusting the visitor's browser clock — the restaurant lives in
+ * one place (Poland) regardless of where the customer is.
+ *
+ * `hourCycle: 'h23'` is required: without it `en-US` emits "24" for midnight on
+ * some ICU builds, which then reads back as hour 24. (Same fix as the analytics
+ * `period-range.ts` day-boundary math.) Falls back to UTC parts if `tz` is an
+ * unknown zone so a bad config can never throw at render time.
+ */
+export function zonedParts(date: Date, tz: string): ZonedParts {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hourCycle: 'h23',
+      weekday: 'short',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+      .formatToParts(date)
+      .reduce<Record<string, string>>((acc, p) => {
+        acc[p.type] = p.value;
+        return acc;
+      }, {});
+    return {
+      year: Number(parts.year),
+      month: Number(parts.month),
+      day: Number(parts.day),
+      hour: Number(parts.hour),
+      minute: Number(parts.minute),
+      second: Number(parts.second),
+      weekday: WEEKDAY_INDEX[parts.weekday ?? ''] ?? date.getUTCDay(),
+    };
+  } catch {
+    return {
+      year: date.getUTCFullYear(),
+      month: date.getUTCMonth() + 1,
+      day: date.getUTCDate(),
+      hour: date.getUTCHours(),
+      minute: date.getUTCMinutes(),
+      second: date.getUTCSeconds(),
+      weekday: date.getUTCDay(),
+    };
+  }
+}
+
+/**
+ * Inverse of {@link zonedParts}: compose a wall-clock time *in `tz`* into the
+ * UTC instant it denotes. DST-correct — finds the zone's offset for that wall
+ * clock via `Intl`. Mirrors the server's `composeWallClockUtc`; used by the
+ * admin calendar's drag-to-move so a dropped slot means the restaurant's local
+ * time regardless of the operator's browser zone.
+ */
+export function zonedTimeToUtc(
+  parts: { year: number; month: number; day: number; hour?: number; minute?: number },
+  tz: string,
+): Date {
+  const asUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour ?? 0,
+    parts.minute ?? 0,
+  );
+  // zonedParts(asUtc) tells us what wall clock `asUtc` reads as in `tz`; the
+  // gap between that and the wall clock we wanted is the zone offset to undo.
+  const back = zonedParts(new Date(asUtc), tz);
+  const reread = Date.UTC(back.year, back.month - 1, back.day, back.hour, back.minute);
+  return new Date(asUtc - (reread - asUtc));
 }
 
 export function fmtInt(value: number, locale = 'en-US'): string {

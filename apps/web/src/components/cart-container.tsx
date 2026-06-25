@@ -2,9 +2,9 @@
 
 import { useAddToCart, useCart, useRemoveCartItem, useUpdateCartItem } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { CartSheet, FloatingCartButton } from '@repo/ui';
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 /**

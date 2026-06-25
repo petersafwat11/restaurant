@@ -4,7 +4,9 @@ import { LandingHero } from '@/features/landing/sections/hero';
 import { LandingHoursLocation } from '@/features/landing/sections/hours-location';
 import { LandingNewsletter } from '@/features/landing/sections/newsletter';
 import { LandingStory } from '@/features/landing/sections/story';
-import { LandingTestimonials } from '@/features/landing/sections/testimonials';
+// Reviews/testimonials section hidden per request — re-enable by uncommenting
+// this import and the <LandingTestimonials /> usage below.
+// import { LandingTestimonials } from '@/features/landing/sections/testimonials';
 import { getAlternates } from '@/lib/seo/alternates';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
@@ -37,7 +39,7 @@ export default async function LandingPage({
       <LandingFeaturedDishes />
       <LandingStory />
       <LandingHoursLocation />
-      <LandingTestimonials />
+      {/* <LandingTestimonials /> hidden per request */}
       <LandingNewsletter />
     </>
   );

@@ -103,10 +103,6 @@ import {
   type CustomerTagDto,
   CustomerTagListSchema,
   CustomerTagSchema,
-  type DeliveryZoneCheckQuery,
-  DeliveryZoneCheckQuerySchema,
-  type DeliveryZoneCheckResponseDto,
-  DeliveryZoneCheckResponseSchema,
   type FeatureFlagAdminDto,
   FeatureFlagAdminSchema,
   type FeatureFlagListDto,
@@ -195,8 +191,6 @@ import {
   type PromotionDto,
   PromotionListSchema,
   PromotionSchema,
-  type PublicDeliveryZonesResponseDto,
-  PublicDeliveryZonesResponseSchema,
   type ReferralListDto,
   type ReferralListQuery,
   ReferralListQuerySchema,
@@ -1588,27 +1582,6 @@ export function createApiClient(opts: ApiClientOptions) {
       request(`/admin/restaurant/holidays/${encodeURIComponent(date)}`, {
         method: 'DELETE',
         responseSchema: RestaurantSettingsSchema,
-      }),
-    checkDeliveryZone: (q: DeliveryZoneCheckQuery): Promise<DeliveryZoneCheckResponseDto> =>
-      request('/admin/restaurant/delivery-zones/check', {
-        method: 'GET',
-        auth: false,
-        query: DeliveryZoneCheckQuerySchema.parse(q) as Record<
-          string,
-          string | number | boolean | undefined
-        >,
-        responseSchema: DeliveryZoneCheckResponseSchema,
-      }),
-    /**
-     * Public list of zone polygons — used by the customer map picker to render
-     * the coverage area. Excludes the fee/min-order config (those live on the
-     * restaurant settings root).
-     */
-    getDeliveryZones: (): Promise<PublicDeliveryZonesResponseDto> =>
-      request('/admin/restaurant/delivery-zones', {
-        method: 'GET',
-        auth: false,
-        responseSchema: PublicDeliveryZonesResponseSchema,
       }),
   };
 

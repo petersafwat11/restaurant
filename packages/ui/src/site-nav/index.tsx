@@ -23,6 +23,7 @@ export interface SiteNavProps {
   /** Primary center navigation links. Hidden on mobile (<1024px). */
   links: SiteNavLink[];
   /** Right-cluster named slots — keep ordering/spacing consistent across pages. */
+  notifications?: React.ReactNode;
   cart?: React.ReactNode;
   langSwitcher?: React.ReactNode;
   cta?: React.ReactNode;
@@ -52,6 +53,7 @@ export interface SiteNavProps {
 export function SiteNav({
   logo,
   links,
+  notifications,
   cart,
   langSwitcher,
   cta,
@@ -97,6 +99,7 @@ export function SiteNav({
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">
           {langSwitcher && <div className="hidden lg:block">{langSwitcher}</div>}
+          {notifications}
           {cart}
           {cta && <div className="hidden sm:block">{cta}</div>}
           {rightSlot}

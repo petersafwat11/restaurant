@@ -166,6 +166,7 @@ export function LandingHoursLocation() {
               <HoursTable
                 hours={hoursToRows(restaurant?.hours)}
                 highlightToday
+                timezone={restaurant?.timezone}
                 layout="list"
                 dayLabels={dayLabels}
                 closedLabel={closedLabel}

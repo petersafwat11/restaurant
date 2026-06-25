@@ -17,10 +17,6 @@
       "preview": "{count, plural, one {# dzień wolny} few {# dni wolne} many {# dni wolnych} other {# dni wolnych}} nadchodzących",
       "next": " · następny: {label}",
       "trailing": "."
-    },
-    "deliveryZones": {
-      "title": "Strefy dostawy",
-      "preview": "{count, plural, one {# strefa skonfigurowana.} few {# strefy skonfigurowane.} many {# stref skonfigurowanych.} other {# stref skonfigurowanych.}}"
     }
   },
   "financials": {

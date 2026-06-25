@@ -8,5 +8,16 @@
   "markAllRead": "Mark all as read",
   "markRead": "Mark read",
   "unreadCount": "{count, plural, one {# unread} other {# unread}}",
-  "preferencesUpdated": "Preferences updated"
+  "preferencesUpdated": "Preferences updated",
+  "prefs": {
+    "toggle": "Notification settings",
+    "title": "Notification preferences",
+    "subtitle": "Choose how we keep you posted. In-app notifications are always on.",
+    "orderUpdates": "Order updates",
+    "promotions": "Promotions & offers",
+    "email": "Email",
+    "sms": "SMS",
+    "push": "Push",
+    "comingSoon": "Coming soon"
+  }
 }

@@ -17,10 +17,6 @@
       "preview": "{count, plural, one {# holiday} other {# holidays}} upcoming",
       "next": " · next: {label}",
       "trailing": "."
-    },
-    "deliveryZones": {
-      "title": "Delivery zones",
-      "preview": "{count, plural, one {# zone configured.} other {# zones configured.}}"
     }
   },
   "financials": {

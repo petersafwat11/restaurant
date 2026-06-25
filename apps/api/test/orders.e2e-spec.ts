@@ -1,6 +1,12 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import {
+  createTestApp,
+  ensureOwnerToken,
+  ensureRestaurant,
+  resetDb,
+  resetMenuDb,
+} from './setup-e2e';
 
 describe('orders (e2e)', () => {
   let app: NestFastifyApplication;
@@ -176,12 +182,7 @@ describe('orders (e2e)', () => {
       },
       ownerToken,
     );
-    await inject(
-      'POST',
-      `/api/v1/cart/coupon`,
-      { code: 'ORDER10' },
-      userToken,
-    );
+    await inject('POST', `/api/v1/cart/coupon`, { code: 'ORDER10' }, userToken);
 
     const res = await inject(
       'POST',
@@ -204,11 +205,11 @@ describe('orders (e2e)', () => {
     // Guest seeds a cart via sessionKey, then places a DELIVERY order with
     // inline deliveryAddress (no signed-in user, no saved UserAddress).
     const sessionKey = 'guest-inline-1';
-    await inject(
-      'POST',
-      `/api/v1/cart/items?sessionKey=${sessionKey}`,
-      { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
-    );
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
 
     const res = await inject(
       'POST',
@@ -247,40 +248,22 @@ describe('orders (e2e)', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it('rejects a DELIVERY order whose pin falls outside the configured zones', async () => {
-    // Seed a single tight polygon around (52.230, 21.010); pin is far away.
+  it('rejects a DELIVERY order whose pin falls outside the delivery radius', async () => {
+    // Centre the restaurant in Warsaw with the default 7 km radius; the pin is
+    // ~170 km away (Łódź area), so it must be rejected.
     await inject(
       'PATCH',
-      `/api/v1/admin/restaurant/settings`,
-      {
-        deliveryZones: [
-          {
-            id: 'z1',
-            name: 'Centrum',
-            polygon: {
-              type: 'Polygon' as const,
-              coordinates: [
-                [
-                  [21.005, 52.225],
-                  [21.015, 52.225],
-                  [21.015, 52.235],
-                  [21.005, 52.235],
-                  [21.005, 52.225],
-                ],
-              ],
-            },
-          },
-        ],
-      },
+      `/api/v1/restaurant`,
+      { geoPoint: { lat: 52.2297, lng: 21.0122 } },
       ownerToken,
     );
 
     const sessionKey = 'guest-out-of-zone';
-    await inject(
-      'POST',
-      `/api/v1/cart/items?sessionKey=${sessionKey}`,
-      { menuItemId: burgerId, quantity: 1, modifierSelections: [] },
-    );
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
 
     const res = await inject(
       'POST',
@@ -291,9 +274,9 @@ describe('orders (e2e)', () => {
         tipAmount: '0',
         deliveryAddress: {
           line1: 'far away',
-          city: 'Warsaw',
+          city: 'Łódź',
           country: 'PL',
-          // way outside the polygon
+          // way outside the 7 km radius
           geoPoint: { lat: 51.5, lng: 19.0 },
         },
       },
@@ -304,46 +287,41 @@ describe('orders (e2e)', () => {
     expect(res.json().message).toMatch(/delivery area/i);
   });
 
-  it('exposes the public delivery-zones list endpoint', async () => {
+  it('accepts a DELIVERY order whose pin is within the delivery radius', async () => {
     await inject(
       'PATCH',
-      `/api/v1/admin/restaurant/settings`,
-      {
-        deliveryZones: [
-          {
-            id: 'z1',
-            name: 'Centrum',
-            polygon: {
-              type: 'Polygon' as const,
-              coordinates: [
-                [
-                  [21.0, 52.2],
-                  [21.05, 52.2],
-                  [21.05, 52.25],
-                  [21.0, 52.25],
-                  [21.0, 52.2],
-                ],
-              ],
-            },
-          },
-        ],
-      },
+      `/api/v1/restaurant`,
+      { geoPoint: { lat: 52.2297, lng: 21.0122 } },
       ownerToken,
     );
 
+    const sessionKey = 'guest-in-radius';
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
+
     const res = await inject(
-      'GET',
-      `/api/v1/admin/restaurant/delivery-zones`,
+      'POST',
+      '/api/v1/orders',
+      {
+        sessionKey,
+        type: 'DELIVERY' as const,
+        tipAmount: '0',
+        deliveryAddress: {
+          line1: 'ul. Marszałkowska 102',
+          city: 'Warsaw',
+          country: 'PL',
+          // ~0.15 km from the restaurant centre — well inside 7 km
+          geoPoint: { lat: 52.2308, lng: 21.0114 },
+        },
+      },
+      undefined,
+      { 'idempotency-key': 'idem-in-radius' },
     );
-    expect(res.statusCode).toBe(200);
-    const body = res.json() as {
-      zones: Array<{ id: string; name: string; polygon: unknown }>;
-    };
-    expect(body.zones).toHaveLength(1);
-    expect(body.zones[0]).toMatchObject({ id: 'z1', name: 'Centrum' });
-    // Slim public shape — no fee/minOrderAmount leak.
-    expect(body.zones[0]).not.toHaveProperty('fee');
-    expect(body.zones[0]).not.toHaveProperty('minOrderAmount');
+    expect(res.statusCode).toBe(201);
+    expect(res.json().type).toBe('DELIVERY');
   });
 
   it('rejects when both deliveryAddressId and inline deliveryAddress are supplied', async () => {
@@ -383,5 +361,69 @@ describe('orders (e2e)', () => {
       { 'idempotency-key': 'idem-unavail' },
     );
     expect(res.statusCode).toBe(400);
+  });
+
+  // ---- Cash on delivery (finalized at creation) ----
+
+  it('a COD order is confirmed at creation and records a paid COD payment', async () => {
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD' },
+      userToken,
+      { 'idempotency-key': 'idem-cod-authed' },
+    );
+    expect(res.statusCode).toBe(201);
+    // The create response already reflects the synchronous confirm.
+    expect(res.json().status).toBe('CONFIRMED');
+    const orderId = res.json().id;
+
+    // Owner (order:read) sees the Payment enrichment on the order.
+    const owner = await inject('GET', `/api/v1/orders/${orderId}`, undefined, ownerToken);
+    expect(owner.json().status).toBe('CONFIRMED');
+    expect(owner.json().payment).toMatchObject({
+      provider: 'cod',
+      method: 'COD',
+      status: 'PAID',
+    });
+  });
+
+  it('a guest COD order (sessionKey, no auth) is confirmed at creation', async () => {
+    const sessionKey = 'guest-cod-1';
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
+
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { sessionKey, type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD' },
+      undefined,
+      { 'idempotency-key': 'idem-cod-guest' },
+    );
+    expect(res.statusCode).toBe(201);
+    expect(res.json().status).toBe('CONFIRMED');
+    const orderId = res.json().id;
+
+    const owner = await inject('GET', `/api/v1/orders/${orderId}`, undefined, ownerToken);
+    expect(owner.json().payment).toMatchObject({
+      provider: 'cod',
+      method: 'COD',
+      status: 'PAID',
+    });
+  });
+
+  it('an order without a payment method is left PENDING (settled later by the payment flow)', async () => {
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { type: 'PICKUP', tipAmount: '0' },
+      userToken,
+      { 'idempotency-key': 'idem-nocod' },
+    );
+    expect(res.statusCode).toBe(201);
+    expect(res.json().status).toBe('PENDING');
   });
 });

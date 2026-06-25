@@ -6,13 +6,12 @@ import {
   useDeleteAddress,
   useSetDefaultAddress,
 } from '@/features/addresses/hooks';
-import { useDeliveryZones } from '@/features/checkout/hooks/use-delivery-zones';
-import { useZoneCheck } from '@/features/checkout/hooks/use-zone-check';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { getZodErrorMap } from '@/lib/zod-error-map';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateAddressDto, CreateAddressSchema } from '@repo/types';
 import { EmptyState, FormField } from '@repo/ui';
+import { isWithinRadiusKm } from '@repo/utils';
 import { MapPin, Plus, Star, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -33,7 +32,6 @@ export default function AddressesPage() {
   const setDefault = useSetDefaultAddress();
   const remove = useDeleteAddress();
   const restaurantQuery = useRestaurant();
-  const zonesQuery = useDeliveryZones();
   const [addOpen, setAddOpen] = React.useState(false);
 
   const form = useForm<CreateAddressDto>({
@@ -55,21 +53,19 @@ export default function AddressesPage() {
   }, [restaurantQuery.data, form]);
 
   const geoPoint = form.watch('geoPoint');
-  const zoneCheck = useZoneCheck(geoPoint ?? null);
-  const inZone = zoneCheck.data?.matched === true;
+  const restaurantGeo = restaurantQuery.data?.geoPoint ?? null;
+  const radiusKm = restaurantQuery.data?.deliveryRadiusKm;
+  const inZone =
+    geoPoint != null &&
+    restaurantGeo != null &&
+    radiusKm != null &&
+    isWithinRadiusKm(restaurantGeo, geoPoint, radiusKm);
 
   const pickerStatus = !geoPoint
     ? { kind: 'idle' as const }
-    : zoneCheck.isFetching
-      ? { kind: 'checking' as const }
-      : zoneCheck.isError
-        ? { kind: 'error' as const, message: t('picker.checkError') }
-        : inZone
-          ? {
-              kind: 'in-zone' as const,
-              zoneName: zoneCheck.data?.zone?.name ?? t('picker.deliveryAreaFallback'),
-            }
-          : { kind: 'out-of-zone' as const };
+    : inZone
+      ? { kind: 'in-range' as const }
+      : { kind: 'out-of-range' as const };
 
   const onAdd = form.handleSubmit(async (values) => {
     if (!inZone) {
@@ -172,7 +168,7 @@ export default function AddressesPage() {
               <>
                 {restaurantQuery.data?.geoPoint ? (
                   <DeliveryLocationPicker
-                    zones={zonesQuery.data?.zones ?? []}
+                    radiusKm={restaurantQuery.data.deliveryRadiusKm}
                     center={restaurantQuery.data.geoPoint}
                     value={field.value ?? null}
                     onChange={(v) => {

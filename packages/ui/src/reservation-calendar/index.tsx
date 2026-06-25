@@ -1,8 +1,29 @@
 'use client';
 
+import { zonedParts, zonedTimeToUtc } from '@repo/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '../lib/cn';
+
+/** The restaurant's zone; defaults so existing callers stay browser-equivalent in Poland. */
+const DEFAULT_TZ = 'Europe/Warsaw';
+
+/** "YYYY-MM-DD" of an instant in the restaurant zone — for day bucketing. */
+function zonedDayKey(iso: string, tz: string): string {
+  const p = zonedParts(new Date(iso), tz);
+  return `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
+}
+
+/** "YYYY-MM-DD" of a calendar anchor Date, read from its local Y/M/D fields. */
+function localDayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Minutes since midnight (restaurant zone) for an instant. */
+function zonedMinutes(iso: string, tz: string): number {
+  const p = zonedParts(new Date(iso), tz);
+  return p.hour * 60 + p.minute;
+}
 
 export type ReservationCalendarStatus =
   | 'CONFIRMED'
@@ -44,6 +65,12 @@ export interface ReservationCalendarProps {
   /** Hour range to display in Day/Week view, inclusive end. */
   dayStartHour?: number;
   dayEndHour?: number;
+  /**
+   * Restaurant IANA timezone. All reservation times, the "now" line, and day
+   * bucketing are evaluated here so the grid reflects the restaurant's clock,
+   * not the operator's browser. Defaults to "Europe/Warsaw".
+   */
+  timezone?: string;
   className?: string;
 }
 
@@ -76,17 +103,9 @@ function startOfWeek(d: Date): Date {
   return c;
 }
 
-function sameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function fmtTime(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+function fmtTime(iso: string, tz: string): string {
+  const p = zonedParts(new Date(iso), tz);
+  return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
 }
 
 function durationMin(startIso: string, endIso: string): number {
@@ -105,6 +124,7 @@ export function ReservationCalendar(props: ReservationCalendarProps) {
     slotMinutes = 30,
     dayStartHour = 9,
     dayEndHour = 24,
+    timezone = DEFAULT_TZ,
     className,
   } = props;
 
@@ -122,6 +142,7 @@ export function ReservationCalendar(props: ReservationCalendarProps) {
             slotMinutes={slotMinutes}
             dayStartHour={dayStartHour}
             dayEndHour={dayEndHour}
+            timezone={timezone}
           />
         )}
         {mode === 'week' && (
@@ -131,10 +152,11 @@ export function ReservationCalendar(props: ReservationCalendarProps) {
             onBlockClick={onBlockClick}
             dayStartHour={dayStartHour}
             dayEndHour={dayEndHour}
+            timezone={timezone}
           />
         )}
         {mode === 'month' && (
-          <MonthView date={date} blocks={blocks} onBlockClick={onBlockClick} />
+          <MonthView date={date} blocks={blocks} onBlockClick={onBlockClick} timezone={timezone} />
         )}
       </div>
     </div>
@@ -224,6 +246,7 @@ function DayView({
   slotMinutes,
   dayStartHour,
   dayEndHour,
+  timezone,
 }: {
   date: Date;
   blocks: ReservationCalendarBlock[];
@@ -233,32 +256,29 @@ function DayView({
   slotMinutes: number;
   dayStartHour: number;
   dayEndHour: number;
+  timezone: string;
 }) {
   const slotsPerHour = 60 / slotMinutes;
-  const hours = Array.from(
-    { length: dayEndHour - dayStartHour },
-    (_, i) => dayStartHour + i,
-  );
+  const hours = Array.from({ length: dayEndHour - dayStartHour }, (_, i) => dayStartHour + i);
   const rowsPerHour = slotsPerHour;
-  const todayBlocks = blocks.filter((b) => sameDay(new Date(b.startAt), date));
+  const anchorKey = localDayKey(date);
+  const todayBlocks = blocks.filter((b) => zonedDayKey(b.startAt, timezone) === anchorKey);
 
   const [now, setNow] = React.useState<Date>(new Date());
   React.useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
   }, []);
-  const isToday = sameDay(now, date);
-  const minutesIntoDay = isToday
-    ? (now.getHours() - dayStartHour) * 60 + now.getMinutes()
-    : -1;
+  const nowParts = zonedParts(now, timezone);
+  const isToday = localDayKey(date) === zonedDayKey(now.toISOString(), timezone);
+  const minutesIntoDay = isToday ? (nowParts.hour - dayStartHour) * 60 + nowParts.minute : -1;
 
   function minutesToTop(min: number): number {
     return (min / slotMinutes) * ROW_HEIGHT;
   }
 
   function blockMetrics(b: ReservationCalendarBlock) {
-    const start = new Date(b.startAt);
-    const startMin = (start.getHours() - dayStartHour) * 60 + start.getMinutes();
+    const startMin = zonedMinutes(b.startAt, timezone) - dayStartHour * 60;
     const dur = durationMin(b.startAt, b.endAt);
     return {
       top: minutesToTop(Math.max(0, startMin)),
@@ -272,9 +292,7 @@ function DayView({
     laneEl: HTMLElement,
   ) {
     if (!onMove) return;
-    const lanes = Array.from(
-      (laneEl.parentElement as HTMLElement).children,
-    ) as HTMLElement[];
+    const lanes = Array.from((laneEl.parentElement as HTMLElement).children) as HTMLElement[];
     const rect = laneEl.getBoundingClientRect();
     const drop = { x: e.clientX, y: e.clientY };
     const targetLane = lanes.find((el) => {
@@ -286,9 +304,19 @@ function DayView({
     const yRel = drop.y - rect.top;
     const minutes = Math.max(0, Math.round((yRel / ROW_HEIGHT) * slotMinutes));
     const snapped = Math.round(minutes / slotMinutes) * slotMinutes;
-    const newStart = new Date(date);
-    newStart.setHours(dayStartHour, 0, 0, 0);
-    newStart.setMinutes(snapped);
+    // Drop position is wall-clock minutes from `dayStartHour` on the viewed
+    // day — compose that as restaurant-local time, then back to a UTC instant.
+    const totalMin = dayStartHour * 60 + snapped;
+    const newStart = zonedTimeToUtc(
+      {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+        hour: Math.floor(totalMin / 60),
+        minute: totalMin % 60,
+      },
+      timezone,
+    );
     if (newStart.toISOString() === b.startAt && targetTableId === b.tableId) return;
     onMove(b.id, { startAt: newStart.toISOString(), tableId: targetTableId });
   }
@@ -327,10 +355,7 @@ function DayView({
                   Cap {t.capacity}
                 </div>
               </header>
-              <div
-                className="relative"
-                style={{ height: ROW_HEIGHT * rowsPerHour * hours.length }}
-              >
+              <div className="relative" style={{ height: ROW_HEIGHT * rowsPerHour * hours.length }}>
                 {hours.map((h, i) => (
                   <div
                     key={h}
@@ -351,12 +376,9 @@ function DayView({
                         block={b}
                         top={top}
                         height={height}
+                        timezone={timezone}
                         onClick={() => onBlockClick?.(b.id)}
-                        onDragEnd={
-                          onMove
-                            ? (e, laneEl) => handleDragEnd(b, e, laneEl)
-                            : undefined
-                        }
+                        onDragEnd={onMove ? (e, laneEl) => handleDragEnd(b, e, laneEl) : undefined}
                       />
                     );
                   })}
@@ -380,17 +402,16 @@ function DraggableBlock({
   block,
   top,
   height,
+  timezone,
   onClick,
   onDragEnd,
 }: {
   block: ReservationCalendarBlock;
   top: number;
   height: number;
+  timezone: string;
   onClick?: () => void;
-  onDragEnd?: (
-    e: React.PointerEvent<HTMLButtonElement>,
-    laneEl: HTMLElement,
-  ) => void;
+  onDragEnd?: (e: React.PointerEvent<HTMLButtonElement>, laneEl: HTMLElement) => void;
 }) {
   const [dragging, setDragging] = React.useState(false);
   const [drag, setDrag] = React.useState<{ dx: number; dy: number } | null>(null);
@@ -450,7 +471,7 @@ function DraggableBlock({
         </span>
       </div>
       <div className="tabular-nums text-caption opacity-80">
-        {fmtTime(block.startAt)} – {fmtTime(block.endAt)}
+        {fmtTime(block.startAt, timezone)} – {fmtTime(block.endAt, timezone)}
       </div>
     </button>
   );
@@ -464,23 +485,21 @@ function WeekView({
   onBlockClick,
   dayStartHour,
   dayEndHour,
+  timezone,
 }: {
   date: Date;
   blocks: ReservationCalendarBlock[];
   onBlockClick?: (id: string) => void;
   dayStartHour: number;
   dayEndHour: number;
+  timezone: string;
 }) {
   const start = startOfWeek(date);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
-  const hours = Array.from(
-    { length: dayEndHour - dayStartHour },
-    (_, i) => dayStartHour + i,
-  );
+  const hours = Array.from({ length: dayEndHour - dayStartHour }, (_, i) => dayStartHour + i);
 
   function topFor(b: ReservationCalendarBlock): number {
-    const d = new Date(b.startAt);
-    const min = (d.getHours() - dayStartHour) * 60 + d.getMinutes();
+    const min = zonedMinutes(b.startAt, timezone) - dayStartHour * 60;
     return (min / 60) * 48; // 48px per hour in week
   }
 
@@ -499,13 +518,16 @@ function WeekView({
         ))}
       </div>
       {days.map((d) => {
-        const dayBlocks = blocks.filter((b) => sameDay(new Date(b.startAt), d));
+        const dKey = localDayKey(d);
+        const dayBlocks = blocks.filter((b) => zonedDayKey(b.startAt, timezone) === dKey);
         return (
           <div
             key={d.toISOString()}
             className="relative flex-1 border-l border-border/[var(--border-alpha)]"
           >
-            <header className={`sticky top-0 z-10 h-10 border-b border-border/[var(--border-alpha)] bg-surface px-2 py-2 text-small ${sameDay(d, new Date()) ? 'text-accent' : 'text-fg-muted'}`}>
+            <header
+              className={`sticky top-0 z-10 h-10 border-b border-border/[var(--border-alpha)] bg-surface px-2 py-2 text-small ${dKey === zonedDayKey(new Date().toISOString(), timezone) ? 'text-accent' : 'text-fg-muted'}`}
+            >
               <div className="text-caption uppercase tracking-wider">
                 {d.toLocaleDateString(undefined, { weekday: 'short' })}
               </div>
@@ -533,7 +555,7 @@ function WeekView({
                     height: Math.max(20, (durationMin(b.startAt, b.endAt) / 60) * 48),
                   }}
                 >
-                  <span className="tabular-nums">{fmtTime(b.startAt)}</span>{' '}
+                  <span className="tabular-nums">{fmtTime(b.startAt, timezone)}</span>{' '}
                   {b.contactName.split(' ')[0]}
                 </button>
               ))}
@@ -551,16 +573,18 @@ function MonthView({
   date,
   blocks,
   onBlockClick,
+  timezone,
 }: {
   date: Date;
   blocks: ReservationCalendarBlock[];
   onBlockClick?: (id: string) => void;
+  timezone: string;
 }) {
   const first = new Date(date.getFullYear(), date.getMonth(), 1);
   const startDay = first.getDay() === 0 ? 6 : first.getDay() - 1;
   const gridStart = addDays(first, -startDay);
   const cells = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
-  const today = new Date();
+  const todayKey = zonedDayKey(new Date().toISOString(), timezone);
 
   return (
     <div className="grid grid-cols-7 border-l border-t border-border/[var(--border-alpha)]">
@@ -573,7 +597,8 @@ function MonthView({
         </div>
       ))}
       {cells.map((c) => {
-        const dayBlocks = blocks.filter((b) => sameDay(new Date(b.startAt), c));
+        const cKey = localDayKey(c);
+        const dayBlocks = blocks.filter((b) => zonedDayKey(b.startAt, timezone) === cKey);
         const inMonth = c.getMonth() === date.getMonth();
         return (
           <div
@@ -586,7 +611,7 @@ function MonthView({
             <div
               className={cn(
                 'mb-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-caption tabular-nums',
-                sameDay(c, today) ? 'bg-accent text-bg font-semibold' : 'text-fg-muted',
+                cKey === todayKey ? 'bg-accent text-bg font-semibold' : 'text-fg-muted',
               )}
             >
               {c.getDate()}
@@ -602,7 +627,7 @@ function MonthView({
                     STATUS_TINT[b.status],
                   )}
                 >
-                  <span className="tabular-nums">{fmtTime(b.startAt)}</span>{' '}
+                  <span className="tabular-nums">{fmtTime(b.startAt, timezone)}</span>{' '}
                   {b.contactName.split(' ')[0]}
                 </button>
               ))}

@@ -1,18 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  DeliveryZoneCheckQuerySchema,
-  HolidaySchema,
-  UpdateRestaurantSettingsSchema,
-} from '@repo/types';
-import type {
-  DeliveryZoneCheckQuery,
-  HolidayDto,
-  UpdateRestaurantSettingsDto,
-} from '@repo/types';
+import { HolidaySchema, UpdateRestaurantSettingsSchema } from '@repo/types';
+import type { HolidayDto, UpdateRestaurantSettingsDto } from '@repo/types';
 import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
-import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { SettingsService } from './settings.service';
 
@@ -50,25 +41,5 @@ export class SettingsController {
   @AuditAction('settings:write', 'settings')
   removeHoliday(@Param('date') date: string) {
     return this.settings.removeHoliday(date);
-  }
-
-  @Public()
-  @Get('delivery-zones/check')
-  checkZone(
-    @Query(new ZodValidationPipe(DeliveryZoneCheckQuerySchema)) q: DeliveryZoneCheckQuery,
-  ) {
-    return this.settings.checkDeliveryZone(q.lat, q.lng);
-  }
-
-  /**
-   * Public list of delivery-zone polygons — used by the customer map picker
-   * to render the coverage area. Excludes restaurant-wide config (fee, min
-   * order, tax) which live on the settings root and aren't needed here.
-   */
-  @Public()
-  @Get('delivery-zones')
-  async listZones() {
-    const zones = await this.settings.getPublicDeliveryZones();
-    return { zones };
   }
 }

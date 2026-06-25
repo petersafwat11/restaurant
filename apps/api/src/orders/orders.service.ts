@@ -1,16 +1,19 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma } from '@repo/db';
 import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
+import { JOB_RECEIPT_GENERATE, QUEUE_RECEIPT } from '@repo/jobs';
+import type { Queue } from 'bullmq';
 import type {
   CreateOrderDto,
-  DeliveryZoneDto,
   GeoPointDto,
   ModifierSnapshotEntry,
   OrderCreatedEvent,
@@ -26,6 +29,7 @@ import type {
   PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils/money';
+import { isWithinRadiusKm } from '@repo/utils';
 import {
   CSV_CONTENT_TYPE,
   PDF_CONTENT_TYPE,
@@ -40,7 +44,6 @@ import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
-import { DeliveryZoneService } from '../settings/delivery-zone.service';
 import { IdempotencyService } from './idempotency.service';
 import { OrderNumberService } from './order-number';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
@@ -58,6 +61,8 @@ interface OrderActor {
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly promotions: PromotionsService,
@@ -67,7 +72,7 @@ export class OrdersService {
     private readonly loyalty: LoyaltyService,
     private readonly analytics: AnalyticsProductService,
     private readonly events: EventEmitter2,
-    private readonly deliveryZones: DeliveryZoneService,
+    @InjectQueue(QUEUE_RECEIPT) private readonly receiptQueue: Queue,
   ) {}
 
   // ---- Create ------------------------------------------------------------
@@ -91,7 +96,8 @@ export class OrdersService {
       select: {
         id: true,
         currency: true,
-        deliveryZones: true,
+        geoPoint: true,
+        deliveryRadiusKm: true,
         minOrderAmount: true,
         defaultDeliveryFee: true,
       },
@@ -261,16 +267,18 @@ export class OrdersService {
         throw new BadRequestException('Delivery address required');
       }
 
-      // 2. Re-validate the pin against the restaurant's delivery zones. The
-      //    client also checks, but we never trust client values.
-      const zones = (restaurantRow.deliveryZones as unknown as DeliveryZoneDto[]) ?? [];
-      if (zones.length > 0) {
-        const zone = this.deliveryZones.findZone(
-          zones,
-          snapshot.geoPoint.lat,
-          snapshot.geoPoint.lng,
+      // 2. Re-validate the pin against the restaurant's delivery radius. The
+      //    client also checks, but we never trust client values. If the
+      //    restaurant has no geoPoint configured, we can't enforce a radius —
+      //    mirror the old "no zones → no restriction" behaviour.
+      const restaurantGeo = restaurantRow.geoPoint as GeoPointDto | null;
+      if (restaurantGeo) {
+        const inRange = isWithinRadiusKm(
+          restaurantGeo,
+          { lat: snapshot.geoPoint.lat, lng: snapshot.geoPoint.lng },
+          restaurantRow.deliveryRadiusKm,
         );
-        if (!zone) {
+        if (!inRange) {
           throw new BadRequestException(
             'Address is outside our delivery area — choose pickup or a different address.',
           );
@@ -401,6 +409,27 @@ export class OrdersService {
       });
     }
 
+    // Cash on delivery: finalize synchronously at order creation. This is the
+    // only path that works for guests (POST /orders is public, but
+    // POST /payments/intent requires an authed owner). We record a COD Payment
+    // row and confirm the order, mirroring PaymentsService.createIntent's COD
+    // branch exactly (provider 'cod', status 'PAID', then confirmPendingOrder).
+    // Online methods (card/BLIK) are left PENDING for the Stripe Elements flow.
+    if (dto.paymentMethod === 'COD') {
+      await this.prisma.payment.create({
+        data: {
+          orderId: created.id,
+          provider: 'cod',
+          providerRef: `cod_${created.id}`,
+          method: 'COD',
+          amount: created.grandTotal,
+          currency: created.currency,
+          status: 'PAID',
+        },
+      });
+      await this.confirmPendingOrder(created.id, 'Payment confirmed');
+    }
+
     // Just-created order — bypass the ownership check so guests (no userId)
     // can read the response. The frontend only ever sees the order id from
     // this path; subsequent reads still go through the standard ownership
@@ -411,6 +440,38 @@ export class OrdersService {
     // ignore it — their session already proves ownership.
     responseDto.trackingToken = signOrderTrackingToken(created.id);
     return responseDto;
+  }
+
+  /**
+   * Confirm a still-PENDING order once its payment is settled. Shared by the
+   * COD-at-checkout path (above) and PaymentsService (Stripe webhook / COD
+   * intent) so both behave identically.
+   *
+   * Idempotent + state-safe: the conditional update only matches a still
+   * PENDING order, so concurrent duplicate webhook deliveries (or a racing
+   * cancel) can't double-confirm, resurrect a terminal order, or enqueue a
+   * second receipt. Deliberately does NOT run the realtime state machine
+   * (no `order.status_changed` / kitchen events) — it mirrors the original
+   * payment-confirm behaviour and the e2e suite asserts this shape.
+   *
+   * @returns true if this call performed the confirm, false if the order was
+   *   no longer PENDING (already confirmed/cancelled).
+   */
+  async confirmPendingOrder(orderId: string, note: string): Promise<boolean> {
+    const { count } = await this.prisma.order.updateMany({
+      where: { id: orderId, status: 'PENDING' },
+      data: { status: 'CONFIRMED' },
+    });
+    if (count === 0) {
+      this.logger.log(`Order ${orderId} not PENDING — skipping confirm`);
+      return false;
+    }
+    await this.prisma.orderStatusEvent.create({
+      data: { orderId, status: 'CONFIRMED', note },
+    });
+    await this.receiptQueue.add(JOB_RECEIPT_GENERATE, { orderId });
+    this.logger.log(`Order ${orderId} confirmed`);
+    return true;
   }
 
   // Public read by signed HMAC token — used by /checkout/success on refresh

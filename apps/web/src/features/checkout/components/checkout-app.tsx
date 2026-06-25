@@ -2,22 +2,21 @@
 
 import { useCartSessionKey } from '@/components/cart-session-provider';
 import { useAddresses } from '@/features/addresses/hooks';
-import { useCart } from '@/features/cart/hooks';
+import { useCart, useSetCartLoyalty } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
 import { StripePaymentForm } from '@/features/checkout/components/stripe-payment-form';
-import { useDeliveryZones } from '@/features/checkout/hooks/use-delivery-zones';
-import { useZoneCheck } from '@/features/checkout/hooks/use-zone-check';
 import { useFeatureFlag } from '@/features/feature-flags/hooks';
+import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
 import { useCreateOrder } from '@/features/orders/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  CHECKOUT_PAYMENT_METHODS,
   type CheckoutFormInput,
   type CheckoutPaymentMethod,
   type OrderType,
+  type PaymentMethodKind,
 } from '@repo/types';
 import { CheckoutFormSchema } from '@repo/types';
 import {
@@ -28,6 +27,8 @@ import {
   type DeliveryRow,
   EmptyState,
   FormField,
+  type LoyaltyApplyResult,
+  LoyaltyRedeemInput,
   OrderSummaryPanel,
   PromoCodeInput,
   RadioCardGroup,
@@ -44,7 +45,7 @@ const DeliveryLocationPicker = dynamic(
   { ssr: false },
 );
 import { Link, useRouter } from '@/i18n/navigation';
-import { formatMoney } from '@repo/utils';
+import { formatMoney, isWithinRadiusKm } from '@repo/utils';
 import {
   ArrowLeft,
   ArrowRight,
@@ -76,6 +77,7 @@ function computeSummary(
   tipAmount: string,
   deliveryFee: string,
   freeLabel: string,
+  loyalty: { amount: string; label: string } | null,
 ) {
   let discountAmount = 0;
   let discountLabel: string | undefined;
@@ -94,7 +96,12 @@ function computeSummary(
     }
   }
   const sub = Number.parseFloat(subtotal);
-  const subAfter = sub - discountAmount;
+  // Loyalty redemption is applied server-side at order creation; clamp the
+  // display so the running total never dips below the post-promo subtotal.
+  const loyaltyAmount = loyalty
+    ? Math.min(Number.parseFloat(loyalty.amount), Math.max(0, sub - discountAmount))
+    : 0;
+  const subAfter = sub - discountAmount - loyaltyAmount;
   let deliveryAmount = 0;
   let deliveryLabel: string | undefined;
   if (orderType === 'PICKUP' || orderType === 'DINE_IN') {
@@ -110,6 +117,10 @@ function computeSummary(
     discount:
       discountAmount > 0 && discountLabel
         ? { amount: discountAmount.toFixed(2), label: discountLabel }
+        : undefined,
+    loyaltyDiscount:
+      loyalty && loyaltyAmount > 0
+        ? { amount: loyaltyAmount.toFixed(2), label: loyalty.label }
         : undefined,
     delivery,
     total,
@@ -129,11 +140,19 @@ export function CheckoutApp() {
   // Saved addresses for the authed user. Empty (and disabled fetch) for guests.
   const addressesQuery = useAddresses();
   const restaurantQuery = useRestaurant();
+  // Loyalty: balance + server-validated redemption. Auth-only — the query 401s
+  // silently for guests, and the redeem UI is gated on `user` below.
+  const loyaltyAccountQuery = useLoyaltyAccount();
+  const redeemQuote = useLoyaltyRedeemQuote();
+  const setCartLoyalty = useSetCartLoyalty();
 
   const restaurant = restaurantQuery.data;
-  const zonesQuery = useDeliveryZones();
 
   const [appliedPromo, setAppliedPromo] = React.useState<AppliedPromo | null>(null);
+  const [appliedLoyalty, setAppliedLoyalty] = React.useState<{
+    points: number;
+    discountAmount: string;
+  } | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [createdOrderId, setCreatedOrderId] = React.useState<string | null>(null);
@@ -256,45 +275,185 @@ export function CheckoutApp() {
     [t],
   );
 
-  const PAYMENT_OPTIONS: RadioCardOption<CheckoutPaymentMethod>[] = React.useMemo(
-    () => [
+  // Online payments (card / BLIK via Stripe) are "ready" only when the
+  // `payments.stripe_elements` flag is on AND the backend returned a publishable
+  // key. Until then those methods are disabled and cash-on-delivery is the only
+  // way to pay. This single flag drives every payment-method decision below.
+  const onlinePaymentsReady = stripeElementsEnabled && !!stripeConfig?.publishableKey;
+
+  const orderType = form.watch('orderType');
+  const tipAmount = form.watch('tipAmount');
+  const geoPoint = form.watch('address.geoPoint');
+  const summary = React.useMemo(() => {
+    const loyalty = appliedLoyalty
+      ? {
+          amount: appliedLoyalty.discountAmount,
+          label: t('loyalty.discountLabel', { points: appliedLoyalty.points }),
+        }
+      : null;
+    return computeSummary(
+      subtotal,
+      orderType,
+      appliedPromo,
+      tipAmount,
+      defaultDeliveryFee,
+      t('free'),
+      loyalty,
+    );
+  }, [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t, appliedLoyalty]);
+
+  // ---- Loyalty redemption --------------------------------------------------
+  const loyaltyBalance = user ? (loyaltyAccountQuery.data?.points ?? 0) : 0;
+  // 1 point = 0.01 of the currency; the server also caps redemption at the
+  // order subtotal, so mirror that ceiling for the input.
+  const maxLoyaltyPoints = React.useMemo(
+    () => Math.max(0, Math.min(loyaltyBalance, Math.floor(Number.parseFloat(subtotal) * 100))),
+    [loyaltyBalance, subtotal],
+  );
+
+  const handleApplyLoyalty = async (points: number): Promise<LoyaltyApplyResult> => {
+    try {
+      const quote = await redeemQuote.mutateAsync({ points, subtotal });
+      if (quote.appliablePoints <= 0) {
+        return { ok: false, error: t('loyalty.cannotApply') };
+      }
+      await setCartLoyalty.mutateAsync({ points: quote.appliablePoints });
+      setAppliedLoyalty({ points: quote.appliablePoints, discountAmount: quote.discountAmount });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: t('loyalty.error') };
+    }
+  };
+
+  const handleRemoveLoyalty = () => {
+    setAppliedLoyalty(null);
+    setCartLoyalty.mutate({ points: 0 });
+  };
+
+  // Reflect any redemption intent already persisted on the cart (e.g. the user
+  // set points, left, and came back) once — re-quoting to show the discount.
+  const cartLoyaltyPoints = cart?.loyaltyPointsToRedeem ?? 0;
+  const loyaltyHydratedRef = React.useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: one-shot hydration guarded by ref; stable mutation refs intentionally omitted.
+  React.useEffect(() => {
+    if (loyaltyHydratedRef.current || !user) return;
+    if (cartLoyaltyPoints <= 0 || Number.parseFloat(subtotal) <= 0) return;
+    loyaltyHydratedRef.current = true;
+    (async () => {
+      try {
+        const quote = await redeemQuote.mutateAsync({ points: cartLoyaltyPoints, subtotal });
+        if (quote.appliablePoints > 0) {
+          setAppliedLoyalty({
+            points: quote.appliablePoints,
+            discountAmount: quote.discountAmount,
+          });
+          if (quote.appliablePoints !== cartLoyaltyPoints) {
+            await setCartLoyalty.mutateAsync({ points: quote.appliablePoints }).catch(() => {});
+          }
+        }
+      } catch {
+        /* server re-validates at order creation */
+      }
+    })();
+  }, [user, cartLoyaltyPoints, subtotal]);
+
+  // If the subtotal changes while points are applied, re-quote and clamp so the
+  // atomic server burn can't fail with a ConflictException at order creation.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally keyed on subtotal only; stable refs/values omitted to avoid a re-quote loop.
+  React.useEffect(() => {
+    if (!appliedLoyalty) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const quote = await redeemQuote.mutateAsync({ points: appliedLoyalty.points, subtotal });
+        if (cancelled) return;
+        if (quote.appliablePoints <= 0) {
+          setAppliedLoyalty(null);
+          await setCartLoyalty.mutateAsync({ points: 0 }).catch(() => {});
+        } else if (
+          quote.appliablePoints !== appliedLoyalty.points ||
+          quote.discountAmount !== appliedLoyalty.discountAmount
+        ) {
+          setAppliedLoyalty({
+            points: quote.appliablePoints,
+            discountAmount: quote.discountAmount,
+          });
+          await setCartLoyalty.mutateAsync({ points: quote.appliablePoints }).catch(() => {});
+        }
+      } catch {
+        /* leave as-is; server re-validates */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [subtotal]);
+
+  // Is the dropped pin within the restaurant's delivery radius? Checked
+  // client-side for instant feedback; the API re-checks on order creation.
+  const restaurantGeo = restaurant?.geoPoint ?? null;
+  const deliveryRadiusKm = restaurant?.deliveryRadiusKm;
+  const inZone =
+    geoPoint != null &&
+    restaurantGeo != null &&
+    deliveryRadiusKm != null &&
+    isWithinRadiusKm(restaurantGeo, geoPoint, deliveryRadiusKm);
+  const belowMinimum =
+    orderType === 'DELIVERY' && Number.parseFloat(subtotal) < Number.parseFloat(minOrderAmount);
+
+  // Payment methods, computed from provider readiness + order type:
+  //  - card / BLIK are disabled (with a tooltip) until online payments are ready.
+  //  - cash-on-delivery is relabelled per order type ("Cash on delivery" /
+  //    "Pay at pickup" / "Pay at the table") and is the universal fallback while
+  //    online payments are off (shown for every order type, no value cap). When
+  //    online IS ready, COD reverts to its secondary role: delivery orders under
+  //    100 only, so large/dine-in/pickup orders go through the card flow.
+  const paymentOptions = React.useMemo<RadioCardOption<CheckoutPaymentMethod>[]>(() => {
+    const codTypeKey =
+      orderType === 'PICKUP' ? 'pickup' : orderType === 'DINE_IN' ? 'dineIn' : 'delivery';
+    const options: RadioCardOption<CheckoutPaymentMethod>[] = [
       {
         id: 'card',
         label: t('sections.payment.options.card.label'),
         description: t('sections.payment.options.card.description'),
         icon: <CreditCard size={22} strokeWidth={1.75} />,
+        disabled: !onlinePaymentsReady,
+        disabledReason: onlinePaymentsReady ? undefined : t('sections.payment.comingSoon'),
       },
       {
         id: 'blik',
         label: t('sections.payment.options.blik.label'),
         description: t('sections.payment.options.blik.description'),
         icon: <span className="text-[12px] font-extrabold tracking-tight text-fg">BLIK</span>,
+        disabled: !onlinePaymentsReady,
+        disabledReason: onlinePaymentsReady ? undefined : t('sections.payment.comingSoon'),
       },
-      {
+    ];
+    const codVisible =
+      !onlinePaymentsReady || (orderType === 'DELIVERY' && Number.parseFloat(summary.total) < 100);
+    if (codVisible) {
+      options.push({
         id: 'cod',
-        label: t('sections.payment.options.cod.label'),
-        description: t('sections.payment.options.cod.description'),
+        label: t(`sections.payment.options.cod.${codTypeKey}.label`),
+        description: t(`sections.payment.options.cod.${codTypeKey}.description`),
         icon: <Banknote size={22} strokeWidth={1.75} />,
-      },
-    ],
-    [t],
-  );
+      });
+    }
+    return options;
+  }, [t, onlinePaymentsReady, orderType, summary.total]);
 
-  const orderType = form.watch('orderType');
-  const tipAmount = form.watch('tipAmount');
-  const geoPoint = form.watch('address.geoPoint');
-  const summary = React.useMemo(
-    () =>
-      computeSummary(subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t('free')),
-    [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t],
-  );
-
-  // Run the zone check whenever the pin moves. Throttled inside the hook.
-  const zoneCheck = useZoneCheck(geoPoint ?? null);
-  const inZone = zoneCheck.data?.matched === true;
-  const checkedZoneName = zoneCheck.data?.zone?.name ?? null;
-  const belowMinimum =
-    orderType === 'DELIVERY' && Number.parseFloat(subtotal) < Number.parseFloat(minOrderAmount);
+  // Keep the selected method valid: if it's disabled or hidden (e.g. online
+  // payments aren't ready, or COD dropped off after the order type changed),
+  // snap to the first selectable option (card when ready, else cash).
+  const selectedMethod = form.watch('paymentMethod');
+  React.useEffect(() => {
+    const current = paymentOptions.find((o) => o.id === selectedMethod);
+    if (current && !current.disabled) return;
+    const firstSelectable = paymentOptions.find((o) => !o.disabled);
+    if (firstSelectable && firstSelectable.id !== selectedMethod) {
+      form.setValue('paymentMethod', firstSelectable.id, { shouldValidate: false });
+    }
+  }, [paymentOptions, selectedMethod, form]);
 
   // Section completion is derived: filled (no errors) = complete.
   const [completedSteps, setCompletedSteps] = React.useState<Record<number, boolean>>({});
@@ -312,7 +471,7 @@ export function CheckoutApp() {
 
   const continueFrom = async (step: number) => {
     if (step === 3 && orderType === 'DELIVERY') {
-      // Block continue: must have a pin AND it must be in-zone.
+      // Block continue: must have a pin AND it must be within delivery range.
       const ok = await form.trigger(['address.line1', 'address.city', 'address.geoPoint'] as never);
       if (!ok) return;
       if (!inZone) {
@@ -348,6 +507,13 @@ export function CheckoutApp() {
       setSubmitError(t('errors.minOrderToast', { amount: formatMoney(minOrderAmount, currency) }));
       return;
     }
+    // Only cash-on-delivery is finalized server-side at order creation (the
+    // guest-safe path). Card/BLIK leave the order PENDING and are settled by
+    // the Stripe Elements flow below — which only runs when it's actually ready.
+    const isOnlineMethod = values.paymentMethod === 'card' || values.paymentMethod === 'blik';
+    const paymentMethodForApi: PaymentMethodKind | undefined =
+      values.paymentMethod === 'cod' ? 'COD' : undefined;
+
     setSubmitting(true);
     try {
       // DELIVERY path:
@@ -399,6 +565,7 @@ export function CheckoutApp() {
         pickupAt: values.timeSlot.kind === 'scheduled' ? values.timeSlot.iso : null,
         notes: values.orderNotes || null,
         tipAmount: values.tipAmount,
+        paymentMethod: paymentMethodForApi,
         acceptedTermsAt: new Date().toISOString(),
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
@@ -407,7 +574,8 @@ export function CheckoutApp() {
 
       // Stripe Elements two-phase flow: order is now PENDING; PaymentIntent
       // mounts, user confirms inline, webhook flips Payment.status → PAID.
-      if (stripeElementsEnabled && stripeConfig && values.paymentMethod === 'card') {
+      // Only reachable when online payments are ready (card/BLIK enabled).
+      if (onlinePaymentsReady && stripeConfig && isOnlineMethod) {
         setCreatedOrderId(order.id);
         const deadline = Date.now() + 8000;
         while (!stripeSubmitRef.current && Date.now() < deadline) {
@@ -449,23 +617,21 @@ export function CheckoutApp() {
   }
 
   const pickerStatus =
-    orderType !== 'DELIVERY'
+    orderType !== 'DELIVERY' || !geoPoint
       ? { kind: 'idle' as const }
-      : !geoPoint
-        ? { kind: 'idle' as const }
-        : zoneCheck.isFetching
-          ? { kind: 'checking' as const }
-          : zoneCheck.isError
-            ? {
-                kind: 'error' as const,
-                message: t('sections.whereWhen.pickerStatus.errorMessage'),
-              }
-            : inZone
-              ? {
-                  kind: 'in-zone' as const,
-                  zoneName: checkedZoneName ?? t('sections.whereWhen.pickerStatus.defaultZoneName'),
-                }
-              : { kind: 'out-of-zone' as const };
+      : inZone
+        ? { kind: 'in-range' as const }
+        : { kind: 'out-of-range' as const };
+
+  // Place-order CTA: the label reflects the method (cash → "Place order",
+  // card/BLIK → "Pay"), and the button is blocked if the selected method is
+  // somehow disabled (defence in depth — selection is auto-corrected above).
+  const selectedOption = paymentOptions.find((o) => o.id === selectedMethod);
+  const selectedMethodUsable = !!selectedOption && !selectedOption.disabled;
+  const ctaIsPayment = selectedMethod === 'card' || selectedMethod === 'blik';
+  const ctaLabel = ctaIsPayment
+    ? t('cta.payNow', { total: formatMoney(summary.total, currency) })
+    : t('cta.placeOrderTotal', { total: formatMoney(summary.total, currency) });
 
   return (
     <Container className="py-12">
@@ -675,7 +841,7 @@ export function CheckoutApp() {
                   render={({ field }) =>
                     restaurant?.geoPoint ? (
                       <DeliveryLocationPicker
-                        zones={zonesQuery.data?.zones ?? []}
+                        radiusKm={restaurant.deliveryRadiusKm}
                         center={restaurant.geoPoint}
                         value={field.value ?? null}
                         onChange={(v) => {
@@ -699,7 +865,7 @@ export function CheckoutApp() {
                 {/* Hidden country — defaulted to PL on first pin. */}
                 <input type="hidden" {...form.register('address.country')} value="PL" />
 
-                {!inZone && geoPoint && !zoneCheck.isFetching && (
+                {!inZone && geoPoint && (
                   <div
                     role="alert"
                     className="flex flex-col gap-2 rounded-card border border-negative/30 bg-negative/10 p-3 text-small text-negative sm:flex-row sm:items-center sm:justify-between"
@@ -731,6 +897,7 @@ export function CheckoutApp() {
                         value={field.value as TimeSlotValue}
                         onChange={field.onChange}
                         earliestSlotMinutes={20}
+                        timezone={restaurant?.timezone}
                       />
                     )}
                   />
@@ -748,6 +915,7 @@ export function CheckoutApp() {
                     value={field.value as TimeSlotValue}
                     onChange={field.onChange}
                     earliestSlotMinutes={10}
+                    timezone={restaurant?.timezone}
                   />
                 )}
               />
@@ -776,7 +944,7 @@ export function CheckoutApp() {
             <button
               type="button"
               onClick={() => continueFrom(3)}
-              disabled={orderType === 'DELIVERY' && (!geoPoint || !inZone || zoneCheck.isFetching)}
+              disabled={orderType === 'DELIVERY' && (!geoPoint || !inZone)}
               className="self-start rounded-button bg-accent px-5 py-2 text-small font-medium text-text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t('continue')}
@@ -818,32 +986,27 @@ export function CheckoutApp() {
             <Controller
               name="paymentMethod"
               control={form.control}
-              render={({ field }) => {
-                const visible = PAYMENT_OPTIONS.filter((o) => {
-                  if (o.id === 'cod') {
-                    return orderType === 'DELIVERY' && Number.parseFloat(summary.total) < 100;
-                  }
-                  return true;
-                });
-                return (
-                  <RadioCardGroup
-                    ariaLabel={t('sections.payment.ariaLabel')}
-                    layout="vertical"
-                    rowVariant
-                    options={visible}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                );
-              }}
+              render={({ field }) => (
+                <RadioCardGroup
+                  ariaLabel={t('sections.payment.ariaLabel')}
+                  layout="vertical"
+                  rowVariant
+                  options={paymentOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
-            {form.watch('paymentMethod') === 'card' && stripeConfig && stripeElementsEnabled && (
-              <StripePaymentForm
-                publishableKey={stripeConfig.publishableKey}
-                orderId={createdOrderId}
-                submitRef={stripeSubmitRef}
-              />
-            )}
+            {onlinePaymentsReady &&
+              stripeConfig &&
+              (selectedMethod === 'card' || selectedMethod === 'blik') && (
+                <StripePaymentForm
+                  publishableKey={stripeConfig.publishableKey}
+                  orderId={createdOrderId}
+                  submitRef={stripeSubmitRef}
+                  methodKind={selectedMethod === 'blik' ? 'BLIK' : 'STRIPE_CARD'}
+                />
+              )}
             <button
               type="button"
               onClick={() => continueFrom(5)}
@@ -903,6 +1066,7 @@ export function CheckoutApp() {
             subtotal={subtotal}
             delivery={summary.delivery}
             discount={summary.discount}
+            loyaltyDiscount={summary.loyaltyDiscount}
             tip={tipAmount}
             total={summary.total}
             currency={currency}
@@ -933,9 +1097,39 @@ export function CheckoutApp() {
                 }}
               />
             }
+            loyaltyInput={
+              user && loyaltyBalance > 0 ? (
+                <LoyaltyRedeemInput
+                  maxPoints={maxLoyaltyPoints}
+                  applied={
+                    appliedLoyalty
+                      ? {
+                          points: appliedLoyalty.points,
+                          label: t('loyalty.applied', {
+                            points: appliedLoyalty.points,
+                            amount: formatMoney(appliedLoyalty.discountAmount, currency),
+                          }),
+                        }
+                      : null
+                  }
+                  onApply={handleApplyLoyalty}
+                  onRemove={handleRemoveLoyalty}
+                  labels={{
+                    trigger: t('loyalty.trigger'),
+                    balanceLabel: t('loyalty.balance', { points: loyaltyBalance }),
+                    placeholder: t('loyalty.placeholder'),
+                    apply: t('loyalty.apply'),
+                    applying: t('loyalty.applying'),
+                    useMax: t('loyalty.useMax'),
+                    inputAriaLabel: t('loyalty.inputAriaLabel'),
+                    removeAriaLabel: t('loyalty.removeAriaLabel'),
+                    invalid: t('loyalty.invalid'),
+                  }}
+                />
+              ) : undefined
+            }
             ctaSlot={
               <div className="flex flex-col gap-3">
-                {/* biome-ignore lint/a11y/noLabelWithoutControl: the checkbox is the control */}
                 <label className="flex items-start gap-2 text-[12px] text-fg-muted">
                   <input
                     type="checkbox"
@@ -965,7 +1159,11 @@ export function CheckoutApp() {
                 <button
                   type="button"
                   onClick={onSubmit}
-                  disabled={submitting || (orderType === 'DELIVERY' && (!inZone || belowMinimum))}
+                  disabled={
+                    submitting ||
+                    !selectedMethodUsable ||
+                    (orderType === 'DELIVERY' && (!inZone || belowMinimum))
+                  }
                   className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-button bg-accent text-[15px] font-medium text-text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-60"
                 >
                   {submitting ? (
@@ -974,9 +1172,7 @@ export function CheckoutApp() {
                     </>
                   ) : (
                     <>
-                      {t('cta.placeOrderTotal', {
-                        total: formatMoney(summary.total, currency),
-                      })}
+                      {ctaLabel}
                       <ArrowRight size={18} />
                     </>
                   )}

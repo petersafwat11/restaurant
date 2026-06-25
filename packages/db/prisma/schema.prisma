@@ -184,39 +184,48 @@ model Notification {
 // ---------------------------------------------------------------------------
 
 model Restaurant {
-  id                       String   @id @default(cuid())
-  slug                     String   @unique
-  name                     String
-  description              String?
-  logoUrl                  String?
-  coverUrl                 String?
-  phone                    String
-  email                    String
-  address                  Json
-  geoPoint                 Json? // { lat, lng }
-  timezone                 String   @default("UTC")
-  currency                 String   @default("USD")
-  taxRate                  Decimal  @default(0.08) @db.Decimal(5, 4)
-  defaultDeliveryFee       Decimal  @default(0) @db.Decimal(10, 2)
-  minOrderAmount           Decimal  @default(0) @db.Decimal(10, 2)
-  deliveryZones            Json     @default("[]")
-  holidayDates             Json     @default("[]")
-  reservationSlotMinutes   Int      @default(90)
-  reservationBufferMinutes Int      @default(15)
-  isActive                 Boolean  @default(true)
-  acceptsReservations      Boolean  @default(true)
-  acceptsDelivery          Boolean  @default(true)
-  acceptsPickup            Boolean  @default(true)
-  acceptsDineIn            Boolean  @default(true)
+  id                          String   @id @default(cuid())
+  slug                        String   @unique
+  name                        String
+  description                 String?
+  logoUrl                     String?
+  coverUrl                    String?
+  phone                       String
+  email                       String
+  address                     Json
+  geoPoint                    Json? // { lat, lng }
+  timezone                    String   @default("UTC")
+  currency                    String   @default("USD")
+  taxRate                     Decimal  @default(0.08) @db.Decimal(5, 4)
+  defaultDeliveryFee          Decimal  @default(0) @db.Decimal(10, 2)
+  minOrderAmount              Decimal  @default(0) @db.Decimal(10, 2)
+  // Delivery coverage: a single circle of this radius (km) centred on geoPoint.
+  deliveryRadiusKm            Float    @default(7)
+  holidayDates                Json     @default("[]")
+  reservationSlotMinutes      Int      @default(90)
+  reservationBufferMinutes    Int      @default(15)
+  // Indicative order-ready time RANGES (minutes) surfaced to customers (e.g. the
+  // checkout success ETA and the Terms "Delivery & pickup" section). Stored as a
+  // min/max pair per channel. Null on the Min = not configured / not shown;
+  // Min and Max are set together, with Min <= Max (enforced server-side).
+  estimatedDeliveryMinutesMin Int?
+  estimatedDeliveryMinutesMax Int?
+  estimatedPickupMinutesMin   Int?
+  estimatedPickupMinutesMax   Int?
+  isActive                    Boolean  @default(true)
+  acceptsReservations         Boolean  @default(true)
+  acceptsDelivery             Boolean  @default(true)
+  acceptsPickup               Boolean  @default(true)
+  acceptsDineIn               Boolean  @default(true)
   // SEO/discovery fields exposed in the public Restaurant DTO and emitted in
   // schema.org JSON-LD. `servesCuisine` carries free-form cuisine tags
   // (e.g. "Polish", "Middle Eastern"); `priceRange` follows schema.org's
   // "$" – "$$$$" convention; `sameAs` is a list of canonical social URLs.
-  servesCuisine            String[] @default([])
-  priceRange               String?
-  sameAs                   String[] @default([])
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  servesCuisine               String[] @default([])
+  priceRange                  String?
+  sameAs                      String[] @default([])
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 }
 
 model OperatingHours {
@@ -800,19 +809,19 @@ enum NewsletterStatus {
 }
 
 model NewsletterSubscriber {
-  id    String           @id @default(cuid())
-  email String           @unique
-  locale String          @default("pl")
-  status NewsletterStatus @default(PENDING)
+  id             String           @id @default(cuid())
+  email          String           @unique
+  locale         String           @default("pl")
+  status         NewsletterStatus @default(PENDING)
   // Single-use token for the confirm + unsubscribe links (regenerated on resub).
-  token String           @unique
+  token          String           @unique
   // Where the consent was given (e.g. "landing"), kept as proof of consent.
-  source String?
-  consentAt      DateTime  @default(now())
+  source         String?
+  consentAt      DateTime         @default(now())
   confirmedAt    DateTime?
   unsubscribedAt DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([status])
 }

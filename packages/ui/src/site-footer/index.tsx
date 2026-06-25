@@ -20,6 +20,14 @@ export interface SiteFooterProps {
     legal?: { href: string; label: string }[];
     rightSlot?: React.ReactNode;
   };
+  /**
+   * Link component used for the legal links. Defaults to `next/link`. Apps with
+   * localized routing (next-intl) pass their locale-aware `Link` so the footer's
+   * legal links stay on the active locale instead of the default one. Typed as
+   * `ElementType` because `next/link` and next-intl's `Link` differ in their
+   * `href` type (both accept `string`, which is all this component passes).
+   */
+  LinkComponent?: React.ElementType;
   className?: string;
 }
 
@@ -27,14 +35,15 @@ export interface SiteFooterProps {
  * The customer site footer. Inverts the palette — espresso (`--fg`) background
  * with cream (`--surface`) text — for visual contrast at the page end.
  */
-export function SiteFooter({ brandSlot, columns, bottom, className }: SiteFooterProps) {
+export function SiteFooter({
+  brandSlot,
+  columns,
+  bottom,
+  LinkComponent = Link,
+  className,
+}: SiteFooterProps) {
   return (
-    <footer
-      className={cn(
-        'bg-fg pb-12 pt-20 text-surface',
-        className,
-      )}
-    >
+    <footer className={cn('bg-fg pb-12 pt-20 text-surface', className)}>
       <Container>
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>{brandSlot}</div>
@@ -51,13 +60,13 @@ export function SiteFooter({ brandSlot, columns, bottom, className }: SiteFooter
             {bottom.legal && (
               <div className="flex items-center gap-4">
                 {bottom.legal.map((l) => (
-                  <Link
+                  <LinkComponent
                     key={l.label}
                     href={l.href}
                     className="text-surface/60 transition-colors hover:text-surface"
                   >
                     {l.label}
-                  </Link>
+                  </LinkComponent>
                 ))}
               </div>
             )}

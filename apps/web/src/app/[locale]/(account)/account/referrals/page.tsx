@@ -1,18 +1,25 @@
 'use client';
 
 import { useReferralList, useReferralMe } from '@/features/referrals/hooks';
+import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { Spinner } from '@repo/ui';
+import { formatRestaurantDateTime } from '@repo/utils';
 import { Check, Copy, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toast } from 'sonner';
 
+const DATE_OPTS: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+
 export default function ReferralsPage() {
   const t = useTranslations('web.account.referrals');
+  const locale = useLocale();
   const meQuery = useReferralMe();
   const listQuery = useReferralList();
   const me = meQuery.data;
   const list = listQuery.data?.items ?? [];
+  // Referral dates in the restaurant's zone (Poland), not the visitor's.
+  const tz = useRestaurant().data?.timezone ?? 'Europe/Warsaw';
   const [copied, setCopied] = React.useState(false);
 
   const copy = (value: string) => {
@@ -109,7 +116,7 @@ export default function ReferralsPage() {
                   >
                     <span className="text-fg">{r.refereeName ?? t('anonymousFriend')}</span>
                     <span className="text-fg-subtle">
-                      {new Date(r.createdAt).toLocaleDateString()}
+                      {formatRestaurantDateTime(r.createdAt, tz, DATE_OPTS, locale)}
                     </span>
                   </li>
                 ))}

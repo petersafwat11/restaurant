@@ -193,6 +193,10 @@ async function seedRestaurants() {
       timezone: 'Europe/Warsaw',
       currency: 'PLN',
       isActive: true,
+      estimatedDeliveryMinutesMin: 30,
+      estimatedDeliveryMinutesMax: 45,
+      estimatedPickupMinutesMin: 12,
+      estimatedPickupMinutesMax: 20,
     },
     create: {
       slug: RESTAURANT_SLUG,
@@ -210,6 +214,10 @@ async function seedRestaurants() {
       timezone: 'Europe/Warsaw',
       currency: 'PLN',
       isActive: true,
+      estimatedDeliveryMinutesMin: 30,
+      estimatedDeliveryMinutesMax: 45,
+      estimatedPickupMinutesMin: 12,
+      estimatedPickupMinutesMax: 20,
     },
   });
 
@@ -1146,48 +1154,6 @@ async function seedReviews() {
   }
 }
 
-async function seedDeliveryZones() {
-  console.log('▸ Seeding 2 delivery zones (Kielce)');
-  const zones = [
-    {
-      id: 'zone-central',
-      name: 'Central Kielce',
-      polygon: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [20.6, 50.83],
-            [20.66, 50.83],
-            [20.66, 50.88],
-            [20.6, 50.88],
-            [20.6, 50.83],
-          ],
-        ],
-      },
-    },
-    {
-      id: 'zone-extended',
-      name: 'Outer Kielce',
-      polygon: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [20.55, 50.8],
-            [20.71, 50.8],
-            [20.71, 50.92],
-            [20.55, 50.92],
-            [20.55, 50.8],
-          ],
-        ],
-      },
-    },
-  ];
-  await prisma.restaurant.update({
-    where: { slug: RESTAURANT_SLUG },
-    data: { deliveryZones: zones as unknown as Prisma.InputJsonValue },
-  });
-}
-
 async function seedStaff() {
   console.log('▸ Seeding 3 staff users (manager, kitchen, cashier)');
   const password = 'Password123!';
@@ -1433,7 +1399,6 @@ async function main() {
   await seedOrders();
   await seedReviews();
   await seedReviewImages();
-  await seedDeliveryZones();
   await seedStaff();
   await seedLoyalty();
   await seedReferrals();

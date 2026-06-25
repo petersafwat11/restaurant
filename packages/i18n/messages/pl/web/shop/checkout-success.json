@@ -42,7 +42,9 @@
     },
     "deliveryDefault": "~25 min",
     "pickupDefault": "~12 min",
-    "dineInDefault": "~10 min"
+    "dineInDefault": "~10 min",
+    "minutesRange": "~{min}–{max} min",
+    "minutesSingle": "~{min} min"
   },
   "now": {
     "regionLabel": "Aktualny status zamówienia",

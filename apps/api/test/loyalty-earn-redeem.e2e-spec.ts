@@ -2,7 +2,13 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { LoyaltyService } from '../src/loyalty/loyalty.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import {
+  createTestApp,
+  ensureOwnerToken,
+  ensureRestaurant,
+  resetDb,
+  resetMenuDb,
+} from './setup-e2e';
 
 describe('loyalty earn/redeem (e2e)', () => {
   let app: NestFastifyApplication;
@@ -120,12 +126,7 @@ describe('loyalty earn/redeem (e2e)', () => {
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
-    await inject(
-      'PATCH',
-      `/api/v1/cart/loyalty`,
-      { points: 500 },
-      userToken,
-    );
+    await inject('PATCH', `/api/v1/cart/loyalty`, { points: 500 }, userToken);
 
     const order = await inject(
       'POST',
@@ -136,8 +137,19 @@ describe('loyalty earn/redeem (e2e)', () => {
     );
     expect(order.statusCode).toBe(201);
     // 500 points → 5.00 discount on a 50.00 subtotal.
-    expect(order.json().discountTotal).toBe('5.00');
-    expect(order.json().loyaltyPointsUsed).toBe(500);
+    const o = order.json();
+    expect(o.discountTotal).toBe('5.00');
+    expect(o.loyaltyPointsUsed).toBe(500);
+    // The discount must flow into the charged total, not just the display:
+    // grandTotal = subtotal + tax + delivery + tip − discountTotal.
+    expect(Number(o.grandTotal)).toBeCloseTo(
+      Number(o.subtotal) +
+        Number(o.taxTotal) +
+        Number(o.deliveryFee) +
+        Number(o.tipAmount) -
+        Number(o.discountTotal),
+      2,
+    );
 
     const me = await inject('GET', '/api/v1/loyalty/me', undefined, userToken);
     expect(me.json().points).toBe(500); // 1000 - 500 burned
@@ -162,19 +174,9 @@ describe('loyalty earn/redeem (e2e)', () => {
       { menuItemId: itemId, quantity: 1, modifierSelections: [] },
       userToken,
     );
-    await inject(
-      'POST',
-      `/api/v1/cart/coupon`,
-      { code: 'EIGHTY' },
-      userToken,
-    );
+    await inject('POST', `/api/v1/cart/coupon`, { code: 'EIGHTY' }, userToken);
     // Ask to redeem far more than the post-coupon remainder allows.
-    await inject(
-      'PATCH',
-      `/api/v1/cart/loyalty`,
-      { points: 5000 },
-      userToken,
-    );
+    await inject('PATCH', `/api/v1/cart/loyalty`, { points: 5000 }, userToken);
 
     const order = await inject(
       'POST',

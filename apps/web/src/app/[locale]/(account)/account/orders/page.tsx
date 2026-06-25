@@ -1,6 +1,7 @@
 'use client';
 
 import { useOrders } from '@/features/orders/hooks';
+import { ReviewCta } from '@/features/reviews/components/review-cta';
 import { Link } from '@/i18n/navigation';
 import { EmptyState, Spinner } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
@@ -48,7 +49,7 @@ export default function OrdersPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {orders.map((o) => (
-            <li key={o.id}>
+            <li key={o.id} className="flex flex-col gap-2">
               <Link
                 href={`/account/orders/${o.id}`}
                 className="group flex items-center gap-4 rounded-card border border-border/[var(--border-alpha)] bg-surface-2 p-4 transition-colors hover:border-accent/40"
@@ -86,6 +87,11 @@ export default function OrdersPage() {
                   />
                 </div>
               </Link>
+              {(o.status === 'COMPLETED' || o.status === 'DELIVERED') && (
+                <div className="flex justify-end px-1">
+                  <ReviewCta orderId={o.id} variant="compact" />
+                </div>
+              )}
             </li>
           ))}
         </ul>

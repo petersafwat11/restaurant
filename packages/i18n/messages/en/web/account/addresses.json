@@ -33,8 +33,6 @@
     }
   },
   "picker": {
-    "deliveryAreaFallback": "Delivery area",
-    "checkError": "Could not check this address.",
     "outOfZoneError": "Pin must be inside our delivery area.",
     "loading": "Loading map…"
   },

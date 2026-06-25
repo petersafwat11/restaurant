@@ -72,7 +72,18 @@
     "acceptsReservationsHint": "Pokaż widżet rezerwacji",
     "acceptsDelivery": "Przyjmuje dostawy",
     "acceptsPickup": "Przyjmuje odbiór",
-    "acceptsDineIn": "Przyjmuje gości na miejscu"
+    "acceptsDineIn": "Przyjmuje gości na miejscu",
+    "estimatedDeliveryLabel": "Szacowany czas dostawy (minuty)",
+    "estimatedPickupLabel": "Szacowany czas odbioru (minuty)",
+    "estimatedTimeHint": "Pokazywany klientom jako orientacyjny zakres (np. 30–45 min). Zostaw oba puste, aby ukryć.",
+    "rangeMinPlaceholder": "Min",
+    "rangeMaxPlaceholder": "Maks",
+    "rangeMinAria": "Minimalna liczba minut",
+    "rangeMaxAria": "Maksymalna liczba minut",
+    "rangeError": {
+      "incomplete": "Ustaw min i maks albo zostaw oba puste.",
+      "order": "Minimum musi być mniejsze lub równe maksimum."
+    }
   },
   "saveBar": {
     "unsavedHint": "Niezapisane zmiany — {shortcut}, aby zapisać.",

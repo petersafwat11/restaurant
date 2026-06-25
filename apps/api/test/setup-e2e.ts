@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { MAX_UPLOAD_BYTES } from '@repo/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { RedisService } from '../src/redis/redis.service';
 
 const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
 
@@ -53,6 +54,17 @@ export async function resetDb(app: NestFastifyApplication): Promise<void> {
   await prisma.user.deleteMany({
     where: { email: { contains: '.e2e@', mode: 'insensitive' } },
   });
+
+  // POST /orders idempotency keys live in Redis (24h TTL), not Postgres, so the
+  // resets above don't clear them. Order/payment e2e tests that reuse a stable
+  // guest `sessionKey` would otherwise collide with a previous run's key: the
+  // replay path returns the prior orderId, which no longer exists in the
+  // freshly-reset Postgres → 404. Flush them so the suites are repeatable
+  // against a persistent (dev) Redis. CI uses a fresh Redis, so this is a no-op
+  // there. Pattern matches IdempotencyService.key() (`idempotency:order:<hash>`).
+  const redis = app.get(RedisService);
+  const keys = await redis.client.keys('idempotency:order:*');
+  if (keys.length > 0) await redis.client.del(...keys);
 }
 
 /**

@@ -41,6 +41,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
   const c = getCompanyInfo(restaurant);
   const date = new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-GB', {
     dateStyle: 'long',
+    timeZone: 'Europe/Warsaw',
   }).format(new Date(LEGAL_LAST_UPDATED));
 
   return (

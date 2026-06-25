@@ -1,13 +1,15 @@
 'use client';
 
+import { NotificationPreferences } from '@/features/notifications/components/notification-preferences';
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
 } from '@/features/notifications/hooks';
 import { EmptyState, Spinner } from '@repo/ui';
-import { Bell } from 'lucide-react';
+import { Bell, Settings } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import * as React from 'react';
 
 export default function NotificationsPage() {
   const t = useTranslations('web.account.notifications');
@@ -15,28 +17,42 @@ export default function NotificationsPage() {
   const query = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
+  const [showPrefs, setShowPrefs] = React.useState(false);
 
   const items = query.data?.items ?? [];
   const unread = query.data?.unreadCount ?? 0;
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-h2 text-fg">{t('title')}</h1>
           <p className="mt-1 text-small text-fg-muted">{t('subtitle')}</p>
         </div>
-        {unread > 0 && (
+        <div className="flex items-center gap-3">
+          {unread > 0 && (
+            <button
+              type="button"
+              onClick={() => markAll.mutate()}
+              disabled={markAll.isPending}
+              className="text-small text-accent hover:underline disabled:opacity-60"
+            >
+              {t('markAllRead')}
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => markAll.mutate()}
-            disabled={markAll.isPending}
-            className="text-small text-accent hover:underline disabled:opacity-60"
+            onClick={() => setShowPrefs((s) => !s)}
+            aria-expanded={showPrefs}
+            aria-label={t('prefs.toggle')}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-fg-muted transition-colors hover:bg-surface-warm/40 hover:text-fg"
           >
-            {t('markAllRead')}
+            <Settings size={18} />
           </button>
-        )}
+        </div>
       </header>
+
+      {showPrefs && <NotificationPreferences />}
 
       {query.isLoading ? (
         <div className="flex justify-center py-10">

@@ -9,6 +9,13 @@ export interface RelativeTimeProps extends Omit<React.HTMLAttributes<HTMLTimeEle
   tick?: 'sec' | 'min' | 'none';
   /** Locale for the absolute-time tooltip. */
   locale?: string;
+  /**
+   * IANA timezone for the absolute-time tooltip. Defaults to the restaurant's
+   * zone ("Europe/Warsaw") so hover always shows the restaurant's local time,
+   * not the operator's browser zone. The relative label ("5m ago") is
+   * zone-independent and unaffected.
+   */
+  timezone?: string;
   /** Optional override of the visible label (e.g. for SSR-stable initial paint). */
   prefix?: string;
 }
@@ -43,6 +50,7 @@ export function RelativeTime({
   value,
   tick = 'min',
   locale,
+  timezone = 'Europe/Warsaw',
   prefix,
   className,
   ...rest
@@ -59,7 +67,13 @@ export function RelativeTime({
 
   const ms = Date.now() - date.getTime();
   const label = formatRelative(ms);
-  const absolute = date.toLocaleString(locale);
+  const absolute = (() => {
+    try {
+      return date.toLocaleString(locale, { timeZone: timezone });
+    } catch {
+      return date.toLocaleString(locale);
+    }
+  })();
 
   return (
     <time

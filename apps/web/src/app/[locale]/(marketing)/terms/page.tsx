@@ -39,8 +39,17 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
   const t = await getTranslations({ locale, namespace: 'web.legal' });
   const restaurant = await fetchPublicRestaurant();
   const c = getCompanyInfo(restaurant);
+  const deliveryRange = toMinsRange(
+    restaurant?.estimatedDeliveryMinutesMin ?? null,
+    restaurant?.estimatedDeliveryMinutesMax ?? null,
+  );
+  const pickupRange = toMinsRange(
+    restaurant?.estimatedPickupMinutesMin ?? null,
+    restaurant?.estimatedPickupMinutesMax ?? null,
+  );
   const date = new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-GB', {
     dateStyle: 'long',
+    timeZone: 'Europe/Warsaw',
   }).format(new Date(LEGAL_LAST_UPDATED));
 
   return (
@@ -57,12 +66,37 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
         </p>
       }
     >
-      {locale === 'pl' ? <TermsPL c={c} /> : <TermsEN c={c} />}
+      {locale === 'pl' ? (
+        <TermsPL c={c} delivery={deliveryRange} pickup={pickupRange} />
+      ) : (
+        <TermsEN c={c} delivery={deliveryRange} pickup={pickupRange} />
+      )}
     </LegalPage>
   );
 }
 
-function TermsEN({ c }: { c: CompanyInfo }) {
+/** Indicative order-ready time range (minutes); `max` null = single value. */
+interface MinsRange {
+  min: number;
+  max: number | null;
+}
+
+function toMinsRange(min: number | null, max: number | null): MinsRange | null {
+  return min != null ? { min, max } : null;
+}
+
+function fmtMinsRange(r: MinsRange): string {
+  return r.max != null && r.max !== r.min ? `${r.min}–${r.max}` : `${r.min}`;
+}
+
+interface TermsBodyProps {
+  c: CompanyInfo;
+  /** Indicative order-ready ranges (minutes); null = not configured / hidden. */
+  delivery: MinsRange | null;
+  pickup: MinsRange | null;
+}
+
+function TermsEN({ c, delivery, pickup }: TermsBodyProps) {
   return (
     <>
       <p>
@@ -105,6 +139,16 @@ function TermsEN({ c }: { c: CompanyInfo }) {
         Delivery is available within our delivery area shown on the map at checkout. Estimated times
         are indicative. For pickup, we’ll tell you when your order is ready.
       </p>
+      {(delivery != null || pickup != null) && (
+        <p>
+          {delivery != null
+            ? `Typical delivery time is about ${fmtMinsRange(delivery)} minutes. `
+            : ''}
+          {pickup != null
+            ? `Orders are usually ready for pickup in about ${fmtMinsRange(pickup)} minutes.`
+            : ''}
+        </p>
+      )}
 
       <h2 id="withdrawal">7. Right of withdrawal &amp; complaints</h2>
       <p>
@@ -138,7 +182,7 @@ function TermsEN({ c }: { c: CompanyInfo }) {
   );
 }
 
-function TermsPL({ c }: { c: CompanyInfo }) {
+function TermsPL({ c, delivery, pickup }: TermsBodyProps) {
   return (
     <>
       <p>
@@ -183,6 +227,14 @@ function TermsPL({ c }: { c: CompanyInfo }) {
         Dostawa dostępna jest w obszarze dostawy pokazanym na mapie przy zamawianiu. Szacowane czasy
         mają charakter orientacyjny. Przy odbiorze poinformujemy, gdy zamówienie będzie gotowe.
       </p>
+      {(delivery != null || pickup != null) && (
+        <p>
+          {delivery != null ? `Typowy czas dostawy to około ${fmtMinsRange(delivery)} min. ` : ''}
+          {pickup != null
+            ? `Zamówienia do odbioru są zwykle gotowe w około ${fmtMinsRange(pickup)} min.`
+            : ''}
+        </p>
+      )}
 
       <h2 id="withdrawal">7. Prawo odstąpienia i reklamacje</h2>
       <p>

@@ -7,16 +7,38 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type RegisterDto, RegisterSchema } from '@repo/types';
 import { FormField } from '@repo/ui';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 
+// Referral codes are 6-16 alphanumeric (see RegisterSchema). The backend silently
+// ignores unknown/malformed codes, so we sanitize here too: a bad `?ref=` must never
+// block signup by failing client validation.
+function sanitizeReferralCode(raw: string | null): string | undefined {
+  if (!raw) return undefined;
+  const code = raw.trim().toUpperCase();
+  return /^[A-Z0-9]{6,16}$/.test(code) ? code : undefined;
+}
+
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageInner />
+    </Suspense>
+  );
+}
+
+function RegisterPageInner() {
   const t = useTranslations('web.auth.register');
   const tValidation = useTranslations('validation');
   const router = useRouter();
   const register = useRegister();
+  const params = useSearchParams();
+  const referralCode = sanitizeReferralCode(params.get('ref'));
+
   const form = useForm<RegisterDto>({
     resolver: zodResolver(RegisterSchema, { errorMap: getZodErrorMap(tValidation) }),
-    defaultValues: { email: '', password: '', firstName: '', lastName: '' },
+    defaultValues: { email: '', password: '', firstName: '', lastName: '', referralCode },
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -91,6 +113,12 @@ export default function RegisterPage() {
             className="h-12 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-4 text-body text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
         </FormField>
+
+        {referralCode ? (
+          <p className="rounded-input bg-surface-2 px-4 py-3 text-center text-small text-fg-muted">
+            {t('referralApplied', { code: referralCode })}
+          </p>
+        ) : null}
 
         <button
           type="submit"

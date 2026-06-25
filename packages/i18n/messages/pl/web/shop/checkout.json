@@ -91,10 +91,6 @@
         "helper": "Sprawdź numer na stoliku lub zeskanuj kod QR.",
         "placeholder": "12"
       },
-      "pickerStatus": {
-        "errorMessage": "Nie udało się sprawdzić adresu. Spróbuj ponownie.",
-        "defaultZoneName": "Strefa dostawy"
-      },
       "errors": {
         "needPinInZone": "Umieść pinezkę w naszej strefie dostawy, aby kontynuować."
       }
@@ -107,6 +103,7 @@
     "payment": {
       "title": "Płatność",
       "ariaLabel": "Sposób płatności",
+      "comingSoon": "Płatności online kartą i BLIK będą dostępne wkrótce — na razie zapłać gotówką przy odbiorze.",
       "options": {
         "card": {
           "label": "Karta",
@@ -117,8 +114,18 @@
           "description": "Wpisz 6-cyfrowy kod z aplikacji banku."
         },
         "cod": {
-          "label": "Płatność przy odbiorze",
-          "description": "Zapłać kurierowi gotówką przy dostawie."
+          "delivery": {
+            "label": "Płatność przy odbiorze",
+            "description": "Zapłać kurierowi gotówką przy dostawie."
+          },
+          "pickup": {
+            "label": "Płatność przy odbiorze osobistym",
+            "description": "Zapłać gotówką, gdy odbierzesz zamówienie."
+          },
+          "dineIn": {
+            "label": "Płatność przy stoliku",
+            "description": "Rozlicz się z obsługą po posiłku."
+          }
         }
       }
     },
@@ -154,9 +161,25 @@
       "student": "5,00 zł rabatu"
     }
   },
+  "loyalty": {
+    "trigger": "Użyć punktów?",
+    "balance": "Masz dostępne {points, number} pkt.",
+    "placeholder": "Punkty",
+    "apply": "Wymień",
+    "applying": "…",
+    "useMax": "Maks.",
+    "inputAriaLabel": "Punkty do wymiany",
+    "removeAriaLabel": "Usuń punkty",
+    "invalid": "Podaj prawidłową liczbę punktów.",
+    "cannotApply": "Tych punktów nie można użyć w tym zamówieniu.",
+    "error": "Nie udało się użyć punktów. Spróbuj ponownie.",
+    "applied": "{points, number} pkt · −{amount}",
+    "discountLabel": "Lojalność · {points, number} pkt"
+  },
   "cta": {
     "placing": "Składanie zamówienia…",
     "placeOrderTotal": "Złóż zamówienie · {total}",
+    "payNow": "Zapłać {total}",
     "terms": "Składając zamówienie, akceptujesz nasz <termsLink>Regulamin</termsLink> oraz <privacyLink>Politykę prywatności</privacyLink>."
   },
   "errors": {
@@ -165,6 +188,9 @@
     "confirmAddress": "Potwierdź adres dostawy na mapie.",
     "stripeNotInit": "Formularz karty nie został zainicjalizowany. Spróbuj ponownie.",
     "createOrderFallback": "Nie udało się złożyć zamówienia."
+  },
+  "return": {
+    "confirming": "Potwierdzanie płatności…"
   },
   "stripe": {
     "notConfigured": "Płatności kartą nie są skonfigurowane.",

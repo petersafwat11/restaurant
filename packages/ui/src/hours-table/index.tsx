@@ -1,3 +1,4 @@
+import { zonedParts } from '@repo/utils';
 import * as React from 'react';
 import { cn } from '../lib/cn';
 
@@ -16,6 +17,12 @@ export interface HoursRow {
 export interface HoursTableProps {
   hours: HoursRow[];
   highlightToday?: boolean;
+  /**
+   * IANA timezone the restaurant lives in (e.g. "Europe/Warsaw"). "Today" is
+   * resolved in this zone so the highlighted row matches the restaurant's day,
+   * not the visitor's browser. Omit to fall back to the browser's day.
+   */
+  timezone?: string;
   /** 'list' = 7 explicit rows; 'compact' = grouped consecutive ranges (Mon–Fri 11–22). */
   layout?: 'list' | 'compact';
   /** Translated day abbreviations, index 0=Sun … 6=Sat. Falls back to English when absent. */
@@ -75,12 +82,18 @@ function groupConsecutive(hours: HoursRow[]): GroupedRow[] {
 export function HoursTable({
   hours,
   highlightToday = true,
+  timezone,
   layout = 'list',
   dayLabels,
   closedLabel = 'Closed',
   className,
 }: HoursTableProps) {
-  const today = (new Date().getDay() as DayOfWeek);
+  // Resolve "today" in the restaurant's zone when given. An explicit-zone Intl
+  // call is deterministic on server and client, so it also avoids a hydration
+  // mismatch that `new Date().getDay()` can cause when server-TZ ≠ browser-TZ.
+  const today = (
+    timezone ? zonedParts(new Date(), timezone).weekday : new Date().getDay()
+  ) as DayOfWeek;
   const labels = dayLabels ?? DAY_LABELS_EN;
 
   if (layout === 'compact') {

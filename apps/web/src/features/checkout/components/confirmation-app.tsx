@@ -2,8 +2,15 @@
 
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
+import { useRestaurant } from '@/features/restaurants/hooks';
+import { ReviewCta } from '@/features/reviews/components/review-cta';
 import { Link } from '@/i18n/navigation';
-import { type OrderDto, type OrderItemDto } from '@repo/types';
+import {
+  type OrderDto,
+  type OrderItemDto,
+  type OrderType,
+  type RestaurantPublicDto,
+} from '@repo/types';
 import {
   Container,
   type DeliveryRow,
@@ -46,6 +53,25 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
+/**
+ * The admin-configured indicative ready-time range (minutes) for an order type,
+ * or null when not configured (or DINE_IN, which has no range). `max` is null
+ * when only a single value was set.
+ */
+function estimatedRangeFor(
+  restaurant: RestaurantPublicDto | undefined,
+  type: OrderType,
+): { min: number; max: number | null } | null {
+  if (!restaurant) return null;
+  const [min, max] =
+    type === 'DELIVERY'
+      ? [restaurant.estimatedDeliveryMinutesMin, restaurant.estimatedDeliveryMinutesMax]
+      : type === 'PICKUP'
+        ? [restaurant.estimatedPickupMinutesMin, restaurant.estimatedPickupMinutesMax]
+        : [null, null];
+  return min != null ? { min, max } : null;
+}
+
 function orderItemToDisplay(item: OrderItemDto) {
   return cartItemToDisplay({
     id: item.id,
@@ -65,6 +91,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   const searchParams = useSearchParams();
   const token = searchParams.get('t');
   const orderQuery = useOrderTracking(orderId, token);
+  // Indicative ETA comes from the admin-configured restaurant estimate. Warm in
+  // the QueryClient cache from checkout, so it usually resolves with no flash.
+  const restaurantQuery = useRestaurant();
 
   if (orderQuery.isLoading) {
     return (
@@ -93,14 +122,28 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   const order = orderQuery.data;
   const etaCaption = t(`eta.${order.type}.caption`);
   const etaSub = t(`eta.${order.type}.sub`);
-  const etaText =
-    order.pickupAt != null
-      ? format.dateTime(new Date(order.pickupAt), { hour: '2-digit', minute: '2-digit' })
-      : order.type === 'DELIVERY'
+  const estRange = estimatedRangeFor(restaurantQuery.data, order.type);
+  let etaText: string | null;
+  if (order.pickupAt != null) {
+    // Scheduled-ahead order — show the exact requested clock time.
+    etaText = format.dateTime(new Date(order.pickupAt), { hour: '2-digit', minute: '2-digit' });
+  } else if (estRange) {
+    etaText =
+      estRange.max != null && estRange.max !== estRange.min
+        ? t('eta.minutesRange', { min: estRange.min, max: estRange.max })
+        : t('eta.minutesSingle', { min: estRange.min });
+  } else if (restaurantQuery.isFetched) {
+    // No configured estimate (or DINE_IN) — fall back to the static default,
+    // but only once the restaurant query settles, to avoid a value flash.
+    etaText =
+      order.type === 'DELIVERY'
         ? t('eta.deliveryDefault')
         : order.type === 'PICKUP'
           ? t('eta.pickupDefault')
           : t('eta.dineInDefault');
+  } else {
+    etaText = null;
+  }
 
   const trackingState = trackingStateFor(order.type, order.status);
   const isTerminal =
@@ -176,7 +219,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                     {etaCaption}
                   </span>
                   <span className="font-display text-h4 font-medium tabular-nums text-accent">
-                    {etaText}
+                    {etaText ?? '…'}
                   </span>
                 </div>
               </div>
@@ -289,6 +332,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
             />
 
             <div className="flex flex-col gap-3">
+              {(order.status === 'COMPLETED' || order.status === 'DELIVERED') && (
+                <ReviewCta orderId={order.id} variant="block" />
+              )}
               <Link
                 href="/menu"
                 className="inline-flex h-12 items-center justify-center rounded-button bg-accent px-6 text-[15px] font-medium text-text-on-accent hover:bg-accent-hover"

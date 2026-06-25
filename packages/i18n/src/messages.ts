@@ -27,7 +27,6 @@ import enAdminReservationsDetail from '../messages/en/admin/reservations/detail.
 import enAdminReservationsList from '../messages/en/admin/reservations/list.json';
 import enAdminRestaurant from '../messages/en/admin/restaurant.json';
 import enAdminReviews from '../messages/en/admin/reviews.json';
-import enAdminSettingsDeliveryZones from '../messages/en/admin/settings/delivery-zones.json';
 import enAdminSettingsGeneral from '../messages/en/admin/settings/general.json';
 import enAdminSettingsHolidays from '../messages/en/admin/settings/holidays.json';
 import enAdminSettingsHours from '../messages/en/admin/settings/hours.json';
@@ -97,7 +96,6 @@ import plAdminReservationsDetail from '../messages/pl/admin/reservations/detail.
 import plAdminReservationsList from '../messages/pl/admin/reservations/list.json';
 import plAdminRestaurant from '../messages/pl/admin/restaurant.json';
 import plAdminReviews from '../messages/pl/admin/reviews.json';
-import plAdminSettingsDeliveryZones from '../messages/pl/admin/settings/delivery-zones.json';
 import plAdminSettingsGeneral from '../messages/pl/admin/settings/general.json';
 import plAdminSettingsHolidays from '../messages/pl/admin/settings/holidays.json';
 import plAdminSettingsHours from '../messages/pl/admin/settings/hours.json';
@@ -180,7 +178,6 @@ const EN_MESSAGES = {
     restaurant: enAdminRestaurant,
     reviews: enAdminReviews,
     settings: {
-      deliveryZones: enAdminSettingsDeliveryZones,
       general: enAdminSettingsGeneral,
       holidays: enAdminSettingsHolidays,
       hours: enAdminSettingsHours,
@@ -282,7 +279,6 @@ const PL_MESSAGES = {
     restaurant: plAdminRestaurant,
     reviews: plAdminReviews,
     settings: {
-      deliveryZones: plAdminSettingsDeliveryZones,
       general: plAdminSettingsGeneral,
       holidays: plAdminSettingsHolidays,
       hours: plAdminSettingsHours,

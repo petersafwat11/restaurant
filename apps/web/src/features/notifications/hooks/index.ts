@@ -13,6 +13,8 @@ import type {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
+export { useNotificationRealtime } from './use-notification-realtime';
+
 export function useNotifications(query?: NotificationListQuery) {
   return useQuery<NotificationListDto>({
     queryKey: ['notifications', 'list', query ?? {}],

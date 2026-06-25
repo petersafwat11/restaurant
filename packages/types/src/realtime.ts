@@ -8,6 +8,7 @@ export const REALTIME_EVENT_NAMES = [
   'order.refunded',
   'kitchen.ticket_added',
   'kitchen.ticket_removed',
+  'notification.created',
 ] as const;
 export type RealtimeEventName = (typeof REALTIME_EVENT_NAMES)[number];
 
@@ -60,6 +61,18 @@ export const KitchenTicketEventSchema = z.object({
 });
 export type KitchenTicketEvent = z.infer<typeof KitchenTicketEventSchema>;
 
+export const NotificationCreatedEventSchema = z.object({
+  userId: z.string(),
+  notification: z.object({
+    id: z.string(),
+    type: z.string(),
+    title: z.string(),
+    body: z.string(),
+    createdAt: z.string(),
+  }),
+});
+export type NotificationCreatedEvent = z.infer<typeof NotificationCreatedEventSchema>;
+
 // ---- Subscribe wire format -------------------------------------------------
 
 export const SubscribeMessageSchema = z.object({
@@ -110,4 +123,6 @@ export const ROOMS = {
   order: (orderId: string) => `order:${orderId}`,
   orders: 'orders',
   kitchen: 'kitchen',
+  /** Per-user room for personal notifications. Only the user may join. */
+  user: (userId: string) => `user:${userId}`,
 } as const;

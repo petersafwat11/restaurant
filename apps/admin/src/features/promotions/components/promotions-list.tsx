@@ -3,9 +3,11 @@
 import { usePageHeader } from '@/components/shell/page-title-context';
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { usePromotion, usePromotions } from '@/features/promotions/hooks';
-import type { PromotionDto } from '@repo/types';
+import { getApiClient } from '@/lib/api-client';
+import type { PromotionDto, RestaurantPublicDto } from '@repo/types';
 import { Button, type ColumnDef, DataTable } from '@repo/ui';
-import { formatMoney } from '@repo/utils';
+import { formatMoney, formatRestaurantDateTime } from '@repo/utils';
+import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -40,6 +42,14 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
 
   const q = usePromotions();
   const rows = q.data ?? [];
+  // Promotion windows are real instants — render their dates in the
+  // restaurant's zone, not the operator's browser zone.
+  const restaurant = useQuery<RestaurantPublicDto>({
+    queryKey: ['restaurant', 'public'],
+    queryFn: () => getApiClient().restaurant.get(),
+    staleTime: 5 * 60_000,
+  });
+  const tz = restaurant.data?.timezone ?? 'Europe/Warsaw';
   const isCreating = selectedId === NEW_PROMOTION_ID;
   const fromList =
     !isCreating && selectedId ? (rows.find((r) => r.id === selectedId) ?? null) : null;
@@ -71,9 +81,14 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
     }
   }
 
+  const dateOpts: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
   function fmtWindow(p: PromotionDto): string {
-    const s = p.startsAt ? new Date(p.startsAt).toLocaleDateString() : t('window.none');
-    const e = p.endsAt ? new Date(p.endsAt).toLocaleDateString() : t('window.none');
+    const s = p.startsAt ? formatRestaurantDateTime(p.startsAt, tz, dateOpts) : t('window.none');
+    const e = p.endsAt ? formatRestaurantDateTime(p.endsAt, tz, dateOpts) : t('window.none');
     return t('window.range', { start: s, end: e });
   }
 

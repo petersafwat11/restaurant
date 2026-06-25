@@ -8,5 +8,16 @@
   "markAllRead": "Oznacz wszystkie jako przeczytane",
   "markRead": "Oznacz jako przeczytane",
   "unreadCount": "{count, plural, one {# nieprzeczytane} few {# nieprzeczytane} many {# nieprzeczytanych} other {# nieprzeczytanych}}",
-  "preferencesUpdated": "Preferencje zaktualizowane"
+  "preferencesUpdated": "Preferencje zaktualizowane",
+  "prefs": {
+    "toggle": "Ustawienia powiadomień",
+    "title": "Preferencje powiadomień",
+    "subtitle": "Wybierz, jak chcesz otrzymywać informacje. Powiadomienia w aplikacji są zawsze włączone.",
+    "orderUpdates": "Aktualizacje zamówień",
+    "promotions": "Promocje i oferty",
+    "email": "E-mail",
+    "sms": "SMS",
+    "push": "Push",
+    "comingSoon": "Wkrótce"
+  }
 }

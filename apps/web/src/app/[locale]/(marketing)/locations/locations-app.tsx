@@ -1,9 +1,11 @@
 'use client';
 
 import { useRestaurants } from '@/features/restaurants/hooks';
+import { FALLBACK_TIMEZONE } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
 import type { RestaurantPublicDto } from '@repo/types';
 import { Container, type DayOfWeek, EmptyState, HoursTable, PageSpinner } from '@repo/ui';
+import { zonedParts } from '@repo/utils';
 // Note: WeekTimeline (the "Open hours at a glance" bar chart) was removed per
 // design feedback — the HoursTable alongside the address already covers it.
 import { ArrowUpRight, MapPin, Phone, Share2 } from 'lucide-react';
@@ -36,11 +38,16 @@ function formatHM(locale: string, hhmm: string): string {
   }
 }
 
-function formatNow(locale: string, now: Date): string {
+function formatNow(locale: string, now: Date, tz: string): string {
   try {
-    return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(now);
+    return new Intl.DateTimeFormat(locale, {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: tz,
+    }).format(now);
   } catch {
-    return `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const p = zonedParts(now, tz);
+    return `${p.hour}:${String(p.minute).padStart(2, '0')}`;
   }
 }
 
@@ -56,10 +63,12 @@ function computeStatus(
   t: ReturnType<typeof useTranslations>,
   longDay: (day: number) => string,
   locale: string,
+  tz: string,
 ): LiveStatus | null {
   if (hours.length === 0) return null;
-  const today = now.getDay();
-  const mins = now.getHours() * 60 + now.getMinutes();
+  const parts = zonedParts(now, tz);
+  const today = parts.weekday;
+  const mins = parts.hour * 60 + parts.minute;
   const todayRow = hours.find((h) => h.dayOfWeek === today);
   if (todayRow && !todayRow.isClosed) {
     const open = toMinutes(todayRow.opensAt);
@@ -127,117 +136,51 @@ function MapCard({ restaurant: r }: MapCardProps) {
         `${r.address.line1}, ${r.address.city}`,
       )}`;
 
+  // Real OpenStreetMap embed centred on the DB coordinates — identical to the
+  // landing page's map (LandingHoursLocation). OSM is used (not Google Maps)
+  // because its embed sets no tracking cookies. Falls back to a placeholder
+  // when the restaurant has no geoPoint configured in admin.
+  const embedSrc = r.geoPoint
+    ? (() => {
+        const d = 0.004; // ~±450 m window
+        const bbox = [
+          r.geoPoint.lng - d,
+          r.geoPoint.lat - d,
+          r.geoPoint.lng + d,
+          r.geoPoint.lat + d,
+        ].join(',');
+        return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
+          bbox,
+        )}&layer=mapnik&marker=${r.geoPoint.lat},${r.geoPoint.lng}`;
+      })()
+    : null;
+
+  const ariaLabel = t('address.mapAriaLabel', {
+    name: r.name,
+    address: `${r.address.line1}, ${r.address.city}`,
+  });
+
   return (
     <div className="relative overflow-hidden rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated">
-      <div
-        role="img"
-        aria-label={t('address.mapAriaLabel', {
-          name: r.name,
-          address: `${r.address.line1}, ${r.address.city}`,
-        })}
-        className="relative aspect-[5/4] w-full bg-[radial-gradient(circle_at_30%_30%,rgb(var(--surface-warm))_0%,rgb(var(--surface-2))_60%,rgb(var(--surface))_100%)]"
-      >
-        <svg
-          viewBox="0 0 500 400"
-          preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 h-full w-full"
-          aria-hidden
-          role="presentation"
-        >
-          <title>{t('mapTitle')}</title>
-          <defs>
-            <pattern id="gridFine" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path
-                d="M0 16 H32 M16 0 V32"
-                stroke="rgba(0,0,0,0.05)"
-                strokeWidth="0.6"
-                fill="none"
-              />
-            </pattern>
-          </defs>
-
-          <rect width="500" height="400" fill="url(#gridFine)" />
-
-          {/* Park / green block */}
-          <path
-            d="M40 280 Q 90 240 160 260 Q 210 280 200 340 L 60 360 Z"
-            fill="rgb(79 123 60 / 0.18)"
+      <div className="relative aspect-[5/4] w-full bg-surface-warm/40">
+        {embedSrc ? (
+          <iframe
+            title={ariaLabel}
+            src={embedSrc}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="absolute inset-0 h-full w-full border-0"
           />
-
-          {/* River */}
-          <path
-            d="M-20 90 Q 120 80 220 130 T 540 110"
-            stroke="rgb(73 130 168 / 0.35)"
-            strokeWidth={28}
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* Avenues */}
-          <path
-            d="M-20 200 Q 150 180 260 220 T 540 240"
-            stroke="rgba(255,255,255,0.95)"
-            strokeWidth={6}
-            fill="none"
-          />
-          <path
-            d="M260 -20 Q 250 130 280 240 T 320 420"
-            stroke="rgba(255,255,255,0.95)"
-            strokeWidth={6}
-            fill="none"
-          />
-          <path d="M-20 320 H 540" stroke="rgba(255,255,255,0.85)" strokeWidth={4} fill="none" />
-          <path d="M80 -20 V 420" stroke="rgba(255,255,255,0.7)" strokeWidth={3} fill="none" />
-
-          {/* Tram stop dot */}
-          <g transform="translate(208, 210)">
-            <circle r={7} fill="#fff" stroke="rgb(var(--accent))" strokeWidth={2} />
-            <circle r={3} fill="rgb(var(--accent))" />
-          </g>
-
-          {/* Metro station marker */}
-          <g transform="translate(370, 326)">
-            <rect x={-9} y={-9} width={18} height={18} rx={3} fill="#1d4ed8" />
-            <text
-              x={0}
-              y={4}
-              textAnchor="middle"
-              fontSize={11}
-              fontWeight={700}
-              fill="#fff"
-              fontFamily="system-ui"
-            >
-              M
-            </text>
-          </g>
-        </svg>
-
-        {/* Restaurant pin */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[68%]">
-          <span className="absolute -inset-3 animate-ping rounded-full bg-accent/40" />
-          <svg width={46} height={58} viewBox="0 0 44 56" aria-hidden role="presentation">
-            <title>{t('restaurantPinTitle')}</title>
-            <path
-              d="M22 0c-12 0-22 9-22 21 0 16 22 35 22 35S44 37 44 21C44 9 34 0 22 0Z"
-              fill="rgb(var(--accent))"
-            />
-            <circle cx={22} cy={20} r={7} fill="white" />
-            <circle cx={22} cy={20} r={3} fill="rgb(var(--accent))" />
-          </svg>
-        </div>
-
-        {/* Annotation chips */}
-        <div className="absolute left-[36%] top-[44%] -translate-y-full">
-          <span className="block whitespace-nowrap rounded-md bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-fg shadow-sm">
-            {t('address.tramAnnotation')}
-          </span>
-        </div>
-        <div className="absolute left-[68%] top-[78%]">
-          <span className="block whitespace-nowrap rounded-md bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-fg shadow-sm">
-            {t('address.metroAnnotation')}
-          </span>
-        </div>
-        <div className="absolute left-4 top-4 rounded-md bg-surface-elevated px-3 py-1.5 text-small font-medium text-fg shadow-sm">
+        ) : (
+          <div
+            role="img"
+            aria-label={ariaLabel}
+            className="absolute inset-0 grid place-items-center text-fg-subtle"
+          >
+            <MapPin size={32} aria-hidden />
+          </div>
+        )}
+        <div className="pointer-events-none absolute left-4 top-4 rounded-md bg-surface-elevated px-3 py-1.5 text-small font-medium text-fg shadow-sm">
           {r.address.line1}
         </div>
       </div>
@@ -342,6 +285,7 @@ export default function LocationsApp() {
         `${r.address.line1}, ${r.address.city}`,
       )}`;
 
+  const tz = r.timezone || FALLBACK_TIMEZONE;
   const hours = r.hours ?? [];
   const hoursForTable = hours.map((h) => ({
     dayOfWeek: h.dayOfWeek as DayOfWeek,
@@ -349,7 +293,7 @@ export default function LocationsApp() {
     closesAt: h.closesAt,
     isClosed: h.isClosed,
   }));
-  const status = now ? computeStatus(hours, now, t, longDay, locale) : null;
+  const status = now ? computeStatus(hours, now, t, longDay, locale, tz) : null;
 
   return (
     <>
@@ -404,7 +348,10 @@ export default function LocationsApp() {
               )}
               {now && (
                 <span className="text-white/70">
-                  {t('clock', { time: formatNow(locale, now), day: longDay(now.getDay()) })}
+                  {t('clock', {
+                    time: formatNow(locale, now, tz),
+                    day: longDay(zonedParts(now, tz).weekday),
+                  })}
                 </span>
               )}
             </div>
@@ -503,6 +450,7 @@ export default function LocationsApp() {
                   <HoursTable
                     hours={hoursForTable}
                     highlightToday
+                    timezone={tz}
                     layout="list"
                     dayLabels={[0, 1, 2, 3, 4, 5, 6].map((d) =>
                       t(`days.short.${d}` as 'days.short.0'),

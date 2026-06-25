@@ -1,14 +1,21 @@
 'use client';
 
+import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { useMyReviews } from '@/features/reviews/hooks';
 import { EmptyState, Spinner, Stars } from '@repo/ui';
+import { formatRestaurantDateTime } from '@repo/utils';
 import { Star } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+
+const DATE_OPTS: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
 
 export default function MyReviewsPage() {
   const t = useTranslations('web.account.reviews');
+  const locale = useLocale();
   const query = useMyReviews();
   const reviews = query.data?.items ?? [];
+  // Timestamps render in the restaurant's zone (Poland), not the visitor's.
+  const tz = useRestaurant().data?.timezone ?? 'Europe/Warsaw';
 
   return (
     <section className="flex flex-col gap-6">
@@ -38,7 +45,7 @@ export default function MyReviewsPage() {
               <div className="flex items-center justify-between gap-3">
                 <Stars value={r.rating} size={16} />
                 <span className="text-[12px] text-fg-subtle">
-                  {new Date(r.createdAt).toLocaleDateString()}
+                  {formatRestaurantDateTime(r.createdAt, tz, DATE_OPTS, locale)}
                 </span>
               </div>
               {r.comment && <p className="m-0 text-body text-fg">{r.comment}</p>}

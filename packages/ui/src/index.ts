@@ -48,6 +48,12 @@ export {
 } from './filter-pill-group';
 export { FormField, type FormFieldProps } from './form-field';
 export { ImageUploader, type ImageUploaderProps, type UploadedImage } from './image-uploader';
+export {
+  LoyaltyRedeemInput,
+  type LoyaltyRedeemInputProps,
+  type AppliedLoyalty,
+  type LoyaltyApplyResult,
+} from './loyalty-redeem-input';
 export { InlineEdit, type InlineEditProps } from './inline-edit';
 export {
   KdsTicketCard,
@@ -64,12 +70,6 @@ export {
   type MapSearchResult,
 } from './map-search-box';
 export { PageHeader, type PageHeaderProps } from './page-header';
-export {
-  PolygonMapEditor,
-  type PolygonMapEditorProps,
-  type MapZone,
-  type GeoJsonPolygon,
-} from './polygon-map-editor';
 export { Prose, type ProseProps } from './prose';
 export { RelativeTime, type RelativeTimeProps } from './relative-time';
 export {
@@ -129,6 +129,7 @@ export { NewsletterForm, type NewsletterFormProps } from './newsletter-form';
 export { SectionHeader, type SectionHeaderProps } from './section-header';
 export { SiteFooter, type SiteFooterProps, type SiteFooterColumn } from './site-footer';
 export { SiteNav, type SiteNavProps, type SiteNavLink } from './site-nav';
+export { StarRatingInput, type StarRatingInputProps } from './star-rating-input';
 export { Stars, type StarsProps } from './stars';
 export { TestimonialCard, type TestimonialCardProps } from './testimonial-card';
 
@@ -166,7 +167,7 @@ export {
   DeliveryLocationPicker,
   type DeliveryLocationPickerProps,
   type DeliveryLocationValue,
-  type DeliveryZoneShape,
+  type DeliveryLocationStatus,
 } from './delivery-location-picker';
 export {
   CheckoutSection,

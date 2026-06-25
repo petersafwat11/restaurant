@@ -91,10 +91,6 @@
         "helper": "Look for the number on your table, or scan the QR.",
         "placeholder": "12"
       },
-      "pickerStatus": {
-        "errorMessage": "Could not check the address. Try again.",
-        "defaultZoneName": "Delivery area"
-      },
       "errors": {
         "needPinInZone": "Drop a pin inside our delivery area to continue."
       }
@@ -107,6 +103,7 @@
     "payment": {
       "title": "Payment",
       "ariaLabel": "Payment method",
+      "comingSoon": "Online card & BLIK payments are coming soon — pay cash on delivery for now.",
       "options": {
         "card": {
           "label": "Card",
@@ -117,8 +114,18 @@
           "description": "Enter the 6-digit code from your bank app."
         },
         "cod": {
-          "label": "Cash on delivery",
-          "description": "Pay the driver in cash when it arrives."
+          "delivery": {
+            "label": "Cash on delivery",
+            "description": "Pay the driver in cash when it arrives."
+          },
+          "pickup": {
+            "label": "Pay at pickup",
+            "description": "Pay in cash when you collect your order."
+          },
+          "dineIn": {
+            "label": "Pay at the table",
+            "description": "Settle up with your server when you're done."
+          }
         }
       }
     },
@@ -154,9 +161,25 @@
       "student": "5,00 zł off"
     }
   },
+  "loyalty": {
+    "trigger": "Use points?",
+    "balance": "You have {points, number} points available.",
+    "placeholder": "Points",
+    "apply": "Redeem",
+    "applying": "…",
+    "useMax": "Use max",
+    "inputAriaLabel": "Points to redeem",
+    "removeAriaLabel": "Remove points",
+    "invalid": "Enter a valid amount of points.",
+    "cannotApply": "Those points can't be applied to this order.",
+    "error": "Could not apply your points. Please try again.",
+    "applied": "{points, number} pts · −{amount}",
+    "discountLabel": "Loyalty · {points, number} pts"
+  },
   "cta": {
     "placing": "Placing order…",
     "placeOrderTotal": "Place order · {total}",
+    "payNow": "Pay {total}",
     "terms": "By placing this order, you agree to our <termsLink>Terms</termsLink> and <privacyLink>Privacy Policy</privacyLink>."
   },
   "errors": {
@@ -165,6 +188,9 @@
     "confirmAddress": "Please confirm your delivery address on the map.",
     "stripeNotInit": "Card form did not initialise. Please retry.",
     "createOrderFallback": "Could not place your order."
+  },
+  "return": {
+    "confirming": "Confirming your payment…"
   },
   "stripe": {
     "notConfigured": "Card payments are not configured.",

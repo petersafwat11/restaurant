@@ -9,5 +9,6 @@ export * from './assert';
 // doesn't tree-shake `export *`).
 export * from './format';
 export * from './deep-link';
+export * from './geo';
 export * from './structured-data';
 export * from './sitemap';

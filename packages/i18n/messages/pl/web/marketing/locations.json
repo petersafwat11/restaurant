@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Lokalizacje",
-    "description": "Znajdź Szef Donald — adres, godziny otwarcia, strefa dostawy i dojazd."
+    "description": "Znajdź Szef Donald — adres, godziny otwarcia, obszar dostawy i dojazd."
   },
   "eyebrow": "Odwiedź nas",
   "heroImageAlt": "Wejście do restauracji Szef Donald",
@@ -26,7 +26,7 @@
   },
   "address": {
     "eyebrow": "Znajdź nas",
-    "title": "W samym sercu miasta {city}.",
+    "title": "Odwiedź nas w mieście {city}.",
     "openInMaps": "Otwórz w Mapach",
     "mapAriaLabel": "Mapa pokazująca {name} przy {address}",
     "tramAnnotation": "Tramwaj · 2 min pieszo",
