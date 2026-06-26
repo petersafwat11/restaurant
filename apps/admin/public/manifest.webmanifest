@@ -1,0 +1,19 @@
+{
+  "name": "Restaurant Admin",
+  "short_name": "Admin",
+  "description": "Manage incoming orders and the kitchen display.",
+  "start_url": "/orders",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -205,6 +205,8 @@ import {
   type RegisterPushTokenDto,
   RegisterPushTokenSchema,
   RegisterSchema,
+  type WebPushSubscriptionInputDto,
+  WebPushSubscriptionInputSchema,
   type ReorderDto,
   type ReorderItemsDto,
   ReorderItemsSchema,
@@ -1254,6 +1256,17 @@ export function createApiClient(opts: ApiClientOptions) {
     unregisterPushToken: (token: string): Promise<{ success: true }> =>
       request(`/notifications/push-tokens/${encodeURIComponent(token)}`, {
         method: 'DELETE',
+      }),
+    // Web Push (admin PWA background order alerts).
+    subscribeWebPush: (input: WebPushSubscriptionInputDto): Promise<{ success: true }> =>
+      request('/notifications/web-push', {
+        method: 'POST',
+        body: WebPushSubscriptionInputSchema.parse(input),
+      }),
+    unsubscribeWebPush: (endpoint: string): Promise<{ success: true }> =>
+      request('/notifications/web-push/unsubscribe', {
+        method: 'POST',
+        body: { endpoint },
       }),
     getPreferences: (): Promise<NotificationPreferenceDto> =>
       request('/notifications/preferences', {

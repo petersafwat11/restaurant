@@ -1,6 +1,7 @@
 'use client';
 
 import { usePageHeader } from '@/components/shell/page-title-context';
+import { WebPushToggle } from '@/features/notifications/components/web-push-toggle';
 import { useRestaurantSettings, useUpdateRestaurantSettings } from '@/features/settings/hooks';
 import { Link } from '@/i18n/navigation';
 import type { HolidayDto, RestaurantSettingsDto } from '@repo/types';
@@ -253,6 +254,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <WebPushToggle />
         <SettingsSectionCard
           id="financials"
           title={t('financials.title')}
