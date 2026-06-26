@@ -1,13 +1,16 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
+  JOB_SMS_NEW_ORDER,
   JOB_SMS_ORDER_STATUS,
   JOB_SMS_OTP,
   QUEUE_SMS,
+  SmsNewOrderPayloadSchema,
   SmsOrderStatusPayloadSchema,
   SmsOtpPayloadSchema,
 } from '@repo/jobs';
 import type { Job } from 'bullmq';
+import { newOrderAlertText } from '../notifications/new-order-alert-copy';
 import { SmsService } from '../sms/sms.service';
 
 @Processor(QUEUE_SMS)
@@ -34,6 +37,11 @@ export class SmsProcessor extends WorkerHost {
           to: payload.phone,
           body: smsBody(payload.toStatus, payload.orderNumber),
         });
+        return;
+      }
+      case JOB_SMS_NEW_ORDER: {
+        const payload = SmsNewOrderPayloadSchema.parse(job.data);
+        await this.sms.send({ to: payload.phone, body: newOrderAlertText(payload) });
         return;
       }
       default:

@@ -46,6 +46,19 @@ export const NotificationPreferenceSchema = z.object({
 });
 export type NotificationPreferenceDto = z.infer<typeof NotificationPreferenceSchema>;
 
+// Browser Web Push subscription registered by the admin PWA so staff get
+// background "new order" alerts even when the dashboard tab is closed. Shape
+// mirrors the browser's `PushSubscription.toJSON()`.
+export const WebPushSubscriptionInputSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string().min(1),
+    auth: z.string().min(1),
+  }),
+  userAgent: z.string().max(500).optional(),
+});
+export type WebPushSubscriptionInputDto = z.infer<typeof WebPushSubscriptionInputSchema>;
+
 export const UpdateNotificationPreferenceSchema = NotificationPreferenceSchema.partial();
 export type UpdateNotificationPreferenceDto = z.infer<
   typeof UpdateNotificationPreferenceSchema

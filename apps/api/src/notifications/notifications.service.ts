@@ -6,6 +6,7 @@ import type {
   NotificationPreferenceDto,
   RegisterPushTokenDto,
   UpdateNotificationPreferenceDto,
+  WebPushSubscriptionInputDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -87,6 +88,40 @@ export class NotificationsService {
 
   async unregisterPushToken(userId: string, token: string): Promise<{ success: true }> {
     await this.prisma.pushToken.deleteMany({ where: { token, userId } });
+    return { success: true };
+  }
+
+  // ---- Web Push subscriptions (admin PWA) -------------------------------
+
+  async subscribeWebPush(
+    userId: string,
+    dto: WebPushSubscriptionInputDto,
+  ): Promise<{ success: true }> {
+    // Idempotent on the endpoint (globally unique). Re-point it if a different
+    // user signed in on the same browser, and refresh the rotated keys.
+    await this.prisma.webPushSubscription.upsert({
+      where: { endpoint: dto.endpoint },
+      create: {
+        userId,
+        endpoint: dto.endpoint,
+        p256dh: dto.keys.p256dh,
+        auth: dto.keys.auth,
+        userAgent: dto.userAgent ?? null,
+        lastUsedAt: new Date(),
+      },
+      update: {
+        userId,
+        p256dh: dto.keys.p256dh,
+        auth: dto.keys.auth,
+        userAgent: dto.userAgent ?? null,
+        lastUsedAt: new Date(),
+      },
+    });
+    return { success: true };
+  }
+
+  async unsubscribeWebPush(userId: string, endpoint: string): Promise<{ success: true }> {
+    await this.prisma.webPushSubscription.deleteMany({ where: { endpoint, userId } });
     return { success: true };
   }
 

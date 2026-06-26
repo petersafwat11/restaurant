@@ -21,6 +21,21 @@ const EnvSchema = z.object({
   TWILIO_ACCOUNT_SID: z.string().optional().default(''),
   TWILIO_AUTH_TOKEN: z.string().optional().default(''),
   TWILIO_FROM: z.string().optional().default(''),
+  // WhatsApp sender for owner alerts, e.g. "whatsapp:+14155238886" (Twilio
+  // sandbox) or an approved Business sender. Empty → console fallback.
+  TWILIO_WHATSAPP_FROM: z.string().optional().default(''),
+
+  // Web Push (VAPID) for the admin PWA staff alerts. Generate once with
+  // `npx web-push generate-vapid-keys`. Empty → web-push disabled (no-op send).
+  VAPID_PUBLIC_KEY: z.string().optional().default(''),
+  VAPID_PRIVATE_KEY: z.string().optional().default(''),
+  VAPID_SUBJECT: z.string().optional().default('mailto:admin@restaurant.local'),
+
+  // Fallback owner-alert recipients when the Restaurant row hasn't been
+  // configured yet (comma-separated E.164). Lets a deployment start alerting
+  // before the admin Settings UI is filled in.
+  ORDER_ALERT_SMS_TO: z.string().optional().default(''),
+  ORDER_ALERT_WHATSAPP_TO: z.string().optional().default(''),
 
   APP_URL_WEB: z.string().url().default('http://localhost:3000'),
   APP_URL_ADMIN: z.string().url().default('http://localhost:3001'),

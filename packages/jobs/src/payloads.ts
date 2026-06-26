@@ -94,6 +94,43 @@ export const PushOrderStatusPayloadSchema = z.object({
 });
 export type PushOrderStatusPayload = z.infer<typeof PushOrderStatusPayloadSchema>;
 
+// Sprint 13 — owner/staff "new order placed" alerts. Distinct from the
+// customer-facing order-status notifications above; these tell the restaurant
+// a customer just ordered. The same summary shape is reused across SMS,
+// WhatsApp and web-push so the transports stay interchangeable.
+const OrderTypeEnumSchema = z.enum(['DELIVERY', 'PICKUP', 'DINE_IN']);
+
+export const NewOrderAlertSummarySchema = z.object({
+  orderId: z.string(),
+  orderNumber: z.string(),
+  orderType: OrderTypeEnumSchema,
+  itemCount: z.number().int().min(0),
+  currency: z.string(),
+  grandTotal: z.string(),
+  customerName: z.string().nullable(),
+  /** Deep link into the admin order detail page. */
+  adminUrl: z.string().url(),
+});
+export type NewOrderAlertSummary = z.infer<typeof NewOrderAlertSummarySchema>;
+
+export const SmsNewOrderPayloadSchema = NewOrderAlertSummarySchema.extend({
+  phone: z.string(),
+});
+export type SmsNewOrderPayload = z.infer<typeof SmsNewOrderPayloadSchema>;
+
+export const WhatsappNewOrderPayloadSchema = NewOrderAlertSummarySchema.extend({
+  phone: z.string(),
+});
+export type WhatsappNewOrderPayload = z.infer<typeof WhatsappNewOrderPayloadSchema>;
+
+// Web-push fans out to every staff subscription, so the alert carries the
+// target userIds; the processor loads each user's browser subscriptions and
+// prunes any the push service reports as gone (404/410).
+export const WebPushNewOrderPayloadSchema = NewOrderAlertSummarySchema.extend({
+  userIds: z.array(z.string()).min(1),
+});
+export type WebPushNewOrderPayload = z.infer<typeof WebPushNewOrderPayloadSchema>;
+
 // Sprint 10 — contact-form: notify the restaurant + auto-reply the sender.
 export const EmailContactPayloadSchema = z.object({
   contactMessageId: z.string(),

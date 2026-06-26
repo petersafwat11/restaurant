@@ -42,6 +42,7 @@ model User {
   loyaltyAccount         LoyaltyAccount?
   refreshTokens          RefreshToken[]
   pushTokens             PushToken[]
+  webPushSubscriptions   WebPushSubscription[]
   notifications          Notification[]
   notificationPreference NotificationPreference?
   couponRedemptions      CouponRedemption[]
@@ -150,6 +151,24 @@ model PushToken {
   @@index([userId])
 }
 
+// Browser Web Push subscription for staff using the admin app installed as a
+// PWA. Powers background "new order" alerts when the dashboard tab is closed.
+// One row per browser/device; `endpoint` is the unique push-service URL.
+model WebPushSubscription {
+  id         String    @id @default(cuid())
+  userId     String
+  endpoint   String    @unique
+  p256dh     String
+  auth       String
+  userAgent  String?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model NotificationPreference {
   id                String   @id @default(cuid())
   userId            String   @unique
@@ -212,6 +231,15 @@ model Restaurant {
   estimatedDeliveryMinutesMax Int?
   estimatedPickupMinutesMin   Int?
   estimatedPickupMinutesMax   Int?
+  // Owner/staff new-order alerting (Sprint 13). Independent of the customer's
+  // order-status notifications: these tell the restaurant a customer just
+  // ordered. Phone lists are E.164 (e.g. "+48600100200"). Web-push fans out to
+  // staff who installed the admin PWA, so it needs no recipient list here.
+  orderAlertSmsEnabled        Boolean  @default(false)
+  orderAlertWhatsAppEnabled   Boolean  @default(false)
+  orderAlertWebPushEnabled    Boolean  @default(true)
+  orderAlertPhones            String[] @default([])
+  orderAlertWhatsApp          String[] @default([])
   isActive                    Boolean  @default(true)
   acceptsReservations         Boolean  @default(true)
   acceptsDelivery             Boolean  @default(true)

@@ -1,6 +1,10 @@
 export const QUEUE_EMAIL = 'email';
 export const QUEUE_SMS = 'sms';
 export const QUEUE_PUSH = 'push';
+// Owner/staff alerting transports (Sprint 13). WhatsApp goes through Twilio's
+// WhatsApp sender; webpush is browser Web Push (VAPID) for the admin PWA.
+export const QUEUE_WHATSAPP = 'whatsapp';
+export const QUEUE_WEBPUSH = 'webpush';
 export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
@@ -9,6 +13,8 @@ export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
   sms: QUEUE_SMS,
   push: QUEUE_PUSH,
+  whatsapp: QUEUE_WHATSAPP,
+  webpush: QUEUE_WEBPUSH,
   receipt: QUEUE_RECEIPT,
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
@@ -28,6 +34,10 @@ export const JOB_EMAIL_PROMO = 'email.promo';
 export const JOB_EMAIL_NEWSLETTER_CONFIRM = 'email.newsletter-confirm';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
+// Owner/staff "a customer placed an order" alerts (Sprint 13).
+export const JOB_SMS_NEW_ORDER = 'sms.new-order';
+export const JOB_WHATSAPP_NEW_ORDER = 'whatsapp.new-order';
+export const JOB_WEBPUSH_NEW_ORDER = 'webpush.new-order';
 export const JOB_PUSH_WELCOME = 'push.welcome';
 export const JOB_PUSH_ORDER_STATUS = 'push.order-status';
 export const JOB_PUSH_TOKEN_CLEANUP = 'push.token-cleanup';

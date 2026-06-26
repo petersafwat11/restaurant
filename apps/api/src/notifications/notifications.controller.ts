@@ -7,7 +7,10 @@ import {
   RegisterPushTokenSchema,
   type UpdateNotificationPreferenceDto,
   UpdateNotificationPreferenceSchema,
+  type WebPushSubscriptionInputDto,
+  WebPushSubscriptionInputSchema,
 } from '@repo/types';
+import { z } from 'zod';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { NotificationsService } from './notifications.service';
@@ -55,6 +58,26 @@ export class NotificationsController {
   @HttpCode(200)
   unregisterPushToken(@CurrentUser() user: RequestUser, @Param('token') token: string) {
     return this.notifications.unregisterPushToken(user.id, token);
+  }
+
+  // ---- Web Push (admin PWA staff alerts) --------------------------------
+
+  @Post('web-push')
+  @HttpCode(200)
+  subscribeWebPush(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(WebPushSubscriptionInputSchema)) dto: WebPushSubscriptionInputDto,
+  ) {
+    return this.notifications.subscribeWebPush(user.id, dto);
+  }
+
+  @Post('web-push/unsubscribe')
+  @HttpCode(200)
+  unsubscribeWebPush(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(z.object({ endpoint: z.string().url() }))) dto: { endpoint: string },
+  ) {
+    return this.notifications.unsubscribeWebPush(user.id, dto.endpoint);
   }
 
   @Get('preferences')
