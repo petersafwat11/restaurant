@@ -202,7 +202,64 @@ Docs (Phase 0)
 
 ---
 
-## Appendix A — EN translation draft (to be filled before seeding)
-*(Full per-item PL→EN table — categories, 29 items, modifier groups/options — drafted here
-for owner review during implementation. Omitted from this overview for brevity; will be
-authored inline in `seed.ts`.)*
+## Appendix A — EN translation (owner-reviewed copy to seed)
+
+PL is the source/default. These `*_en` values are seeded alongside and served on `/en`
+(with PL fallback when blank).
+
+**Restaurant**
+- `descriptionEn`: "Fresh kebab and falafel in Kielce, on Ściegiennego — everything made to order."
+
+**Categories** (`nameEn` / `descriptionEn`)
+
+| slug | nameEn | descriptionEn |
+|---|---|---|
+| kebab | Kebab | Meat (chicken, beef or mixed) with fresh salad and sauce. |
+| falafel | Vegetarian — Falafel | Falafel and salad with mild, mixed or spicy sauce. |
+| strips-tacos | Box Strips & Tacos | Chicken strips and tacos. |
+| zestawy | Combo Deals | Kebab + Coca-Cola 0.5L at a combo price. |
+| dodatki | Sides | Fries and dessert. |
+| napoje-zimne | Cold Drinks | Soft drinks, juices and water. |
+
+**Items** (`nameEn` / `descriptionEn`)
+
+| slug | nameEn | descriptionEn |
+|---|---|---|
+| kebab-tortilla | Kebab Tortilla (Wrap) | Döner kebab in a tortilla wrap — chicken, beef or mixed meat with fresh salad and your choice of sauce. |
+| kebab-pita | Kebab in Pita | Döner kebab in pita bread — meat, fresh salad and sauce. |
+| kebab-w-bulce | Kebab in a Bun | Döner kebab in a bun — meat, fresh salad and sauce. |
+| kebab-kapsalon | Kapsalon | Meat over fries, topped with melted cheese and sauce. |
+| kebab-na-talerzu | Kebab Plate | Döner kebab on a plate — meat, fresh salad and sauce. |
+| kebab-box | Kebab Box | Meat, fresh salad, fries and sauce in a box. |
+| fryto-kebab | Fryto Kebab | Meat, fresh salad, fries and sauce wrapped in a tortilla. |
+| salatka-kebab | Kebab Salad | Salad with kebab meat, fresh veg and sauce. |
+| tortilla-falafel | Falafel Tortilla (Wrap) | Falafel in a tortilla wrap with salad and sauce. |
+| bulka-falafel | Falafel in a Bun | Falafel in a bun with salad and sauce. |
+| pita-falafel | Falafel in Pita | Falafel in pita bread with salad and sauce. |
+| talerz-falafel | Falafel Plate | Falafel on a plate with salad and sauce. |
+| box-strips | Chicken Strips Box | Chicken strips with fries, fresh salad and sauce. |
+| tacos | Tacos | Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries. |
+| zestaw-kebab-tortilla-sredni-cola | Medium Kebab Tortilla + Coca-Cola 0.5L | Medium kebab tortilla with a Coca-Cola 0.5L. Save 2 zł. |
+| zestaw-kapsalon-duzy-cola | Large Kapsalon + Coca-Cola 0.5L | Large kapsalon with a Coca-Cola 0.5L. Save 2 zł. |
+| frytki-male | Small Fries | Small portion of fries. |
+| frytki-duze | Large Fries | Large portion of fries. |
+| baklawa | Baklava | Traditional baklava. |
+| coca-cola | Coca-Cola | 0.5L |
+| coca-cola-zero | Coca-Cola Zero | 0.5L |
+| coca-cola-light | Coca-Cola Light | 0.5L |
+| fanta | Fanta | 0.5L |
+| sprite | Sprite | 0.5L |
+| kinley | Kinley | 0.5L |
+| kropla-beskidu | Kropla Beskidu | Still water 0.5L |
+| fuze-tea | Fuze Tea | 0.5L |
+| cappy | Cappy | Juice 0.33L |
+| burn | Burn | Energy drink 0.25L |
+
+**Modifier groups** (`nameEn`): Rozmiar→Size · Mięso→Meat · Sos→Sauce · Dodatki→Add-ons
+
+**Modifier options** (`nameEn`)
+- Sauce: Łagodny→Mild · Ostry→Spicy · Mieszany→Mixed
+- Meat: Kurczak→Chicken · Wołowina→Beef · Mieszane→Mixed
+- Add-ons: Ser żółty→Cheese · Ser feta→Feta · Dodatkowy sos→Extra sauce · Opakowanie→Packaging
+- Sizes: Mały→Small · Średni→Medium · Duży→Large · Mega→Mega · Standard→Standard;
+  "(N szt)"→"(N pcs)" (e.g. "Standard (2 szt)"→"Standard (2 pcs)")
