@@ -30,7 +30,7 @@ const DeliveryLocationPicker = dynamic(
   },
 );
 
-const DEFAULT_MAP_CENTER = { lat: 50.8505, lng: 20.6275 }; // Kielce fallback
+const DEFAULT_MAP_CENTER = { lat: 50.8478329, lng: 20.6231079 }; // Szef Donald, Ściegiennego (Kielce) fallback
 
 const restaurantAdminKey = ['restaurant', 'admin'] as const;
 
