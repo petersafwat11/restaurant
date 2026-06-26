@@ -183,42 +183,44 @@ const RESTAURANT_SLUG = 'szef-donald';
 async function seedRestaurants() {
   console.log(`▸ Seeding restaurant: ${RESTAURANT_SLUG} (Europe/Warsaw, PLN)`);
 
+  // One source of truth for the restaurant fields, applied on both create and
+  // update so re-seeding an existing DB actually propagates address/geo/SEO
+  // changes (the previous split put address + geoPoint only on `create`, so
+  // they never refreshed on an existing row).
+  const restaurantData = {
+    name: 'Szef Donald',
+    description: 'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
+    phone: '+48 883 953 589',
+    email: 'mahmodrasul123@gmail.com',
+    address: {
+      line1: 'ul. Ks. Piotra Ściegiennego 68a',
+      city: 'Kielce',
+      zip: '25-115',
+      country: 'PL',
+    },
+    // Google Maps place pin for "Szef Donald" (the !3d/!4d marker, not the
+    // viewport centre) so the location-page map + directions land on the shop.
+    geoPoint: { lat: 50.8478329, lng: 20.6231079 },
+    // schema.org discovery fields surfaced in the Restaurant JSON-LD.
+    // `priceRange` mirrors the range Google shows on the Business Profile.
+    servesCuisine: ['Kebab', 'Falafel', 'Middle Eastern', 'Turkish', 'Vegetarian'],
+    priceRange: '20–40 zł',
+    timezone: 'Europe/Warsaw',
+    currency: 'PLN',
+    isActive: true,
+    estimatedDeliveryMinutesMin: 30,
+    estimatedDeliveryMinutesMax: 45,
+    estimatedPickupMinutesMin: 12,
+    estimatedPickupMinutesMax: 20,
+  };
+
+  // `sameAs` (social profile URLs) is intentionally not seeded here so a reseed
+  // never wipes the real links the owner sets in admin. Bake them in once the
+  // canonical URLs are confirmed.
   const restaurant = await prisma.restaurant.upsert({
     where: { slug: RESTAURANT_SLUG },
-    update: {
-      name: 'Szef Donald',
-      description: 'Kebab i falafel — Kielce kebab shop.',
-      phone: '+48 883 953 589',
-      email: 'mahmodrasul123@gmail.com',
-      timezone: 'Europe/Warsaw',
-      currency: 'PLN',
-      isActive: true,
-      estimatedDeliveryMinutesMin: 30,
-      estimatedDeliveryMinutesMax: 45,
-      estimatedPickupMinutesMin: 12,
-      estimatedPickupMinutesMax: 20,
-    },
-    create: {
-      slug: RESTAURANT_SLUG,
-      name: 'Szef Donald',
-      description: 'Kebab i falafel — Kielce kebab shop.',
-      phone: '+48 883 953 589',
-      email: 'mahmodrasul123@gmail.com',
-      address: {
-        line1: 'ul. Ks. Piotra Ściegiennego 68a',
-        city: 'Kielce',
-        zip: '25-115',
-        country: 'PL',
-      },
-      geoPoint: { lat: 50.8505, lng: 20.6275 },
-      timezone: 'Europe/Warsaw',
-      currency: 'PLN',
-      isActive: true,
-      estimatedDeliveryMinutesMin: 30,
-      estimatedDeliveryMinutesMax: 45,
-      estimatedPickupMinutesMin: 12,
-      estimatedPickupMinutesMax: 20,
-    },
+    update: restaurantData,
+    create: { slug: RESTAURANT_SLUG, ...restaurantData },
   });
 
   // 7 days, 11:00-23:00 except Mondays closed.

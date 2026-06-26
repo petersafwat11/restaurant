@@ -58,7 +58,7 @@
     "cuisineLabel": "Cuisine",
     "cuisineHint": "Comma-separated, e.g. \"Polish, Middle Eastern\". Drives schema.org servesCuisine.",
     "priceRangeLabel": "Price range",
-    "priceRangeHint": "Used by Google rich results and map cards.",
+    "priceRangeHint": "Shown in Google rich results and map cards. Enter a range like \"20–40 zł\" or a tier ($–$$$$).",
     "priceRangeOptionNone": "Not set",
     "sameAsLabel": "Social profiles",
     "sameAsHint": "One URL per line — Facebook, Instagram, Google Business, etc. Emitted as schema.org sameAs."

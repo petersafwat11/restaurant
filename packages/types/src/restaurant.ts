@@ -40,10 +40,15 @@ export type UpdateOperatingHoursDto = z.infer<typeof UpdateOperatingHoursSchema>
 
 const MoneyStringSchema = z.string().regex(/^-?\d+(\.\d{1,2})?$/);
 
-// Schema.org `priceRange` convention — empty string is invalid, but we accept
-// `null` (i.e., "not set") so the DTO can pass through the field unset.
+// schema.org `priceRange` is free-form text. We accept either the "$"–"$$$$"
+// convention or a human currency range (e.g. "20–40 zł", matching what Google
+// shows on the Business Profile). Empty string is rejected; `null` means
+// "not set" so the DTO can pass the field through unset.
 const PriceRangeSchema = z
-  .enum(['$', '$$', '$$$', '$$$$'], { message: 'priceRange must be $, $$, $$$, or $$$$' })
+  .string()
+  .trim()
+  .min(1, { message: 'priceRange must not be empty' })
+  .max(24, { message: 'priceRange is too long' })
   .nullable();
 
 export const RestaurantPublicSchema = z.object({

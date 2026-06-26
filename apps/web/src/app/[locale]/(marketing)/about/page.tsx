@@ -16,7 +16,7 @@ export function generateMetadata(): Metadata {
 // fixed business fact rather than a live API aggregate. Update both together
 // if the Google rating changes. The rating value itself lives in i18n
 // (`stats.ratingValue`) so it can be formatted per locale (4.1 / 4,1).
-const GOOGLE_REVIEW_COUNT = 212;
+const GOOGLE_REVIEW_COUNT = 213;
 
 export default async function AboutPage({
   params,
