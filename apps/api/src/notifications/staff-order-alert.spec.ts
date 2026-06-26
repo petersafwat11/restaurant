@@ -30,7 +30,7 @@ const ENV_BASE = {
   APP_URL_ADMIN: 'https://admin.example.com',
   ORDER_ALERT_SMS_TO: '',
   ORDER_ALERT_WHATSAPP_TO: '',
-} as never;
+};
 
 function makeService(opts: {
   restaurant: Record<string, unknown> | null;
