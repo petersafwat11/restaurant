@@ -11,15 +11,18 @@ import { StructuredDataSchema } from '@repo/types';
  * (Phase A.1 / A.4) calls this; the locale-root layout uses the lighter
  * `fetchPublicRestaurant` since it only needs the Restaurant node.
  */
-export async function fetchStructuredData(slug: string): Promise<StructuredDataDto | null> {
+export async function fetchStructuredData(
+  slug: string,
+  locale = 'pl',
+): Promise<StructuredDataDto | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return null;
 
   try {
     const res = await fetch(
-      `${apiUrl.replace(/\/+$/, '')}/seo/structured-data/${encodeURIComponent(slug)}`,
+      `${apiUrl.replace(/\/+$/, '')}/seo/structured-data/${encodeURIComponent(slug)}?locale=${encodeURIComponent(locale)}`,
       {
-        next: { revalidate: 3600, tags: ['restaurant', `seo:${slug}`] },
+        next: { revalidate: 3600, tags: ['restaurant', `seo:${slug}`, `seo:${slug}:${locale}`] },
         headers: { 'X-App-Audience': 'web' },
       },
     );

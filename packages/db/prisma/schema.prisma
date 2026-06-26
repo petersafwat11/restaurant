@@ -188,6 +188,9 @@ model Restaurant {
   slug                        String   @unique
   name                        String
   description                 String?
+  // English translation of `description` (PL is the source/default; EN falls
+  // back to PL when null). Surfaced per-locale in SEO JSON-LD.
+  descriptionEn               String?
   logoUrl                     String?
   coverUrl                    String?
   phone                       String
@@ -243,8 +246,12 @@ model OperatingHours {
 model MenuCategory {
   id          String  @id @default(cuid())
   name        String
+  // English translations (PL columns are the source/default; EN falls back to
+  // PL when null). Served per-locale on the public menu + SEO endpoints.
+  nameEn        String?
   slug        String  @unique
   description String?
+  descriptionEn String?
   imageUrl    String?
   position    Int     @default(0)
   isActive    Boolean @default(true)
@@ -256,8 +263,12 @@ model MenuItem {
   id           String   @id @default(cuid())
   categoryId   String
   name         String
+  // English translations (PL columns are the source/default; EN falls back to
+  // PL when null). Served per-locale on the public menu + SEO endpoints.
+  nameEn       String?
   slug         String
   description  String?
+  descriptionEn String?
   basePrice    Decimal  @db.Decimal(10, 2)
   compareAt    Decimal? @db.Decimal(10, 2)
   calories     Int?
@@ -295,6 +306,7 @@ model MenuItemModifierGroup {
   id         String  @id @default(cuid())
   itemId     String
   name       String // "Size", "Add-ons", "Spice level"
+  nameEn     String? // EN translation; falls back to `name` when null
   isRequired Boolean @default(false)
   minSelect  Int     @default(0)
   maxSelect  Int     @default(1)
@@ -307,6 +319,7 @@ model MenuItemModifierOption {
   id         String  @id @default(cuid())
   groupId    String
   name       String
+  nameEn     String? // EN translation; falls back to `name` when null
   priceDelta Decimal @default(0) @db.Decimal(10, 2)
   isDefault  Boolean @default(false)
 

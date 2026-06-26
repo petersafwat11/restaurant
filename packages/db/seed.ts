@@ -190,6 +190,7 @@ async function seedRestaurants() {
   const restaurantData = {
     name: 'Szef Donald',
     description: 'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
+    descriptionEn: 'Fresh kebab and falafel in Kielce, on Ściegiennego — everything made to order.',
     phone: '+48 883 953 589',
     email: 'mahmodrasul123@gmail.com',
     address: {
@@ -253,7 +254,9 @@ async function seedRestaurants() {
 interface SeedItem {
   slug: string;
   name: string;
+  nameEn?: string;
   description: string;
+  descriptionEn?: string;
   basePrice: string; // PLN, 2dp string
   isVegetarian?: boolean;
   isVegan?: boolean;
@@ -266,17 +269,20 @@ interface SeedItem {
   allergens?: string[];
   modifierGroups?: Array<{
     name: string;
+    nameEn?: string;
     isRequired?: boolean;
     minSelect?: number;
     maxSelect?: number;
-    options: Array<{ name: string; priceDelta?: string; isDefault?: boolean }>;
+    options: Array<{ name: string; nameEn?: string; priceDelta?: string; isDefault?: boolean }>;
   }>;
 }
 
 interface SeedCategory {
   slug: string;
   name: string;
+  nameEn?: string;
   description: string;
+  descriptionEn?: string;
   items: SeedItem[];
 }
 
@@ -725,6 +731,138 @@ const MENU_IMAGE_BASE =
     ? `${process.env.APP_URL_API.replace(/\/+$/, '')}/uploads/menu-items`
     : 'http://localhost:4000/uploads/menu-items');
 
+// --- English translations (PL above is the source/default) -----------------
+// Keyed by slug so the PL `CATEGORIES` data stays untouched and the EN copy is
+// reviewable in one place. Served on /en with PL fallback when an entry is
+// missing. Modifier group/option names use a closed vocabulary, so they're
+// translated by small maps rather than per-row copy.
+
+const CATEGORY_EN: Record<string, { name: string; description: string }> = {
+  kebab: { name: 'Kebab', description: 'Meat (chicken, beef or mixed) with fresh salad and sauce.' },
+  falafel: {
+    name: 'Vegetarian — Falafel',
+    description: 'Falafel and salad with mild, mixed or spicy sauce.',
+  },
+  'strips-tacos': { name: 'Box Strips & Tacos', description: 'Chicken strips and tacos.' },
+  zestawy: { name: 'Combo Deals', description: 'Kebab + Coca-Cola 0.5L at a combo price.' },
+  dodatki: { name: 'Sides', description: 'Fries and dessert.' },
+  'napoje-zimne': { name: 'Cold Drinks', description: 'Soft drinks, juices and water.' },
+};
+
+const ITEM_EN: Record<string, { name: string; description: string }> = {
+  'kebab-tortilla': {
+    name: 'Kebab Tortilla (Wrap)',
+    description:
+      'Döner kebab in a tortilla wrap — chicken, beef or mixed meat with fresh salad and your choice of sauce.',
+  },
+  'kebab-pita': {
+    name: 'Kebab in Pita',
+    description: 'Döner kebab in pita bread — meat, fresh salad and sauce.',
+  },
+  'kebab-w-bulce': {
+    name: 'Kebab in a Bun',
+    description: 'Döner kebab in a bun — meat, fresh salad and sauce.',
+  },
+  'kebab-kapsalon': {
+    name: 'Kapsalon',
+    description: 'Meat over fries, topped with melted cheese and sauce.',
+  },
+  'kebab-na-talerzu': {
+    name: 'Kebab Plate',
+    description: 'Döner kebab on a plate — meat, fresh salad and sauce.',
+  },
+  'kebab-box': { name: 'Kebab Box', description: 'Meat, fresh salad, fries and sauce in a box.' },
+  'fryto-kebab': {
+    name: 'Fryto Kebab',
+    description: 'Meat, fresh salad, fries and sauce wrapped in a tortilla.',
+  },
+  'salatka-kebab': {
+    name: 'Kebab Salad',
+    description: 'Salad with kebab meat, fresh veg and sauce.',
+  },
+  'tortilla-falafel': {
+    name: 'Falafel Tortilla (Wrap)',
+    description: 'Falafel in a tortilla wrap with salad and sauce.',
+  },
+  'bulka-falafel': {
+    name: 'Falafel in a Bun',
+    description: 'Falafel in a bun with salad and sauce.',
+  },
+  'pita-falafel': {
+    name: 'Falafel in Pita',
+    description: 'Falafel in pita bread with salad and sauce.',
+  },
+  'talerz-falafel': {
+    name: 'Falafel Plate',
+    description: 'Falafel on a plate with salad and sauce.',
+  },
+  'box-strips': {
+    name: 'Chicken Strips Box',
+    description: 'Chicken strips with fries, fresh salad and sauce.',
+  },
+  tacos: {
+    name: 'Tacos',
+    description: 'Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries.',
+  },
+  'zestaw-kebab-tortilla-sredni-cola': {
+    name: 'Medium Kebab Tortilla + Coca-Cola 0.5L',
+    description: 'Medium kebab tortilla with a Coca-Cola 0.5L. Save 2 zł.',
+  },
+  'zestaw-kapsalon-duzy-cola': {
+    name: 'Large Kapsalon + Coca-Cola 0.5L',
+    description: 'Large kapsalon with a Coca-Cola 0.5L. Save 2 zł.',
+  },
+  'frytki-male': { name: 'Small Fries', description: 'Small portion of fries.' },
+  'frytki-duze': { name: 'Large Fries', description: 'Large portion of fries.' },
+  baklawa: { name: 'Baklava', description: 'Traditional baklava.' },
+  'coca-cola': { name: 'Coca-Cola', description: '0.5L' },
+  'coca-cola-zero': { name: 'Coca-Cola Zero', description: '0.5L' },
+  'coca-cola-light': { name: 'Coca-Cola Light', description: '0.5L' },
+  fanta: { name: 'Fanta', description: '0.5L' },
+  sprite: { name: 'Sprite', description: '0.5L' },
+  kinley: { name: 'Kinley', description: '0.5L' },
+  'kropla-beskidu': { name: 'Kropla Beskidu', description: 'Still water 0.5L' },
+  'fuze-tea': { name: 'Fuze Tea', description: '0.5L' },
+  cappy: { name: 'Cappy', description: 'Juice 0.33L' },
+  burn: { name: 'Burn', description: 'Energy drink 0.25L' },
+};
+
+const GROUP_NAME_EN: Record<string, string> = {
+  Rozmiar: 'Size',
+  Mięso: 'Meat',
+  Sos: 'Sauce',
+  Dodatki: 'Add-ons',
+};
+
+const OPTION_NAME_EN: Record<string, string> = {
+  Łagodny: 'Mild',
+  Ostry: 'Spicy',
+  Mieszany: 'Mixed',
+  Kurczak: 'Chicken',
+  Wołowina: 'Beef',
+  Mieszane: 'Mixed',
+  'Ser żółty': 'Cheese',
+  'Ser feta': 'Feta',
+  'Dodatkowy sos': 'Extra sauce',
+  Opakowanie: 'Packaging',
+  Mały: 'Small',
+  Średni: 'Medium',
+  Duży: 'Large',
+  Mega: 'Mega',
+  Standard: 'Standard',
+};
+
+/** EN for a modifier option name, handling the "(N szt)" → "(N pcs)" suffix. */
+function optionNameEn(name: string): string {
+  if (OPTION_NAME_EN[name]) return OPTION_NAME_EN[name];
+  const m = name.match(/^(.+?)\s*\((\d+)\s*szt\)$/);
+  if (m) {
+    const base = OPTION_NAME_EN[m[1]] ?? m[1];
+    return `${base} (${m[2]} pcs)`;
+  }
+  return name;
+}
+
 async function seedMenu() {
   // Wipe existing menu so renamed/removed items don't linger. CartItem has
   // no FK on menuItemId — clear cart items first so live carts don't hold
@@ -740,31 +878,39 @@ async function seedMenu() {
   );
 
   for (const [cIdx, cat] of CATEGORIES.entries()) {
+    const catEn = CATEGORY_EN[cat.slug];
     const category = await prisma.menuCategory.upsert({
       where: { slug: cat.slug },
       update: {
         name: cat.name,
+        nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
+        descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
         position: cIdx,
         isActive: true,
       },
       create: {
         slug: cat.slug,
         name: cat.name,
+        nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
+        descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
         position: cIdx,
         isActive: true,
       },
     });
 
     for (const [iIdx, it] of cat.items.entries()) {
+      const itEn = ITEM_EN[it.slug];
       const item = await prisma.menuItem.upsert({
         where: {
           categoryId_slug: { categoryId: category.id, slug: it.slug },
         },
         update: {
           name: it.name,
+          nameEn: itEn?.name ?? it.nameEn ?? null,
           description: it.description,
+          descriptionEn: itEn?.description ?? it.descriptionEn ?? null,
           basePrice: new Prisma.Decimal(it.basePrice),
           isVegetarian: it.isVegetarian ?? false,
           isVegan: it.isVegan ?? false,
@@ -782,7 +928,9 @@ async function seedMenu() {
           categoryId: category.id,
           slug: it.slug,
           name: it.name,
+          nameEn: itEn?.name ?? it.nameEn ?? null,
           description: it.description,
+          descriptionEn: itEn?.description ?? it.descriptionEn ?? null,
           basePrice: new Prisma.Decimal(it.basePrice),
           isVegetarian: it.isVegetarian ?? false,
           isVegan: it.isVegan ?? false,
@@ -821,6 +969,7 @@ async function seedMenu() {
             ? await prisma.menuItemModifierGroup.update({
                 where: { id: existing.id },
                 data: {
+                  nameEn: group.nameEn ?? GROUP_NAME_EN[group.name] ?? null,
                   isRequired: group.isRequired ?? false,
                   minSelect: group.minSelect ?? 0,
                   maxSelect: group.maxSelect ?? 1,
@@ -830,6 +979,7 @@ async function seedMenu() {
                 data: {
                   itemId: item.id,
                   name: group.name,
+                  nameEn: group.nameEn ?? GROUP_NAME_EN[group.name] ?? null,
                   isRequired: group.isRequired ?? false,
                   minSelect: group.minSelect ?? 0,
                   maxSelect: group.maxSelect ?? 1,
@@ -844,6 +994,7 @@ async function seedMenu() {
             data: group.options.map((o) => ({
               groupId: row.id,
               name: o.name,
+              nameEn: o.nameEn ?? optionNameEn(o.name),
               priceDelta: new Prisma.Decimal(o.priceDelta ?? '0'),
               isDefault: o.isDefault ?? false,
             })),
