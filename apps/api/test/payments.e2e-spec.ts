@@ -1,7 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('payments (e2e)', () => {
   let app: NestFastifyApplication;
@@ -55,7 +55,7 @@ describe('payments (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'pay-idem-1' },
     );

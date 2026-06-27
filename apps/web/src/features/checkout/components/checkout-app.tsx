@@ -20,7 +20,7 @@ import {
   type OrderType,
   type PaymentMethodKind,
 } from '@repo/types';
-import { CheckoutFormSchema } from '@repo/types';
+import { CheckoutFormSchema, LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import {
   CheckoutSection,
   type CheckoutSectionStatus,
@@ -58,12 +58,13 @@ import {
   Truck,
   Utensils,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export function CheckoutApp() {
   const t = useTranslations('web.shop.checkout');
+  const locale = useLocale();
   // The indicative ETA strings (eta.*) live in the success-page namespace, which
   // is the single source so the order-type cards and the success page never
   // diverge. See features/checkout/estimate.ts.
@@ -547,7 +548,18 @@ export function CheckoutApp() {
         notes: values.orderNotes || null,
         tipAmount: values.tipAmount,
         paymentMethod: paymentMethodForApi,
-        acceptedTermsAt: new Date().toISOString(),
+        // Customer contact snapshot — the server stores this verbatim so guest
+        // receipts/notifications work and don't depend on a User row.
+        contact: {
+          name: values.contact.name,
+          email: values.contact.email,
+          phone: values.contact.phone,
+        },
+        checkoutLocale: locale === 'en' ? 'en' : 'pl',
+        // Durable legal acceptance: the server validates the version, sets the
+        // timestamp, and writes the immutable snapshot/hash (plan §C2).
+        legalAccepted: true,
+        legalBundleVersion: LEGAL_BUNDLE_VERSION,
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
@@ -576,8 +588,20 @@ export function CheckoutApp() {
       const tokenQuery = order.trackingToken ? `?t=${encodeURIComponent(order.trackingToken)}` : '';
       router.push(`/checkout/success/${order.id}${tokenQuery}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('errors.createOrderFallback');
-      setSubmitError(msg);
+      // The legal bundle changed between page load and submit — force the
+      // customer to re-read and re-accept rather than binding stale terms.
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code?: string }).code === LEGAL_VERSION_CHANGED
+      ) {
+        form.setValue('acceptedTerms', false);
+        setSubmitError(t('errors.legalVersionChanged'));
+      } else {
+        const msg = err instanceof Error ? err.message : t('errors.createOrderFallback');
+        setSubmitError(msg);
+      }
     } finally {
       setSubmitting(false);
     }

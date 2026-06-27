@@ -65,14 +65,17 @@ export class ReceiptProcessor extends WorkerHost {
       refundedAmount: null,
     });
 
-    if (!order.user?.email) {
-      this.logger.log(`Receipt for guest order ${order.orderNumber} generated; no email to send`);
+    // Prefer the registered user's email, else the immutable guest contact
+    // snapshot captured at checkout (plan §C1) so guests receive receipts too.
+    const recipientEmail = order.user?.email ?? order.customerEmail;
+    if (!recipientEmail) {
+      this.logger.log(`Receipt for order ${order.orderNumber} generated; no email on file`);
       return;
     }
 
     await this.emailQueue.add(JOB_EMAIL_RECEIPT, {
       orderId: order.id,
-      to: order.user.email,
+      to: recipientEmail,
       pdfBase64: pdf.toString('base64'),
       orderNumber: order.orderNumber,
       currency: order.currency,

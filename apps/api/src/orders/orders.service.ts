@@ -11,6 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma } from '@repo/db';
 import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
 import { JOB_RECEIPT_GENERATE, QUEUE_RECEIPT } from '@repo/jobs';
+import { LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import type { Queue } from 'bullmq';
 import type {
   CheckoutQuoteDto,
@@ -48,6 +49,7 @@ import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
 import { IdempotencyService } from './idempotency.service';
+import { buildLegalSnapshot, hashLegalSnapshot } from './legal-snapshot';
 import { OrderNumberService } from './order-number';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
 import { computeEta, isTerminalStatus } from './order-tracking';
@@ -95,11 +97,29 @@ export class OrdersService {
     const restaurantRow = await this.prisma.restaurant.findFirst({
       select: {
         id: true,
+        name: true,
         currency: true,
         geoPoint: true,
         deliveryRadiusKm: true,
         minOrderAmount: true,
         defaultDeliveryFee: true,
+        // Legal-snapshot inputs — only consumed by create(); harmless to load
+        // for quote() (all are public legal/commercial fields anyway).
+        address: true,
+        legalName: true,
+        nip: true,
+        krs: true,
+        regon: true,
+        registryCourt: true,
+        registeredAddress: true,
+        registeredAddressSameAsTrading: true,
+        supportEmail: true,
+        complaintsEmail: true,
+        privacyEmail: true,
+        estimatedDeliveryMinutesMin: true,
+        estimatedDeliveryMinutesMax: true,
+        estimatedPickupMinutesMin: true,
+        estimatedPickupMinutesMax: true,
       },
     });
     if (!restaurantRow) throw new BadRequestException('Restaurant not configured');
@@ -270,6 +290,26 @@ export class OrdersService {
       return this.getById(actor, existingOrderId);
     }
 
+    // Durable legal acceptance (plan §C2): reject a stale bundle version with a
+    // typed conflict so the client can refresh the policy text and re-accept.
+    // The server — never the client — owns the acceptance timestamp + snapshot.
+    if (dto.legalBundleVersion !== LEGAL_BUNDLE_VERSION) {
+      throw new ConflictException({
+        code: LEGAL_VERSION_CHANGED,
+        message: 'The terms changed since you opened checkout. Please review and accept again.',
+        details: { currentVersion: LEGAL_BUNDLE_VERSION },
+      });
+    }
+
+    // Guest checkout must carry contact details — there's no User row to email a
+    // receipt/notification to (plan §C1). Authed orders may omit it; the read
+    // path then falls back to the user row.
+    if (!actor.userId && !dto.contact) {
+      throw new BadRequestException(
+        'Contact name, email and phone are required for guest checkout',
+      );
+    }
+
     const {
       restaurantRow,
       cart,
@@ -369,6 +409,39 @@ export class OrdersService {
       deliveryAddress = snapshot as unknown as Prisma.InputJsonValue;
     }
 
+    // Build the durable, server-generated legal-acceptance evidence (plan §C2):
+    // an immutable snapshot of the exact seller identity + commercial terms the
+    // customer accepted, plus its SHA-256 hash. The client cannot influence the
+    // timestamp or the hash.
+    const legalAcceptedAt = new Date();
+    const legalSnapshot = buildLegalSnapshot({
+      acceptedAt: legalAcceptedAt.toISOString(),
+      locale: dto.checkoutLocale,
+      orderType: dto.type,
+      currency: restaurantRow.currency,
+      restaurant: {
+        name: restaurantRow.name,
+        address: restaurantRow.address as Record<string, unknown> | null,
+        legalName: restaurantRow.legalName,
+        nip: restaurantRow.nip,
+        krs: restaurantRow.krs,
+        regon: restaurantRow.regon,
+        registryCourt: restaurantRow.registryCourt,
+        registeredAddress: restaurantRow.registeredAddress as Record<string, unknown> | null,
+        registeredAddressSameAsTrading: restaurantRow.registeredAddressSameAsTrading,
+        supportEmail: restaurantRow.supportEmail,
+        complaintsEmail: restaurantRow.complaintsEmail,
+        privacyEmail: restaurantRow.privacyEmail,
+        defaultDeliveryFee: restaurantRow.defaultDeliveryFee.toString(),
+        minOrderAmount: restaurantRow.minOrderAmount.toString(),
+        estimatedDeliveryMinutesMin: restaurantRow.estimatedDeliveryMinutesMin,
+        estimatedDeliveryMinutesMax: restaurantRow.estimatedDeliveryMinutesMax,
+        estimatedPickupMinutesMin: restaurantRow.estimatedPickupMinutesMin,
+        estimatedPickupMinutesMax: restaurantRow.estimatedPickupMinutesMax,
+      },
+    });
+    const legalSnapshotHash = hashLegalSnapshot(legalSnapshot);
+
     // Atomically claim the idempotency key right before we create the order.
     // A second concurrent request with the same key sees `done` (replay) or
     // `pending` (reject) instead of racing into a duplicate order.
@@ -401,7 +474,19 @@ export class OrdersService {
             deliveryAddress: deliveryAddress ?? Prisma.JsonNull,
             pickupAt: dto.pickupAt ? new Date(dto.pickupAt) : null,
             notes: dto.notes ?? null,
-            acceptedTermsAt: dto.acceptedTermsAt ? new Date(dto.acceptedTermsAt) : null,
+            // Immutable customer contact snapshot (plan §C1) — required for guest
+            // receipts/notifications and independent of later profile edits.
+            customerName: dto.contact?.name ?? null,
+            customerEmail: dto.contact?.email ?? null,
+            customerPhone: dto.contact?.phone ?? null,
+            checkoutLocale: dto.checkoutLocale,
+            // Server-generated legal-acceptance evidence (plan §C2). The deprecated
+            // acceptedTermsAt is kept in sync until a later migration drops it.
+            acceptedTermsAt: legalAcceptedAt,
+            legalAcceptedAt,
+            legalBundleVersion: dto.legalBundleVersion,
+            legalSnapshot: legalSnapshot as unknown as Prisma.InputJsonValue,
+            legalSnapshotHash,
             couponCode,
             items: {
               create: lineSnapshots.map((l) => ({
@@ -458,7 +543,8 @@ export class OrdersService {
     }
 
     // Emit an internal event so the realtime/notification dispatcher can react.
-    const customerName = await this.loadCustomerName(created.userId);
+    // Prefer the order's contact snapshot (populated for guests too).
+    const customerName = created.customerName ?? (await this.loadCustomerName(created.userId));
     const createdEvent: OrderCreatedEvent = {
       orderId: created.id,
       orderNumber: created.orderNumber,
@@ -837,10 +923,11 @@ export class OrdersService {
       grandTotal: r.grandTotal,
       currency: r.currency,
       itemCount: r._count.items,
-      customerName: r.user
-        ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ') || null
-        : null,
-      customerEmail: r.user?.email ?? null,
+      // Prefer the order's contact snapshot (present for guests too).
+      customerName:
+        r.customerName ??
+        (r.user ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ') || null : null),
+      customerEmail: r.customerEmail ?? r.user?.email ?? null,
       createdAt: r.createdAt,
     }));
 
@@ -887,7 +974,7 @@ export class OrdersService {
     const dto = toOrderDto(order);
     if (canReadAny) {
       const [customer, payment] = await Promise.all([
-        this.loadOrderCustomer(order.userId),
+        this.loadOrderCustomer(order),
         this.loadOrderPayment(order.id),
       ]);
       dto.customer = customer;
@@ -962,10 +1049,28 @@ export class OrdersService {
     };
   }
 
-  private async loadOrderCustomer(userId: string | null): Promise<OrderCustomerDto | null> {
-    if (!userId) return null;
+  private async loadOrderCustomer(order: {
+    userId: string | null;
+    customerName: string | null;
+    customerEmail: string | null;
+    customerPhone: string | null;
+  }): Promise<OrderCustomerDto | null> {
+    // Prefer the immutable contact snapshot captured at checkout — this is the
+    // only source that works for guest orders and is stable against later
+    // profile edits (plan §C1).
+    if (order.customerEmail) {
+      return {
+        id: order.userId,
+        name: order.customerName,
+        email: order.customerEmail,
+        phone: order.customerPhone,
+      };
+    }
+    // Legacy orders (placed before the snapshot existed): fall back to the live
+    // user row.
+    if (!order.userId) return null;
     const u = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: order.userId },
       select: { id: true, firstName: true, lastName: true, email: true, phone: true },
     });
     if (!u) return null;
@@ -1105,9 +1210,12 @@ function toListItem(r: OrderListRow): OrderListItemDto {
     grandTotal: r.grandTotal.toFixed(2),
     currency: r.currency,
     itemCount: r.items.length,
-    customerName: r.user
-      ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ').trim() || r.user.email
-      : null,
+    // Prefer the order's contact snapshot (present for guests too).
+    customerName:
+      r.customerName ??
+      (r.user
+        ? [r.user.firstName, r.user.lastName].filter(Boolean).join(' ').trim() || r.user.email
+        : null),
     createdAt: r.createdAt.toISOString(),
   };
 }

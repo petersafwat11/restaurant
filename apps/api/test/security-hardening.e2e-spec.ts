@@ -1,7 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { LoyaltyService } from '../src/loyalty/loyalty.service';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 /**
  * Cross-cutting hardening assertions for the launch security review
@@ -89,7 +89,7 @@ describe('security hardening (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
     );
     expect(res.statusCode).toBe(400);
@@ -115,7 +115,7 @@ describe('security hardening (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'Idempotency-Key': 'sec-loyalty-cap' },
     );

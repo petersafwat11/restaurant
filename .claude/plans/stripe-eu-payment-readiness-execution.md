@@ -40,26 +40,31 @@ bottom and handed back to the user — they block the §1 release gate, not the 
       from DB legal name; SSR `initialRestaurant` wired through all 4 marketing layouts; removed
       hardcoded `bottom.copyright` from both footer locales. **P0 placeholder blocker cleared.**
 
-### Slice 3 — Checkout: kill mocks + client money math (Phase E)  ⏳ NEXT  [no schema dep]
-Design (grounded): `PricingService.calculateTotals` (apps/api/src/pricing/pricing.service.ts)
-already returns the full Decimal breakdown. orders.service.ts is the reference for the
-revalidate-coupon → loyalty-quote → delivery-fee → calculateTotals pipeline.
-- [ ] E2 backend: `CheckoutQuoteSchema`/`CheckoutQuoteRequestSchema` in packages/types
-      (subtotal, couponDiscount, loyaltyDiscount, deliveryFee, tax, tip, grandTotal, currency,
-      quoteVersion). New `POST /cart/quote` (Public; optional user + `sessionKey`) in cart
-      controller/service reusing the orders pricing pipeline; add to api-client.
-- [ ] E1 frontend: import `useApplyCoupon`/`useRemoveCoupon`, wire `PromoCodeInput` to them;
-      delete `MOCK_PROMOS`, `AppliedPromo` state, `handleApplyPromo` delay, `promo.mock.*` keys;
-      render coupon from `cart.appliedCoupon`.
-- [ ] E2 frontend: replace `computeSummary` with a `useCheckoutQuote` hook (requote on
-      orderType/tip/coupon/loyalty change); display server strings; use `quote.grandTotal` for the
-      COD<100 gate + CTA. No `Number.parseFloat`/`toFixed`/arithmetic on chargeable money.
-- [ ] E3: promotion correctness tests (apply/remove/expiry/limits; displayed==Order==Payment total)
+### Slice 3 — Checkout: kill mocks + client money math (Phase E)  ✅ DONE (E1/E2; E3 partial)
+Implemented as `POST /orders/quote` (not /cart/quote) reusing the shared `priceCheckout`
+pipeline in orders.service.ts so the quoted total == the charged total.
+- [x] E2 backend: `CheckoutQuoteSchema`/`CheckoutQuoteRequestSchema`; `POST /orders/quote`
+      (Public; optional user + `sessionKey`) reusing `priceCheckout`; added to api-client.
+      Confirmed `priceCheckout` is read-only (safe as a public endpoint).
+- [x] E1 frontend: `useApplyCoupon`/`useRemoveCoupon` wired into `PromoCodeInput`;
+      deleted `MOCK_PROMOS`, `AppliedPromo` state, delay, `promo.mock.*` keys; coupon rendered
+      from `cart.appliedCoupon`.
+- [x] E2 frontend: `useCheckoutQuote` hook (requotes on orderType/tip/cart.updatedAt); summary
+      renders server quote strings; CTA/COD gate use `quote.grandTotal`. No client money math.
+- [~] E3: existing `applies the coupon discount` e2e + new legal/snapshot tests cover part.
+      FULL promo matrix (remove/expiry/global+per-user limits; displayed==Order==Payment) STILL OWED.
 
-### Slice 4 — Order identity + legal evidence (Phase C wiring)
-- [ ] C1 wiring: send + store guest contact; DTO/admin/list/export/email/receipt
-- [ ] C2 wiring: `legalAccepted`+`legalBundleVersion`, server snapshot/hash, `LEGAL_VERSION_CHANGED`
-- [ ] C3: durable PL/EN legal copy attached to first confirmed-order email (guest-safe)
+### Slice 4 — Order identity + legal evidence (Phase C wiring)  ✅ DONE (C1+C2; C3 deferred)
+- [x] C1 wiring: `OrderContactSchema` (optional in DTO; required for guests server-side);
+      snapshot `customerName/Email/Phone`+`checkoutLocale` on Order; admin customer/list/export
+      prefer snapshot (guest id=null); search by customer name/email/phone; guest email/SMS via
+      dispatcher snapshot fallback; guest receipt via `order.customerEmail`. Unit: legal-snapshot.
+- [x] C2 wiring: `LEGAL_BUNDLE_VERSION` (packages/types/legal.ts); `legalAccepted`+
+      `legalBundleVersion` required; server validates version → `LEGAL_VERSION_CHANGED` 409;
+      server-built immutable `legalSnapshot`+SHA-256 `legalSnapshotHash` (pure builder + unit test).
+      Web sends contact/locale/legal + handles the version-changed conflict (re-accept).
+- [ ] C3: durable PL/EN legal copy attached to first confirmed-order email (guest-safe).
+      DEFERRED → Slice 6: needs the versioned MDX legal sources (lawyer prose) to attach.
 
 ### Slice 5 — Secure guest Stripe + PaymentIntent lifecycle (Phase F)
 - [ ] F1: guest auth via signed `X-Order-Token`

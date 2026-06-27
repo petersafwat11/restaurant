@@ -39,6 +39,16 @@ export const InlineDeliveryAddressSchema = z.object({
 });
 export type InlineDeliveryAddressDto = z.infer<typeof InlineDeliveryAddressSchema>;
 
+// Immutable customer contact snapshot captured at checkout. Required for every
+// order (the checkout form always collects it) so guest receipts can be emailed
+// and a historical order never depends on the mutable `User` row (plan §C1).
+export const OrderContactSchema = z.object({
+  name: z.string().min(1).max(80),
+  email: z.string().email().max(160),
+  phone: z.string().min(3).max(40),
+});
+export type OrderContactDto = z.infer<typeof OrderContactSchema>;
+
 export const CreateOrderSchema = z
   .object({
     sessionKey: z.string().min(1).optional(), // required for guests
@@ -53,8 +63,19 @@ export const CreateOrderSchema = z
     // /payments/intent requires an authed owner). Online methods (card/BLIK)
     // leave the order PENDING for the Stripe Elements flow to finalize.
     paymentMethod: z.enum(PAYMENT_METHOD_KINDS).optional(),
-    // When the customer accepted the Regulamin + Privacy Policy at checkout.
-    acceptedTermsAt: z.string().datetime().nullish(),
+    // Customer contact snapshot — snapshotted onto the order by the server.
+    // Required for guest checkout (enforced server-side, where guest identity is
+    // known); for authed checkout it is accepted + snapshotted when provided.
+    contact: OrderContactSchema.optional(),
+    // Locale the checkout + legal copy was shown in; drives guest notifications.
+    checkoutLocale: z.enum(['pl', 'en']).default('pl'),
+    // Durable legal acceptance (plan §C2): the client sends an explicit accept
+    // boolean plus the bundle version it displayed. The server validates the
+    // version, sets the timestamp, and writes the immutable snapshot + hash —
+    // the client cannot choose the timestamp/hash. Replaces the old
+    // client-supplied `acceptedTermsAt`.
+    legalAccepted: z.literal(true),
+    legalBundleVersion: z.string().min(1).max(40),
   })
   .refine((d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress, {
     message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
@@ -150,7 +171,8 @@ export type AddOrderNoteDto = z.infer<typeof AddOrderNoteSchema>;
 // ---- Admin-only enrichment (populated only for callers with order:read) ----
 
 export const OrderCustomerSchema = z.object({
-  id: z.string(),
+  // Null for guest orders — the contact comes from the order snapshot, not a User.
+  id: z.string().nullable(),
   name: z.string().nullable(),
   email: z.string(),
   phone: z.string().nullable(),

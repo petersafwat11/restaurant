@@ -4,7 +4,7 @@ import { type Socket, io } from 'socket.io-client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ROOMS } from '@repo/types';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 const SOCKET_PATH = '/socket.io/';
 const SUBSCRIBE_TIMEOUT_MS = 3_000;
@@ -67,7 +67,7 @@ describe('realtime (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       customerToken,
       { 'idempotency-key': `rt-${Date.now()}` },
     );
@@ -245,7 +245,7 @@ describe('realtime (e2e)', () => {
     await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       customer2,
       { 'idempotency-key': `rt-evt-${Date.now()}` },
     );

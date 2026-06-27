@@ -78,6 +78,17 @@ export class NotificationDispatcherService {
         })
       : null;
 
+    // Guests have no User row — fall back to the immutable order contact
+    // snapshot (plan §C1) so guest order emails/SMS actually send.
+    const snapshot = user
+      ? null
+      : await this.prisma.order.findUnique({
+          where: { id: input.orderId },
+          select: { customerEmail: true, customerPhone: true, checkoutLocale: true },
+        });
+    const recipientEmail = user?.email ?? snapshot?.customerEmail ?? null;
+    const recipientPhone = user?.phone ?? snapshot?.customerPhone ?? null;
+
     const prefs = user
       ? await this.prisma.notificationPreference.findUnique({
           where: { userId: user.id },
@@ -87,7 +98,7 @@ export class NotificationDispatcherService {
     const allowSms = prefs ? prefs.orderUpdatesSms : true;
     const allowPush = prefs ? prefs.orderUpdatesPush : true;
 
-    const locale = pickLocale(user?.locale);
+    const locale = pickLocale(user?.locale ?? snapshot?.checkoutLocale);
     const copy = notificationCopyFor(this.i18n, input.to, input.orderNumber, locale);
 
     if (channels.inApp && user) {
@@ -114,22 +125,22 @@ export class NotificationDispatcherService {
       });
     }
 
-    if (channels.email && allowEmail && user?.email) {
+    if (channels.email && allowEmail && recipientEmail) {
       await this.emailQueue.add(JOB_EMAIL_ORDER_STATUS, {
         orderId: input.orderId,
-        userId: user.id,
-        to: user.email,
+        userId: user?.id ?? null,
+        to: recipientEmail,
         orderNumber: input.orderNumber,
         fromStatus: input.from,
         toStatus: input.to,
       });
     }
 
-    if (channels.sms && allowSms && user?.phone) {
+    if (channels.sms && allowSms && recipientPhone) {
       await this.smsQueue.add(JOB_SMS_ORDER_STATUS, {
         orderId: input.orderId,
-        userId: user.id,
-        phone: user.phone,
+        userId: user?.id ?? null,
+        phone: recipientPhone,
         orderNumber: input.orderNumber,
         toStatus: input.to,
       });

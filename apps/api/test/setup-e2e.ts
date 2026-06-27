@@ -1,12 +1,28 @@
 import fastifyMultipart from '@fastify/multipart';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
-import { MAX_UPLOAD_BYTES } from '@repo/types';
+import { LEGAL_BUNDLE_VERSION, MAX_UPLOAD_BYTES } from '@repo/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { RedisService } from '../src/redis/redis.service';
 
 const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
+
+/**
+ * Legal-acceptance fields every POST /orders payload must now carry (plan §C2).
+ * Spread into an order body: `{ type, tipAmount, ...orderLegal() }`. Pass
+ * `{ guest: true }` to also include the contact snapshot required for guest
+ * checkout (no User row to fall back to).
+ */
+export function orderLegal(opts: { guest?: boolean } = {}) {
+  return {
+    legalAccepted: true as const,
+    legalBundleVersion: LEGAL_BUNDLE_VERSION,
+    ...(opts.guest
+      ? { contact: { name: 'Guest E2E', email: 'guest.e2e@test.local', phone: '+48555000222' } }
+      : {}),
+  };
+}
 
 export async function createTestApp(): Promise<NestFastifyApplication> {
   const moduleRef = await Test.createTestingModule({
