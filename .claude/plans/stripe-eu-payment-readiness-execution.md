@@ -129,11 +129,15 @@ PL/EN heading parity (verified: every section id has exactly 2 `<h2 id>` anchors
       owner-verified legal values, live processor/DPA status, retention matrix, cookie-banner
       decision, and the `EU-COMPLIANCE.md` PKE update (docs — Slice 11).
 
-### Slice 7 — Content integrity + locale (Phase H)
-- [ ] H1: remove mock featured dishes/testimonials/baklava from prod; SSR crawler test
-- [ ] H2: data-driven PL/EN translations (or hide EN commerce route) — owner decision §18.5
-- [ ] H3: reservations consistency (`acceptsReservations=false` until built) — owner decision §18.4
-- [ ] H4: media reliability
+### Slice 7 — Content integrity + locale (Phase H)  ✅ DONE (owner content/flag remain)
+- [x] H1: removed mock featured dishes/testimonials + "free baklava"; live-or-hide. Mock module
+      → `__mocks__` (test/demo only) + guard test. Crawler/SSR integrity test added.
+- [x] H2: verified `/en` menu already serves `nameEn`/`descriptionEn` (EN→PL fallback); no
+      fabricated translations (real EN commercial content = OWNER §18.5).
+- [x] H3: reservation UI consistent (no false "available" claims; JSON-LD gated on flag).
+      OWNER still sets `acceptsReservations=false` in prod data (§18.4).
+- [x] H4: image-checker flags Unsplash/external assets for OWNER licensed replacement; alt-text
+      softened. Remaining OWNER bits: `/about` rating count + `shop/cart` baklava footer hint.
 
 ### Slice 8 — Abuse protection, headers, ops (Phase I)  ⏳ I1+I3 DONE; I2 partial; I4 = docs/owner
 - [x] I1: shared `@RateLimit` decorator + global Redis fixed-window `RateLimitGuard`
@@ -151,8 +155,14 @@ PL/EN heading parity (verified: every section id has exactly 2 `<h2 id>` anchors
       tuned via violation reports then flipped to enforcing. `poweredByHeader:false` in both Next configs.
 - [ ] I4: Contabo offsite backup + monitoring + log retention/redaction — docs/ops (Slice 11), owner.
 
-### Slice 9 — Account deletion + privacy ops (Phase G)  [retention matrix = accountant/lawyer]
-- [ ] G2: deletion request/confirm/cancel/inspect endpoints + BullMQ anonymisation
+### Slice 9 — Account deletion + privacy ops (Phase G)  ✅ DONE (retention matrix = accountant/lawyer)
+- [x] G2: Zod DTOs + authed `/account/deletion` request/confirm/cancel/status (password OR
+      single-use email-token reauth; 7-day grace; `@RateLimit`). BullMQ `account-deletion` queue +
+      status-guarded idempotent anonymise job: revokes sessions, deletes PII/transient rows,
+      de-identifies reservations, pseudonymises the retained User row; KEEPS order/payment/refund/
+      audit intact. Web `/account/delete` UI + guest privacy-email fallback. Hand-authored
+      migration `20260627140000_add_account_deletion`. Pure `pseudonymise` unit-tested; e2e added.
+      OWNER/lawyer: retention matrix, grace length, reauth policy (defaults documented in code).
 
 ### Slice 10 — Mobile/push removal (Phase A)  ✅ CODE DONE (column drop deferred)
 - [ ] A1: confirm no prod consumer / app-store release; check prod `PushToken` counts (OWNER)
@@ -170,8 +180,18 @@ PL/EN heading parity (verified: every section id has exactly 2 `<h2 id>` anchors
       (all inert) with deferred-drop comments. **Column-drop migration still OWED** after the
       owner's prod `PushToken` count (A1). Orchestrator must run `pnpm install` to refresh lockfile.
 
-### Slice 11 — Docs (Phase plan §16)
-- [ ] Update EU-COMPLIANCE.md, runbooks, .env.example, repo map, etc.
+### Slice 11 — Docs (Phase plan §16)  ✅ DONE
+- [x] Corrected EU-COMPLIANCE.md (PKE, ODR closure, allergens/newsletter/legal implemented),
+      PROJECT-REPORT + project-plan (Contabo topology, order-before-intent, PaymentIntent
+      idempotency, reconciliation job, mobile removed), backup-dr (offsite required), soft-launch
+      + pentest-checklist (rate-limit + headers), local-setup, deploy/RUNBOOK, AGENTS.md, CLAUDE.md,
+      `.env.example` (Expo vars dropped, Stripe + ORDER_TRACKING_SECRET documented).
+
+## Status: all code-shaped slices (1–11) landed on `feat/stripe-eu-payment-readiness`.
+Verification: typecheck 16/16, full unit suite green+stable (api 103, web 109, utils 61, +others),
+biome lint error-free. DB-dependent e2e + live-Stripe sandbox run in CI / pre-go-live (see §14 +
+the live-Stripe checklist above). What remains is OWNER/lawyer/Stripe-manual (below) + the two
+deferred migrations (legal field backfill values; push column drop after prod count check).
 
 ## ⚠ Deploy ordering (Slices 1–5)
 - **Slice 4's `legalAccepted`+`legalBundleVersion` (and guest `contact`) are REQUIRED on
