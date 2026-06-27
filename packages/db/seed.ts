@@ -206,6 +206,12 @@ async function seedRestaurants() {
     // `priceRange` mirrors the range Google shows on the Business Profile.
     servesCuisine: ['Kebab', 'Falafel', 'Middle Eastern', 'Turkish', 'Vegetarian'],
     priceRange: '20–40 zł',
+    // Canonical social / map profiles — emitted as schema.org `sameAs` and
+    // rendered as the footer social icons.
+    sameAs: [
+      'https://www.facebook.com/share/18Xj8ksRwy/?mibextid=wwXIfr',
+      'https://maps.app.goo.gl/xvbbF5kpVVKvbXW8A',
+    ],
     timezone: 'Europe/Warsaw',
     currency: 'PLN',
     isActive: true,
@@ -215,9 +221,6 @@ async function seedRestaurants() {
     estimatedPickupMinutesMax: 20,
   };
 
-  // `sameAs` (social profile URLs) is intentionally not seeded here so a reseed
-  // never wipes the real links the owner sets in admin. Bake them in once the
-  // canonical URLs are confirmed.
   const restaurant = await prisma.restaurant.upsert({
     where: { slug: RESTAURANT_SLUG },
     update: restaurantData,

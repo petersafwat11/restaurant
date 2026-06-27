@@ -1,6 +1,7 @@
 import type { RestaurantAddressDto, RestaurantPublicDto } from '@repo/types';
 import type { DayOfWeek, HoursRow } from '@repo/ui';
 import { zonedParts } from '@repo/utils';
+import { GOOGLE_MAPS_URL } from '@/lib/brand';
 
 /** The restaurant lives in Poland; never trust the visitor's browser clock. */
 export const FALLBACK_TIMEZONE = 'Europe/Warsaw';
@@ -23,16 +24,20 @@ export function formatAddressLine2(address: RestaurantAddressDto): string {
 }
 
 /**
- * Google Maps directions link. Prefers the restaurant's stored geo-point and
- * falls back to a text search of the DB address — never hardcoded coordinates.
+ * Google Maps link for "Get directions" / "Open in Maps". Prefers the owner's
+ * canonical Google Business place link (`GOOGLE_MAPS_URL`) so it opens the real
+ * "Szef Donald" listing; falls back to the stored geo-point, then a text search
+ * of the DB address.
  */
 export function directionsHref(r: Pick<RestaurantPublicDto, 'geoPoint' | 'address'>): string {
-  if (r.geoPoint) {
-    return `https://www.google.com/maps/dir/?api=1&destination=${r.geoPoint.lat},${r.geoPoint.lng}`;
-  }
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${r.address.line1}, ${r.address.city}`,
-  )}`;
+  // Canonical place link first; coordinate/address links remain as fallbacks in
+  // case the constant is ever cleared.
+  const fallback = r.geoPoint
+    ? `https://www.google.com/maps/dir/?api=1&destination=${r.geoPoint.lat},${r.geoPoint.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        `${r.address.line1}, ${r.address.city}`,
+      )}`;
+  return GOOGLE_MAPS_URL || fallback;
 }
 
 function toMinutes(hhmm: string): number {
