@@ -40,7 +40,7 @@ export default async function MenuPage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'web.layout.nav' });
 
   const restaurant = await fetchPublicRestaurant();
-  const structured = restaurant ? await fetchStructuredData(restaurant.slug) : null;
+  const structured = restaurant ? await fetchStructuredData(restaurant.slug, locale) : null;
   const base = siteUrl();
   const breadcrumb = buildBreadcrumbSchema([
     { name: t('home'), url: `${base}/` },

@@ -30,7 +30,7 @@ const DeliveryLocationPicker = dynamic(
   },
 );
 
-const DEFAULT_MAP_CENTER = { lat: 50.8505, lng: 20.6275 }; // Kielce fallback
+const DEFAULT_MAP_CENTER = { lat: 50.8478329, lng: 20.6231079 }; // Szef Donald, Ściegiennego (Kielce) fallback
 
 const restaurantAdminKey = ['restaurant', 'admin'] as const;
 
@@ -64,12 +64,9 @@ interface FormState {
   estimatedPickupMinutesMax: number | null;
   // SEO / discovery
   cuisineRaw: string; // comma-separated input; split on submit
-  priceRange: '' | '$' | '$$' | '$$$' | '$$$$';
+  priceRange: string; // schema.org priceRange — "$$" or a range like "20–40 zł"; '' = unset
   sameAsRaw: string; // one URL per line; split on submit
 }
-
-type PriceRangeOption = NonNullable<UpdateRestaurantDto['priceRange']> | '';
-const PRICE_RANGE_OPTIONS: PriceRangeOption[] = ['', '$', '$$', '$$$', '$$$$'];
 
 function splitCsv(raw: string): string[] {
   return raw
@@ -124,7 +121,7 @@ function fromDto(r: RestaurantAdminDto): FormState {
     estimatedPickupMinutesMin: r.estimatedPickupMinutesMin,
     estimatedPickupMinutesMax: r.estimatedPickupMinutesMax,
     cuisineRaw: r.servesCuisine.join(', '),
-    priceRange: (r.priceRange ?? '') as PriceRangeOption,
+    priceRange: r.priceRange ?? '',
     sameAsRaw: r.sameAs.join('\n'),
   };
 }
@@ -568,17 +565,11 @@ export default function RestaurantProfilePage() {
             />
           </Field>
           <Field label={t('discovery.priceRangeLabel')} hint={t('discovery.priceRangeHint')}>
-            <select
+            <Input
               value={draft.priceRange}
-              onChange={(e) => patch('priceRange', e.target.value as FormState['priceRange'])}
-              className="h-9 w-full rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
-            >
-              {PRICE_RANGE_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt === '' ? t('discovery.priceRangeOptionNone') : opt}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => patch('priceRange', e.target.value)}
+              placeholder="20–40 zł"
+            />
           </Field>
           <Field label={t('discovery.sameAsLabel')} hint={t('discovery.sameAsHint')}>
             <Textarea

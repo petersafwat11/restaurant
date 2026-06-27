@@ -1,7 +1,10 @@
 'use client';
 
 import { useRestaurants } from '@/features/restaurants/hooks';
-import { FALLBACK_TIMEZONE } from '@/features/restaurants/lib/restaurant-info';
+import {
+  FALLBACK_TIMEZONE,
+  directionsHref as buildDirectionsHref,
+} from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
 import type { RestaurantPublicDto } from '@repo/types';
 import { Container, type DayOfWeek, EmptyState, HoursTable, PageSpinner } from '@repo/ui';
@@ -130,11 +133,7 @@ interface MapCardProps {
 
 function MapCard({ restaurant: r }: MapCardProps) {
   const t = useTranslations('web.marketing.locations');
-  const directionsHref = r.geoPoint
-    ? `https://www.google.com/maps/dir/?api=1&destination=${r.geoPoint.lat},${r.geoPoint.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${r.address.line1}, ${r.address.city}`,
-      )}`;
+  const directionsHref = buildDirectionsHref(r);
 
   // Real OpenStreetMap embed centred on the DB coordinates — identical to the
   // landing page's map (LandingHoursLocation). OSM is used (not Google Maps)
@@ -279,11 +278,7 @@ export default function LocationsApp() {
   }
 
   const tel = r.phone.replace(/\s/g, '');
-  const directionsHref = r.geoPoint
-    ? `https://www.google.com/maps/dir/?api=1&destination=${r.geoPoint.lat},${r.geoPoint.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${r.address.line1}, ${r.address.city}`,
-      )}`;
+  const directionsHref = buildDirectionsHref(r);
 
   const tz = r.timezone || FALLBACK_TIMEZONE;
   const hours = r.hours ?? [];

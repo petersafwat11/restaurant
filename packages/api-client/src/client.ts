@@ -624,11 +624,12 @@ export function createApiClient(opts: ApiClientOptions) {
   // ---- menu -------------------------------------------------------------
   const okSchema = z.object({ success: z.literal(true) });
   const menu = {
-    getTree: (): Promise<MenuTreeDto> =>
+    getTree: (locale?: string): Promise<MenuTreeDto> =>
       request('/menu', {
         method: 'GET',
         auth: false,
         responseSchema: MenuTreeSchema,
+        query: locale ? { locale } : undefined,
       }),
     getItem: (categorySlug: string, itemSlug: string): Promise<MenuItemDetailDto> =>
       request(

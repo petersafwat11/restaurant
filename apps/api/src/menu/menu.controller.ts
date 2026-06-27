@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -38,6 +39,7 @@ import {
 import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { parseLocale } from '../common/i18n/locale';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { MenuService } from './menu.service';
 
@@ -50,8 +52,8 @@ export class MenuController {
 
   @Public()
   @Get('menu')
-  getTree() {
-    return this.menu.getTree();
+  getTree(@Query('locale') locale?: string) {
+    return this.menu.getTree(parseLocale(locale));
   }
 
   @Public()
@@ -59,8 +61,9 @@ export class MenuController {
   getItem(
     @Param('categorySlug') categorySlug: string,
     @Param('itemSlug') itemSlug: string,
+    @Query('locale') locale?: string,
   ) {
-    return this.menu.getItem(categorySlug, itemSlug);
+    return this.menu.getItem(categorySlug, itemSlug, parseLocale(locale));
   }
 
   // ---- Categories ---------------------------------------------------------

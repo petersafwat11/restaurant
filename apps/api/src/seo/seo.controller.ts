@@ -2,6 +2,7 @@ import { Controller, Get, Header, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { type SeoMetaQuery, SeoMetaQuerySchema } from '@repo/types';
 import { Public } from '../common/decorators/public.decorator';
+import { parseLocale } from '../common/i18n/locale';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { SeoService } from './seo.service';
 
@@ -12,8 +13,8 @@ export class SeoController {
 
   @Public()
   @Get('structured-data/:slug')
-  structuredData(@Param('slug') slug: string) {
-    return this.seo.structuredData(slug);
+  structuredData(@Param('slug') slug: string, @Query('locale') locale?: string) {
+    return this.seo.structuredData(slug, parseLocale(locale));
   }
 
   @Public()

@@ -183,42 +183,49 @@ const RESTAURANT_SLUG = 'szef-donald';
 async function seedRestaurants() {
   console.log(`▸ Seeding restaurant: ${RESTAURANT_SLUG} (Europe/Warsaw, PLN)`);
 
+  // One source of truth for the restaurant fields, applied on both create and
+  // update so re-seeding an existing DB actually propagates address/geo/SEO
+  // changes (the previous split put address + geoPoint only on `create`, so
+  // they never refreshed on an existing row).
+  const restaurantData = {
+    name: 'Szef Donald',
+    description:
+      'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
+    descriptionEn: 'Fresh kebab and falafel in Kielce, on Ściegiennego — everything made to order.',
+    phone: '+48 883 953 589',
+    email: 'mahmodrasul123@gmail.com',
+    address: {
+      line1: 'ul. Ks. Piotra Ściegiennego 68a',
+      city: 'Kielce',
+      zip: '25-115',
+      country: 'PL',
+    },
+    // Google Maps place pin for "Szef Donald" (the !3d/!4d marker, not the
+    // viewport centre) so the location-page map + directions land on the shop.
+    geoPoint: { lat: 50.8478329, lng: 20.6231079 },
+    // schema.org discovery fields surfaced in the Restaurant JSON-LD.
+    // `priceRange` mirrors the range Google shows on the Business Profile.
+    servesCuisine: ['Kebab', 'Falafel', 'Middle Eastern', 'Turkish', 'Vegetarian'],
+    priceRange: '20–40 zł',
+    // Canonical social / map profiles — emitted as schema.org `sameAs` and
+    // rendered as the footer social icons.
+    sameAs: [
+      'https://www.facebook.com/share/18Xj8ksRwy/?mibextid=wwXIfr',
+      'https://maps.app.goo.gl/xvbbF5kpVVKvbXW8A',
+    ],
+    timezone: 'Europe/Warsaw',
+    currency: 'PLN',
+    isActive: true,
+    estimatedDeliveryMinutesMin: 30,
+    estimatedDeliveryMinutesMax: 45,
+    estimatedPickupMinutesMin: 12,
+    estimatedPickupMinutesMax: 20,
+  };
+
   const restaurant = await prisma.restaurant.upsert({
     where: { slug: RESTAURANT_SLUG },
-    update: {
-      name: 'Szef Donald',
-      description: 'Kebab i falafel — Kielce kebab shop.',
-      phone: '+48 883 953 589',
-      email: 'mahmodrasul123@gmail.com',
-      timezone: 'Europe/Warsaw',
-      currency: 'PLN',
-      isActive: true,
-      estimatedDeliveryMinutesMin: 30,
-      estimatedDeliveryMinutesMax: 45,
-      estimatedPickupMinutesMin: 12,
-      estimatedPickupMinutesMax: 20,
-    },
-    create: {
-      slug: RESTAURANT_SLUG,
-      name: 'Szef Donald',
-      description: 'Kebab i falafel — Kielce kebab shop.',
-      phone: '+48 883 953 589',
-      email: 'mahmodrasul123@gmail.com',
-      address: {
-        line1: 'ul. Ks. Piotra Ściegiennego 68a',
-        city: 'Kielce',
-        zip: '25-115',
-        country: 'PL',
-      },
-      geoPoint: { lat: 50.8505, lng: 20.6275 },
-      timezone: 'Europe/Warsaw',
-      currency: 'PLN',
-      isActive: true,
-      estimatedDeliveryMinutesMin: 30,
-      estimatedDeliveryMinutesMax: 45,
-      estimatedPickupMinutesMin: 12,
-      estimatedPickupMinutesMax: 20,
-    },
+    update: restaurantData,
+    create: { slug: RESTAURANT_SLUG, ...restaurantData },
   });
 
   // 7 days, 11:00-23:00 except Mondays closed.
@@ -251,7 +258,9 @@ async function seedRestaurants() {
 interface SeedItem {
   slug: string;
   name: string;
+  nameEn?: string;
   description: string;
+  descriptionEn?: string;
   basePrice: string; // PLN, 2dp string
   isVegetarian?: boolean;
   isVegan?: boolean;
@@ -264,17 +273,20 @@ interface SeedItem {
   allergens?: string[];
   modifierGroups?: Array<{
     name: string;
+    nameEn?: string;
     isRequired?: boolean;
     minSelect?: number;
     maxSelect?: number;
-    options: Array<{ name: string; priceDelta?: string; isDefault?: boolean }>;
+    options: Array<{ name: string; nameEn?: string; priceDelta?: string; isDefault?: boolean }>;
   }>;
 }
 
 interface SeedCategory {
   slug: string;
   name: string;
+  nameEn?: string;
   description: string;
+  descriptionEn?: string;
   items: SeedItem[];
 }
 
@@ -723,6 +735,144 @@ const MENU_IMAGE_BASE =
     ? `${process.env.APP_URL_API.replace(/\/+$/, '')}/uploads/menu-items`
     : 'http://localhost:4000/uploads/menu-items');
 
+// --- English translations (PL above is the source/default) -----------------
+// Keyed by slug so the PL `CATEGORIES` data stays untouched and the EN copy is
+// reviewable in one place. Served on /en with PL fallback when an entry is
+// missing. Modifier group/option names use a closed vocabulary, so they're
+// translated by small maps rather than per-row copy.
+
+const CATEGORY_EN: Record<string, { name: string; description: string }> = {
+  kebab: {
+    name: 'Kebab',
+    description: 'Meat (chicken, beef or mixed) with fresh salad and sauce.',
+  },
+  falafel: {
+    name: 'Vegetarian — Falafel',
+    description: 'Falafel and salad with mild, mixed or spicy sauce.',
+  },
+  'strips-tacos': { name: 'Box Strips & Tacos', description: 'Chicken strips and tacos.' },
+  zestawy: { name: 'Combo Deals', description: 'Kebab + Coca-Cola 0.5L at a combo price.' },
+  dodatki: { name: 'Sides', description: 'Fries and dessert.' },
+  'napoje-zimne': { name: 'Cold Drinks', description: 'Soft drinks, juices and water.' },
+};
+
+const ITEM_EN: Record<string, { name: string; description: string }> = {
+  'kebab-tortilla': {
+    name: 'Kebab Tortilla (Wrap)',
+    description:
+      'Döner kebab in a tortilla wrap — chicken, beef or mixed meat with fresh salad and your choice of sauce.',
+  },
+  'kebab-pita': {
+    name: 'Kebab in Pita',
+    description: 'Döner kebab in pita bread — meat, fresh salad and sauce.',
+  },
+  'kebab-w-bulce': {
+    name: 'Kebab in a Bun',
+    description: 'Döner kebab in a bun — meat, fresh salad and sauce.',
+  },
+  'kebab-kapsalon': {
+    name: 'Kapsalon',
+    description: 'Meat over fries, topped with melted cheese and sauce.',
+  },
+  'kebab-na-talerzu': {
+    name: 'Kebab Plate',
+    description: 'Döner kebab on a plate — meat, fresh salad and sauce.',
+  },
+  'kebab-box': { name: 'Kebab Box', description: 'Meat, fresh salad, fries and sauce in a box.' },
+  'fryto-kebab': {
+    name: 'Fryto Kebab',
+    description: 'Meat, fresh salad, fries and sauce wrapped in a tortilla.',
+  },
+  'salatka-kebab': {
+    name: 'Kebab Salad',
+    description: 'Salad with kebab meat, fresh veg and sauce.',
+  },
+  'tortilla-falafel': {
+    name: 'Falafel Tortilla (Wrap)',
+    description: 'Falafel in a tortilla wrap with salad and sauce.',
+  },
+  'bulka-falafel': {
+    name: 'Falafel in a Bun',
+    description: 'Falafel in a bun with salad and sauce.',
+  },
+  'pita-falafel': {
+    name: 'Falafel in Pita',
+    description: 'Falafel in pita bread with salad and sauce.',
+  },
+  'talerz-falafel': {
+    name: 'Falafel Plate',
+    description: 'Falafel on a plate with salad and sauce.',
+  },
+  'box-strips': {
+    name: 'Chicken Strips Box',
+    description: 'Chicken strips with fries, fresh salad and sauce.',
+  },
+  tacos: {
+    name: 'Tacos',
+    description:
+      'Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries.',
+  },
+  'zestaw-kebab-tortilla-sredni-cola': {
+    name: 'Medium Kebab Tortilla + Coca-Cola 0.5L',
+    description: 'Medium kebab tortilla with a Coca-Cola 0.5L. Save 2 zł.',
+  },
+  'zestaw-kapsalon-duzy-cola': {
+    name: 'Large Kapsalon + Coca-Cola 0.5L',
+    description: 'Large kapsalon with a Coca-Cola 0.5L. Save 2 zł.',
+  },
+  'frytki-male': { name: 'Small Fries', description: 'Small portion of fries.' },
+  'frytki-duze': { name: 'Large Fries', description: 'Large portion of fries.' },
+  baklawa: { name: 'Baklava', description: 'Traditional baklava.' },
+  'coca-cola': { name: 'Coca-Cola', description: '0.5L' },
+  'coca-cola-zero': { name: 'Coca-Cola Zero', description: '0.5L' },
+  'coca-cola-light': { name: 'Coca-Cola Light', description: '0.5L' },
+  fanta: { name: 'Fanta', description: '0.5L' },
+  sprite: { name: 'Sprite', description: '0.5L' },
+  kinley: { name: 'Kinley', description: '0.5L' },
+  'kropla-beskidu': { name: 'Kropla Beskidu', description: 'Still water 0.5L' },
+  'fuze-tea': { name: 'Fuze Tea', description: '0.5L' },
+  cappy: { name: 'Cappy', description: 'Juice 0.33L' },
+  burn: { name: 'Burn', description: 'Energy drink 0.25L' },
+};
+
+const GROUP_NAME_EN: Record<string, string> = {
+  Rozmiar: 'Size',
+  Mięso: 'Meat',
+  Sos: 'Sauce',
+  Dodatki: 'Add-ons',
+};
+
+const OPTION_NAME_EN: Record<string, string> = {
+  Łagodny: 'Mild',
+  Ostry: 'Spicy',
+  Mieszany: 'Mixed',
+  Kurczak: 'Chicken',
+  Wołowina: 'Beef',
+  Mieszane: 'Mixed',
+  'Ser żółty': 'Cheese',
+  'Ser feta': 'Feta',
+  'Dodatkowy sos': 'Extra sauce',
+  Opakowanie: 'Packaging',
+  Mały: 'Small',
+  Średni: 'Medium',
+  Duży: 'Large',
+  Mega: 'Mega',
+  Standard: 'Standard',
+};
+
+/** EN for a modifier option name, handling the "(N szt)" → "(N pcs)" suffix. */
+function optionNameEn(name: string): string {
+  const exact = OPTION_NAME_EN[name];
+  if (exact) return exact;
+  const m = name.match(/^(.+?)\s*\((\d+)\s*szt\)$/);
+  const baseName = m?.[1];
+  const count = m?.[2];
+  if (baseName && count) {
+    return `${OPTION_NAME_EN[baseName] ?? baseName} (${count} pcs)`;
+  }
+  return name;
+}
+
 async function seedMenu() {
   // Wipe existing menu so renamed/removed items don't linger. CartItem has
   // no FK on menuItemId — clear cart items first so live carts don't hold
@@ -738,31 +888,39 @@ async function seedMenu() {
   );
 
   for (const [cIdx, cat] of CATEGORIES.entries()) {
+    const catEn = CATEGORY_EN[cat.slug];
     const category = await prisma.menuCategory.upsert({
       where: { slug: cat.slug },
       update: {
         name: cat.name,
+        nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
+        descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
         position: cIdx,
         isActive: true,
       },
       create: {
         slug: cat.slug,
         name: cat.name,
+        nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
+        descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
         position: cIdx,
         isActive: true,
       },
     });
 
     for (const [iIdx, it] of cat.items.entries()) {
+      const itEn = ITEM_EN[it.slug];
       const item = await prisma.menuItem.upsert({
         where: {
           categoryId_slug: { categoryId: category.id, slug: it.slug },
         },
         update: {
           name: it.name,
+          nameEn: itEn?.name ?? it.nameEn ?? null,
           description: it.description,
+          descriptionEn: itEn?.description ?? it.descriptionEn ?? null,
           basePrice: new Prisma.Decimal(it.basePrice),
           isVegetarian: it.isVegetarian ?? false,
           isVegan: it.isVegan ?? false,
@@ -780,7 +938,9 @@ async function seedMenu() {
           categoryId: category.id,
           slug: it.slug,
           name: it.name,
+          nameEn: itEn?.name ?? it.nameEn ?? null,
           description: it.description,
+          descriptionEn: itEn?.description ?? it.descriptionEn ?? null,
           basePrice: new Prisma.Decimal(it.basePrice),
           isVegetarian: it.isVegetarian ?? false,
           isVegan: it.isVegan ?? false,
@@ -819,6 +979,7 @@ async function seedMenu() {
             ? await prisma.menuItemModifierGroup.update({
                 where: { id: existing.id },
                 data: {
+                  nameEn: group.nameEn ?? GROUP_NAME_EN[group.name] ?? null,
                   isRequired: group.isRequired ?? false,
                   minSelect: group.minSelect ?? 0,
                   maxSelect: group.maxSelect ?? 1,
@@ -828,6 +989,7 @@ async function seedMenu() {
                 data: {
                   itemId: item.id,
                   name: group.name,
+                  nameEn: group.nameEn ?? GROUP_NAME_EN[group.name] ?? null,
                   isRequired: group.isRequired ?? false,
                   minSelect: group.minSelect ?? 0,
                   maxSelect: group.maxSelect ?? 1,
@@ -842,6 +1004,7 @@ async function seedMenu() {
             data: group.options.map((o) => ({
               groupId: row.id,
               name: o.name,
+              nameEn: o.nameEn ?? optionNameEn(o.name),
               priceDelta: new Prisma.Decimal(o.priceDelta ?? '0'),
               isDefault: o.isDefault ?? false,
             })),

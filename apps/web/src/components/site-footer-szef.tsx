@@ -6,7 +6,7 @@ import { useRestaurant } from '@/features/restaurants/hooks';
 import { formatAddressLine2, hoursToRows } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
 import { HoursTable, SiteFooter } from '@repo/ui';
-import { Facebook, Globe, Instagram } from 'lucide-react';
+import { Facebook, Globe, Instagram, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 /** Pick an icon + accessible label for a social/profile URL (from `sameAs`). */
@@ -14,6 +14,9 @@ function socialMeta(url: string): { Icon: typeof Instagram; label: string } {
   const u = url.toLowerCase();
   if (u.includes('instagram')) return { Icon: Instagram, label: 'Instagram' };
   if (u.includes('facebook') || u.includes('fb.com')) return { Icon: Facebook, label: 'Facebook' };
+  if (u.includes('google') || u.includes('maps.app.goo.gl') || u.includes('goo.gl/maps')) {
+    return { Icon: MapPin, label: 'Google Maps' };
+  }
   try {
     return { Icon: Globe, label: new URL(url).hostname.replace(/^www\./, '') };
   } catch {

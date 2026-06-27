@@ -10,6 +10,7 @@ import {
   buildSitemap,
   buildStructuredData,
 } from '@repo/utils';
+import { type ContentLocale, pickLocale, pickLocaleN } from '../common/i18n/locale';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -24,7 +25,10 @@ export class SeoService {
     return this.env.APP_URL_WEB.replace(/\/+$/, '');
   }
 
-  async structuredData(slug: string): Promise<StructuredDataDto> {
+  async structuredData(
+    slug: string,
+    locale: ContentLocale = 'pl',
+  ): Promise<StructuredDataDto> {
     const restaurant = await this.prisma.restaurant.findUnique({ where: { slug } });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
 
@@ -51,7 +55,7 @@ export class SeoService {
     return buildStructuredData({
       restaurant: {
         name: restaurant.name,
-        description: restaurant.description,
+        description: pickLocaleN(locale, restaurant.description, restaurant.descriptionEn),
         url: `${this.baseUrl}`,
         telephone: restaurant.phone,
         email: restaurant.email,
@@ -82,10 +86,10 @@ export class SeoService {
       menu: {
         name: `${restaurant.name} Menu`,
         sections: menus.map((c) => ({
-          name: c.name,
+          name: pickLocale(locale, c.name, c.nameEn),
           items: c.items.map((it) => ({
-            name: it.name,
-            description: it.description,
+            name: pickLocale(locale, it.name, it.nameEn),
+            description: pickLocaleN(locale, it.description, it.descriptionEn),
             price: it.basePrice.toFixed(2),
           })),
         })),

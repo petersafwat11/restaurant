@@ -28,14 +28,17 @@ import type {
   UpdateModifierOptionDto,
 } from '@repo/types';
 import { decimalToString } from '@repo/utils/money';
+import { type ContentLocale, pickLocale, pickLocaleN } from '../common/i18n/locale';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../redis/cache.service';
 import { UploadsService } from '../uploads/uploads.service';
 
 const TREE_TTL_SECONDS = 300;
-// Single-restaurant project — one tree cache key for the whole menu. v2 = post
-// restaurantId drop (categories/items no longer carry it).
-const TREE_KEY = 'menu:tree:v2';
+// Single-restaurant project — one tree cache key per locale for the whole menu.
+// v3 = added per-locale (pl/en) variants on top of the v2 restaurantId drop.
+const TREE_KEY_PREFIX = 'menu:tree:v3';
+const treeKey = (locale: ContentLocale) => `${TREE_KEY_PREFIX}:${locale}`;
+const CONTENT_LOCALES: ContentLocale[] = ['pl', 'en'];
 const availabilityKey = (itemId: string) => `availability:${itemId}`;
 
 @Injectable()
@@ -48,14 +51,18 @@ export class MenuService {
 
   // ---- Public reads -------------------------------------------------------
 
-  async getTree(): Promise<MenuTreeDto> {
-    const tree = await this.cache.getOrSet<MenuTreeDto>(TREE_KEY, TREE_TTL_SECONDS, async () =>
-      this.loadTreeFromDb(),
+  async getTree(locale: ContentLocale = 'pl'): Promise<MenuTreeDto> {
+    const tree = await this.cache.getOrSet<MenuTreeDto>(treeKey(locale), TREE_TTL_SECONDS, async () =>
+      this.loadTreeFromDb(locale),
     );
     return this.applyAvailabilityOverrides(tree);
   }
 
-  async getItem(categorySlug: string, itemSlug: string): Promise<MenuItemDetailDto> {
+  async getItem(
+    categorySlug: string,
+    itemSlug: string,
+    locale: ContentLocale = 'pl',
+  ): Promise<MenuItemDetailDto> {
     const category = await this.prisma.menuCategory.findUnique({ where: { slug: categorySlug } });
     if (!category) throw new NotFoundException('Category not found');
 
@@ -72,7 +79,7 @@ export class MenuService {
     if (!item) throw new NotFoundException('Menu item not found');
 
     const isAvailable = await this.resolveAvailability(item.id, item.isAvailable);
-    return toItemDetailDto({ ...item, isAvailable });
+    return toItemDetailDto({ ...item, isAvailable }, locale);
   }
 
   // ---- Category writes ----------------------------------------------------
@@ -417,7 +424,7 @@ export class MenuService {
 
   // ---- Private helpers ----------------------------------------------------
 
-  private async loadTreeFromDb(): Promise<MenuTreeDto> {
+  private async loadTreeFromDb(locale: ContentLocale): Promise<MenuTreeDto> {
     const categories = await this.prisma.menuCategory.findMany({
       where: { isActive: true },
       include: {
@@ -438,13 +445,13 @@ export class MenuService {
     return {
       categories: categories.map((c) => ({
         id: c.id,
-        name: c.name,
+        name: pickLocale(locale, c.name, c.nameEn),
         slug: c.slug,
-        description: c.description,
+        description: pickLocaleN(locale, c.description, c.descriptionEn),
         imageUrl: c.imageUrl,
         position: c.position,
         isActive: c.isActive,
-        items: c.items.map(toItemDetailDto),
+        items: c.items.map((it) => toItemDetailDto(it, locale)),
       })),
     };
   }
@@ -490,7 +497,7 @@ export class MenuService {
   }
 
   private async invalidateTree(): Promise<void> {
-    await this.cache.invalidate(TREE_KEY);
+    await Promise.all(CONTENT_LOCALES.map((l) => this.cache.invalidate(treeKey(l))));
   }
 }
 
@@ -498,12 +505,16 @@ export class MenuService {
 // Mappers
 // ---------------------------------------------------------------------------
 
-function toCategoryDto(row: MenuCategory, items: MenuItemDto[]): MenuCategoryDto {
+function toCategoryDto(
+  row: MenuCategory,
+  items: MenuItemDto[],
+  locale: ContentLocale = 'pl',
+): MenuCategoryDto {
   return {
     id: row.id,
-    name: row.name,
+    name: pickLocale(locale, row.name, row.nameEn),
     slug: row.slug,
-    description: row.description,
+    description: pickLocaleN(locale, row.description, row.descriptionEn),
     imageUrl: row.imageUrl,
     position: row.position,
     isActive: row.isActive,
@@ -518,13 +529,13 @@ type MenuItemWithRelations = MenuItemWithImages & {
   })[];
 };
 
-function toItemDto(row: MenuItemWithImages): MenuItemDto {
+function toItemDto(row: MenuItemWithImages, locale: ContentLocale = 'pl'): MenuItemDto {
   return {
     id: row.id,
     categoryId: row.categoryId,
-    name: row.name,
+    name: pickLocale(locale, row.name, row.nameEn),
     slug: row.slug,
-    description: row.description,
+    description: pickLocaleN(locale, row.description, row.descriptionEn),
     basePrice: decimalToString(row.basePrice.toString()),
     compareAt: row.compareAt !== null ? decimalToString(row.compareAt.toString()) : null,
     calories: row.calories,
@@ -542,10 +553,13 @@ function toItemDto(row: MenuItemWithImages): MenuItemDto {
   };
 }
 
-function toItemDetailDto(row: MenuItemWithRelations): MenuItemDetailDto {
+function toItemDetailDto(
+  row: MenuItemWithRelations,
+  locale: ContentLocale = 'pl',
+): MenuItemDetailDto {
   return {
-    ...toItemDto(row),
-    modifierGroups: row.modifierGroups.map((g) => toGroupDto(g, g.options)),
+    ...toItemDto(row, locale),
+    modifierGroups: row.modifierGroups.map((g) => toGroupDto(g, g.options, locale)),
   };
 }
 
@@ -562,23 +576,24 @@ function toImageDto(row: MenuItemImage): MenuItemImageDto {
 function toGroupDto(
   row: MenuItemModifierGroup,
   options: MenuItemModifierOption[],
+  locale: ContentLocale = 'pl',
 ): ModifierGroupDto {
   return {
     id: row.id,
     itemId: row.itemId,
-    name: row.name,
+    name: pickLocale(locale, row.name, row.nameEn),
     isRequired: row.isRequired,
     minSelect: row.minSelect,
     maxSelect: row.maxSelect,
-    options: options.map(toOptionDto),
+    options: options.map((o) => toOptionDto(o, locale)),
   };
 }
 
-function toOptionDto(row: MenuItemModifierOption): ModifierOptionDto {
+function toOptionDto(row: MenuItemModifierOption, locale: ContentLocale = 'pl'): ModifierOptionDto {
   return {
     id: row.id,
     groupId: row.groupId,
-    name: row.name,
+    name: pickLocale(locale, row.name, row.nameEn),
     priceDelta: decimalToString(row.priceDelta.toString()),
     isDefault: row.isDefault,
   };
