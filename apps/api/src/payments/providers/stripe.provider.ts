@@ -6,6 +6,7 @@ import { ENV, type ENV_TYPE } from '../../config/config.module';
 import type {
   CreateIntentInput,
   CreateIntentResult,
+  NormalizedIntentStatus,
   ParsedWebhookEvent,
   PaymentProvider,
   RefundInput,
@@ -86,6 +87,35 @@ export class StripeProvider implements PaymentProvider {
       // Already-canceled/succeeded intents can't be canceled — that's fine, the
       // goal (no lingering confirmable intent for the old method) still holds.
       this.logger.warn(`Stripe cancelIntent(${providerRef}) skipped: ${(err as Error).message}`);
+    }
+  }
+
+  async retrieveIntentStatus(providerRef: string): Promise<NormalizedIntentStatus | null> {
+    // Stub mode can't talk to Stripe — signal "unknown source" so the
+    // reconciliation job leaves the row alone rather than guessing.
+    if (this.stubMode || !this.stripe) return null;
+    try {
+      const intent = await this.stripe.paymentIntents.retrieve(providerRef);
+      switch (intent.status) {
+        case 'succeeded':
+          return 'succeeded';
+        case 'canceled':
+          return 'canceled';
+        case 'processing':
+          return 'processing';
+        case 'requires_payment_method':
+          // The last attempt failed and Stripe is waiting for a new method.
+          return 'failed';
+        case 'requires_action':
+        case 'requires_confirmation':
+        case 'requires_capture':
+          return 'requires_action';
+        default:
+          return 'unknown';
+      }
+    } catch (err) {
+      this.logger.warn(`Stripe retrieveIntentStatus(${providerRef}) failed: ${(err as Error).message}`);
+      return null;
     }
   }
 

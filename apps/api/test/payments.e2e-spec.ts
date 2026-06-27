@@ -176,6 +176,48 @@ describe('payments (e2e)', () => {
     expect(after.json().status).toBe('CONFIRMED');
   });
 
+  it('payment_intent.payment_failed marks the payment FAILED', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    const res = await inject('POST', '/api/v1/payments/webhooks/stripe', {
+      id: 'evt_failed_1',
+      type: 'payment_intent.payment_failed',
+      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
+    });
+    expect(res.statusCode).toBe(200);
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('FAILED');
+  });
+
+  it('an out-of-order payment_failed after succeeded does not clobber PAID (§F6)', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    const ref = `pi_stub_${orderId}_STRIPE_CARD`;
+    await inject('POST', '/api/v1/payments/webhooks/stripe', {
+      id: 'evt_ooo_succeeded',
+      type: 'payment_intent.succeeded',
+      data: { object: { id: ref } },
+    });
+    // A late failure for the same intent (distinct event id) must be ignored.
+    await inject('POST', '/api/v1/payments/webhooks/stripe', {
+      id: 'evt_ooo_failed',
+      type: 'payment_intent.payment_failed',
+      data: { object: { id: ref } },
+    });
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('PAID');
+  });
+
   // ---- Refund ----
 
   it('refunds a paid payment (full) and transitions order to REFUNDED', async () => {

@@ -6,6 +6,7 @@ import {
   QUEUE_EMAIL,
   QUEUE_PUSH,
   QUEUE_RECEIPT,
+  QUEUE_RECONCILIATION,
   QUEUE_SMS,
 } from '@repo/jobs';
 import { ENV, type ENV_TYPE } from '../config/config.module';
@@ -25,6 +26,7 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
       { name: QUEUE_RECEIPT },
       { name: QUEUE_ANALYTICS },
       { name: QUEUE_AUDIT },
+      { name: QUEUE_RECONCILIATION },
     ),
   ],
   exports: [BullModule],

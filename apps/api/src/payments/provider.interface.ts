@@ -36,6 +36,19 @@ export interface RefundResult {
   status: PaymentStatus;
 }
 
+/**
+ * Provider intent status normalized for reconciliation (plan §F6). `null` means
+ * the provider couldn't determine it (stub mode / transient error) — the caller
+ * leaves the local row untouched and retries on the next pass.
+ */
+export type NormalizedIntentStatus =
+  | 'succeeded'
+  | 'processing'
+  | 'requires_action'
+  | 'canceled'
+  | 'failed'
+  | 'unknown';
+
 export interface ParsedWebhookRefund {
   /** Provider's refund id (e.g., Stripe `re_...`). */
   id: string;
@@ -77,6 +90,13 @@ export interface PaymentProvider {
    * (COD).
    */
   cancelIntent?(providerRef: string): Promise<void>;
+
+  /**
+   * Fetch the current normalized status of a provider intent — used by the
+   * reconciliation job (plan §F6) to repair local rows when a webhook was
+   * missed. Returns null when it can't be determined (stub mode / error).
+   */
+  retrieveIntentStatus?(providerRef: string): Promise<NormalizedIntentStatus | null>;
 
   /**
    * Parse + verify a raw webhook delivery. Returns null when the signature is

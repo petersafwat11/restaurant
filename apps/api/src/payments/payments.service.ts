@@ -20,6 +20,7 @@ import type {
   PaymentStatus,
   RefundDto,
 } from '@repo/types';
+import { captureException } from '@repo/observability';
 import { Decimal, addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils/money';
 import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
@@ -29,6 +30,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { ParsedWebhookEvent, PaymentProvider } from './provider.interface';
 import { CodProvider } from './providers/cod.provider';
 import { StripeProvider } from './providers/stripe.provider';
+import { reconcileAction } from './reconcile';
 import { stripeIntentIdempotencyKey } from './stripe-intent';
 import { WebhookEventsService } from './webhook-events.service';
 
@@ -381,6 +383,77 @@ export class PaymentsService {
     }
   }
 
+  // ---- Reconciliation (plan §F6) -----------------------------------------
+
+  /**
+   * Reconcile non-terminal Stripe payments against the provider. Repairs rows
+   * where a webhook was missed (provider succeeded → PAID + confirm order) or
+   * the intent died (canceled/failed → FAILED), and alerts on anything
+   * unexpected. Status-guarded + idempotent, so safe to run on a schedule.
+   * In stub mode the provider returns no status, so this is a no-op.
+   */
+  async reconcilePayments(
+    opts: { olderThanMinutes?: number; limit?: number } = {},
+  ): Promise<{ checked: number; repaired: number; attention: number }> {
+    const cutoff = new Date(Date.now() - (opts.olderThanMinutes ?? 15) * 60_000);
+    const stale = await this.prisma.payment.findMany({
+      where: {
+        provider: 'stripe',
+        status: { in: ['PENDING', 'AUTHORIZED'] },
+        // Only rows that have sat un-settled past the grace window — avoids
+        // racing an intent the customer is actively completing.
+        updatedAt: { lt: cutoff },
+      },
+      include: { order: true },
+      take: opts.limit ?? 100,
+    });
+
+    let checked = 0;
+    let repaired = 0;
+    let attention = 0;
+
+    for (const payment of stale) {
+      if (!payment.providerRef) continue;
+      const status = (await this.stripeProvider.retrieveIntentStatus?.(payment.providerRef)) ?? null;
+      checked += 1;
+      const action = reconcileAction(status, payment.status as PaymentStatus);
+
+      if (action === 'mark_paid') {
+        const { count } = await this.prisma.payment.updateMany({
+          where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
+          data: { status: 'PAID' },
+        });
+        if (count > 0) {
+          repaired += 1;
+          this.logger.warn(`[RECONCILE] payment ${payment.id} → PAID (missed webhook)`);
+          if (payment.order.status === 'PENDING') {
+            await this.confirmOrderFromPayment(payment.order, payment.id);
+          }
+        }
+      } else if (action === 'mark_failed') {
+        const { count } = await this.prisma.payment.updateMany({
+          where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
+          data: { status: 'FAILED' },
+        });
+        if (count > 0) {
+          repaired += 1;
+          this.logger.warn(`[RECONCILE] payment ${payment.id} → FAILED (stripe: ${status})`);
+        }
+      } else if (action === 'attention') {
+        attention += 1;
+        this.logger.error(`[RECONCILE] payment ${payment.id} unexpected stripe status: ${status}`);
+      }
+    }
+
+    if (attention > 0) {
+      captureException(
+        new Error(`Payment reconciliation flagged ${attention} payment(s) for review`),
+        { checked, repaired, attention },
+      );
+    }
+    return { checked, repaired, attention };
+  }
+
   // ---- Internal ----------------------------------------------------------
 
   private pickProvider(
@@ -429,10 +502,18 @@ export class PaymentsService {
       return;
     }
 
-    if (event.type === 'payment_intent.payment_failed') {
+    if (
+      event.type === 'payment_intent.payment_failed' ||
+      event.type === 'payment_intent.canceled'
+    ) {
       if (!event.paymentIntentId) return;
+      // Guard against out-of-order delivery: a late failed/canceled event must
+      // never clobber an already-settled (PAID/refunded) payment (plan §F6).
       await this.prisma.payment.updateMany({
-        where: { providerRef: event.paymentIntentId },
+        where: {
+          providerRef: event.paymentIntentId,
+          status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] },
+        },
         data: { status: 'FAILED' },
       });
       return;

@@ -4,6 +4,7 @@ export const QUEUE_PUSH = 'push';
 export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
+export const QUEUE_RECONCILIATION = 'reconciliation';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
@@ -12,6 +13,7 @@ export const QUEUE_NAMES = {
   receipt: QUEUE_RECEIPT,
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
+  reconciliation: QUEUE_RECONCILIATION,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -37,3 +39,4 @@ export const JOB_RECEIPT_GENERATE = 'receipt.generate';
 export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';
 export const JOB_ANALYTICS_ROLLUP_FINALIZE = 'analytics.rollup-finalize';
 export const JOB_AUDIT_WRITE = 'audit.write';
+export const JOB_PAYMENT_RECONCILE = 'payment.reconcile';

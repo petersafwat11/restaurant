@@ -82,8 +82,14 @@ Server core (F5/F1/F3/F2) committed; F6 + F4 are the second pass.
       removed `automatic_payment_methods`. Stub returns a method-distinct ref. (Unit-tested.)
 - [x] F5: central `currencyMinorUnitExponent`/`toMinorUnits`/`fromMinorUnits` in
       @repo/utils/money (Decimal, reject unsupported ccy); stripe.provider uses them. (Unit-tested.)
-- [ ] F4: checkout recovery (no duplicate orders, locale+token redirect, abandoned-intent expiry job)
-- [ ] F6: webhook event tests (delayed/dup/out-of-order/failed/canceled) + reconciliation BullMQ job
+- [x] F6: webhook guard — late/out-of-order `payment_failed`/`canceled` can't clobber a
+      settled (PAID/refunded) payment; added `canceled` handling. Reconciliation BullMQ job
+      (`reconciliation` queue, 15-min repeat) compares non-terminal Stripe payments to
+      `retrieveIntentStatus`, repairs missed-webhook → PAID (+confirm) / dead → FAILED, alerts
+      on unexpected via captureException. Pure `reconcileAction` unit-tested (6); e2e:
+      failed + out-of-order-after-succeeded. (Repair path only runs with a live Stripe key.)
+- [ ] F4: checkout recovery — reuse existing pending order on retry (no duplicate); locale+token
+      redirect; abandoned-order/intent expiry policy (owner decision on cutoff).
 - NOTE for Slice 8 §I1: add `/payments/intent` + `/payments/by-order` to the throttle list.
 
 ### Slice 6 — Legal/fulfilment page structure (Phase D)  [prose = lawyer]
