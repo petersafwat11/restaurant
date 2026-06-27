@@ -20,5 +20,5 @@
   "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
   "checkout": "Do kasy",
   "checkoutCta": "Do kasy · {total}",
-  "footerHint": "Darmowa baklawa do pierwszego zamówienia — kod przy kasie."
+  "footerHint": "Opłata za dostawę i podatki są naliczane przy kasie."
 }
