@@ -1,7 +1,13 @@
 # Project: Restaurant Ordering Platform
 
 ## Stack
-Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ · Expo · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
+Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
+
+> Surfaces are **web + admin only**. The Expo mobile app and its push
+> infrastructure were removed (Slice 10); notification channels are in-app +
+> email + Twilio SMS. The Prisma `PushToken` table and the
+> `NotificationPreference.*Push` columns are retained (inert) until a later
+> migration drops them after a production token-count check.
 
 ## Working agreement
 
@@ -10,7 +16,7 @@ Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ 
 **Use the design assets.** Designs live in `design-assets/`. Before implementing any screen:
 1. `view` the matching `preview.png` (and `preview-mobile.png` if present)
 2. Read `spec.md`
-3. Treat `exported.tsx` as reference only — never copy it. Rebuild using `packages/ui` (web/admin) or `packages/ui-mobile` (mobile).
+3. Treat `exported.tsx` as reference only — never copy it. Rebuild using `packages/ui` (web/admin).
 4. All tokens from `tooling/tailwind-config`. If a needed token doesn't exist, add it there and explain why in your PR description.
 
 **Types and validation.**
@@ -34,11 +40,6 @@ Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ 
 **Jobs.**
 - Side effects (email, SMS, push, exports) go in BullMQ queues. Never `await` them in request handlers.
 
-**Mobile-specific.**
-- Use `expo-router`. No React Navigation imports directly.
-- All styling via NativeWind. No StyleSheet.
-- Push tokens registered after login via `useRegisterPushToken()`.
-
 **Conventions.**
 - File names: kebab-case for files, PascalCase for component default export.
 - Imports: absolute paths via `@/*` (per app), `@repo/*` for shared packages.
@@ -61,7 +62,6 @@ apps/
   api/      NestJS 11 (Fastify) — /api/v1
   web/      Next.js 15 — customer
   admin/    Next.js 15 — staff/owner
-  mobile/   Expo + expo-router — customer
 packages/
   db/             Prisma schema + client + seed
   types/          Zod schemas + inferred DTOs (single source of truth)
@@ -72,9 +72,8 @@ packages/
   utils/          Pure utility functions
   config-runtime/ createEnv() Zod helper
   ui/             shadcn components for web + admin (filled in Sprint 2+)
-  ui-mobile/      NativeWind components for mobile (filled in Sprint 2+)
 tooling/
-  tsconfig/       Shared TS configs (base/nextjs/react-native/nestjs)
+  tsconfig/       Shared TS configs (base/nextjs/nestjs)
   biome-config/   Shared biome.json
   eslint-config/  Next-specific rules only
   tailwind-config/ Token preset

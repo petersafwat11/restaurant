@@ -2,14 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { I18nService } from 'nestjs-i18n';
-import {
-  JOB_EMAIL_ORDER_STATUS,
-  JOB_PUSH_ORDER_STATUS,
-  JOB_SMS_ORDER_STATUS,
-  QUEUE_EMAIL,
-  QUEUE_PUSH,
-  QUEUE_SMS,
-} from '@repo/jobs';
+import { JOB_EMAIL_ORDER_STATUS, JOB_SMS_ORDER_STATUS, QUEUE_EMAIL, QUEUE_SMS } from '@repo/jobs';
 import type { OrderCreatedEvent, OrderStatusChangedEvent } from '@repo/types';
 import type { Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,7 +22,6 @@ export class NotificationDispatcherService {
     private readonly events: EventEmitter2,
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
     @InjectQueue(QUEUE_SMS) private readonly smsQueue: Queue,
-    @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
   ) {}
 
   @OnEvent('order.created')
@@ -62,12 +54,7 @@ export class NotificationDispatcherService {
     to: import('@repo/types').OrderStatus;
   }): Promise<void> {
     const channels = channelsForStatus(input.to);
-    if (
-      !channels.email &&
-      !channels.sms &&
-      !channels.push &&
-      !channels.inApp
-    ) {
+    if (!channels.email && !channels.sms && !channels.inApp) {
       return;
     }
 
@@ -96,7 +83,6 @@ export class NotificationDispatcherService {
       : null;
     const allowEmail = prefs ? prefs.orderUpdatesEmail : true;
     const allowSms = prefs ? prefs.orderUpdatesSms : true;
-    const allowPush = prefs ? prefs.orderUpdatesPush : true;
 
     const locale = pickLocale(user?.locale ?? snapshot?.checkoutLocale);
     const copy = notificationCopyFor(this.i18n, input.to, input.orderNumber, locale);
@@ -141,15 +127,6 @@ export class NotificationDispatcherService {
         orderId: input.orderId,
         userId: user?.id ?? null,
         phone: recipientPhone,
-        orderNumber: input.orderNumber,
-        toStatus: input.to,
-      });
-    }
-
-    if (channels.push && allowPush && user) {
-      await this.pushQueue.add(JOB_PUSH_ORDER_STATUS, {
-        orderId: input.orderId,
-        userId: user.id,
         orderNumber: input.orderNumber,
         toStatus: input.to,
       });

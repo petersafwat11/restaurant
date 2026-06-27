@@ -154,10 +154,21 @@ PL/EN heading parity (verified: every section id has exactly 2 `<h2 id>` anchors
 ### Slice 9 — Account deletion + privacy ops (Phase G)  [retention matrix = accountant/lawyer]
 - [ ] G2: deletion request/confirm/cancel/inspect endpoints + BullMQ anonymisation
 
-### Slice 10 — Mobile/push removal (Phase A)  ⚠ DESTRUCTIVE — last, gated
+### Slice 10 — Mobile/push removal (Phase A)  ✅ CODE DONE (column drop deferred)
 - [ ] A1: confirm no prod consumer / app-store release; check prod `PushToken` counts (OWNER)
-- [ ] A2/A3: delete `apps/mobile`, `packages/ui-mobile`, Expo deps, push backend; drop columns
-      (separate later migration)
+- [x] A2: deleted `apps/mobile/**`, `packages/ui-mobile/**`, `tooling/tsconfig/react-native.json`,
+      `apps/api/src/jobs/push.processor.ts`, `packages/utils/src/deep-link.ts(+test)`, whole
+      `apps/api/src/scheduler/**` (its only job was push-token-cleanup → deleting the empty
+      module is honest vs. logging "registered" with 0 jobs). Removed `expo-server-sdk` dep,
+      `mobile.push_v2` flag (catalog+seed), `APP_DEEP_LINK_SCHEME`/`EXPO_PUBLIC_API_URL`
+      (env.ts/turbo/deploy), `.expo`/mobile globs (gitignore/dockerignore/biome/tsconfig).
+- [x] A3 (code only): removed push queue/jobs/payloads (`QUEUE_PUSH`, `JOB_PUSH_*`, Push*Payload),
+      push-token endpoints+service methods+api-client methods+`RegisterPushToken` DTO, push branch
+      in dispatcher, `push` field in notification-matrix ChannelSet, referral-completion push.
+      KEPT: in-app+email+SMS untouched; Prisma `PushToken` + `NotificationPreference.*Push`
+      columns + DTO push fields + `DEFAULT_PREFERENCE` + account-deletion `pushToken.deleteMany`
+      (all inert) with deferred-drop comments. **Column-drop migration still OWED** after the
+      owner's prod `PushToken` count (A1). Orchestrator must run `pnpm install` to refresh lockfile.
 
 ### Slice 11 — Docs (Phase plan §16)
 - [ ] Update EU-COMPLIANCE.md, runbooks, .env.example, repo map, etc.

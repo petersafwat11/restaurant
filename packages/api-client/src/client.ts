@@ -213,8 +213,6 @@ import {
   type RefundDto,
   RefundSchema,
   type RegisterDto,
-  type RegisterPushTokenDto,
-  RegisterPushTokenSchema,
   RegisterSchema,
   type ReorderDto,
   type ReorderItemsDto,
@@ -1299,15 +1297,6 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
     markAllRead: (): Promise<{ success: true; count: number }> =>
       request('/notifications/read-all', { method: 'POST' }),
-    registerPushToken: (input: RegisterPushTokenDto): Promise<{ success: true }> =>
-      request('/notifications/push-tokens', {
-        method: 'POST',
-        body: RegisterPushTokenSchema.parse(input),
-      }),
-    unregisterPushToken: (token: string): Promise<{ success: true }> =>
-      request(`/notifications/push-tokens/${encodeURIComponent(token)}`, {
-        method: 'DELETE',
-      }),
     getPreferences: (): Promise<NotificationPreferenceDto> =>
       request('/notifications/preferences', {
         method: 'GET',

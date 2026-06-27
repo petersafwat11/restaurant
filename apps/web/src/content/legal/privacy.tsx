@@ -10,8 +10,8 @@ import { Link } from '@/i18n/navigation';
  *
  * D7: adds an Article 13/14 processing-activity table (structure) by data flow,
  * and a processor register reflecting the ACTUAL production configuration. The
- * mobile app (Expo) and push notifications are intentionally omitted — mobile is
- * being decommissioned (plan Phase A). Optional vendors that may not be live in
+ * mobile app and push notifications are intentionally omitted — that surface was
+ * removed (plan Phase A). Optional vendors that may not be live in
  * production (PostHog, Sentry) are marked "if enabled".
  *
  * Binding retention periods and the precise legal-basis wording require lawyer
@@ -76,7 +76,7 @@ const DEFAULT_TRANSFER = {
 
 /**
  * Processing activities by data flow (plan §D7). Recipients reflect the actual
- * processors. Push notifications / the mobile app are deliberately absent.
+ * processors. Push notifications / the mobile app are deliberately absent (removed).
  * Reviews / reservations / loyalty / referrals are app features that are
  * conditionally enabled — kept as a single row noted as "if enabled".
  */

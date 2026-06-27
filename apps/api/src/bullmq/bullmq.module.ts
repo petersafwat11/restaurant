@@ -5,7 +5,6 @@ import {
   QUEUE_ANALYTICS,
   QUEUE_AUDIT,
   QUEUE_EMAIL,
-  QUEUE_PUSH,
   QUEUE_RECEIPT,
   QUEUE_RECONCILIATION,
   QUEUE_SMS,
@@ -23,7 +22,6 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
     BullModule.registerQueue(
       { name: QUEUE_EMAIL },
       { name: QUEUE_SMS },
-      { name: QUEUE_PUSH },
       { name: QUEUE_RECEIPT },
       { name: QUEUE_ANALYTICS },
       { name: QUEUE_AUDIT },

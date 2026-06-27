@@ -77,35 +77,6 @@ describe('notifications (e2e)', () => {
     expect(all.json().count).toBe(1);
   });
 
-  it('registers and unregisters a push token idempotently', async () => {
-    const reg1 = await inject(
-      'POST',
-      '/api/v1/notifications/push-tokens',
-      { token: 'ExponentPushToken[abc]', platform: 'ios' },
-      userToken,
-    );
-    expect(reg1.statusCode).toBe(200);
-    const reg2 = await inject(
-      'POST',
-      '/api/v1/notifications/push-tokens',
-      { token: 'ExponentPushToken[abc]', platform: 'ios' },
-      userToken,
-    );
-    expect(reg2.statusCode).toBe(200);
-
-    const prisma = app.get(PrismaService);
-    expect(await prisma.pushToken.count({ where: { userId } })).toBe(1);
-
-    const del = await inject(
-      'DELETE',
-      `/api/v1/notifications/push-tokens/${encodeURIComponent('ExponentPushToken[abc]')}`,
-      undefined,
-      userToken,
-    );
-    expect(del.statusCode).toBe(200);
-    expect(await prisma.pushToken.count({ where: { userId } })).toBe(0);
-  });
-
   it('reads defaults and patches preferences', async () => {
     const def = await inject(
       'GET',

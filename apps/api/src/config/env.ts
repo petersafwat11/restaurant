@@ -25,7 +25,6 @@ const EnvSchema = z.object({
   APP_URL_WEB: z.string().url().default('http://localhost:3000'),
   APP_URL_ADMIN: z.string().url().default('http://localhost:3001'),
   APP_URL_API: z.string().url().default('http://localhost:4000'),
-  APP_DEEP_LINK_SCHEME: z.string().default('restaurant'),
 
   // Local-disk uploads. Files are written under UPLOADS_DIR and served via
   // the API at `${APP_URL_API}/uploads/{key}` (static middleware in main.ts).

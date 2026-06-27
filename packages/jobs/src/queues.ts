@@ -1,6 +1,5 @@
 export const QUEUE_EMAIL = 'email';
 export const QUEUE_SMS = 'sms';
-export const QUEUE_PUSH = 'push';
 export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
@@ -10,7 +9,6 @@ export const QUEUE_ACCOUNT_DELETION = 'account-deletion';
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
   sms: QUEUE_SMS,
-  push: QUEUE_PUSH,
   receipt: QUEUE_RECEIPT,
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
@@ -32,10 +30,6 @@ export const JOB_EMAIL_PROMO = 'email.promo';
 export const JOB_EMAIL_NEWSLETTER_CONFIRM = 'email.newsletter-confirm';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
-export const JOB_PUSH_WELCOME = 'push.welcome';
-export const JOB_PUSH_ORDER_STATUS = 'push.order-status';
-export const JOB_PUSH_TOKEN_CLEANUP = 'push.token-cleanup';
-export const JOB_PUSH_LOYALTY = 'push.loyalty';
 export const JOB_EMAIL_REFERRAL_INVITE = 'email.referral-invite';
 export const JOB_RECEIPT_GENERATE = 'receipt.generate';
 export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';

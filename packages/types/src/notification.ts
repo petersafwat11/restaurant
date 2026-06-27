@@ -28,15 +28,11 @@ export type NotificationListQuery = z.infer<typeof NotificationListQuerySchema>;
 export const UnreadCountSchema = z.object({ unreadCount: z.number().int() });
 export type UnreadCountDto = z.infer<typeof UnreadCountSchema>;
 
-export const PUSH_PLATFORMS = ['ios', 'android', 'web'] as const;
-export type PushPlatform = (typeof PUSH_PLATFORMS)[number];
-
-export const RegisterPushTokenSchema = z.object({
-  token: z.string().min(1),
-  platform: z.enum(PUSH_PLATFORMS),
-});
-export type RegisterPushTokenDto = z.infer<typeof RegisterPushTokenSchema>;
-
+// NOTE (Slice 10): push notifications + the Expo mobile app were removed. The
+// `orderUpdatesPush` / `promotionsPush` fields are RETAINED (inert) because the
+// matching Prisma columns are kept until a later migration drops them after a
+// production token-count check; removing them here would break the DTO ↔ column
+// round-trip. There is no longer a push-token registration DTO.
 export const NotificationPreferenceSchema = z.object({
   orderUpdatesPush: z.boolean(),
   orderUpdatesEmail: z.boolean(),
@@ -47,6 +43,4 @@ export const NotificationPreferenceSchema = z.object({
 export type NotificationPreferenceDto = z.infer<typeof NotificationPreferenceSchema>;
 
 export const UpdateNotificationPreferenceSchema = NotificationPreferenceSchema.partial();
-export type UpdateNotificationPreferenceDto = z.infer<
-  typeof UpdateNotificationPreferenceSchema
->;
+export type UpdateNotificationPreferenceDto = z.infer<typeof UpdateNotificationPreferenceSchema>;

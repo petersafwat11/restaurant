@@ -160,6 +160,7 @@ model PaymentMethod {
   @@index([userId])
 }
 
+// DEPRECATED (Slice 10): push removed; table dropped in a later migration after prod count check.
 model PushToken {
   id         String    @id @default(cuid())
   userId     String
@@ -176,9 +177,11 @@ model PushToken {
 model NotificationPreference {
   id                String   @id @default(cuid())
   userId            String   @unique
+  // DEPRECATED (Slice 10): push removed; columns dropped in a later migration after prod count check.
   orderUpdatesPush  Boolean  @default(true)
   orderUpdatesEmail Boolean  @default(true)
   orderUpdatesSms   Boolean  @default(true)
+  // DEPRECATED (Slice 10): push removed; columns dropped in a later migration after prod count check.
   promotionsPush    Boolean  @default(false)
   promotionsEmail   Boolean  @default(false)
   createdAt         DateTime @default(now())

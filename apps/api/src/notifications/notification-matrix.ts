@@ -6,24 +6,24 @@ export type Locale = 'pl' | 'en';
 /**
  * Per-status channel matrix — mirrors §9 of the project plan.
  * `inApp` always fires for the customer (so they see it in the in-app feed).
+ * (Slice 10: the push channel was removed; only email + SMS + in-app remain.)
  */
 export interface ChannelSet {
   email: boolean;
   sms: boolean;
-  push: boolean;
   inApp: boolean;
 }
 
-const NONE: ChannelSet = { email: false, sms: false, push: false, inApp: false };
+const NONE: ChannelSet = { email: false, sms: false, inApp: false };
 
 export const ORDER_STATUS_CHANNELS: Partial<Record<OrderStatus, ChannelSet>> = {
-  PENDING: { email: true, sms: false, push: true, inApp: true },
-  CONFIRMED: { email: false, sms: true, push: true, inApp: true },
-  OUT_FOR_DELIVERY: { email: false, sms: true, push: true, inApp: true },
-  DELIVERED: { email: false, sms: false, push: true, inApp: true },
+  PENDING: { email: true, sms: false, inApp: true },
+  CONFIRMED: { email: false, sms: true, inApp: true },
+  OUT_FOR_DELIVERY: { email: false, sms: true, inApp: true },
+  DELIVERED: { email: false, sms: false, inApp: true },
   COMPLETED: NONE,
-  CANCELLED: { email: true, sms: false, push: true, inApp: true },
-  REFUNDED: { email: true, sms: false, push: true, inApp: true },
+  CANCELLED: { email: true, sms: false, inApp: true },
+  REFUNDED: { email: true, sms: false, inApp: true },
 };
 
 export function channelsForStatus(status: OrderStatus): ChannelSet {

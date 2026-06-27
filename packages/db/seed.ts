@@ -1539,7 +1539,6 @@ const FEATURE_FLAGS: { key: string; description: string; default: boolean }[] = 
     description: 'Serve the new marketing landing aggregation',
     default: false,
   },
-  { key: 'mobile.push_v2', description: 'New mobile push payload + deep links', default: false },
   { key: 'soft_launch', description: 'Master soft-launch gate (kill switch)', default: false },
 ];
 

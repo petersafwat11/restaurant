@@ -1,10 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   type NotificationListQuery,
   NotificationListQuerySchema,
-  type RegisterPushTokenDto,
-  RegisterPushTokenSchema,
   type UpdateNotificationPreferenceDto,
   UpdateNotificationPreferenceSchema,
 } from '@repo/types';
@@ -40,21 +38,6 @@ export class NotificationsController {
   @HttpCode(200)
   markAllRead(@CurrentUser() user: RequestUser) {
     return this.notifications.markAllRead(user.id);
-  }
-
-  @Post('push-tokens')
-  @HttpCode(200)
-  registerPushToken(
-    @CurrentUser() user: RequestUser,
-    @Body(new ZodValidationPipe(RegisterPushTokenSchema)) dto: RegisterPushTokenDto,
-  ) {
-    return this.notifications.registerPushToken(user.id, dto);
-  }
-
-  @Delete('push-tokens/:token')
-  @HttpCode(200)
-  unregisterPushToken(@CurrentUser() user: RequestUser, @Param('token') token: string) {
-    return this.notifications.unregisterPushToken(user.id, token);
   }
 
   @Get('preferences')

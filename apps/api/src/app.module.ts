@@ -49,7 +49,6 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ReviewsModule } from './reviews/reviews.module';
-import { SchedulerModule } from './scheduler/scheduler.module';
 import { SeoModule } from './seo/seo.module';
 import { SettingsModule } from './settings/settings.module';
 import { SmsModule } from './sms/sms.module';
@@ -98,7 +97,11 @@ import { UsersModule } from './users/users.module';
             path.dirname(require.resolve('@repo/i18n/package.json')),
             'messages',
           ),
-          watch: process.env.NODE_ENV !== 'production',
+          // Watch only in local dev. Watching under `test` makes the file
+          // watcher race across parallel vitest workers and intermittently
+          // fails i18n-dependent specs (e.g. notification-matrix); prod never
+          // watches.
+          watch: process.env.NODE_ENV === 'development',
           // Translations live in nested folders (shared/, web/, admin/). Without
           // this, nestjs-i18n only loads the top-level *.json files and silently
           // ignores the subfolders, so e.g. `shared.order-status.*` never resolves.
@@ -122,7 +125,6 @@ import { UsersModule } from './users/users.module';
     MarketingModule,
     SeoModule,
     JobsModule,
-    SchedulerModule,
   ],
   controllers: [HealthController],
   providers: [
