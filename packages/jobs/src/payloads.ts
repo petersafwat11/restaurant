@@ -169,6 +169,25 @@ export const AnalyticsRollupPayloadSchema = z.object({
 });
 export type AnalyticsRollupPayload = z.infer<typeof AnalyticsRollupPayloadSchema>;
 
+// Slice 9 / §G2 — anonymise the account once the grace period elapses. The
+// processor re-reads the user and no-ops unless the request is still PENDING and
+// due, so a stale/duplicate job is harmless.
+export const AccountAnonymisePayloadSchema = z.object({
+  userId: z.string(),
+});
+export type AccountAnonymisePayload = z.infer<typeof AccountAnonymisePayloadSchema>;
+
+// Single-use email-confirmation link for the no-password account-deletion path.
+export const AccountDeletionConfirmEmailPayloadSchema = z.object({
+  userId: z.string(),
+  email: z.string().email(),
+  firstName: z.string().nullable(),
+  confirmUrl: z.string().url(),
+});
+export type AccountDeletionConfirmEmailPayload = z.infer<
+  typeof AccountDeletionConfirmEmailPayloadSchema
+>;
+
 export const AuditWritePayloadSchema = z.object({
   actorUserId: z.string(),
   action: z.string(),

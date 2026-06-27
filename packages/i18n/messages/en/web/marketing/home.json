@@ -4,7 +4,6 @@
   "ourStory": "Our story",
   "locations": "Locations",
   "contactUs": "Contact us",
-  "reserveTable": "Reserve a table",
   "hero": {
     "eyebrow": "Kebab · Falafel · Tacos · Since 2019",
     "titleLine1": "Real kebab.",
@@ -42,42 +41,8 @@
     "description": "The dishes people order over and over.",
     "seeFullMenu": "See full menu",
     "viewFullMenuCta": "View the full menu",
-    "addedToCart": "Added to cart",
-    "addedToCartDescription": "1 × {name}",
     "addAriaLabel": "Add {name} to cart",
-    "soldOutLabel": "Sold out today",
-    "dishes": {
-      "kebab-tortilla-srodni": {
-        "name": "Kebab Tortilla Średni",
-        "description": "Beef + lamb mix, fresh salad, tahini sauce in a warm tortilla. Our most-ordered.",
-        "imageAlt": "Kebab tortilla wrap on cream paper"
-      },
-      "falafel-pita-duzy": {
-        "name": "Falafel Pita Duży",
-        "description": "Eight hand-rolled falafel, hummus, pickled turnips, parsley.",
-        "imageAlt": "Falafel pita with hummus"
-      },
-      "kapsalon-duzy": {
-        "name": "Kapsalon Duży",
-        "description": "The Rotterdam classic. Fries, kebab, melted cheese, salad, sauce. Built for two.",
-        "imageAlt": "Kapsalon with kebab and melted cheese"
-      },
-      "tacos-x3": {
-        "name": "Tacos x3",
-        "description": "Three soft tacos, your choice of kebab or falafel, salsa.",
-        "imageAlt": "Three soft tacos"
-      },
-      "box-strips-mega": {
-        "name": "Box Strips Mega",
-        "description": "Crispy chicken strips, fries, slaw, two sauces.",
-        "imageAlt": "Box of crispy chicken strips and fries"
-      },
-      "salatka-kebab-duzy": {
-        "name": "Sałatka Kebab Duży",
-        "description": "No bread — just greens, kebab meat, tahini, pomegranate.",
-        "imageAlt": "Kebab salad bowl with greens and pomegranate"
-      }
-    }
+    "soldOutLabel": "Sold out today"
   },
   "story": {
     "eyebrow": "Our story",
@@ -86,7 +51,7 @@
     "lead": "A small kebab and falafel shop on Ściegiennego in Kielce. The bread is baked through the day, the falafel rolled by hand, the meat marinated overnight — all made to order, nothing from a freezer.",
     "body": "Three of us run it, and we've kept it that way on purpose. Same corner since 2019.",
     "readMore": "Read our full story",
-    "imageAlt": "Meat being carved from the spit at Szef Donald in Kielce",
+    "imageAlt": "Kebab meat being carved from a vertical rotisserie spit",
     "yearsValue": "{years} years",
     "yearsLabel": "Open since {since}",
     "wrapsValue": "~{count} /wk",
@@ -113,37 +78,15 @@
   },
   "testimonials": {
     "eyebrow": "Reviews",
-    "title": "Rated 4.1 on Google.",
-    "description": "An average 4.1 across 213 reviews from guests in Kielce.",
+    "title": "What our guests say",
+    "description": "Recent reviews from guests in Kielce.",
     "readAllReviews": "Read all reviews",
     "starsAriaLabel": "{value} out of 5 stars",
-    "anonymous": "Anonymous",
-    "items": {
-      "0": {
-        "quote": "Best kebab in Kielce, hands down. The tahini sauce is on another level and you can tell the bread is fresh. I've been three times this month.",
-        "name": "Kasia W.",
-        "meta": "Local guide · 42 reviews"
-      },
-      "1": {
-        "quote": "Falafel pita that actually tastes like it should — crispy outside, soft inside, properly spiced. My go-to vegetarian lunch.",
-        "name": "Tomasz K.",
-        "meta": "12 reviews"
-      },
-      "2": {
-        "quote": "The kapsalon is dangerous. In a good way.",
-        "name": "Anna M.",
-        "meta": "5 reviews"
-      },
-      "3": {
-        "quote": "Real quality and fair prices. Sometimes a wait on Fridays but worth it.",
-        "name": "Michał R.",
-        "meta": "Top reviewer"
-      }
-    }
+    "anonymous": "Anonymous"
   },
   "newsletter": {
     "eyebrow": "Stay in touch",
-    "title": "Get a free baklava on your first order.",
+    "title": "Fresh from the kitchen, straight to your inbox.",
     "description": "Join the list — occasional emails, never spam. Unsubscribe whenever.",
     "emailPlaceholder": "Your email",
     "subscribe": "Subscribe",

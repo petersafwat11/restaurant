@@ -1,11 +1,15 @@
 /**
- * Szef Donald brand assets used by the landing page + dev primitives demo.
+ * Szef Donald brand FIXTURES — TEST / DEMO ONLY.
  *
- * NOTE: this is *not* DB seed data — the real menu comes from `useMenuTree()`
- * (which reads The Test Kitchen). These constants drive the design language
- * showcase (hero copy, testimonials, featured dishes). Hours, address, phone
- * and coordinates are NOT here anymore — they are read live from the restaurant
- * settings in the DB via `useRestaurant()`.
+ * IMPORTANT (Phase H1): this module must NOT be imported by any
+ * production-rendered component. It lives under `__mocks__/` so it stays out of
+ * the production bundle; the `no-mock-in-prod` test guards against regressions.
+ * The real menu, featured dishes and reviews come from the API
+ * (`useMenuTree()` / `useReviews()`); restaurant identity from `useRestaurant()`.
+ *
+ * The Unsplash URLs below are placeholder stock imagery — they are fixtures, not
+ * shipped assets. Real photography is owner-provided through the admin upload
+ * flow.
  */
 
 const U = (id: string, w = 1200) =>

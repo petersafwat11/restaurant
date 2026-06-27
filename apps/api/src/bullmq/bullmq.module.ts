@@ -1,6 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import {
+  QUEUE_ACCOUNT_DELETION,
   QUEUE_ANALYTICS,
   QUEUE_AUDIT,
   QUEUE_EMAIL,
@@ -27,6 +28,7 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
       { name: QUEUE_ANALYTICS },
       { name: QUEUE_AUDIT },
       { name: QUEUE_RECONCILIATION },
+      { name: QUEUE_ACCOUNT_DELETION },
     ),
   ],
   exports: [BullModule],

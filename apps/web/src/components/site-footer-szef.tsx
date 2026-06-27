@@ -164,8 +164,11 @@ export function SzefSiteFooter({
       bottom={{
         copyright,
         legal: [
-          { href: '/privacy', label: t('bottom.legal.privacy') },
           { href: '/terms', label: t('bottom.legal.terms') },
+          { href: '/privacy', label: t('bottom.legal.privacy') },
+          { href: '/refunds-complaints', label: t('bottom.legal.refundsComplaints') },
+          { href: '/delivery-cancellation', label: t('bottom.legal.deliveryCancellation') },
+          { href: '/promotion-terms', label: t('bottom.legal.promotionTerms') },
           { href: '/cookies', label: t('bottom.legal.cookies') },
         ],
         rightSlot: <LanguageSwitcher />,

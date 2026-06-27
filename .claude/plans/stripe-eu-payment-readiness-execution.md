@@ -98,10 +98,36 @@ is left — an owner decision, noted below.
       settles intents Stripe reports as dead.
 - NOTE for Slice 8 §I1: add `/payments/intent` + `/payments/by-order` to the throttle list.
 
-### Slice 6 — Legal/fulfilment page structure (Phase D)  [prose = lawyer]
-- [ ] D1: `LEGAL_BUNDLE_VERSION`, per-doc hash, archive manifest, MDX scaffold
-- [ ] D2: new routes `/refunds-complaints`, `/delivery-cancellation`, `/promotion-terms`
-- [ ] D5/D6/D7/D8/D9: DB-backed delivery values, promo terms, RODO table, cookie audit, ODR fix
+### Slice 6 — Legal/fulfilment page structure (Phase D)  ✅ DONE (typecheck + biome green) [prose = lawyer]
+Content moved to typed TSX modules under `apps/web/src/content/legal/` (no MDX — avoids
+build config). Each module exports a `*_SECTIONS` list driving both the on-page TOC and
+PL/EN heading parity (verified: every section id has exactly 2 `<h2 id>` anchors). Shared
+`features/legal/{legal-toc,print-controls,legal-bundle}.tsx`.
+- [x] D1: reused `LEGAL_BUNDLE_VERSION`/effective date/`LEGAL_BUNDLE_DOCUMENTS` from @repo/types;
+      `legal-bundle.tsx` manifest (title key + sections + `renderBundleBody`); archive route
+      `[locale]/legal/archive/[version]/[document]/page.tsx` (generateStaticParams = current
+      version × 4 bundle docs, `notFound()` else, `noindex`). Prose relocated out of page TSX.
+      Per-doc SHA-256 deferred (its home @repo/types is frozen; C3 deferred).
+- [x] D2: new routes `/refunds-complaints`, `/delivery-cancellation`, `/promotion-terms` (metadata
+      + TOC + print/Save-as-PDF). Footer `bottom.legal` extended with all 6 legal pages (+ labels
+      in footer.json pl/en). Cookies + promotion-terms intentionally NOT bundle docs.
+- [x] D5: delivery-cancellation renders DB facts (trading address, channels, radius, delivery fee,
+      min order, delivery+pickup ETA, hours via `<HoursTable>`); money via `formatMoney` (display
+      only). Snapshot-preserves-purchase-time note included.
+- [x] D6: promotion-terms structure (eligibility, timezone from `restaurant.timezone`, code/limits,
+      min subtotal, stacking/loyalty, channels, refund reversal, abuse) — LAWYER placeholders for
+      binding rules.
+- [x] D7: privacy Art. 13/14 processing table (10 data-flow rows × 8 cols incl. transfer
+      mechanism). Processor register = actual config (Contabo, Stripe-when-enabled, Resend/SMTP,
+      Twilio-if-enabled, OSM/Nominatim, PostHog/Sentry "if enabled"). Expo/push REMOVED. No R2.
+- [x] D8: cookies page lists exact first-party cookies (`web_at`/`web_rt`/`cart_session`/
+      `NEXT_LOCALE`) + conditional Stripe cookies w/ link; REMOVED the hardcoded "no banner
+      required" decision → counsel TODO.
+- [x] D9: ODR-closed note (20 Jul 2025) + Polish ADR/UOKiK in terms (`odr`→`disputes` anchor) and
+      refunds-complaints; no page links the dead ODR platform.
+- [ ] HANDOFF (not code): all binding prose (LAWYER placeholders listed in the slice summary),
+      owner-verified legal values, live processor/DPA status, retention matrix, cookie-banner
+      decision, and the `EU-COMPLIANCE.md` PKE update (docs — Slice 11).
 
 ### Slice 7 — Content integrity + locale (Phase H)
 - [ ] H1: remove mock featured dishes/testimonials/baklava from prod; SSR crawler test

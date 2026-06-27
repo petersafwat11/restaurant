@@ -1,0 +1,44 @@
+{
+  "title": "Usuń konto",
+  "intro": "Usunięcie konta jest trwałe. Zanim przejdziesz dalej, zapoznaj się z konsekwencjami.",
+  "consequences": {
+    "heading": "Co się stanie po usunięciu konta",
+    "sessions": "Zostaniesz wylogowany na wszystkich urządzeniach, a logowanie przestanie działać.",
+    "profile": "Twoje imię, e-mail, telefon i zapisane adresy zostaną usunięte lub zanonimizowane.",
+    "retained": "Dotychczasowe zamówienia, faktury i dane płatności zachowujemy tam, gdzie wymaga tego prawo (rachunkowość, podatki, przeciwdziałanie nadużyciom i reklamacje) — nie będą już jednak powiązane z Tobą imiennie.",
+    "grace": "Usunięcie planujemy po {graceDays}-dniowym okresie karencji. Do tego czasu możesz je anulować w każdej chwili.",
+    "irreversible": "Po zakończeniu okresu karencji anonimizacji nie można cofnąć."
+  },
+  "password": {
+    "label": "Potwierdź hasło",
+    "placeholder": "Twoje aktualne hasło",
+    "help": "Prosimy o hasło, aby potwierdzić, że to naprawdę Ty."
+  },
+  "reasonLabel": "Powód (opcjonalnie)",
+  "reasonPlaceholder": "Napisz, dlaczego odchodzisz (opcjonalnie)",
+  "actions": {
+    "request": "Zaplanuj usunięcie konta",
+    "requesting": "Planowanie…",
+    "cancel": "Anuluj usunięcie",
+    "cancelling": "Anulowanie…",
+    "sendEmail": "Wyślij mi link potwierdzający",
+    "sending": "Wysyłanie…"
+  },
+  "status": {
+    "pendingHeading": "Usunięcie zaplanowane",
+    "pending": "Twoje konto zostanie usunięte {date}. Do tego czasu możesz to anulować.",
+    "cancelledHeading": "Usunięcie anulowane",
+    "cancelled": "Prośba o usunięcie konta została anulowana. Twoje konto pozostaje aktywne.",
+    "completedHeading": "Konto zanonimizowane",
+    "completed": "To konto zostało zanonimizowane.",
+    "emailSentHeading": "Sprawdź skrzynkę",
+    "emailSent": "Wysłaliśmy Ci link potwierdzający. Otwórz go, aby zaplanować usunięcie konta. Link wygasa po 1 godzinie."
+  },
+  "noPassword": {
+    "note": "Twoje konto nie ma hasła (logujesz się kodem lub przez konto społecznościowe). Użyj przycisku poniżej, a wyślemy Ci link potwierdzający e-mailem."
+  },
+  "guestNote": "Nie masz konta lub nie możesz się zalogować? Aby poprosić o usunięcie swoich danych, napisz do nas na adres {email}.",
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie."
+  }
+}

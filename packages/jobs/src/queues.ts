@@ -5,6 +5,7 @@ export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
 export const QUEUE_RECONCILIATION = 'reconciliation';
+export const QUEUE_ACCOUNT_DELETION = 'account-deletion';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
@@ -14,6 +15,7 @@ export const QUEUE_NAMES = {
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
   reconciliation: QUEUE_RECONCILIATION,
+  accountDeletion: QUEUE_ACCOUNT_DELETION,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -40,3 +42,11 @@ export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';
 export const JOB_ANALYTICS_ROLLUP_FINALIZE = 'analytics.rollup-finalize';
 export const JOB_AUDIT_WRITE = 'audit.write';
 export const JOB_PAYMENT_RECONCILE = 'payment.reconcile';
+// Slice 9 / §G2 — anonymise an account whose grace period has elapsed. Enqueued
+// (delayed) when a deletion is confirmed; the processor re-checks state and
+// no-ops if the request was cancelled.
+export const JOB_ACCOUNT_ANONYMISE = 'account.anonymise';
+// Send the single-use email-confirmation link for the no-password reauth path.
+// Queued (never awaited in the request handler) on this queue so the deletion
+// module owns its own side-effects without touching the shared email processor.
+export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-email';

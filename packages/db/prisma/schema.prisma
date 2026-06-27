@@ -17,6 +17,15 @@ datasource db {
 // Identity & access
 // ---------------------------------------------------------------------------
 
+// Account-deletion lifecycle (plan §G2). MUST stay identical to the Zod
+// `AccountDeletionStatusSchema` enum in packages/types/src/account-deletion.ts.
+enum AccountDeletionStatus {
+  NONE
+  PENDING
+  CANCELLED
+  COMPLETED
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -31,6 +40,20 @@ model User {
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  // --- Account deletion / anonymisation (GDPR erasure, plan §G2) -------------
+  // All additive/nullable. A verified request schedules an anonymisation job
+  // after a grace period; on execution the row is pseudonymised (NOT deleted —
+  // Review.userId is FK-restrict and retained orders keep their user link).
+  deletionStatus              AccountDeletionStatus @default(NONE)
+  deletionRequestedAt         DateTime? // when the customer requested deletion
+  deletionScheduledAt         DateTime? // when the anonymisation job runs (grace end)
+  deletionReason              String? // optional free-form feedback
+  // Single-use email-confirmation token (SHA-256 hash; never store the raw token)
+  // for the no-password reauth path. Cleared once consumed.
+  deletionConfirmTokenHash    String?
+  deletionConfirmTokenExpires DateTime?
+  anonymisedAt                DateTime? // set when the anonymisation job completes
 
   roles                  UserRole[]
   addresses              UserAddress[]

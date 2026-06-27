@@ -4,6 +4,13 @@ import {
   // Sprint 7
   type AcceptStaffInviteDto,
   AcceptStaffInviteSchema,
+  // Slice 9 — account deletion / anonymisation
+  type AccountDeletionStatusResponseDto,
+  AccountDeletionStatusResponseSchema,
+  type ConfirmAccountDeletionDto,
+  ConfirmAccountDeletionSchema,
+  type RequestAccountDeletionDto,
+  RequestAccountDeletionSchema,
   type AddCartItemDto,
   AddCartItemSchema,
   type AddMenuItemImageDto,
@@ -558,6 +565,32 @@ export function createApiClient(opts: ApiClientOptions) {
         method: 'POST',
         body: ChangePasswordSchema.parse(input),
         responseSchema: z.object({ success: z.literal(true) }),
+      }),
+  };
+
+  // ---- account deletion (Slice 9 / §G2) --------------------------------
+  const accountDeletion = {
+    status: (): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion', {
+        method: 'GET',
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    request: (input: RequestAccountDeletionDto): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/request', {
+        method: 'POST',
+        body: RequestAccountDeletionSchema.parse(input),
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    confirm: (input: ConfirmAccountDeletionDto): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/confirm', {
+        method: 'POST',
+        body: ConfirmAccountDeletionSchema.parse(input),
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    cancel: (): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/cancel', {
+        method: 'POST',
+        responseSchema: AccountDeletionStatusResponseSchema,
       }),
   };
 
@@ -1699,6 +1732,7 @@ export function createApiClient(opts: ApiClientOptions) {
   return {
     auth,
     users,
+    accountDeletion,
     addresses,
     restaurant,
     menu,

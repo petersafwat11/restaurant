@@ -1,0 +1,44 @@
+{
+  "title": "Delete account",
+  "intro": "Deleting your account is permanent. Please read what happens before you continue.",
+  "consequences": {
+    "heading": "What happens when you delete your account",
+    "sessions": "You'll be signed out everywhere and your login will stop working.",
+    "profile": "Your name, email, phone and saved addresses are removed or anonymised.",
+    "retained": "Past orders, invoices and payment records are kept where the law requires (accounting, tax, fraud and dispute handling) — they are no longer linked to you by name.",
+    "grace": "We schedule the deletion after a {graceDays}-day grace period. You can cancel any time before then.",
+    "irreversible": "Once the grace period ends, anonymisation cannot be undone."
+  },
+  "password": {
+    "label": "Confirm your password",
+    "placeholder": "Your current password",
+    "help": "We ask for your password to make sure it's really you."
+  },
+  "reasonLabel": "Reason (optional)",
+  "reasonPlaceholder": "Tell us why you're leaving (optional)",
+  "actions": {
+    "request": "Schedule account deletion",
+    "requesting": "Scheduling…",
+    "cancel": "Cancel deletion",
+    "cancelling": "Cancelling…",
+    "sendEmail": "Email me a confirmation link",
+    "sending": "Sending…"
+  },
+  "status": {
+    "pendingHeading": "Deletion scheduled",
+    "pending": "Your account is scheduled for deletion on {date}. You can still cancel until then.",
+    "cancelledHeading": "Deletion cancelled",
+    "cancelled": "Your account deletion request was cancelled. Your account stays active.",
+    "completedHeading": "Account anonymised",
+    "completed": "This account has been anonymised.",
+    "emailSentHeading": "Check your inbox",
+    "emailSent": "We've emailed you a confirmation link. Open it to schedule your account deletion. The link expires in 1 hour."
+  },
+  "noPassword": {
+    "note": "Your account has no password (you sign in with a code or a social login). Use the button below and we'll email you a confirmation link instead."
+  },
+  "guestNote": "Don't have an account, or can't sign in? To request deletion of your data, email us at {email}.",
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  }
+}

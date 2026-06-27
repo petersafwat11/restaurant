@@ -2,22 +2,23 @@
 
 import { useReviews } from '@/features/reviews/hooks';
 import { GOOGLE_REVIEWS_URL } from '@/lib/brand';
-import { mockTestimonials } from '@/lib/mock/szef-donald';
 import { Container, SectionHeader, TestimonialCard } from '@repo/ui';
 import { ArrowUpRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 /**
- * Pulls 3 recent positive reviews from the API. Falls back to the Szef
- * Donald mock when the API returns nothing — landing still has to feel
- * complete before reviews are collected.
+ * Pulls recent positive reviews from the API. There is NO mock fallback
+ * (Phase H1): if fewer than three real, visible reviews exist, the whole
+ * section is hidden so the landing never advertises fabricated testimonials.
+ * (This section is currently not mounted on the homepage — see page.tsx — but
+ * it stays live-or-hide so it can't regress to mock content if re-enabled.)
  */
 export function LandingTestimonials() {
   const t = useTranslations('web.marketing.home.testimonials');
   const reviewsQuery = useReviews();
 
-  const realCards = React.useMemo(() => {
+  const cards = React.useMemo(() => {
     const reviews = reviewsQuery.data?.items ?? [];
     return reviews
       .filter((r) => r.rating >= 4 && r.comment && r.comment.length > 0 && r.isVisible)
@@ -32,18 +33,8 @@ export function LandingTestimonials() {
       }));
   }, [reviewsQuery.data, t]);
 
-  const cards =
-    realCards.length >= 3
-      ? realCards
-      : mockTestimonials.slice(0, 3).map((card, i) => ({
-          ...card,
-          quote: t(`items.${i}.quote` as 'items.0.quote'),
-          author: {
-            ...card.author,
-            name: t(`items.${i}.name` as 'items.0.name'),
-            meta: t(`items.${i}.meta` as 'items.0.meta'),
-          },
-        }));
+  // Not enough real reviews to fill the row → hide rather than pad with mocks.
+  if (cards.length < 3) return null;
 
   return (
     <section aria-labelledby="reviews-h" className="bg-bg py-section-y-mobile sm:py-section-y">

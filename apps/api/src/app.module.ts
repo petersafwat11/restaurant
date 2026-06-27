@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AccountDeletionModule } from './account-deletion/account-deletion.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { AnalyticsProductModule } from './analytics-product/analytics-product.module';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -68,6 +69,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     AddressesModule,
+    AccountDeletionModule,
     RestaurantsModule,
     MenuModule,
     UploadsModule,
