@@ -126,6 +126,26 @@ is left — an owner decision, noted below.
 ### Slice 11 — Docs (Phase plan §16)
 - [ ] Update EU-COMPLIANCE.md, runbooks, .env.example, repo map, etc.
 
+## ⚠ Deploy ordering (Slices 1–5)
+- **Slice 4's `legalAccepted`+`legalBundleVersion` (and guest `contact`) are REQUIRED on
+  POST /orders and are NOT behind the `payments.stripe_elements` flag.** Old web bundles
+  will 400 on every order the moment the new API deploys. Web + API MUST deploy together
+  (plan §15 step 5). The migrations are additive/nullable and safe to deploy first.
+- The migrations (`20260627120000`, `20260627130000`) are hand-authored and have NOT run
+  against a real Postgres yet — run `prisma migrate deploy` on a prod-shaped copy first (§14).
+
+## Live-Stripe verification checklist (Slice 5 — integration-UNverified locally; stub mode only)
+Pure functions are unit-tested, but the real Stripe SDK calls (`payment_method_types`,
+`idempotencyKey` option, `paymentIntents.cancel`/`.retrieve`) never executed in any local
+test. Before flipping `payments.stripe_elements` on, run the §14 sandbox matrix, especially:
+- guest card + BLIK success via X-Order-Token; 3DS required/success/failure
+- duplicate concurrent **same-method** intents → one intent (server idempotency key)
+- method switch card→BLIK; **double switch card→BLIK→card** (does the reused original key
+  hand back a *canceled* intent? if so add a per-attempt counter to the key)
+- concurrent **different-method** requests (two live intents before either cancels — UI is
+  sequential so not a normal path, but confirm)
+- reconciliation actually repairs a deliberately-dropped webhook against a live key
+
 ## External blockers handed back to user (block §1 gate, not code)
 1. Owner-verified legal entity: legalName, KRS, REGON, registry court, share capital,
    registered vs trading address (plan §18.1, §B2). Candidate values UNVERIFIED.
