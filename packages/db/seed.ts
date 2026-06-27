@@ -189,7 +189,8 @@ async function seedRestaurants() {
   // they never refreshed on an existing row).
   const restaurantData = {
     name: 'Szef Donald',
-    description: 'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
+    description:
+      'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
     descriptionEn: 'Fresh kebab and falafel in Kielce, on Ściegiennego — everything made to order.',
     phone: '+48 883 953 589',
     email: 'mahmodrasul123@gmail.com',
@@ -741,7 +742,10 @@ const MENU_IMAGE_BASE =
 // translated by small maps rather than per-row copy.
 
 const CATEGORY_EN: Record<string, { name: string; description: string }> = {
-  kebab: { name: 'Kebab', description: 'Meat (chicken, beef or mixed) with fresh salad and sauce.' },
+  kebab: {
+    name: 'Kebab',
+    description: 'Meat (chicken, beef or mixed) with fresh salad and sauce.',
+  },
   falafel: {
     name: 'Vegetarian — Falafel',
     description: 'Falafel and salad with mild, mixed or spicy sauce.',
@@ -805,7 +809,8 @@ const ITEM_EN: Record<string, { name: string; description: string }> = {
   },
   tacos: {
     name: 'Tacos',
-    description: 'Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries.',
+    description:
+      'Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries.',
   },
   'zestaw-kebab-tortilla-sredni-cola': {
     name: 'Medium Kebab Tortilla + Coca-Cola 0.5L',

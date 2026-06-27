@@ -1,7 +1,7 @@
+import { GOOGLE_MAPS_URL } from '@/lib/brand';
 import type { RestaurantAddressDto, RestaurantPublicDto } from '@repo/types';
 import type { DayOfWeek, HoursRow } from '@repo/ui';
 import { zonedParts } from '@repo/utils';
-import { GOOGLE_MAPS_URL } from '@/lib/brand';
 
 /** The restaurant lives in Poland; never trust the visitor's browser clock. */
 export const FALLBACK_TIMEZONE = 'Europe/Warsaw';
