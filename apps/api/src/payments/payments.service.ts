@@ -7,6 +7,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@repo/db';
 import type { Order, Payment, Refund } from '@repo/db';
 import { JOB_EMAIL_REFUND, QUEUE_EMAIL } from '@repo/jobs';
 import type {
@@ -22,11 +23,13 @@ import type {
 import { Decimal, addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils/money';
 import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
+import { verifyOrderTrackingToken } from '../orders/order-tracking-token';
 import { OrdersService } from '../orders/orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ParsedWebhookEvent, PaymentProvider } from './provider.interface';
 import { CodProvider } from './providers/cod.provider';
 import { StripeProvider } from './providers/stripe.provider';
+import { stripeIntentIdempotencyKey } from './stripe-intent';
 import { WebhookEventsService } from './webhook-events.service';
 
 interface PaymentActor {
@@ -60,57 +63,112 @@ export class PaymentsService {
   async createIntent(
     actor: PaymentActor,
     dto: CreatePaymentIntentDto,
+    orderToken?: string | null,
   ): Promise<PaymentIntentResponseDto> {
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: { payment: true },
     });
     if (!order) throw new NotFoundException('Order not found');
-    if (!actor.userId || order.userId !== actor.userId) {
-      throw new ForbiddenException('Not your order');
-    }
+
+    // F1 — authorize by the authed owner OR a valid signed token bound to this
+    // exact order. A session key / order UUID alone is never accepted.
+    this.authorizeOrderAccess(order, actor, orderToken);
+
     if (order.status !== 'PENDING') {
       throw new BadRequestException(`Order is not pending (status: ${order.status})`);
     }
-    if (order.payment && order.payment.status === 'PAID') {
-      throw new BadRequestException('Order is already paid');
+    // Terminal payment states can never be re-intented (plan §F2).
+    const existing = order.payment;
+    if (existing && ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(existing.status)) {
+      throw new BadRequestException(`Order payment is already ${existing.status.toLowerCase()}`);
     }
 
     const provider = this.pickProvider(dto.provider, dto.methodKind);
 
+    // Method switch (e.g. card → BLIK): the old intent is method-specific and
+    // can't be confirmed the new way, so cancel it before creating a fresh one
+    // (plan §F2). Same-method retries reuse via the deterministic key below.
+    if (
+      provider.id === 'stripe' &&
+      existing?.provider === 'stripe' &&
+      existing.status === 'PENDING' &&
+      existing.providerRef &&
+      existing.method !== dto.methodKind
+    ) {
+      await provider.cancelIntent?.(existing.providerRef);
+    }
+
+    const amount = order.grandTotal.toFixed(2);
+    const idempotencyKey =
+      provider.id === 'stripe'
+        ? stripeIntentIdempotencyKey({
+            orderId: order.id,
+            methodKind: dto.methodKind,
+            amount,
+            currency: order.currency,
+          })
+        : undefined;
+
     const intent = await provider.createIntent({
       orderId: order.id,
-      amount: order.grandTotal.toFixed(2),
+      amount,
       currency: order.currency,
       methodKind: dto.methodKind,
-      metadata: { orderNumber: order.orderNumber },
+      // Reconcilable, PII-free metadata (plan §F2).
+      metadata: {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        environment: this.env.NODE_ENV ?? 'unknown',
+      },
+      idempotencyKey,
     });
 
-    // Upsert the payment row.
-    const payment = await this.prisma.payment.upsert({
+    const data = {
+      provider: provider.id,
+      providerRef: intent.providerRef,
+      method: dto.methodKind,
+      amount: order.grandTotal,
+      currency: order.currency,
+      status: (intent.confirmed ? 'PAID' : 'PENDING') as PaymentStatus,
+    };
+
+    // Write the payment row without ever clobbering a PAID one. The
+    // `status: { not: 'PAID' }` guard closes the TOCTOU window where a webhook
+    // flips the row PAID between our read above and this write (plan §F2).
+    if (!existing) {
+      try {
+        await this.prisma.payment.create({ data: { orderId: order.id, ...data } });
+      } catch (err) {
+        // Lost the create race to a concurrent request — fall through to the
+        // same conditional update path (both carry the same providerRef via the
+        // deterministic idempotency key).
+        if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')) {
+          throw err;
+        }
+        this.assertNotAlreadyPaid(
+          await this.prisma.payment.updateMany({
+            where: { orderId: order.id, status: { not: 'PAID' } },
+            data,
+          }),
+        );
+      }
+    } else {
+      this.assertNotAlreadyPaid(
+        await this.prisma.payment.updateMany({
+          where: { orderId: order.id, status: { not: 'PAID' } },
+          data,
+        }),
+      );
+    }
+
+    const payment = await this.prisma.payment.findUniqueOrThrow({
       where: { orderId: order.id },
-      update: {
-        provider: provider.id,
-        providerRef: intent.providerRef,
-        method: dto.methodKind,
-        amount: order.grandTotal,
-        currency: order.currency,
-        status: intent.confirmed ? 'PAID' : 'PENDING',
-      },
-      create: {
-        orderId: order.id,
-        provider: provider.id,
-        providerRef: intent.providerRef,
-        method: dto.methodKind,
-        amount: order.grandTotal,
-        currency: order.currency,
-        status: intent.confirmed ? 'PAID' : 'PENDING',
-      },
     });
 
     // COD short-circuits: confirm the order immediately and emit the same
-    // events the Stripe webhook would, so Sprint 5's notification dispatcher
-    // can listen on a single channel.
+    // events the Stripe webhook would, so the notification dispatcher can listen
+    // on a single channel.
     if (intent.confirmed) {
       await this.confirmOrderFromPayment(order, payment.id);
     }
@@ -123,6 +181,33 @@ export class PaymentsService {
       publishableKey: provider.id === 'stripe' ? this.env.STRIPE_PUBLISHABLE_KEY : null,
       confirmed: intent.confirmed,
     };
+  }
+
+  /**
+   * Authorize access to an order for payment create / status recovery (plan
+   * §F1): either the authed owner, a staff member with `payment:read`, or a
+   * valid unexpired signed token whose embedded order id matches. Never accepts
+   * a raw order UUID or session key alone.
+   */
+  private authorizeOrderAccess(
+    order: { id: string; userId: string | null },
+    actor: PaymentActor,
+    orderToken?: string | null,
+  ): void {
+    if (actor.userId && order.userId === actor.userId) return;
+    if (actor.permissions.includes('payment:read')) return;
+    if (orderToken) {
+      const verified = verifyOrderTrackingToken(orderToken);
+      if (verified.ok && verified.orderId === order.id) return;
+    }
+    throw new ForbiddenException('Not your order');
+  }
+
+  private assertNotAlreadyPaid(result: { count: number }): void {
+    if (result.count === 0) {
+      // The only row not matched by `status != 'PAID'` is a PAID one.
+      throw new BadRequestException('Order is already paid');
+    }
   }
 
   // ---- Refund ------------------------------------------------------------
@@ -242,7 +327,11 @@ export class PaymentsService {
 
   // ---- Read --------------------------------------------------------------
 
-  async byOrderId(actor: PaymentActor, orderId: string): Promise<PaymentDto | null> {
+  async byOrderId(
+    actor: PaymentActor,
+    orderId: string,
+    orderToken?: string | null,
+  ): Promise<PaymentDto | null> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { payment: true },
@@ -251,7 +340,14 @@ export class PaymentsService {
 
     const isOwner = actor.userId !== null && order.userId === actor.userId;
     const canRead = actor.permissions.includes('payment:read');
-    if (!isOwner && !canRead) {
+    const tokenOk = orderToken
+      ? (() => {
+          const v = verifyOrderTrackingToken(orderToken);
+          return v.ok && v.orderId === order.id;
+        })()
+      : false;
+    // 404 (not 403) when unauthorized so we don't leak order existence.
+    if (!isOwner && !canRead && !tokenOk) {
       throw new NotFoundException('Order not found');
     }
     return order.payment ? toPaymentDto(order.payment) : null;

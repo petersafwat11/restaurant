@@ -100,6 +100,9 @@ export function CheckoutApp() {
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [createdOrderId, setCreatedOrderId] = React.useState<string | null>(null);
+  // Signed guest order token from the create response — lets a guest create the
+  // Stripe intent (and recover status) without an auth session (plan §F1).
+  const [createdOrderToken, setCreatedOrderToken] = React.useState<string | null>(null);
   const [stripeConfig, setStripeConfig] = React.useState<{ publishableKey: string } | null>(null);
   const stripeSubmitRef = React.useRef<(() => Promise<string | null>) | null>(null);
   const stripeElementsEnabled = useFeatureFlag('payments.stripe_elements');
@@ -570,6 +573,7 @@ export function CheckoutApp() {
       // Only reachable when online payments are ready (card/BLIK enabled).
       if (onlinePaymentsReady && stripeConfig && isOnlineMethod) {
         setCreatedOrderId(order.id);
+        setCreatedOrderToken(order.trackingToken ?? null);
         const deadline = Date.now() + 8000;
         while (!stripeSubmitRef.current && Date.now() < deadline) {
           await new Promise((r) => setTimeout(r, 100));
@@ -1008,6 +1012,7 @@ export function CheckoutApp() {
                 <StripePaymentForm
                   publishableKey={stripeConfig.publishableKey}
                   orderId={createdOrderId}
+                  orderToken={createdOrderToken}
                   submitRef={stripeSubmitRef}
                   methodKind={selectedMethod === 'blik' ? 'BLIK' : 'STRIPE_CARD'}
                 />

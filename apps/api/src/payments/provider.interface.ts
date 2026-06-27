@@ -6,6 +6,12 @@ export interface CreateIntentInput {
   currency: string;
   methodKind: PaymentMethodKind;
   metadata?: Record<string, string>;
+  /**
+   * Deterministic idempotency key (plan §F2). Passed to the provider as a
+   * request option so repeated/concurrent calls with the same key return the
+   * same intent instead of creating duplicates.
+   */
+  idempotencyKey?: string;
 }
 
 export interface CreateIntentResult {
@@ -63,6 +69,14 @@ export interface PaymentProvider {
 
   createIntent(input: CreateIntentInput): Promise<CreateIntentResult>;
   refund(input: RefundInput): Promise<RefundResult>;
+
+  /**
+   * Cancel a still-open provider intent. Used when the customer switches
+   * payment method (plan §F2/§F4) so the previous method-specific intent
+   * doesn't linger. No-op / undefined for providers without cancelable intents
+   * (COD).
+   */
+  cancelIntent?(providerRef: string): Promise<void>;
 
   /**
    * Parse + verify a raw webhook delivery. Returns null when the signature is

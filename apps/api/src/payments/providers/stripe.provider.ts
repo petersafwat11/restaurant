@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { PaymentMethodKind, PaymentStatus } from '@repo/types';
+import { fromMinorUnits, toMinorUnits } from '@repo/utils/money';
 import Stripe from 'stripe';
 import { ENV, type ENV_TYPE } from '../../config/config.module';
 import type {
@@ -10,6 +11,7 @@ import type {
   RefundInput,
   RefundResult,
 } from '../provider.interface';
+import { stripePaymentMethodTypes } from '../stripe-intent';
 
 @Injectable()
 export class StripeProvider implements PaymentProvider {
@@ -42,9 +44,14 @@ export class StripeProvider implements PaymentProvider {
   }
 
   async createIntent(input: CreateIntentInput): Promise<CreateIntentResult> {
+    // Exactly the method the customer chose — never automatic_payment_methods,
+    // which would surface other methods (plan §F3).
+    const methodTypes = stripePaymentMethodTypes(input.methodKind);
+
     if (this.stubMode || !this.stripe) {
-      // Deterministic stub so frontend can exercise the full flow in dev.
-      const providerRef = `pi_stub_${input.orderId}`;
+      // Deterministic stub so the frontend can exercise the full flow in dev.
+      // Method-distinct so the reuse / method-switch logic is exercisable here.
+      const providerRef = `pi_stub_${input.orderId}_${input.methodKind}`;
       return {
         providerRef,
         clientSecret: `${providerRef}_secret_stub`,
@@ -52,18 +59,34 @@ export class StripeProvider implements PaymentProvider {
       };
     }
 
-    const intent = await this.stripe.paymentIntents.create({
-      amount: toMinorUnits(input.amount, input.currency),
-      currency: input.currency.toLowerCase(),
-      automatic_payment_methods: { enabled: true },
-      metadata: input.metadata ?? {},
-    });
+    const intent = await this.stripe.paymentIntents.create(
+      {
+        amount: toMinorUnits(input.amount, input.currency),
+        currency: input.currency.toLowerCase(),
+        payment_method_types: methodTypes,
+        metadata: input.metadata ?? {},
+      },
+      // Deterministic key → Stripe returns the same intent for concurrent /
+      // repeated same-method calls, preventing duplicate active intents (§F2).
+      input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined,
+    );
 
     return {
       providerRef: intent.id,
       clientSecret: intent.client_secret,
       confirmed: false,
     };
+  }
+
+  async cancelIntent(providerRef: string): Promise<void> {
+    if (this.stubMode || !this.stripe) return;
+    try {
+      await this.stripe.paymentIntents.cancel(providerRef);
+    } catch (err) {
+      // Already-canceled/succeeded intents can't be canceled — that's fine, the
+      // goal (no lingering confirmable intent for the old method) still holds.
+      this.logger.warn(`Stripe cancelIntent(${providerRef}) skipped: ${(err as Error).message}`);
+    }
   }
 
   async refund(input: RefundInput): Promise<RefundResult> {
@@ -147,27 +170,4 @@ function parsedFromStripeEvent(event: Stripe.Event): ParsedWebhookEvent {
   }
 
   return base;
-}
-
-/**
- * Convert a 2dp decimal string into Stripe minor units (e.g., "12.34" → 1234).
- * Zero-decimal currencies (JPY, KRW) aren't supported by the demo restaurant
- * but the helper guards against accidental misuse.
- */
-function toMinorUnits(amount: string, currency: string): number {
-  const zeroDecimal = ['JPY', 'KRW'];
-  const value = Number.parseFloat(amount);
-  if (Number.isNaN(value)) throw new Error(`Invalid amount: ${amount}`);
-  if (zeroDecimal.includes(currency.toUpperCase())) {
-    return Math.round(value);
-  }
-  return Math.round(value * 100);
-}
-
-function fromMinorUnits(minor: number, currency: string): string {
-  const zeroDecimal = ['JPY', 'KRW'];
-  if (zeroDecimal.includes(currency.toUpperCase())) {
-    return minor.toFixed(2);
-  }
-  return (minor / 100).toFixed(2);
 }

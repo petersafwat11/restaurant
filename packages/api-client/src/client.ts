@@ -1039,15 +1039,22 @@ export function createApiClient(opts: ApiClientOptions) {
         auth: false,
         responseSchema: PaymentConfigSchema,
       }),
-    createIntent: (input: CreatePaymentIntentDto): Promise<PaymentIntentResponseDto> =>
+    // `orderToken` (signed guest order token) is sent as X-Order-Token so guests
+    // can create a payment intent / recover status without an auth session.
+    createIntent: (
+      input: CreatePaymentIntentDto,
+      orderToken?: string | null,
+    ): Promise<PaymentIntentResponseDto> =>
       request('/payments/intent', {
         method: 'POST',
         body: CreatePaymentIntentSchema.parse(input),
+        ...(orderToken ? { headers: { 'X-Order-Token': orderToken } } : {}),
         responseSchema: PaymentIntentResponseSchema,
       }),
-    byOrderId: (orderId: string): Promise<PaymentDto | null> =>
+    byOrderId: (orderId: string, orderToken?: string | null): Promise<PaymentDto | null> =>
       request(`/payments/by-order/${encodeURIComponent(orderId)}`, {
         method: 'GET',
+        ...(orderToken ? { headers: { 'X-Order-Token': orderToken } } : {}),
         responseSchema: PaymentSchema.nullable(),
       }),
     refund: (paymentId: string, input: CreateRefundDto): Promise<RefundDto> =>

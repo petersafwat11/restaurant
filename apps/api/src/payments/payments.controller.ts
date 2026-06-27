@@ -32,6 +32,18 @@ const CurrentUserOptional = createParamDecorator(
   },
 );
 
+// Signed guest order token (plan §F1). Read from the `X-Order-Token` header so
+// guests can pay for / recover an order without an auth session. Never logged.
+const OrderTokenHeader = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): string | null => {
+    const req = ctx
+      .switchToHttp()
+      .getRequest<{ headers?: Record<string, string | string[] | undefined> }>();
+    const raw = req.headers?.['x-order-token'];
+    return typeof raw === 'string' && raw.length > 0 ? raw : null;
+  },
+);
+
 @ApiTags('payments')
 @Controller('payments')
 export class PaymentsController {
@@ -43,25 +55,35 @@ export class PaymentsController {
     return this.payments.getConfig();
   }
 
+  // Public so guests can pay; authorization is by the authed user OR a valid
+  // signed order token (plan §F1).
+  @Public()
   @Post('intent')
   createIntent(
     @CurrentUserOptional() user: OptionalUser | null,
+    @OrderTokenHeader() orderToken: string | null,
     @Body(new ZodValidationPipe(CreatePaymentIntentSchema)) dto: CreatePaymentIntentDto,
   ) {
     return this.payments.createIntent(
       { userId: user?.id ?? null, permissions: user?.permissions ?? [] },
       dto,
+      orderToken,
     );
   }
 
+  // Public payment-status recovery — guest confirmation page reads its payment
+  // status via the signed order token (plan §F1/§F4).
+  @Public()
   @Get('by-order/:orderId')
   byOrderId(
     @CurrentUserOptional() user: OptionalUser | null,
+    @OrderTokenHeader() orderToken: string | null,
     @Param('orderId') orderId: string,
   ) {
     return this.payments.byOrderId(
       { userId: user?.id ?? null, permissions: user?.permissions ?? [] },
       orderId,
+      orderToken,
     );
   }
 

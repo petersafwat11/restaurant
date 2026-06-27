@@ -8,6 +8,7 @@ describe('payments (e2e)', () => {
   let ownerToken: string;
   let userToken: string;
   let orderId: string;
+  let itemId: string;
   let paymentIntentRef: string;
 
   beforeAll(async () => {
@@ -46,10 +47,11 @@ describe('payments (e2e)', () => {
       },
       ownerToken,
     );
+    itemId = item.json().id;
     await inject(
       'POST',
       `/api/v1/cart/items`,
-      { menuItemId: item.json().id, quantity: 2, modifierSelections: [] },
+      { menuItemId: itemId, quantity: 2, modifierSelections: [] },
       userToken,
     );
     const order = await inject(
@@ -151,7 +153,7 @@ describe('payments (e2e)', () => {
       { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
       userToken,
     );
-    const providerRef = `pi_stub_${orderId}`;
+    const providerRef = `pi_stub_${orderId}_STRIPE_CARD`;
     expect(intent.json().clientSecret).toContain(providerRef);
 
     const event = {
@@ -187,7 +189,7 @@ describe('payments (e2e)', () => {
     await inject('POST', '/api/v1/payments/webhooks/stripe', {
       id: 'evt_refund_setup_1',
       type: 'payment_intent.succeeded',
-      data: { object: { id: `pi_stub_${orderId}` } },
+      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
     });
 
     const prisma = app.get(PrismaService);
@@ -216,7 +218,7 @@ describe('payments (e2e)', () => {
     await inject('POST', '/api/v1/payments/webhooks/stripe', {
       id: 'evt_partial_setup_1',
       type: 'payment_intent.succeeded',
-      data: { object: { id: `pi_stub_${orderId}` } },
+      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
     });
 
     const prisma = app.get(PrismaService);
@@ -248,6 +250,136 @@ describe('payments (e2e)', () => {
     });
   });
 
+  // ---- F1: guest authorization via signed order token ----
+
+  async function createGuestOrder(sessionKey: string): Promise<{ id: string; token: string }> {
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: itemId,
+      quantity: 1,
+      modifierSelections: [],
+    });
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { sessionKey, type: 'PICKUP', tipAmount: '0', ...orderLegal({ guest: true }) },
+      undefined,
+      { 'idempotency-key': `guest-pay-${sessionKey}` },
+    );
+    expect(res.statusCode).toBe(201);
+    return { id: res.json().id, token: res.json().trackingToken };
+  }
+
+  it('lets a guest create an intent with a valid X-Order-Token (no auth)', async () => {
+    const guest = await createGuestOrder('pay-guest-ok');
+    const res = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      undefined,
+      { 'x-order-token': guest.token },
+    );
+    expect(res.statusCode).toBe(201);
+    expect(res.json().clientSecret).toMatch(/_secret/);
+  });
+
+  it('rejects a guest intent with no token, an invalid token, or a wrong-order token', async () => {
+    const guest = await createGuestOrder('pay-guest-reject');
+    const other = await createGuestOrder('pay-guest-other');
+
+    const noToken = await inject('POST', '/api/v1/payments/intent', {
+      orderId: guest.id,
+      provider: 'stripe',
+      methodKind: 'STRIPE_CARD',
+    });
+    expect(noToken.statusCode).toBe(403);
+
+    const badToken = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      undefined,
+      { 'x-order-token': 'not.a.valid.token' },
+    );
+    expect(badToken.statusCode).toBe(403);
+
+    // A valid token for a *different* order must not authorize this one.
+    const wrongOrder = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      undefined,
+      { 'x-order-token': other.token },
+    );
+    expect(wrongOrder.statusCode).toBe(403);
+  });
+
+  // ---- F2: idempotency / reuse / method switch ----
+
+  it('reuses one Payment row across duplicate same-method intent calls', async () => {
+    const a = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    const b = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    expect(a.statusCode).toBe(201);
+    expect(b.statusCode).toBe(201);
+    // Same order → same single Payment row (unique on orderId).
+    expect(a.json().paymentId).toBe(b.json().paymentId);
+    const prisma = app.get(PrismaService);
+    const payments = await prisma.payment.findMany({ where: { orderId } });
+    expect(payments).toHaveLength(1);
+  });
+
+  it('switching method updates the single Payment row to the new method', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    const blik = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'BLIK' },
+      userToken,
+    );
+    expect(blik.statusCode).toBe(201);
+    const prisma = app.get(PrismaService);
+    const payments = await prisma.payment.findMany({ where: { orderId } });
+    expect(payments).toHaveLength(1);
+    expect(payments[0].method).toBe('BLIK');
+    expect(payments[0].providerRef).toContain('BLIK');
+  });
+
+  it('rejects an intent for an already-paid order', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    await inject('POST', '/api/v1/payments/webhooks/stripe', {
+      id: 'evt_already_paid_1',
+      type: 'payment_intent.succeeded',
+      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
+    });
+    const res = await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      userToken,
+    );
+    expect(res.statusCode).toBe(400);
+    expect(res.json().message).toMatch(/paid/i);
+  });
+
   // ---- charge.refunded (dashboard sync) ----
 
   async function getOrderToPaid(): Promise<{ paymentId: string; intentRef: string }> {
@@ -257,7 +389,7 @@ describe('payments (e2e)', () => {
       { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
       userToken,
     );
-    const intentRef = `pi_stub_${orderId}`;
+    const intentRef = `pi_stub_${orderId}_STRIPE_CARD`;
     await inject('POST', '/api/v1/payments/webhooks/stripe', {
       id: `evt_succeed_${Math.random().toString(36).slice(2)}`,
       type: 'payment_intent.succeeded',

@@ -66,13 +66,25 @@ pipeline in orders.service.ts so the quoted total == the charged total.
 - [ ] C3: durable PL/EN legal copy attached to first confirmed-order email (guest-safe).
       DEFERRED → Slice 6: needs the versioned MDX legal sources (lawyer prose) to attach.
 
-### Slice 5 — Secure guest Stripe + PaymentIntent lifecycle (Phase F)
-- [ ] F1: guest auth via signed `X-Order-Token`
-- [ ] F2: PaymentIntent idempotency + reuse existing Payment row + concurrency claim
-- [ ] F3: enforce selected method (card-only / BLIK-only intents)
-- [ ] F4: checkout recovery (no duplicate orders, expiry job)
-- [ ] F5: Decimal money conversion in `stripe.provider.ts` + boundary tests
-- [ ] F6: webhook tests + reconciliation BullMQ job
+### Slice 5 — Secure guest Stripe + PaymentIntent lifecycle (Phase F)  ⏳ server core DONE
+Server core (F5/F1/F3/F2) committed; F6 + F4 are the second pass.
+- [x] F1: `/payments/intent` + `/payments/by-order` are `@Public()`; authorize by authed
+      owner / `payment:read` / valid signed `X-Order-Token` whose orderId matches. Token
+      threaded through api-client + `StripePaymentForm` (never logged). e2e: guest-ok,
+      no/invalid/wrong-order token → 403.
+- [x] F2: server-derived deterministic Stripe idempotency key
+      (`pi:order:method:minor:ccy`) → same-method retries reuse one intent; method switch
+      cancels the old + creates a new one; TOCTOU-safe `updateMany where status!='PAID'`;
+      P2002 create-race falls back to the conditional update. Reject PAID/REFUNDED. (Unit:
+      stripe-intent. e2e: reuse, method-switch, already-paid.) NOTE: did NOT add a breaking
+      client `Idempotency-Key` header — the server key + unique Payment(orderId) is the guarantee.
+- [x] F3: `stripePaymentMethodTypes` (card/blik/p24; wallets→card) → `payment_method_types`;
+      removed `automatic_payment_methods`. Stub returns a method-distinct ref. (Unit-tested.)
+- [x] F5: central `currencyMinorUnitExponent`/`toMinorUnits`/`fromMinorUnits` in
+      @repo/utils/money (Decimal, reject unsupported ccy); stripe.provider uses them. (Unit-tested.)
+- [ ] F4: checkout recovery (no duplicate orders, locale+token redirect, abandoned-intent expiry job)
+- [ ] F6: webhook event tests (delayed/dup/out-of-order/failed/canceled) + reconciliation BullMQ job
+- NOTE for Slice 8 §I1: add `/payments/intent` + `/payments/by-order` to the throttle list.
 
 ### Slice 6 — Legal/fulfilment page structure (Phase D)  [prose = lawyer]
 - [ ] D1: `LEGAL_BUNDLE_VERSION`, per-doc hash, archive manifest, MDX scaffold
