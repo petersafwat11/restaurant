@@ -1,6 +1,12 @@
 # Restaurant Ordering Platform — Full Project Report
 
-> Generated 2026-05-15. Source of truth for handoff. Reflects what is actually committed in the repo (sprints 0–5, 7–8, plus pre-sprint-6 hardening). The customer-web/admin/mobile UIs are largely TODO stubs; the backend, hooks, stores, types, and infrastructure are fully wired.
+> Generated 2026-05-15; **corrected 2026-06-27** to match production reality. Source of truth for handoff.
+>
+> **Key corrections since first draft:**
+> - **Surfaces are web + admin only.** The Expo mobile app + push channel were removed; sections describing them are dropped/annotated. Notification channels are in-app + email + Twilio SMS.
+> - **Production is a single Contabo VPS** (Docker Compose + Caddy + self-hosted PostgreSQL + Redis + local `/opt/restaurant/uploads`). No Vercel, no managed PostgreSQL/PITR, no Cloudflare R2.
+> - **Checkout creates the order *before* the payment intent** (order-before-intent), with guest payments via a signed order token and **deterministic PaymentIntent-level Stripe idempotency**.
+> - A **`reconciliation`** BullMQ job (15-min repeat) repairs missed webhooks.
 
 ---
 
@@ -17,7 +23,7 @@
 9. [Background jobs (BullMQ)](#9-background-jobs-bullmq)
 10. [Customer Web app — every page](#10-customer-web-app--every-page)
 11. [Admin app — every page](#11-admin-app--every-page)
-12. [Mobile app — every screen](#12-mobile-app--every-screen)
+12. [Mobile app — removed](#12-mobile-app--removed)
 13. [End-to-end pipelines (the full story)](#13-end-to-end-pipelines-the-full-story)
 14. [Shared packages reference](#14-shared-packages-reference)
 15. [Local development & deployment](#15-local-development--deployment)
@@ -27,16 +33,15 @@
 
 ## 1. Executive snapshot
 
-A four-surface restaurant ordering platform behind one NestJS API and one shared type/contract layer.
+A two-surface restaurant ordering platform behind one NestJS API and one shared type/contract layer. *(An Expo mobile surface was planned and then removed — web + admin only.)*
 
 | Surface | Stack | Audience | Bundle |
 |---|---|---|---|
 | Customer Web (`apps/web`) | Next.js 15 App Router | End users | Marketing + ordering + account |
 | Admin Dashboard (`apps/admin`) | Next.js 15 App Router | Owner / Manager / Kitchen / Cashier | Operations, KPIs, menu, orders, customers, reservations, reports |
-| Customer Mobile (`apps/mobile`) | Expo SDK 52 + expo-router | End users | Native ordering experience, push, deep links |
 | API (`apps/api`) | NestJS 11 + Fastify | All clients | REST `/api/v1/*`, Socket.IO, BullMQ workers |
 
-The product is built around: industry-grade ordering UX; real-time order/kitchen updates across all surfaces; multi-location ready; EN/AR with RTL; hard separation of customer apps from admin (no shared route, no shared bundle).
+The product is built around: industry-grade ordering UX; real-time order/kitchen updates across web + admin; multi-location ready; i18n with RTL support; hard separation of the customer app from admin (no shared route, no shared bundle).
 
 ---
 
@@ -44,16 +49,16 @@ The product is built around: industry-grade ordering UX; real-time order/kitchen
 
 ### Backend (`apps/api`)
 - **NestJS 11** with the **Fastify** adapter — controllers, modules, guards, interceptors.
-- **PostgreSQL 16** through **Prisma 6** — primary data store; migrations in `packages/db/prisma/migrations`.
-- **Redis 7** — auth/OTP tokens, idempotency cache, BullMQ broker.
-- **BullMQ** — every side-effect (email, SMS, push, receipts, reports, audit, analytics, R2 cleanup) is queued, never awaited in a request.
+- **PostgreSQL 16** through **Prisma 6** — primary data store (self-hosted container in prod); migrations in `packages/db/prisma/migrations`.
+- **Redis 7** — auth/OTP tokens, idempotency cache, rate-limit windows, BullMQ broker (self-hosted container in prod).
+- **BullMQ** — every side-effect (email, SMS, receipts, reports, audit, analytics, **payment reconciliation**, upload cleanup) is queued, never awaited in a request. *(No `push` — that channel was removed.)*
 - **Socket.IO** — `RealtimeGateway` for live order, kitchen, refund events.
 - **Stripe** (primary) + **COD** adapter; payment provider is pluggable (`PaymentProvider` interface).
 - **Resend** — transactional email.
-- **Twilio** — SMS and WhatsApp OTP.
-- **Cloudflare R2** (S3-compatible) — image storage with presigned PUT.
-- **Sentry** — error tracking (api + workers).
-- **PostHog** — backend product analytics.
+- **Twilio** — SMS OTP.
+- **Local-disk uploads** — images written under `UPLOADS_DIR` and served by the API at `${APP_URL_API}/uploads/{key}`; in prod a bind-mounted Docker volume at `/opt/restaurant/uploads`. *(No Cloudflare R2/S3.)*
+- **Sentry** — error tracking (api + workers); optional, no-op when unset.
+- **PostHog** — backend product analytics; optional.
 - **Zod** — env validation, every DTO is a Zod schema in `packages/types`.
 
 ### Frontends
@@ -64,20 +69,16 @@ The product is built around: industry-grade ordering UX; real-time order/kitchen
 - **next-intl** for i18n; **EN + AR** with RTL; locales in `packages/i18n`.
 - **Recharts** + **Tremor** for admin charts; **TanStack Table** for admin tables.
 
-### Mobile (`apps/mobile`)
-- **Expo SDK 52+** with EAS Build, **expo-router** file-based routing.
-- **NativeWind** for styling (tokens shared with web via `tooling/tailwind-config`).
-- **TanStack Query** + **React Hook Form** + **Zod** (same patterns as web).
-- **Zustand** stores; **expo-secure-store** for tokens + offline cart snapshot.
-- **@stripe/stripe-react-native** for Apple/Google Pay (provider wiring deferred to UI sprint).
-- **expo-notifications** for push (registration hook ready).
-- Deep link scheme: `restaurant://`.
+### Mobile — removed
+The Expo mobile app and its native stack (EAS, expo-router, NativeWind,
+expo-secure-store, `@stripe/stripe-react-native`, expo-notifications, deep
+links) were **removed**. There is no native app and no push channel.
 
 ### Tooling
 - **Turborepo** with remote caching; **pnpm** workspaces.
 - **Biome** for lint + format; ESLint kept only for Next-specific rules.
 - **TypeScript 5.6+** strict, project references.
-- **GitHub Actions** CI: typecheck, lint, tests.
+- **GitHub Actions** CI: typecheck, lint, tests; deploys images to the Contabo VPS.
 
 ---
 
@@ -88,30 +89,31 @@ apps/
   api/        NestJS — /api/v1 + Socket.IO + BullMQ workers
   web/        Next.js 15 — customer
   admin/      Next.js 15 — staff/owner
-  mobile/     Expo + expo-router — customer
+  (mobile/    Expo — REMOVED)
 
 packages/
   db/             Prisma schema + client + seed
   types/          Zod schemas + inferred DTOs (single source of truth)
-  api-client/     Typed fetch wrapper, used by all three frontends
+  api-client/     Typed fetch wrapper, used by web + admin
   auth-core/      Pure JWT/bcrypt/OTP helpers
   jobs/           Queue names + payload Zod schemas
   i18n/           Locale JSONs + RTL helper + formatters
   utils/          Pure helpers: money, slugify, phone, structured-data, sitemap, loyalty
   config-runtime/ createEnv() Zod helper
   ui/             shadcn components for web + admin (placeholder)
-  ui-mobile/      NativeWind components for mobile (placeholder)
+  (ui-mobile/     NativeWind components — REMOVED)
   analytics/      PostHog backend client
   observability/  Sentry wrapper
   feature-flags/  Flag catalog + helpers
   realtime-client/ Socket.IO client wrapper
 
 tooling/
-  tsconfig/       base / nextjs / react-native / nestjs
+  tsconfig/       base / nextjs / nestjs
   biome-config/   shared biome.json
   eslint-config/  next-only rules
   tailwind-config/ shared token preset
 
+deploy/           Contabo VPS: docker-compose.prod.yml, Caddyfile, RUNBOOK, backup script
 design-assets/    Stitch exports per screen (preview.png + spec.md + exported.tsx)
 docs/             plan, runbooks, security, sprints
 load/             k6 load tests
@@ -140,7 +142,7 @@ Full schema in `packages/db/prisma/schema.prisma`. Models grouped by domain:
 
 **Reviews**: `Review`, `ReviewImage`.
 
-**Notifications**: `Notification`, `NotificationPreference`, `PushToken`.
+**Notifications**: `Notification`, `NotificationPreference`, `PushToken` (scheduled for removal with the mobile-removal migration).
 
 **Other**: `UserAddress`, `CustomerNote`, `ContactMessage`, `Favorite`, `ReferralCode`, `Referral`, `AuditLog`, `DailyMetric`, `Export`, `FeatureFlag`.
 
@@ -200,11 +202,11 @@ contact:read         flags:write
 
 ## 6. User stories per role
 
-### Customer (web + mobile)
+### Customer (web)
 - I can browse the menu without an account, add items to a guest cart, and check out as a guest *or* create an account first.
 - I can sign up with email + password, verify my email, and log in. Or I can log in with phone OTP.
 - I can place a delivery, pickup, or dine-in order; apply a coupon; redeem loyalty points; tip; and pay with card / Apple Pay / Google Pay / cash on delivery.
-- I get email + SMS + push notifications when my order is confirmed, out for delivery, or delivered; I can see the live status on an order tracking page.
+- I get email + SMS + in-app notifications when my order is confirmed, out for delivery, or delivered; I can see the live status on an order tracking page.
 - I can manage my profile, saved addresses, payment methods, favorites, notification preferences, loyalty balance, referrals, and past reviews.
 - I can book a table reservation and cancel it.
 - I can rate a completed order and post a review.
@@ -273,7 +275,7 @@ Base path: `/api/v1`. Every protected route enforces `@Permissions(...)`; every 
 - **Modifier groups + options (`menu:write`)**: CRUD under `/menu/modifier-groups` and `/menu/modifier-options`.
 
 ### Uploads (`/uploads`)
-- `POST /uploads/presign` — `menu:write`. Returns a one-shot presigned R2 PUT URL + canonical download URL. The `r2.orphan-cleanup` job sweeps unreferenced uploads.
+- `POST /uploads/presign` — `menu:write`. Returns a one-shot upload URL + canonical download URL for **local-disk** storage (files land under `UPLOADS_DIR`, served at `${APP_URL_API}/uploads/{key}`). A cleanup job sweeps unreferenced uploads from the local filesystem. *(No Cloudflare R2.)*
 
 ### Cart (`/cart`)
 - `GET /cart`, `POST /cart/items`, `PATCH /cart/items/:id`, `DELETE /cart/items/:id`, `DELETE /cart` — public (guest via `sessionKey`) or authed.
@@ -290,10 +292,10 @@ Base path: `/api/v1`. Every protected route enforces `@Permissions(...)`; every 
 
 ### Payments (`/payments`)
 - `GET /payments/config` (public) — returns Stripe publishable key + currency.
-- `POST /payments/intent` (auth optional) — creates Stripe PaymentIntent; for COD short-circuits to instant approval. Idempotent.
-- `GET /payments/by-order/:orderId` — fetches payment by order.
+- `POST /payments/intent` (**`@Public()`**) — creates a Stripe PaymentIntent for an **already-created** order (order-before-intent). Authorized by the authed owner / `payment:read`, **or** a valid signed `X-Order-Token` whose order id matches; rate-limited. Method-specific (`payment_method_types`) and uses a **deterministic Stripe idempotency key** so same-method retries reuse one intent and a method switch cancels the old one. COD short-circuits to instant approval.
+- `GET /payments/by-order/:orderId` (**`@Public()`**) — fetches payment by order; same token/owner authorization as above.
 - `POST /payments/:paymentId/refunds` — `payment:refund`. Calls provider's refund, writes `Refund` row, enqueues `email.refund`, emits `order.refunded`.
-- `POST /payments/webhooks/stripe` — public. Raw body parsed in `main.ts`; signature verified; dedup via `WebhookEvent` table. Handles `payment_intent.succeeded` (→ Payment PAID, Order CONFIRMED, enqueue receipt) and `charge.refunded` (→ Refund REFUNDED).
+- `POST /payments/webhooks/stripe` — public, **never rate-limited**. Raw body parsed in `main.ts`; signature verified; dedup via `WebhookEvent` table. Handles `payment_intent.succeeded` (→ Payment PAID, Order CONFIRMED, enqueue receipt), `payment_intent.canceled`/`payment_failed` (guarded so they can't clobber a settled payment), and `charge.refunded` (→ Refund REFUNDED). The **`reconciliation`** queue (15-min repeat) repairs missed webhooks.
 
 ### Reservations (`/reservations`)
 - `GET /reservations/availability` (public) — slot computation.
@@ -322,8 +324,8 @@ Base path: `/api/v1`. Every protected route enforces `@Permissions(...)`; every 
 
 ### Notifications (`/notifications`)
 - `GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:id/read`, `POST /notifications/read-all` (auth).
-- `POST /notifications/push-tokens`, `DELETE /notifications/push-tokens/:token` — device registration.
 - `GET /notifications/preferences`, `PATCH /notifications/preferences`.
+- *(Push-token registration endpoints were removed with the push channel. Channels are in-app + email + SMS.)*
 
 ### Favorites (`/favorites`)
 - `GET /favorites`, `GET /favorites/ids`, `PUT /favorites/:menuItemId`, `DELETE /favorites/:menuItemId` — auth.
@@ -346,7 +348,7 @@ Base path: `/api/v1`. Every protected route enforces `@Permissions(...)`; every 
 
 ### Reports (`/reports`)
 - `POST /reports/exports` — `report:export`. Queues a generation job.
-- `GET /reports/exports`, `GET /reports/exports/:id`, `GET /reports/exports/:id/download` — `report:read`. Download streams R2-stored file.
+- `GET /reports/exports`, `GET /reports/exports/:id`, `GET /reports/exports/:id/download` — `report:read`. Download streams the locally-stored export file.
 
 ### Audit (`/admin/audit-log`)
 - Read-only viewer — `audit:read`.
@@ -408,25 +410,27 @@ Queues live in `packages/jobs`. Producers enqueue from `apps/api`. Workers run i
 |---|---|
 | `email` | `email.verification`, `email.password-reset`, `email.receipt`, `email.refund`, `email.order-status`, `email.contact`, `email.referral-invite` |
 | `sms` | `sms.otp`, `sms.order-status` |
-| `push` | `push.welcome`, `push.order-status`, `push.loyalty`, `push.token-cleanup` |
 | `receipt` | `receipt.generate` (PDF, attached to `email.receipt`) |
 | `reports` | `reports.generate`, `reports.cleanup` |
 | `analytics` | `analytics.rollup-daily`, `analytics.rollup-finalize` |
 | `audit` | `audit.write` (driven by `@AuditAction` decorator + `AuditInterceptor`) |
-| `r2.orphan-cleanup` | `r2.orphan-sweep` |
+| `reconciliation` | payment reconciliation (15-min repeat) — compare non-terminal payments to Stripe, repair missed-webhook gaps, alert on mismatches |
+| uploads cleanup | sweep unreferenced local-disk uploads |
+
+*(No `push` queue — channel removed. The cleanup job sweeps local `/opt/restaurant/uploads`, not R2.)*
 
 Notification matrix (which channels fire on which event):
 
-| Event | Email | SMS | Push | In-app |
-|---|---|---|---|---|
-| Welcome / verify email | ✅ | — | — | — |
-| OTP login | — | ✅ | — | — |
-| Order placed | ✅ | — | ✅ | ✅ |
-| Order confirmed | — | ✅ | ✅ | ✅ |
-| Out for delivery | — | ✅ | ✅ | ✅ |
-| Delivered | — | — | ✅ | ✅ |
-| Refund issued | ✅ | — | ✅ | ✅ |
-| Promo / loyalty digest | ✅ | — | ✅ (opt-in) | ✅ |
+| Event | Email | SMS | In-app |
+|---|---|---|---|
+| Welcome / verify email | ✅ | — | — |
+| OTP login | — | ✅ | — |
+| Order placed | ✅ | — | ✅ |
+| Order confirmed | — | ✅ | ✅ |
+| Out for delivery | — | ✅ | ✅ |
+| Delivered | — | — | ✅ |
+| Refund issued | ✅ | — | ✅ |
+| Promo / loyalty digest | ✅ | — | ✅ |
 
 ---
 
@@ -454,12 +458,12 @@ Web app at `apps/web`. Auth state in `useAuthStore` (Zustand); cart in `useCartS
 
 ### `(shop)` route group — guest or authed
 - `/cart` — `useCart(restaurantId)`; mutations: add/update/remove items, apply/remove coupon, set loyalty intent. All optimistically reflected in `useCartStore`.
-- `/checkout` — multi-step:
+- `/checkout` — multi-step (**order-before-intent**):
   1. Load cart, addresses (`useAddresses` if logged in), and `usePaymentConfig()`.
-  2. Pick type/address/payment.
-  3. `useCreatePaymentIntent()` → backend creates intent, returns `clientSecret`.
-  4. `useCreateOrder()` → `POST /orders` with `Idempotency-Key` header (regenerated after success).
-  5. Frontend confirms with Stripe SDK; the webhook flips the order to CONFIRMED.
+  2. Pick type/address/payment; the order summary shows a **server checkout quote** (`POST /orders/quote`), never client-computed money.
+  3. `useCreateOrder()` → `POST /orders` with `Idempotency-Key` + contact + `legalAccepted`/`legalBundleVersion`. The response includes a signed **order token**.
+  4. `useCreatePaymentIntent()` → `POST /payments/intent` for that order (sending `X-Order-Token` for guests) → returns `clientSecret`.
+  5. Frontend confirms with the Stripe SDK; the webhook flips the order to CONFIRMED. On decline, the same pending order + intent are reused on retry (no duplicate order).
 - `/checkout/success` — shows order number + tracking link. Subscribes to `order:{id}` immediately.
 
 ### `(account)` route group — auth-only
@@ -529,42 +533,11 @@ Every mutation uses `useMutation` + `qc.invalidateQueries(...)` on success and `
 
 ---
 
-## 12. Mobile app — every screen
+## 12. Mobile app — removed
 
-Expo app at `apps/mobile`. File-based routing via `expo-router`. Auth token in `expo-secure-store`; cart snapshot also persisted there for offline display. Stripe React Native SDK is installed; provider wiring deferred to UI sprint. Same hooks pattern as web/admin.
-
-### Layouts
-- `app/index.tsx` — redirects to `/(tabs)`.
-- `app/(tabs)/_layout.tsx` — auth-guarded tab bar (Home, Menu, Cart, Orders, Profile).
-- `app/(auth)/_layout.tsx` — public stack.
-
-### `(auth)` — public
-- `/login`, `/register`, `/forgot-password`, `/verify-otp`, `/reset-password` — same API calls as web.
-
-### `(tabs)` — auth-required
-- `/(tabs)` (home placeholder).
-- `/(tabs)/cart` — `useCart`, add/update/remove/coupon/loyalty.
-- `/(tabs)/orders` — `useOrders()`.
-
-### Menu / item / checkout / order tracking
-- `/menu` — `useMenuTree`.
-- `/item/[id]` — modifier sheet, add to cart.
-- `/checkout` — `useAddresses`, `usePaymentConfig`, `useCreatePaymentIntent`, `useCreateOrder` (with idempotency).
-- `/checkout/success` — confirmation.
-- `/orders/[id]` — `useOrderTracking` subscribes to `order:{id}`, applies `order.status_changed`.
-
-### Account
-- `/account/profile`, `/account/addresses`, `/account/favorites`, `/account/notifications`, `/account/loyalty`, `/account/referrals`.
-
-### Reservations + reviews
-- `/reservations/index`, `/reservations/new` — availability + create.
-- `/reviews/new` — create review.
-
-### Native concerns
-- **Push tokens**: `useRegisterPushToken()` hook ready; will be called after login with the device token from `expo-notifications`. Backend stores in `PushToken` and dispatches via the `push` queue.
-- **Deep links**: scheme `restaurant://`. `restaurant://orders/123` maps via expo-router to `/orders/[id]`. Used by push notification taps.
-- **Offline cart**: `useCartStore.hydrate()` reads `cart.snapshot` from SecureStore on app open so the cart renders instantly; `useCartSync()` refetches once online; guest cart `sessionKey` (UUID) is also persisted in SecureStore.
-- **Stripe**: `usePaymentConfig()` returns the publishable key; payment sheet wires up in `<StripeProvider>` once the UI sprint adds it.
+The Expo mobile app (`apps/mobile`) and its push infrastructure were removed.
+The customer surface is the responsive **web** app (`apps/web`); there is no
+native app. (Earlier drafts of this report documented mobile screens here.)
 
 ---
 
@@ -591,22 +564,20 @@ This is the most important section if you only have a few minutes. Each pipeline
 1. **Cart build-up**: every `POST /cart/items` validates the menu item is still available, recomputes the unit price, and snapshots the modifier selection (so receipts are immutable). The cart row is keyed on `(userId, restaurantId)` or `(sessionKey, restaurantId)`.
 2. **Apply coupon (optional)**: `POST /cart/coupon` calls `PromotionsService.validate()` against `Coupon` + `Promotion` rules (min subtotal, per-user limit, validity window). On success, the coupon id is stored on the cart and totals recompute.
 3. **Set loyalty intent (optional)**: `PATCH /cart/loyalty` checks the user's `LoyaltyAccount.balance` and records intended redemption on the cart (no points moved yet).
-4. **Create payment intent**: `POST /payments/intent { orderId?, methodKind }`.
-   - Service picks provider: STRIPE_CARD / APPLE_PAY / GOOGLE_PAY / P24 / BLIK → `StripeProvider`; CASH → `CodProvider`.
-   - Calls `stripe.paymentIntents.create({ amount, currency, ... metadata })` → returns `clientSecret`.
-   - Upserts a `Payment` row (status PENDING, providerRef = intent id).
-5. **Create order**: `POST /orders` with `Idempotency-Key` header.
+4. **Create order** (first — order-before-intent): `POST /orders` with `Idempotency-Key` header + customer contact + `legalAccepted`/`legalBundleVersion`.
    - Idempotency: Redis lookup `(userId|sessionKey, key) → orderId`. If hit, return cached order.
    - Loads cart, re-fetches menu items, recomputes everything server-side (**never trust client prices**).
-   - Validates coupon and loyalty redemption against current rules.
+   - Validates coupon and loyalty redemption against current rules; validates the legal bundle version (stale → `LEGAL_VERSION_CHANGED` 409).
    - `PricingService.compute()` → subtotal, tax, delivery fee, tip, discount, grand total — all `Decimal`.
-   - **DB transaction**: insert `Order` (status PENDING) + `OrderItem[]` with `nameSnapshot` and `modifierSnapshot` JSON + `OrderStatusEvent` (initial) + claim coupon redemption + clear cart items.
+   - **DB transaction**: insert `Order` (status PENDING) + `OrderItem[]` with `nameSnapshot` and `modifierSnapshot` JSON + `OrderStatusEvent` (initial) + customer snapshot + server-built `legalSnapshot`/hash + claim coupon redemption + clear cart items.
    - Emits `order.created` via `EventEmitter2`. The `RealtimeGateway` broadcasts to `restaurant:{id}:orders`.
-   - Enqueues `receipt.generate` to the `receipt` queue.
    - `@AuditAction('order:create', 'order')` causes the `AuditInterceptor` to enqueue `audit.write` after the response is sent.
-   - Captures `order_placed` PostHog event.
-   - Caches `(idempotencyKey → orderId)` in Redis.
-   - Returns `OrderDto`.
+   - Captures `order_placed` PostHog event; caches `(idempotencyKey → orderId)` in Redis.
+   - Returns `OrderDto` **including a 7-day signed order token**.
+5. **Create payment intent** (second): `POST /payments/intent { orderId, methodKind }` (guests send `X-Order-Token`).
+   - Service picks provider: STRIPE_CARD / wallets / P24 / BLIK → `StripeProvider`; CASH → `CodProvider`.
+   - Inspects the unique `Payment(orderId)` row; calls `stripe.paymentIntents.create({ amount, currency, payment_method_types, metadata }, { idempotencyKey })` with a **deterministic** key so same-method retries reuse one intent → returns `clientSecret`.
+   - Upserts the `Payment` row (status PENDING, providerRef = intent id) without overwriting a paid reference.
 6. **Client confirms with Stripe SDK** using the `clientSecret`.
 7. **Stripe webhook** hits `POST /api/v1/payments/webhooks/stripe`.
    - `main.ts` captured the raw body for this route only; signature verified with `stripe.webhooks.constructEvent`.
@@ -617,16 +588,16 @@ This is the most important section if you only have a few minutes. Each pipeline
      - Emits `order.status_changed` (rooms: `order:{id}`, `restaurant:{id}:orders`) and `kitchen.ticket_added` (room: `restaurant:{id}:kitchen`).
      - Awards loyalty points (`loyalty.earn`) — `LoyaltyAccount.points += earned`, writes `LoyaltyTransaction`.
      - If the user had a referral pending and this is their first paid order, marks the `Referral` as completed and emits `referral_completed`.
-     - Enqueues `email.receipt`, `push.order-status`, `sms.order-status` (per `NotificationPreference`).
+     - Enqueues `email.receipt`, `sms.order-status` (per `NotificationPreference`).
 8. **Workers fan out**:
-   - `receipt.generate` worker → renders PDF, uploads to R2, then enqueues `email.receipt` with `pdfBase64`.
-   - `email.receipt` → Resend.
+   - `receipt.generate` worker → renders PDF, stores it on local disk, then enqueues `email.receipt` with `pdfBase64`.
+   - `email.receipt` → Resend (guest receipts use `Order.customerEmail`).
    - `sms.order-status` → Twilio.
-   - `push.order-status` → loops through the user's `PushToken[]`, calls Expo / FCM, falls back to `push.token-cleanup` for failures.
    - Each worker writes an in-app `Notification` row so the bell badge updates.
-9. **Customer** sees the status live on `/account/orders/[id]` (web) or `/orders/[id]` (mobile) via the `order:{id}` room.
+   - *(No push fan-out — channel removed.)*
+9. **Customer** sees the status live on `/account/orders/[id]` (web) via the `order:{id}` room.
 10. **Admin** sees the new order on `/orders` (live list) and on the KDS at `/orders/kitchen`.
-11. **Kitchen** taps "Mark preparing" → `POST /orders/:id/status { to: PREPARING }` → state machine validates the transition for the actor's role → emits `order.status_changed` → enqueues another `push.order-status`/`sms.order-status` (per matrix). When status reaches READY, `kitchen.ticket_removed` fires and the KDS card disappears.
+11. **Kitchen** taps "Mark preparing" → `POST /orders/:id/status { to: PREPARING }` → state machine validates the transition for the actor's role → emits `order.status_changed` → enqueues another `sms.order-status` + in-app notification (per matrix). When status reaches READY, `kitchen.ticket_removed` fires and the KDS card disappears.
 12. Final `DELIVERED` transition triggers loyalty finalization (if not already credited) and the review prompt on the customer side.
 
 ### C. Owner issues a refund
@@ -642,7 +613,7 @@ This is the most important section if you only have a few minutes. Each pipeline
 3. Customer gets the email and the in-app notification; the admin row reflects the new status immediately via the socket event.
 
 ### D. Customer phone OTP login
-1. Mobile `/login` → toggles to OTP → `POST /auth/request-otp { phone }`.
+1. Web `/login` → toggles to OTP → `POST /auth/request-otp { phone }`.
 2. **API**: generates a 6-digit code, hashes it (SHA-256), stores it in Redis at `otp:phone:{phone}` with 5-min TTL, enqueues `sms.otp { phone, code, expiresInSeconds }`.
 3. **Worker (`sms` queue)** sends the SMS via Twilio.
 4. User enters the code → `POST /auth/verify-otp { phone, code }`.
@@ -665,12 +636,13 @@ Every sensitive endpoint carries `@AuditAction(action, resourceType, idFrom?)`. 
 ### H. Reports export
 1. Admin `/reports/exports` → "New export" → `POST /reports/exports { type, dateFrom, dateTo, restaurantId? }`.
 2. API creates an `Export` row with status PENDING; enqueues `reports.generate`.
-3. Worker queries the data, generates CSV/XLSX, uploads to R2, sets status COMPLETED and writes the download URL.
-4. Frontend polls `GET /reports/exports/:id` until COMPLETED; user clicks Download → backend issues a signed R2 URL → file streams.
+3. Worker queries the data, generates CSV/XLSX, stores it on local disk, sets status COMPLETED and writes the download reference.
+4. Frontend polls `GET /reports/exports/:id` until COMPLETED; user clicks Download → backend streams the locally-stored file.
 
 ### I. Idempotency, generally
-- `POST /orders` requires `Idempotency-Key` (UUID). Cached at `(userId|sessionKey, key) → orderId`.
-- Stripe webhooks are deduplicated via the `WebhookEvent` table by event id.
+- **Order-level:** `POST /orders` requires `Idempotency-Key` (UUID), cached at `(userId|sessionKey, key) → orderId`, backed by a unique `Payment(orderId)` row.
+- **PaymentIntent-level:** the server passes a **deterministic Stripe idempotency key** in the Stripe request options (not just metadata), so concurrent/retried same-method requests yield one provider intent and a method switch cancels the old one.
+- Stripe webhooks are deduplicated via the `WebhookEvent` table by event id; the `reconciliation` job repairs any missed webhooks.
 - All workers retry on failure with exponential backoff (BullMQ default) and dead-letter on max attempts.
 
 ---
@@ -681,7 +653,7 @@ Every sensitive endpoint carries `@AuditAction(action, resourceType, idFrom?)`. 
 |---|---|---|
 | `@repo/db` | Prisma client + 43 models + seed | `PrismaClient`, enums, `seed.ts` (33 permission keys, 5 roles, demo restaurant + menu) |
 | `@repo/types` | Zod schemas + inferred types for every DTO/event | `RegisterSchema`, `CreateOrderSchema`, `OrderStatus`, `PaymentStatus`, `PERMISSION_KEYS`, `ROLE_PERMISSIONS`, `ROOMS`, …|
-| `@repo/api-client` | Typed HTTP client (all frontends) | `createApiClient({ baseUrl, getAccessToken, refreshAccessToken, onUnauthorized })` |
+| `@repo/api-client` | Typed HTTP client (web + admin) | `createApiClient({ baseUrl, getAccessToken, refreshAccessToken, onUnauthorized })` |
 | `@repo/auth-core` | JWT + bcrypt + OTP | `signAccess/RefreshToken`, `verify*`, `hashPassword`, `verifyPassword`, `generateOtp`, `hashToken` |
 | `@repo/jobs` | BullMQ queue names + job payload schemas | `QUEUE_EMAIL`, `JOB_EMAIL_RECEIPT`, `*Payload` schemas |
 | `@repo/i18n` | EN + AR catalogs, formatters, RTL helper | `getDir(locale)`, `negotiate`, `translator`, `format` |
@@ -690,9 +662,9 @@ Every sensitive endpoint carries `@AuditAction(action, resourceType, idFrom?)`. 
 | `@repo/realtime-client` | Socket.IO wrapper | `createRealtimeClient({ url, getAccessToken })`, `ROOMS`, `RealtimeEventMap` |
 | `@repo/analytics` | PostHog backend client | `createAnalytics({ apiKey, host })`, typed events |
 | `@repo/observability` | Sentry wrapper | `initNodeSentry`, `captureException`, `flushSentry` |
-| `@repo/feature-flags` | Flag catalog | `FLAG_CATALOG` (`loyalty.redemption`, `referral.program`, `marketing.new_landing`, `mobile.push_v2`, `soft_launch`) |
-| `@repo/ui` | shadcn web components | placeholder — populated in UI sprint |
-| `@repo/ui-mobile` | NativeWind components | placeholder — populated in UI sprint |
+| `@repo/feature-flags` | Flag catalog | `FLAG_CATALOG` (`loyalty.redemption`, `referral.program`, `marketing.new_landing`, `payments.stripe_elements`, `soft_launch`) |
+| `@repo/ui` | shadcn web components | web + admin |
+| ~~`@repo/ui-mobile`~~ | NativeWind components | **removed with the mobile surface** |
 
 ---
 
@@ -708,42 +680,52 @@ pnpm dev                    # turbo runs all apps
 stripe listen --forward-to localhost:4000/api/v1/payments/webhooks/stripe
 ```
 
-Env vars validated by `packages/config-runtime`; see `.env.example` for the full list (database, redis, JWT secrets, Stripe, Resend, Twilio, R2, Sentry, PostHog, app URLs, deep link scheme).
+Env vars validated by `packages/config-runtime`; see `.env.example` for the full list (database, redis, JWT secrets, Stripe incl. `STRIPE_PUBLISHABLE_KEY`, `ORDER_TRACKING_SECRET`, Resend, Twilio, `UPLOADS_DIR`, Sentry, PostHog, app URLs). No R2 vars, no Expo/deep-link vars.
 
-### Hosting (planned)
-- **API + workers** on Fly.io or Railway (Docker, autoscaling).
-- **Postgres** managed (Neon / Supabase / Railway).
-- **Redis** Upstash or Railway.
-- **R2** Cloudflare for images and report exports.
-- **Web + Admin** Vercel (separate projects for blast-radius isolation).
-- **Mobile** EAS Build → TestFlight + Play Internal → production.
-- **Observability**: Sentry (all apps), PostHog (product analytics + session replay on web), BetterStack uptime, k6 load tests in `load/`.
+### Hosting (actual — Contabo VPS)
+Everything runs in **Docker Compose on a single Contabo VPS** (`/opt/restaurant`):
+- **API + workers, web, admin** as containers.
+- **PostgreSQL** and **Redis** self-hosted containers (not managed).
+- **Caddy** terminates TLS (Let's Encrypt) and reverse-proxies `szefdonald.pl`, `admin.szefdonald.pl`, `api.szefdonald.pl`.
+- **Images + report exports** on local disk (`/opt/restaurant/uploads`); no R2/S3.
+- **Backups**: nightly `pg_dump` on the VPS — encrypted offsite backups are the required next step (see `docs/runbooks/backup-dr.md`).
+- **Deploy**: push to `main` → GitHub Actions builds + deploys (see `deploy/RUNBOOK.md`).
+- **Observability**: Sentry + PostHog (optional, no-op when unset), k6 load tests in `load/`.
+
+*(There is no Vercel, Fly/Railway, managed Postgres/PITR, Upstash, or EAS.)*
 
 ---
 
 ## 16. Sprint status & what's next
 
-From `docs/restaurant-app-project-plan.md` and `.claude/plans/*`. The latest commit landed sprints 0–5, 7–8, and a pre-sprint-6 hardening pass.
+From `docs/restaurant-app-project-plan.md` and `.claude/plans/*`.
+
+> Note: this is the original sprint history. The mobile surface (and its
+> "push" work in sprints 4/5/9) was later **removed** — disregard those bits.
+> Since this list, web + admin UIs were built out, EU/payment-readiness work
+> landed (legal pages, allergens, newsletter double opt-in, guest Stripe,
+> reconciliation, rate limiting, Caddy security headers), and the stack moved
+> to the Contabo VPS.
 
 - **Sprint 0** ✅ — Turborepo, scaffolds, Docker compose, CI, design assets folder.
-- **Sprint 1** ✅ — Auth + users + addresses (backend + hooks + stores + route stubs).
-- **Sprint 2** ✅ — Restaurant + menu (categories, items, modifiers, presigned uploads).
+- **Sprint 1** ✅ — Auth + users + addresses.
+- **Sprint 2** ✅ — Restaurant + menu (categories, items, modifiers, uploads).
 - **Sprint 3** ✅ — Cart + checkout API; coupon validation.
-- **Sprint 4** ✅ — Stripe + COD; refunds; receipt PDFs (the Apple/Google Pay mobile wiring lands in sprint 9).
-- **Sprint 5** ✅ — Order state machine; Socket.IO rooms/events; email/SMS/push processors.
+- **Sprint 4** ✅ — Stripe + COD; refunds; receipt PDFs. *(Apple/Google Pay was a mobile item — dropped.)*
+- **Sprint 5** ✅ — Order state machine; Socket.IO rooms/events; email/SMS processors. *(The push processor was later removed.)*
 - **Pre-Sprint-6 hardening** ✅ — Audit interceptor, idempotency, webhook dedupe, Sentry, PostHog.
-- **Sprint 6** ⏳ — Admin KPI overview + live orders + KDS UI (hooks ready, pages are stubs).
-- **Sprint 7** ✅ — Customers, promotions, reservations, reviews, staff, settings (APIs done; admin pages are stubs).
-- **Sprint 8** ✅ — Reports, analytics rollups, audit log viewer (APIs done; admin pages are stubs).
-- **Sprint 9** ⏳ — Mobile polish + push notifications (registration hook ready; UI deferred).
-- **Sprint 10** ⏳ — Marketing pages + SEO (endpoints exist; web pages are stubs).
-- **Sprint 11** ⏳ — Full EN/AR translations, RTL audit, loyalty + referrals UI polish.
-- **Sprint 12** ⏳ — Soft launch hardening (load tests scaffolded in `load/`, runbooks in `docs/runbooks/`, security checklist in `docs/security/`).
+- **Sprint 6** — Admin KPI overview + live orders + KDS UI.
+- **Sprint 7** ✅ — Customers, promotions, reservations, reviews, staff, settings.
+- **Sprint 8** ✅ — Reports, analytics rollups, audit log viewer.
+- ~~**Sprint 9** — Mobile polish + push notifications~~ — **dropped** (mobile surface removed).
+- **Sprint 10** — Marketing pages + SEO.
+- **Sprint 11** — i18n, loyalty + referrals UI polish.
+- **Sprint 12** — Soft launch hardening (load tests in `load/`, runbooks in `docs/runbooks/`, security checklist in `docs/security/`).
 
 ### Practical handoff notes
 - **Backend is the real source of truth** for what works today. The frontends are skeletons: routes exist, hooks exist, stores exist, but each `page.tsx` is `() => null` with a TODO comment. The UI sprints (and the `design-assets/` folder) are where the actual visual implementation will happen.
 - **Never trust the client**: prices, coupon validity, and loyalty redemption are always recomputed server-side at checkout.
-- **Side effects belong in queues**, not request handlers. If you need to send an email/SMS/push, enqueue from the service and let the worker handle it.
+- **Side effects belong in queues**, not request handlers. If you need to send an email/SMS, enqueue from the service and let the worker handle it.
 - **Money is `Decimal`**, never `number`. Use `packages/utils/money.ts`.
 - **Add a new permission**: seed it in `packages/db/seed.ts`, update `ROLE_PERMISSIONS` in `packages/types/src/permissions.ts`, then `@Permissions('your:new-key')` on the controller.
 - **Plan first**: per `CLAUDE.md`, any non-trivial change goes to `.claude/plans/<task-slug>.md` for approval before implementation.

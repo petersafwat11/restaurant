@@ -11,7 +11,7 @@ Flags are evaluated server-side with precedence
 | `loyalty.redemption` | on | Redeem points at checkout |
 | `referral.program` | on | Referral capture + reward |
 | `marketing.new_landing` | off | New landing aggregation |
-| `mobile.push_v2` | off | New push payload/deep links |
+| `payments.stripe_elements` | off | Live Stripe Elements checkout (kept off until §14 P0 gates pass) |
 | `soft_launch` | off | Master gate / kill switch |
 
 ## Rollout sequence
