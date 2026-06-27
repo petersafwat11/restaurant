@@ -66,8 +66,9 @@ pipeline in orders.service.ts so the quoted total == the charged total.
 - [ ] C3: durable PL/EN legal copy attached to first confirmed-order email (guest-safe).
       DEFERRED → Slice 6: needs the versioned MDX legal sources (lawyer prose) to attach.
 
-### Slice 5 — Secure guest Stripe + PaymentIntent lifecycle (Phase F)  ⏳ server core DONE
-Server core (F5/F1/F3/F2) committed; F6 + F4 are the second pass.
+### Slice 5 — Secure guest Stripe + PaymentIntent lifecycle (Phase F)  ✅ DONE (expiry-job = owner)
+F5/F1/F3/F2 + F6 + F4-core landed. Only the abandoned-order expiry *policy* (cutoff)
+is left — an owner decision, noted below.
 - [x] F1: `/payments/intent` + `/payments/by-order` are `@Public()`; authorize by authed
       owner / `payment:read` / valid signed `X-Order-Token` whose orderId matches. Token
       threaded through api-client + `StripePaymentForm` (never logged). e2e: guest-ok,
@@ -88,8 +89,13 @@ Server core (F5/F1/F3/F2) committed; F6 + F4 are the second pass.
       `retrieveIntentStatus`, repairs missed-webhook → PAID (+confirm) / dead → FAILED, alerts
       on unexpected via captureException. Pure `reconcileAction` unit-tested (6); e2e:
       failed + out-of-order-after-succeeded. (Repair path only runs with a live Stripe key.)
-- [ ] F4: checkout recovery — reuse existing pending order on retry (no duplicate); locale+token
-      redirect; abandoned-order/intent expiry policy (owner decision on cutoff).
+- [x] F4 core: on retry after a Stripe decline the checkout reuses the existing pending order
+      (cart was cleared at creation, so no duplicate order) + reuses the intent via the server
+      idempotency key; recoverable pending order kept; success redirect preserves locale+token.
+      Shared `runStripeConfirm` for first-attempt + retry.
+      [ ] abandoned-order/intent **expiry job** still owed — needs the owner's cutoff policy
+      (how long a PENDING/unpaid order lives before auto-cancel). Reconciliation already
+      settles intents Stripe reports as dead.
 - NOTE for Slice 8 §I1: add `/payments/intent` + `/payments/by-order` to the throttle list.
 
 ### Slice 6 — Legal/fulfilment page structure (Phase D)  [prose = lawyer]

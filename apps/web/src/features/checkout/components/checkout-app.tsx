@@ -486,6 +486,18 @@ export function CheckoutApp() {
   };
   const handleRemovePromo = () => removeCoupon.mutate();
 
+  // Wait for the mounted Stripe Elements form to be ready, then run its confirm.
+  // Returns null on success or an error string. Shared by the first attempt and
+  // the recovery retry so neither re-creates an order (plan §F4).
+  const runStripeConfirm = async (): Promise<string | null> => {
+    const deadline = Date.now() + 8000;
+    while (!stripeSubmitRef.current && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    if (!stripeSubmitRef.current) return t('errors.stripeNotInit');
+    return stripeSubmitRef.current();
+  };
+
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null);
     if (values.orderType === 'DELIVERY' && belowMinimum) {
@@ -501,6 +513,25 @@ export function CheckoutApp() {
 
     setSubmitting(true);
     try {
+      // F4 recovery: a pending order was already created on a prior attempt
+      // (e.g. a Stripe decline). The cart was cleared server-side at creation,
+      // so DON'T create a second order — just retry the payment for the existing
+      // one. The server reuses the same PaymentIntent via its deterministic
+      // idempotency key, so no duplicate intent either.
+      if (createdOrderId && onlinePaymentsReady && stripeConfig && isOnlineMethod) {
+        const retryErr = await runStripeConfirm();
+        if (retryErr) {
+          setSubmitError(retryErr);
+          setSubmitting(false);
+          return;
+        }
+        const tokenQuery = createdOrderToken
+          ? `?t=${encodeURIComponent(createdOrderToken)}`
+          : '';
+        router.push(`/checkout/success/${createdOrderId}${tokenQuery}`);
+        return;
+      }
+
       // DELIVERY path:
       //  - Authenticated users save the address (so they can reuse it) and
       //    pass `deliveryAddressId` to /orders.
@@ -574,15 +605,10 @@ export function CheckoutApp() {
       if (onlinePaymentsReady && stripeConfig && isOnlineMethod) {
         setCreatedOrderId(order.id);
         setCreatedOrderToken(order.trackingToken ?? null);
-        const deadline = Date.now() + 8000;
-        while (!stripeSubmitRef.current && Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, 100));
-        }
-        if (!stripeSubmitRef.current) {
-          throw new Error(t('errors.stripeNotInit'));
-        }
-        const stripeErr = await stripeSubmitRef.current();
+        const stripeErr = await runStripeConfirm();
         if (stripeErr) {
+          // Keep the pending order recoverable — the next submit retries the
+          // payment for it instead of creating a new order (guard above).
           setSubmitError(stripeErr);
           setSubmitting(false);
           return;
