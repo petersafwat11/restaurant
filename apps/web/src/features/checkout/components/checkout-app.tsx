@@ -2,11 +2,12 @@
 
 import { useCartSessionKey } from '@/components/cart-session-provider';
 import { useAddresses } from '@/features/addresses/hooks';
-import { useCart, useSetCartLoyalty } from '@/features/cart/hooks';
+import { useApplyCoupon, useCart, useRemoveCoupon, useSetCartLoyalty } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
 import { StripePaymentForm } from '@/features/checkout/components/stripe-payment-form';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
+import { useCheckoutQuote } from '@/features/checkout/hooks/use-checkout-quote';
 import { useFeatureFlag } from '@/features/feature-flags/hooks';
 import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
 import { useCreateOrder } from '@/features/orders/hooks';
@@ -21,7 +22,6 @@ import {
 } from '@repo/types';
 import { CheckoutFormSchema } from '@repo/types';
 import {
-  type AppliedPromo,
   CheckoutSection,
   type CheckoutSectionStatus,
   Container,
@@ -31,6 +31,7 @@ import {
   type LoyaltyApplyResult,
   LoyaltyRedeemInput,
   OrderSummaryPanel,
+  type PromoApplyResult,
   PromoCodeInput,
   RadioCardGroup,
   type RadioCardOption,
@@ -61,73 +62,6 @@ import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-// Mock promo store — wires to a future server endpoint. For now, in-memory.
-// `labelKey` resolves via the `promo.mock.*` translation namespace.
-const MOCK_PROMOS: Record<
-  string,
-  { discountPercent?: number; discountAmount?: string; labelKey: 'baklava' | 'student' }
-> = {
-  BAKLAVA: { discountPercent: 15, labelKey: 'baklava' },
-  STUDENT: { discountAmount: '5.00', labelKey: 'student' },
-};
-
-function computeSummary(
-  subtotal: string,
-  orderType: OrderType,
-  appliedPromo: AppliedPromo | null,
-  tipAmount: string,
-  deliveryFee: string,
-  freeLabel: string,
-  loyalty: { amount: string; label: string } | null,
-) {
-  let discountAmount = 0;
-  let discountLabel: string | undefined;
-  if (appliedPromo) {
-    const promo = MOCK_PROMOS[appliedPromo.code];
-    if (promo) {
-      if (promo.discountPercent) {
-        discountAmount = (Number.parseFloat(subtotal) * promo.discountPercent) / 100;
-      } else if (promo.discountAmount) {
-        discountAmount = Math.min(
-          Number.parseFloat(promo.discountAmount),
-          Number.parseFloat(subtotal),
-        );
-      }
-      discountLabel = appliedPromo.label;
-    }
-  }
-  const sub = Number.parseFloat(subtotal);
-  // Loyalty redemption is applied server-side at order creation; clamp the
-  // display so the running total never dips below the post-promo subtotal.
-  const loyaltyAmount = loyalty
-    ? Math.min(Number.parseFloat(loyalty.amount), Math.max(0, sub - discountAmount))
-    : 0;
-  const subAfter = sub - discountAmount - loyaltyAmount;
-  let deliveryAmount = 0;
-  let deliveryLabel: string | undefined;
-  if (orderType === 'PICKUP' || orderType === 'DINE_IN') {
-    deliveryLabel = freeLabel;
-  } else {
-    deliveryAmount = Number.parseFloat(deliveryFee);
-  }
-  const total = (subAfter + deliveryAmount + Number.parseFloat(tipAmount || '0')).toFixed(2);
-  const delivery: DeliveryRow = deliveryLabel
-    ? { label: deliveryLabel }
-    : { amount: deliveryAmount.toFixed(2) };
-  return {
-    discount:
-      discountAmount > 0 && discountLabel
-        ? { amount: discountAmount.toFixed(2), label: discountLabel }
-        : undefined,
-    loyaltyDiscount:
-      loyalty && loyaltyAmount > 0
-        ? { amount: loyaltyAmount.toFixed(2), label: loyalty.label }
-        : undefined,
-    delivery,
-    total,
-  };
-}
-
 export function CheckoutApp() {
   const t = useTranslations('web.shop.checkout');
   // The indicative ETA strings (eta.*) live in the success-page namespace, which
@@ -150,10 +84,14 @@ export function CheckoutApp() {
   const loyaltyAccountQuery = useLoyaltyAccount();
   const redeemQuote = useLoyaltyRedeemQuote();
   const setCartLoyalty = useSetCartLoyalty();
+  // Real coupon apply/remove — replaces the old client-side MOCK_PROMOS. Both
+  // atomically swap the cart query/store with the API response, which busts the
+  // checkout quote (keyed on cart.updatedAt) so totals re-fetch authoritatively.
+  const applyCoupon = useApplyCoupon();
+  const removeCoupon = useRemoveCoupon();
 
   const restaurant = restaurantQuery.data;
 
-  const [appliedPromo, setAppliedPromo] = React.useState<AppliedPromo | null>(null);
   const [appliedLoyalty, setAppliedLoyalty] = React.useState<{
     points: number;
     discountAmount: string;
@@ -299,23 +237,42 @@ export function CheckoutApp() {
   const orderType = form.watch('orderType');
   const tipAmount = form.watch('tipAmount');
   const geoPoint = form.watch('address.geoPoint');
+
+  // Server-authoritative price quote — the single source of every money value
+  // shown in the summary. Re-quotes when orderType, tip, or the cart (items,
+  // coupon, loyalty — all reflected in cart.updatedAt) change.
+  const quoteQuery = useCheckoutQuote({
+    orderType,
+    tipAmount,
+    cartVersion: cart?.updatedAt ?? '',
+    enabled: !!cart && lines.length > 0,
+  });
+  const quote = quoteQuery.data;
+
+  // Display rows derived from the quote strings — never recomputed client-side.
   const summary = React.useMemo(() => {
-    const loyalty = appliedLoyalty
-      ? {
-          amount: appliedLoyalty.discountAmount,
-          label: t('loyalty.discountLabel', { points: appliedLoyalty.points }),
-        }
-      : null;
-    return computeSummary(
-      subtotal,
-      orderType,
-      appliedPromo,
-      tipAmount,
-      defaultDeliveryFee,
-      t('free'),
-      loyalty,
-    );
-  }, [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t, appliedLoyalty]);
+    const delivery: DeliveryRow =
+      orderType === 'DELIVERY'
+        ? { amount: quote?.deliveryFee ?? defaultDeliveryFee }
+        : { label: t('free') };
+    return {
+      delivery,
+      discount:
+        cart?.appliedCoupon && quote
+          ? { amount: quote.couponDiscount, label: cart.appliedCoupon.code }
+          : undefined,
+      loyaltyDiscount:
+        appliedLoyalty && quote
+          ? {
+              amount: quote.loyaltyDiscount,
+              label: t('loyalty.discountLabel', { points: appliedLoyalty.points }),
+            }
+          : undefined,
+      // Falls back to the cart subtotal only until the first quote resolves; the
+      // place-order CTA is disabled until `quote` is present.
+      total: quote?.grandTotal ?? subtotal,
+    };
+  }, [quote, cart?.appliedCoupon, appliedLoyalty, orderType, defaultDeliveryFee, subtotal, t]);
 
   // ---- Loyalty redemption --------------------------------------------------
   const loyaltyBalance = user ? (loyaltyAccountQuery.data?.points ?? 0) : 0;
@@ -507,14 +464,23 @@ export function CheckoutApp() {
     if (ok) setCompletedSteps((s) => ({ ...s, [step]: true }));
   };
 
-  const handleApplyPromo = async (code: string) => {
-    await new Promise((r) => setTimeout(r, 400));
-    const found = MOCK_PROMOS[code];
-    if (!found) return { ok: false as const, error: t('promo.notValid') };
-    const label = t(`promo.mock.${found.labelKey}`);
-    setAppliedPromo({ code, label });
-    return { ok: true as const, label };
+  // Real server-validated coupon apply/remove. The hooks swap the cart query
+  // with the API response, which re-quotes the totals (keyed on cart.updatedAt).
+  const handleApplyPromo = async (code: string): Promise<PromoApplyResult> => {
+    try {
+      const next = await applyCoupon.mutateAsync({ code });
+      const applied = next.appliedCoupon;
+      return {
+        ok: true,
+        label: applied
+          ? t('promo.appliedLabel', { amount: formatMoney(applied.discountAmount, currency) })
+          : undefined,
+      };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : t('promo.notValid') };
+    }
   };
+  const handleRemovePromo = () => removeCoupon.mutate();
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null);
@@ -1099,9 +1065,21 @@ export function CheckoutApp() {
             }}
             promoInput={
               <PromoCodeInput
-                applied={appliedPromo}
+                applied={
+                  cart?.appliedCoupon
+                    ? {
+                        code: cart.appliedCoupon.code,
+                        label: t('promo.appliedLabel', {
+                          amount: formatMoney(
+                            quote?.couponDiscount ?? cart.appliedCoupon.discountAmount,
+                            currency,
+                          ),
+                        }),
+                      }
+                    : null
+                }
                 onApply={handleApplyPromo}
-                onRemove={() => setAppliedPromo(null)}
+                onRemove={handleRemovePromo}
                 labels={{
                   trigger: t('promo.trigger'),
                   placeholder: t('promo.placeholder'),

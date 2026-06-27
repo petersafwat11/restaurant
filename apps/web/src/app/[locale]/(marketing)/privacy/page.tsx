@@ -1,5 +1,6 @@
 import { type CompanyInfo, LEGAL_LAST_UPDATED, getCompanyInfo } from '@/features/legal/company';
 import { LegalPage } from '@/features/legal/legal-page';
+import { SellerIdentity } from '@/features/legal/seller-identity';
 import { Link } from '@/i18n/navigation';
 import { getAlternates } from '@/lib/seo/alternates';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
@@ -12,25 +13,6 @@ export function generateStaticParams() {
 
 export function generateMetadata(): Metadata {
   return { alternates: getAlternates('/privacy') };
-}
-
-function CompanyBlock({ c }: { c: CompanyInfo }) {
-  return (
-    <p>
-      <strong>{c.legalName}</strong>
-      <br />
-      {c.addressLines.map((l) => (
-        <span key={l}>
-          {l}
-          <br />
-        </span>
-      ))}
-      NIP {c.nip} · KRS {c.krs} · REGON {c.regon}
-      <br />
-      <a href={`mailto:${c.email}`}>{c.email}</a>
-      {c.phone ? ` · ${c.phone}` : ''}
-    </p>
-  );
 }
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -73,7 +55,7 @@ function PrivacyEN({ c }: { c: CompanyInfo }) {
       </p>
 
       <h2 id="controller">1. Who we are (data controller)</h2>
-      <CompanyBlock c={c} />
+      <SellerIdentity c={c} locale="en" />
 
       <h2 id="data">2. What data we collect</h2>
       <ul>
@@ -172,7 +154,7 @@ function PrivacyPL({ c }: { c: CompanyInfo }) {
       </p>
 
       <h2 id="controller">1. Kim jesteśmy (administrator danych)</h2>
-      <CompanyBlock c={c} />
+      <SellerIdentity c={c} locale="pl" />
 
       <h2 id="data">2. Jakie dane zbieramy</h2>
       <ul>

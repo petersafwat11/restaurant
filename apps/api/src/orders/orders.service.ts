@@ -13,6 +13,8 @@ import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
 import { JOB_RECEIPT_GENERATE, QUEUE_RECEIPT } from '@repo/jobs';
 import type { Queue } from 'bullmq';
 import type {
+  CheckoutQuoteDto,
+  CheckoutQuoteRequestDto,
   CreateOrderDto,
   GeoPointDto,
   ModifierSnapshotEntry,
@@ -26,6 +28,7 @@ import type {
   OrderPaymentDto,
   OrderStatusChangedEvent,
   OrderTrackingDto,
+  OrderType,
   PaymentMethodKind,
 } from '@repo/types';
 import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils/money';
@@ -75,23 +78,20 @@ export class OrdersService {
     @InjectQueue(QUEUE_RECEIPT) private readonly receiptQueue: Queue,
   ) {}
 
-  // ---- Create ------------------------------------------------------------
+  // ---- Shared checkout pricing -------------------------------------------
 
-  async create(actor: OrderActor, idempotencyKey: string, dto: CreateOrderDto): Promise<OrderDto> {
-    if (!idempotencyKey) {
-      throw new BadRequestException('Idempotency-Key header is required');
-    }
-
-    const scope = actor.userId ?? actor.sessionKey ?? '';
-    if (!scope) {
-      throw new BadRequestException('Auth or sessionKey required to place an order');
-    }
-
-    const existingOrderId = await this.idempotency.get(scope, idempotencyKey);
-    if (existingOrderId) {
-      return this.getById(actor, existingOrderId);
-    }
-
+  /**
+   * Server-authoritative pricing shared by the checkout quote and order
+   * creation. Loads the caller's cart, re-validates each line against the live
+   * menu, re-validates the applied coupon, quotes loyalty redemption, and runs
+   * the single `PricingService.calculateTotals` calculator. Both `create()` and
+   * `quote()` call this so the displayed total and the charged total cannot
+   * diverge (plan §3.4 — never a second checkout calculator).
+   */
+  private async priceCheckout(
+    actor: OrderActor,
+    input: { type: OrderType; tipAmount: string; sessionKey?: string | null },
+  ) {
     const restaurantRow = await this.prisma.restaurant.findFirst({
       select: {
         id: true,
@@ -108,7 +108,7 @@ export class OrdersService {
     const cart = await this.prisma.cart.findFirst({
       where: actor.userId
         ? { userId: actor.userId }
-        : { sessionKey: dto.sessionKey ?? actor.sessionKey ?? '' },
+        : { sessionKey: input.sessionKey ?? actor.sessionKey ?? '' },
       include: {
         items: true,
         appliedPromotion: true,
@@ -117,8 +117,6 @@ export class OrdersService {
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('Cart is empty');
     }
-
-    const restaurant = { currency: restaurantRow.currency };
 
     // Re-validate each line against the live menu.
     const menuItems = await this.prisma.menuItem.findMany({
@@ -205,14 +203,89 @@ export class OrdersService {
       totals = await this.pricing.calculateTotals({
         lines: lineSnapshots.map((l) => ({ unitPrice: l.unitPrice, quantity: l.quantity })),
         couponDiscount: couponDiscount.plus(loyaltyDiscount),
-        tipAmount: dto.tipAmount ?? '0',
+        tipAmount: input.tipAmount,
         // Flat restaurant-wide fee — only charged for DELIVERY orders.
-        deliveryFee:
-          dto.type === 'DELIVERY' ? restaurantRow.defaultDeliveryFee.toString() : 0,
+        deliveryFee: input.type === 'DELIVERY' ? restaurantRow.defaultDeliveryFee.toString() : 0,
       });
     } catch (err) {
       throw new BadRequestException((err as Error).message);
     }
+
+    return {
+      restaurantRow,
+      cart,
+      lineSnapshots,
+      subtotalPreview,
+      couponCode,
+      couponDiscount,
+      couponRedemption,
+      loyaltyPointsToBurn,
+      loyaltyDiscount,
+      totals,
+    };
+  }
+
+  /**
+   * Read-only checkout price quote — the single source of the totals the
+   * checkout summary displays. Reuses `priceCheckout` so the quoted grand total
+   * equals what `create()` will charge.
+   */
+  async quote(actor: OrderActor, dto: CheckoutQuoteRequestDto): Promise<CheckoutQuoteDto> {
+    const { restaurantRow, couponCode, couponDiscount, loyaltyDiscount, totals } =
+      await this.priceCheckout(actor, {
+        type: dto.type,
+        tipAmount: dto.tipAmount,
+        sessionKey: dto.sessionKey,
+      });
+    return {
+      subtotal: totals.asStrings.subtotal,
+      couponDiscount: decimalToString(couponDiscount),
+      loyaltyDiscount: decimalToString(loyaltyDiscount),
+      discountTotal: totals.asStrings.discountTotal,
+      deliveryFee: totals.asStrings.deliveryFee,
+      taxTotal: totals.asStrings.taxTotal,
+      tipAmount: totals.asStrings.tipAmount,
+      grandTotal: totals.asStrings.grandTotal,
+      currency: restaurantRow.currency,
+      couponCode,
+      orderType: dto.type,
+      quotedAt: new Date().toISOString(),
+    };
+  }
+
+  // ---- Create ------------------------------------------------------------
+
+  async create(actor: OrderActor, idempotencyKey: string, dto: CreateOrderDto): Promise<OrderDto> {
+    if (!idempotencyKey) {
+      throw new BadRequestException('Idempotency-Key header is required');
+    }
+
+    const scope = actor.userId ?? actor.sessionKey ?? '';
+    if (!scope) {
+      throw new BadRequestException('Auth or sessionKey required to place an order');
+    }
+
+    const existingOrderId = await this.idempotency.get(scope, idempotencyKey);
+    if (existingOrderId) {
+      return this.getById(actor, existingOrderId);
+    }
+
+    const {
+      restaurantRow,
+      cart,
+      lineSnapshots,
+      subtotalPreview,
+      couponCode,
+      couponDiscount,
+      couponRedemption,
+      loyaltyPointsToBurn,
+      loyaltyDiscount,
+      totals,
+    } = await this.priceCheckout(actor, {
+      type: dto.type,
+      tipAmount: dto.tipAmount ?? '0',
+      sessionKey: dto.sessionKey,
+    });
 
     const { subtotal, taxTotal, deliveryFee, tipAmount, discountTotal, grandTotal } = totals;
 
@@ -324,7 +397,7 @@ export class OrdersService {
             tipAmount,
             discountTotal,
             grandTotal,
-            currency: restaurant.currency,
+            currency: restaurantRow.currency,
             deliveryAddress: deliveryAddress ?? Prisma.JsonNull,
             pickupAt: dto.pickupAt ? new Date(dto.pickupAt) : null,
             notes: dto.notes ?? null,

@@ -1,5 +1,6 @@
 import { type CompanyInfo, LEGAL_LAST_UPDATED, getCompanyInfo } from '@/features/legal/company';
 import { LegalPage } from '@/features/legal/legal-page';
+import { SellerIdentity } from '@/features/legal/seller-identity';
 import { Link } from '@/i18n/navigation';
 import { getAlternates } from '@/lib/seo/alternates';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
@@ -12,25 +13,6 @@ export function generateStaticParams() {
 
 export function generateMetadata(): Metadata {
   return { alternates: getAlternates('/terms') };
-}
-
-function SellerBlock({ c }: { c: CompanyInfo }) {
-  return (
-    <p>
-      <strong>{c.legalName}</strong>
-      <br />
-      {c.addressLines.map((l) => (
-        <span key={l}>
-          {l}
-          <br />
-        </span>
-      ))}
-      NIP {c.nip} · KRS {c.krs} · REGON {c.regon}
-      <br />
-      <a href={`mailto:${c.email}`}>{c.email}</a>
-      {c.phone ? ` · ${c.phone}` : ''}
-    </p>
-  );
 }
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -105,7 +87,7 @@ function TermsEN({ c, delivery, pickup }: TermsBodyProps) {
       </p>
 
       <h2 id="seller">1. Who we are (the Seller)</h2>
-      <SellerBlock c={c} />
+      <SellerIdentity c={c} locale="en" />
 
       <h2 id="services">2. Services</h2>
       <p>
@@ -192,7 +174,7 @@ function TermsPL({ c, delivery, pickup }: TermsBodyProps) {
       </p>
 
       <h2 id="seller">1. Sprzedawca</h2>
-      <SellerBlock c={c} />
+      <SellerIdentity c={c} locale="pl" />
 
       <h2 id="services">2. Usługi</h2>
       <p>

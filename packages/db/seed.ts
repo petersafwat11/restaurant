@@ -220,6 +220,16 @@ async function seedRestaurants() {
     estimatedDeliveryMinutesMax: 45,
     estimatedPickupMinutesMin: 12,
     estimatedPickupMinutesMax: 20,
+    // Payment-provider readiness (plan §B). Only the known NIP + provisional
+    // support contacts are seeded; the legal identity (legalName/KRS/REGON/
+    // registryCourt/shareCapital) is intentionally left unset so the admin
+    // readiness check reflects the real "verify against eKRS first" state.
+    nip: '6572959741',
+    registeredAddressSameAsTrading: true,
+    supportEmail: 'mahmodrasul123@gmail.com',
+    supportPhone: '+48 883 953 589',
+    complaintsEmail: 'mahmodrasul123@gmail.com',
+    privacyEmail: 'mahmodrasul123@gmail.com',
   };
 
   const restaurant = await prisma.restaurant.upsert({

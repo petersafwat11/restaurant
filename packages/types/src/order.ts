@@ -66,6 +66,42 @@ export const CreateOrderSchema = z
   });
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 
+// ---- Checkout quote --------------------------------------------------------
+// Server-authoritative price quote for the checkout summary. The client sends
+// the order-time-only inputs (order type + tip); coupon and loyalty come from
+// the persisted cart. The server computes every money value with the same
+// `PricingService.calculateTotals` used at order creation — the client must
+// display these strings and never recompute chargeable money. Order creation
+// still recomputes authoritatively; if the final total differs the client is
+// asked to review rather than being silently charged a different amount.
+
+export const CheckoutQuoteRequestSchema = z.object({
+  type: z.enum(ORDER_TYPES),
+  tipAmount: MoneyStringSchema.default('0'),
+  // Guests pass their cart session key; authed callers are resolved by token.
+  sessionKey: z.string().min(1).optional(),
+});
+export type CheckoutQuoteRequestDto = z.infer<typeof CheckoutQuoteRequestSchema>;
+
+export const CheckoutQuoteSchema = z.object({
+  subtotal: MoneyStringSchema,
+  couponDiscount: MoneyStringSchema,
+  loyaltyDiscount: MoneyStringSchema,
+  // coupon + loyalty, clamped to subtotal (matches Order.discountTotal).
+  discountTotal: MoneyStringSchema,
+  deliveryFee: MoneyStringSchema,
+  taxTotal: MoneyStringSchema,
+  tipAmount: MoneyStringSchema,
+  grandTotal: MoneyStringSchema,
+  currency: z.string(),
+  couponCode: z.string().nullable(),
+  // Echo of the requested order type + an ISO timestamp so the client can detect
+  // a stale quote. The server remains authoritative regardless.
+  orderType: z.enum(ORDER_TYPES),
+  quotedAt: z.string(),
+});
+export type CheckoutQuoteDto = z.infer<typeof CheckoutQuoteSchema>;
+
 // ---- Order items snapshot --------------------------------------------------
 
 export const OrderItemSchema = z.object({

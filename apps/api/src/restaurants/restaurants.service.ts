@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { OperatingHours, Prisma, Restaurant } from '@repo/db';
+import { type OperatingHours, Prisma, type Restaurant } from '@repo/db';
 import type {
   OperatingHoursDto,
   RestaurantAdminDto,
@@ -18,9 +18,10 @@ import { CacheService } from '../redis/cache.service';
 const CACHE_TTL_SECONDS = 300;
 // Single-restaurant project — one cached entry covers all reads. v3 = post
 // restaurantId drop (cart/menu/etc. no longer carry it). v4 = estimated*Minutes
-// split into Min/Max range pairs (DTO shape changed; bump avoids serving a stale
-// v3 object missing the new keys during the post-deploy TTL window).
-const PUBLIC_KEY = 'restaurant:public:v4';
+// split into Min/Max range pairs. v5 = added nested `legal` block (legal entity +
+// support contacts). Bump avoids serving a stale object missing the new keys
+// during the post-deploy TTL window.
+const PUBLIC_KEY = 'restaurant:public:v5';
 
 /**
  * Single-restaurant project (decision: drop restaurantId everywhere).
@@ -55,6 +56,7 @@ export class RestaurantsService {
       ...toPublic(row, hours),
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      legal: toAdminLegal(row),
     };
   }
 
@@ -134,6 +136,38 @@ export class RestaurantsService {
         ...(dto.estimatedPickupMinutesMax !== undefined
           ? { estimatedPickupMinutesMax: dto.estimatedPickupMinutesMax }
           : {}),
+        // Legal entity & customer-support fields (stored flat).
+        ...(dto.legalName !== undefined ? { legalName: dto.legalName } : {}),
+        ...(dto.nip !== undefined ? { nip: dto.nip } : {}),
+        ...(dto.regon !== undefined ? { regon: dto.regon } : {}),
+        ...(dto.krs !== undefined ? { krs: dto.krs } : {}),
+        ...(dto.registryCourt !== undefined ? { registryCourt: dto.registryCourt } : {}),
+        ...(dto.shareCapital !== undefined
+          ? {
+              shareCapital: dto.shareCapital === null ? null : new Prisma.Decimal(dto.shareCapital),
+            }
+          : {}),
+        ...(dto.shareCapitalCurrency !== undefined
+          ? { shareCapitalCurrency: dto.shareCapitalCurrency }
+          : {}),
+        ...(dto.registeredAddress !== undefined
+          ? {
+              registeredAddress:
+                dto.registeredAddress === null
+                  ? Prisma.DbNull
+                  : (dto.registeredAddress as Prisma.InputJsonValue),
+            }
+          : {}),
+        ...(dto.registeredAddressSameAsTrading !== undefined
+          ? { registeredAddressSameAsTrading: dto.registeredAddressSameAsTrading }
+          : {}),
+        ...(dto.supportEmail !== undefined ? { supportEmail: dto.supportEmail } : {}),
+        ...(dto.supportPhone !== undefined ? { supportPhone: dto.supportPhone } : {}),
+        ...(dto.complaintsEmail !== undefined ? { complaintsEmail: dto.complaintsEmail } : {}),
+        ...(dto.privacyEmail !== undefined ? { privacyEmail: dto.privacyEmail } : {}),
+        ...(dto.statementDescriptor !== undefined
+          ? { statementDescriptor: dto.statementDescriptor }
+          : {}),
       },
     });
     await this.cache.invalidate(PUBLIC_KEY);
@@ -142,6 +176,7 @@ export class RestaurantsService {
       ...toPublic(updated, hours),
       createdAt: updated.createdAt.toISOString(),
       updatedAt: updated.updatedAt.toISOString(),
+      legal: toAdminLegal(updated),
     };
   }
 
@@ -225,7 +260,36 @@ function toPublic(row: Restaurant, hours?: OperatingHours[]): RestaurantPublicDt
     servesCuisine: row.servesCuisine,
     priceRange: (row.priceRange ?? null) as RestaurantPublicDto['priceRange'],
     sameAs: row.sameAs,
+    legal: toLegal(row),
     ...(hours ? { hours: hours.map(toHoursDto) } : {}),
+  };
+}
+
+/** Public legal block (no same-as-trading switch — that is admin-only). */
+function toLegal(row: Restaurant): RestaurantPublicDto['legal'] {
+  return {
+    legalName: row.legalName,
+    nip: row.nip,
+    regon: row.regon,
+    krs: row.krs,
+    registryCourt: row.registryCourt,
+    shareCapital: row.shareCapital ? row.shareCapital.toFixed(2) : null,
+    shareCapitalCurrency: row.shareCapitalCurrency,
+    registeredAddress: (row.registeredAddress ??
+      null) as RestaurantPublicDto['legal']['registeredAddress'],
+    supportEmail: row.supportEmail,
+    supportPhone: row.supportPhone,
+    complaintsEmail: row.complaintsEmail,
+    privacyEmail: row.privacyEmail,
+    statementDescriptor: row.statementDescriptor,
+  };
+}
+
+/** Admin legal block — public block plus the registered-address-same-as-trading switch. */
+function toAdminLegal(row: Restaurant): RestaurantAdminDto['legal'] {
+  return {
+    ...toLegal(row),
+    registeredAddressSameAsTrading: row.registeredAddressSameAsTrading,
   };
 }
 

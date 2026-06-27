@@ -17,6 +17,8 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   type AddOrderNoteDto,
   AddOrderNoteSchema,
+  type CheckoutQuoteRequestDto,
+  CheckoutQuoteRequestSchema,
   type CreateOrderDto,
   CreateOrderSchema,
   type OrderExportQuery,
@@ -74,6 +76,25 @@ export class OrdersController {
         permissions: user?.permissions ?? [],
       },
       idempotencyKey,
+      dto,
+    );
+  }
+
+  // Server-authoritative checkout quote. Public so guests can price their cart;
+  // identity comes from the optional authed user or the supplied sessionKey.
+  // Declared before `:id` so the `quote` segment isn't swallowed as an id.
+  @Public()
+  @Post('quote')
+  quote(
+    @CurrentUserOptional() user: OptionalUser | null,
+    @Body(new ZodValidationPipe(CheckoutQuoteRequestSchema)) dto: CheckoutQuoteRequestDto,
+  ) {
+    return this.orders.quote(
+      {
+        userId: user?.id ?? null,
+        sessionKey: dto.sessionKey ?? null,
+        permissions: user?.permissions ?? [],
+      },
       dto,
     );
   }

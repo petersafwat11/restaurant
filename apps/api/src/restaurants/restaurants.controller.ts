@@ -6,6 +6,7 @@ import {
   type UpdateRestaurantDto,
   UpdateRestaurantSchema,
 } from '@repo/types';
+import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -36,6 +37,7 @@ export class RestaurantsController {
 
   @Patch()
   @Permissions('restaurant:write')
+  @AuditAction('restaurant:write', 'restaurant')
   update(@Body(new ZodValidationPipe(UpdateRestaurantSchema)) dto: UpdateRestaurantDto) {
     return this.restaurants.update(dto);
   }

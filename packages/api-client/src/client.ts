@@ -69,6 +69,10 @@ import {
   CreateMenuCategorySchema,
   type CreateMenuItemDto,
   CreateMenuItemSchema,
+  type CheckoutQuoteDto,
+  type CheckoutQuoteRequestDto,
+  CheckoutQuoteRequestSchema,
+  CheckoutQuoteSchema,
   type CreateModifierGroupDto,
   CreateModifierGroupSchema,
   type CreateModifierOptionDto,
@@ -889,6 +893,14 @@ export function createApiClient(opts: ApiClientOptions) {
         body: CreateOrderSchema.parse(input),
         headers: { 'Idempotency-Key': idempotencyKey },
         responseSchema: OrderSchema,
+      }),
+    // Server-authoritative checkout price quote (guest-safe via sessionKey).
+    quote: (input: CheckoutQuoteRequestDto): Promise<CheckoutQuoteDto> =>
+      request('/orders/quote', {
+        method: 'POST',
+        auth: false,
+        body: CheckoutQuoteRequestSchema.parse(input),
+        responseSchema: CheckoutQuoteSchema,
       }),
     list: (query?: OrderListQuery): Promise<OrderListDto> =>
       request('/orders', {

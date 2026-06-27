@@ -154,10 +154,7 @@
     "inputAriaLabel": "Promo code",
     "removeAriaLabel": "Remove promo",
     "notValid": "Code not valid.",
-    "mock": {
-      "baklava": "15% off — first order",
-      "student": "5,00 zł off"
-    }
+    "appliedLabel": "{amount} off"
   },
   "loyalty": {
     "trigger": "Use points?",
