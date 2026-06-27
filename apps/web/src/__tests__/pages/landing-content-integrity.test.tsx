@@ -13,8 +13,8 @@
 import { LandingFeaturedDishes } from '@/features/landing/sections/featured-dishes';
 import { LandingTestimonials } from '@/features/landing/sections/testimonials';
 import { server } from '@/test/setup';
-import type { MenuItemDto, MenuTreeDto, ReviewDto, ReviewListDto } from '@repo/types';
 import { loadMessages } from '@repo/i18n';
+import type { MenuItemDto, MenuTreeDto, ReviewDto, ReviewListDto } from '@repo/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
@@ -33,7 +33,11 @@ function withProviders(ui: React.ReactNode, locale: 'pl' | 'en' = 'en') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <QueryClientProvider client={client}>
-      <NextIntlClientProvider locale={locale} messages={loadMessages(locale)} timeZone="Europe/Warsaw">
+      <NextIntlClientProvider
+        locale={locale}
+        messages={loadMessages(locale)}
+        timeZone="Europe/Warsaw"
+      >
         {ui}
       </NextIntlClientProvider>
     </QueryClientProvider>
@@ -130,7 +134,9 @@ describe('LandingFeaturedDishes (H1 — live or hidden, no mock fallback)', () =
 
   it('hides the section entirely when no dish is featured (no mock fallback)', async () => {
     server.use(
-      menuHandler(treeWith([makeItem({ id: 'house-fries', name: 'House Fries', isFeatured: false })])),
+      menuHandler(
+        treeWith([makeItem({ id: 'house-fries', name: 'House Fries', isFeatured: false })]),
+      ),
     );
     const { container } = render(withProviders(<LandingFeaturedDishes />));
 
@@ -146,7 +152,9 @@ describe('LandingFeaturedDishes (H1 — live or hidden, no mock fallback)', () =
     let seenLocale: string | null = null;
     server.use(
       menuHandler(
-        treeWith([makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate (EN)', isFeatured: true })]),
+        treeWith([
+          makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate (EN)', isFeatured: true }),
+        ]),
         (url) => {
           seenLocale = url.searchParams.get('locale');
         },
@@ -200,7 +208,13 @@ describe('LandingTestimonials (H1 — live or hidden, no mock fallback)', () => 
           makeReview({ id: '1', rating: 5, comment: 'Great', authorName: 'Kept One' }),
           makeReview({ id: '2', rating: 2, comment: 'Bad', authorName: 'Dropped Low' }),
           makeReview({ id: '3', rating: 5, comment: null, authorName: 'Dropped Empty' }),
-          makeReview({ id: '4', rating: 5, comment: 'Hidden', isVisible: false, authorName: 'Dropped Hidden' }),
+          makeReview({
+            id: '4',
+            rating: 5,
+            comment: 'Hidden',
+            isVisible: false,
+            authorName: 'Dropped Hidden',
+          }),
         ],
         nextCursor: null,
       }),

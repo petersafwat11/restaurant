@@ -21,7 +21,7 @@ import type { MenuTreeDto, RestaurantPublicDto } from '@repo/types';
 import { http, passthrough } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-export interface FlaggedImage {
+interface FlaggedImage {
   url: string;
   where: string;
   reason: 'external-host' | 'unsplash' | 'empty';
@@ -32,7 +32,7 @@ export interface FlaggedImage {
  * from our own domain) is always allowed. Extend `ownHosts` if production
  * serves images from an additional first-party CDN.
  */
-export function flagExternalImages(
+function flagExternalImages(
   images: { url: string | null | undefined; where: string }[],
   ownHosts: string[] = [],
 ): FlaggedImage[] {
@@ -64,7 +64,7 @@ export function flagExternalImages(
 }
 
 /** Collect every image reference out of a menu tree (categories + items). */
-export function collectMenuImages(
+function collectMenuImages(
   tree: MenuTreeDto,
 ): { url: string | null | undefined; where: string }[] {
   const out: { url: string | null | undefined; where: string }[] = [];
@@ -79,7 +79,7 @@ export function collectMenuImages(
   return out;
 }
 
-export function collectRestaurantImages(
+function collectRestaurantImages(
   r: RestaurantPublicDto,
 ): { url: string | null | undefined; where: string }[] {
   return [
@@ -140,8 +140,9 @@ describe('live menu/marketing image audit (opt-in)', () => {
     if (flagged.length > 0) {
       // Surface the full list so the owner knows exactly what to replace.
       console.warn(
-        `[image-checker] ${flagged.length} image(s) need owner-supplied licensed replacements:\n` +
-          flagged.map((f) => `  - ${f.where}: [${f.reason}] ${f.url}`).join('\n'),
+        `[image-checker] ${flagged.length} image(s) need owner-supplied licensed replacements:\n${flagged
+          .map((f) => `  - ${f.where}: [${f.reason}] ${f.url}`)
+          .join('\n')}`,
       );
     }
     expect(flagged, 'live API is serving external/stock imagery (see warning above)').toEqual([]);
