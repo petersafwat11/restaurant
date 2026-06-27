@@ -862,11 +862,13 @@ const OPTION_NAME_EN: Record<string, string> = {
 
 /** EN for a modifier option name, handling the "(N szt)" → "(N pcs)" suffix. */
 function optionNameEn(name: string): string {
-  if (OPTION_NAME_EN[name]) return OPTION_NAME_EN[name];
+  const exact = OPTION_NAME_EN[name];
+  if (exact) return exact;
   const m = name.match(/^(.+?)\s*\((\d+)\s*szt\)$/);
-  if (m) {
-    const base = OPTION_NAME_EN[m[1]] ?? m[1];
-    return `${base} (${m[2]} pcs)`;
+  const baseName = m?.[1];
+  const count = m?.[2];
+  if (baseName && count) {
+    return `${OPTION_NAME_EN[baseName] ?? baseName} (${count} pcs)`;
   }
   return name;
 }
