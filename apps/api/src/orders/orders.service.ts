@@ -726,10 +726,12 @@ export class OrdersService {
     // was racy — concurrent transitions / equal createdAt could swap rows.
     const previousStatus = from;
 
-    const [itemCount, customerName] = await Promise.all([
+    const [itemCount, fallbackName] = await Promise.all([
       this.prisma.orderItem.count({ where: { orderId } }),
       this.loadCustomerName(updated.userId),
     ]);
+    // Prefer the order's contact snapshot (populated for guests too).
+    const customerName = updated.customerName ?? fallbackName;
 
     const statusEvent: OrderStatusChangedEvent = {
       orderId: updated.id,

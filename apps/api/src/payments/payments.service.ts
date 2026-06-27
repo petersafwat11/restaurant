@@ -215,17 +215,20 @@ export class PaymentsService {
       }
     }
 
-    // Enqueue the refund-confirmation email if we have a customer email.
+    // Enqueue the refund-confirmation email. Prefer the registered user's email,
+    // else the immutable guest contact snapshot on the order (plan §C1) so guest
+    // refunds are emailed too.
     const customer = payment.order.userId
       ? await this.prisma.user.findUnique({
           where: { id: payment.order.userId },
           select: { email: true },
         })
       : null;
-    if (customer?.email) {
+    const recipientEmail = customer?.email ?? payment.order.customerEmail;
+    if (recipientEmail) {
       await this.emailQueue.add(JOB_EMAIL_REFUND, {
         orderId: payment.orderId,
-        to: customer.email,
+        to: recipientEmail,
         orderNumber: payment.order.orderNumber,
         currency: payment.order.currency,
         amount: decimalToString(requested),
