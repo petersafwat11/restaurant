@@ -81,6 +81,13 @@ export async function resetDb(app: NestFastifyApplication): Promise<void> {
   const redis = app.get(RedisService);
   const keys = await redis.client.keys('idempotency:order:*');
   if (keys.length > 0) await redis.client.del(...keys);
+
+  // Rate-limit counters (plan §I1) are also Redis-backed and IP-keyed, so the
+  // shared test IP would carry counts across runs/tests against a persistent
+  // dev Redis. Flush them so throttle suites are repeatable. No-op on CI's
+  // fresh Redis. Pattern matches RateLimitGuard's `rl:<name>:<fingerprint>`.
+  const rlKeys = await redis.client.keys('rl:*');
+  if (rlKeys.length > 0) await redis.client.del(...rlKeys);
 }
 
 /**

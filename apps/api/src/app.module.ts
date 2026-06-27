@@ -13,6 +13,7 @@ import { CartModule } from './cart/cart.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
+import { RateLimitGuard } from './common/rate-limit/rate-limit.guard';
 import { SlidingRefreshInterceptor } from './common/interceptors/sliding-refresh.interceptor';
 import { ConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
@@ -125,6 +126,8 @@ import { UsersModule } from './users/users.module';
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
+    // After auth so authenticated callers can be keyed on their user id (§I1).
+    { provide: APP_GUARD, useClass: RateLimitGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: SlidingRefreshInterceptor },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },

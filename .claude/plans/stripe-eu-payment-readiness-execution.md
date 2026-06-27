@@ -109,11 +109,21 @@ is left — an owner decision, noted below.
 - [ ] H3: reservations consistency (`acceptsReservations=false` until built) — owner decision §18.4
 - [ ] H4: media reliability
 
-### Slice 8 — Abuse protection, headers, ops (Phase I)
-- [ ] I1: Redis-backed throttling on auth/order/payment/coupon/token endpoints
-- [ ] I2: card-testing controls
-- [ ] I3: security headers / CSP (Caddy) — report-only → enforce
-- [ ] I4: Contabo backup/monitoring docs
+### Slice 8 — Abuse protection, headers, ops (Phase I)  ⏳ I1+I3 DONE; I2 partial; I4 = docs/owner
+- [x] I1: shared `@RateLimit` decorator + global Redis fixed-window `RateLimitGuard`
+      (after auth so authed callers key on user id, else IP via trustProxy; 429 + Retry-After;
+      fail-open on Redis error; `[RATE_LIMIT]` metric log). Applied to auth
+      login/register/refresh/otp/forgot/reset/verify-email, cart coupon, order create/quote,
+      order by-token, payment intent + by-order. Webhooks deliberately un-limited. e2e:
+      login-throttle (Retry-After) + webhook-never-throttled. resetDb flushes `rl:*`.
+- [~] I2: card-testing controls — token/ownership gate (from F1) + per-user/IP intent rate
+      limit done. Stripe Radar/3DS/SCA rules + burst-decline alerting are Stripe-side (Phase J,
+      owner). CAPTCHA intentionally deferred (plan: only after privacy/cookie review).
+- [x] I3: security headers in Caddy (HSTS, nosniff, Referrer-Policy, Permissions-Policy,
+      X-Frame-Options DENY, strip X-Powered-By/Server) for all 3 domains; CSP **report-only**
+      (web: Stripe+OSM directives; admin stricter; api locked to `default-src 'none'`) — must be
+      tuned via violation reports then flipped to enforcing. `poweredByHeader:false` in both Next configs.
+- [ ] I4: Contabo offsite backup + monitoring + log retention/redaction — docs/ops (Slice 11), owner.
 
 ### Slice 9 — Account deletion + privacy ops (Phase G)  [retention matrix = accountant/lawyer]
 - [ ] G2: deletion request/confirm/cancel/inspect endpoints + BullMQ anonymisation

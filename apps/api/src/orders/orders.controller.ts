@@ -33,6 +33,7 @@ import { AuditAction } from '../audit-log/audit.decorator';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   signOrderTrackingToken,
@@ -62,6 +63,7 @@ export class OrdersController {
   // Public so guest carts can place an order. The service derives identity
   // from the (optional) authed user or the supplied sessionKey.
   @Public()
+  @RateLimit({ name: 'order:create', limit: 20, windowSeconds: 300 })
   @Post()
   @AuditAction('order:create', 'order')
   create(
@@ -84,6 +86,7 @@ export class OrdersController {
   // identity comes from the optional authed user or the supplied sessionKey.
   // Declared before `:id` so the `quote` segment isn't swallowed as an id.
   @Public()
+  @RateLimit({ name: 'order:quote', limit: 60, windowSeconds: 300 })
   @Post('quote')
   quote(
     @CurrentUserOptional() user: OptionalUser | null,
@@ -138,6 +141,7 @@ export class OrdersController {
   // but the URL carries the token issued at order creation). Declared before
   // the `:id` route so the `by-token` segment isn't swallowed as an id.
   @Public()
+  @RateLimit({ name: 'order:by-token', limit: 60, windowSeconds: 300, perUser: false })
   @Get('by-token')
   getByToken(@Query('token') token?: string) {
     if (!token) throw new BadRequestException('Missing token');

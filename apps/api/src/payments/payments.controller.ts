@@ -17,6 +17,7 @@ import {
 import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { PaymentsService } from './payments.service';
 
@@ -58,6 +59,8 @@ export class PaymentsController {
   // Public so guests can pay; authorization is by the authed user OR a valid
   // signed order token (plan §F1).
   @Public()
+  // Card-testing control (§I2): cap intent creation per user/IP.
+  @RateLimit({ name: 'payment:intent', limit: 15, windowSeconds: 300 })
   @Post('intent')
   createIntent(
     @CurrentUserOptional() user: OptionalUser | null,
@@ -74,6 +77,7 @@ export class PaymentsController {
   // Public payment-status recovery — guest confirmation page reads its payment
   // status via the signed order token (plan §F1/§F4).
   @Public()
+  @RateLimit({ name: 'payment:by-order', limit: 60, windowSeconds: 300 })
   @Get('by-order/:orderId')
   byOrderId(
     @CurrentUserOptional() user: OptionalUser | null,

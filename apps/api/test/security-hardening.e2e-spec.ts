@@ -135,4 +135,36 @@ describe('security hardening (e2e)', () => {
     const list = await inject('GET', '/api/v1/referrals', undefined, reg.json().accessToken);
     expect(list.json().items).toHaveLength(0);
   });
+
+  it('C9: rate-limits repeated login attempts from one IP, with Retry-After (§I1)', async () => {
+    // resetDb() flushed rl:* so the login counter starts fresh. Login is capped
+    // at 10/5min per IP; the 11th attempt (bad creds or not) must be throttled.
+    let throttled: { statusCode: number; headers: Record<string, unknown> } | null = null;
+    for (let i = 0; i < 12; i++) {
+      const res = await inject('POST', '/api/v1/auth/login', {
+        email: 'nobody.sec@test.local',
+        password: 'wrong-password',
+      });
+      if (res.statusCode === 429) {
+        throttled = { statusCode: res.statusCode, headers: res.headers as Record<string, unknown> };
+        break;
+      }
+    }
+    expect(throttled).not.toBeNull();
+    expect(throttled?.headers['retry-after']).toBeDefined();
+  });
+
+  it('C10: does NOT rate-limit the Stripe webhook endpoint', async () => {
+    // Webhooks must never be customer-rate-limited (§I1). Fire many; none 429.
+    const codes: number[] = [];
+    for (let i = 0; i < 25; i++) {
+      const res = await inject('POST', '/api/v1/payments/webhooks/stripe', {
+        id: `evt_rl_probe_${i}`,
+        type: 'payment_intent.succeeded',
+        data: { object: { id: `pi_none_${i}` } },
+      });
+      codes.push(res.statusCode);
+    }
+    expect(codes.every((c) => c !== 429)).toBe(true);
+  });
 });
