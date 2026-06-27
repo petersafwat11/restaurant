@@ -44,7 +44,7 @@ const EnvSchema = z.object({
   ORDER_TRACKING_SECRET: z.string().optional().default(''),
 
   // Sprint 12 — observability + analytics + feature flags. All optional;
-  // empty → safe no-op (same contract as Stripe/R2 above).
+  // empty → safe no-op (same optional contract as Stripe above).
   SENTRY_DSN: z.string().optional().default(''),
   SENTRY_ENV: z.string().optional().default(''),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),

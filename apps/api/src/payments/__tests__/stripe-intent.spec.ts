@@ -20,7 +20,12 @@ describe('stripePaymentMethodTypes (F3 method enforcement)', () => {
 });
 
 describe('stripeIntentIdempotencyKey (F2 duplicate-intent guard)', () => {
-  const base = { orderId: 'order_1', methodKind: 'STRIPE_CARD' as const, amount: '82.08', currency: 'PLN' };
+  const base = {
+    orderId: 'order_1',
+    methodKind: 'STRIPE_CARD' as const,
+    amount: '82.08',
+    currency: 'PLN',
+  };
 
   it('is stable for identical inputs (same order+method+amount → reuse)', () => {
     expect(stripeIntentIdempotencyKey(base)).toBe(stripeIntentIdempotencyKey(base));

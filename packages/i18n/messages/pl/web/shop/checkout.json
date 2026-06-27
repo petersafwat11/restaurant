@@ -183,7 +183,7 @@
     "confirmAddress": "Potwierdź adres dostawy na mapie.",
     "stripeNotInit": "Formularz karty nie został zainicjalizowany. Spróbuj ponownie.",
     "createOrderFallback": "Nie udało się złożyć zamówienia.",
-    "legalVersionChanged": "Nasz Regulamin zmienił się od momentu otwarcia kasy. Zapoznaj się z nim i zaakceptuj ponownie, aby kontynuować."
+    "legalVersionChanged": "Nasz Regulamin został zaktualizowany, gdy byłeś na tej stronie. Odśwież stronę, aby wczytać nową wersję, a następnie zapoznaj się z nią i zaakceptuj, aby kontynuować."
   },
   "return": {
     "confirming": "Potwierdzanie płatności…"

@@ -10,6 +10,7 @@ import {
 import { Prisma } from '@repo/db';
 import type { Order, Payment, Refund } from '@repo/db';
 import { JOB_EMAIL_REFUND, QUEUE_EMAIL } from '@repo/jobs';
+import { captureException } from '@repo/observability';
 import type {
   CreatePaymentIntentDto,
   CreateRefundDto,
@@ -20,8 +21,7 @@ import type {
   PaymentStatus,
   RefundDto,
 } from '@repo/types';
-import { captureException } from '@repo/observability';
-import { Decimal, addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils/money';
+import { addAll, clampNonNegative, decimalToString, toDecimal } from '@repo/utils/money';
 import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { verifyOrderTrackingToken } from '../orders/order-tracking-token';
@@ -491,12 +491,15 @@ export class PaymentsService {
         this.logger.warn(`Webhook ${event.id}: no Payment for intent ${event.paymentIntentId}`);
         return;
       }
-      if (payment.status === 'PAID') return; // already processed
-      await this.prisma.payment.update({
-        where: { id: payment.id },
+      // Only settle a non-terminal payment — never flip an already-PAID or
+      // refunded row back to PAID (out-of-order / duplicate delivery safety,
+      // symmetric with the failed/canceled guard below). Idempotent: an
+      // already-settled row matches 0 and skips the confirm.
+      const { count } = await this.prisma.payment.updateMany({
+        where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
         data: { status: 'PAID' },
       });
-      if (payment.order.status === 'PENDING') {
+      if (count > 0 && payment.order.status === 'PENDING') {
         await this.confirmOrderFromPayment(payment.order, payment.id);
       }
       return;
@@ -631,7 +634,3 @@ function toRefundDto(row: Refund): RefundDto {
     createdAt: row.createdAt.toISOString(),
   };
 }
-
-// Side-effect-free unused-import guard for Decimal (used by addAll above).
-const _DecimalGuard = Decimal;
-void _DecimalGuard;

@@ -121,6 +121,7 @@ export class OrdersController {
   // URL shape: /api/v1/orders/track?token=<base64url-payload>.<base64url-sig>
   // Declared before `:id` so the `track` segment isn't swallowed as an id.
   @Public()
+  @RateLimit({ name: 'order:track', limit: 60, windowSeconds: 300, perUser: false })
   @Get('track')
   trackByToken(@Query('token') token?: string) {
     if (!token) throw new BadRequestException('Missing token');

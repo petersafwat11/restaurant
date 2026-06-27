@@ -38,6 +38,16 @@ customer snapshot for receipts/accounting). Because the row survives, **no casca
 fires** — every PII-bearing child row is handled explicitly in
 `AccountDeletionService.anonymise()`.
 
+> **Important — this is account-PROFILE deletion, not full erasure of all PII.**
+> Pseudonymising the `User` row does **not** remove the customer identity stored
+> on retained orders: `Order.customerName/customerEmail/customerPhone`, the
+> `deliveryAddress` JSON, and the `legalSnapshot` JSON remain in plaintext on each
+> historical order. That data is kept under the legal-obligation basis
+> (accounting/tax/dispute), NOT anonymised — so the data subject is still
+> identifiable from their order history. The customer-facing copy must say so
+> accurately (it does not claim full anonymisation), and the concrete retention
+> period for this order PII is part of the **FLAGGED** lawyer/accountant matrix.
+
 User row itself → email `deleted-<id>@deleted.invalid`, phone/name/avatar/
 passwordHash cleared, `isActive=false`, `deletionStatus=COMPLETED`, `anonymisedAt`
 set.
@@ -55,7 +65,7 @@ Per-relation disposition (every `User` relation in schema.prisma):
 | Cart / CartItem | **delete** | transient (items cascade on cart delete) |
 | CustomerNote | **delete** | staff CRM observations about the data subject |
 | Reservation | **detach + de-identify** | `userId→null`, contact name/phone anonymised; operational/no-show record retained de-identified |
-| Order / OrderItem / OrderStatusEvent | **retain** | accounting/tax/dispute; carries own immutable customer snapshot, link severed by anonymising the User |
+| Order / OrderItem / OrderStatusEvent | **retain (incl. PII, FLAGGED)** | accounting/tax/dispute. NB: the Order's immutable customer snapshot (name/email/phone) + deliveryAddress/legalSnapshot JSON ARE retained PII — kept under legal-obligation basis, NOT anonymised. Concrete retention period = lawyer/accountant matrix |
 | Payment / Refund | **retain** | accounting/fraud/dispute |
 | AuditLog | **retain** (not a FK relation) | security/audit trail |
 | Review / ReviewImage | **retain (FLAGGED)** | needs lawyer matrix decision |

@@ -5,7 +5,7 @@
     "heading": "Co się stanie po usunięciu konta",
     "sessions": "Zostaniesz wylogowany na wszystkich urządzeniach, a logowanie przestanie działać.",
     "profile": "Twoje imię, e-mail, telefon i zapisane adresy zostaną usunięte lub zanonimizowane.",
-    "retained": "Dotychczasowe zamówienia, faktury i dane płatności zachowujemy tam, gdzie wymaga tego prawo (rachunkowość, podatki, przeciwdziałanie nadużyciom i reklamacje) — nie będą już jednak powiązane z Tobą imiennie.",
+    "retained": "Dotychczasowe zamówienia, faktury i dane płatności — w tym imię, e-mail i telefon zapisane przy każdym zamówieniu — zachowujemy tylko tak długo, jak wymaga tego prawo (rachunkowość, podatki, przeciwdziałanie nadużyciom i reklamacje). Nie będą już używane do kontaktu, profilowania ani marketingu.",
     "grace": "Usunięcie planujemy po {graceDays}-dniowym okresie karencji. Do tego czasu możesz je anulować w każdej chwili.",
     "irreversible": "Po zakończeniu okresu karencji anonimizacji nie można cofnąć."
   },

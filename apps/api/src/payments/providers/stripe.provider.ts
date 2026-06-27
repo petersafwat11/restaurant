@@ -104,8 +104,10 @@ export class StripeProvider implements PaymentProvider {
         case 'processing':
           return 'processing';
         case 'requires_payment_method':
-          // The last attempt failed and Stripe is waiting for a new method.
-          return 'failed';
+        // This is ALSO the status of a brand-new, never-confirmed intent and of
+        // an intent between attempts — not necessarily a failure. Treat it as
+        // "customer hasn't finished" so reconciliation LEAVES it (doesn't mark a
+        // still-usable abandoned intent FAILED out from under the customer).
         case 'requires_action':
         case 'requires_confirmation':
         case 'requires_capture':

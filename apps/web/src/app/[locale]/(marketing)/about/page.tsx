@@ -1,7 +1,7 @@
 import { getAlternates } from '@/lib/seo/alternates';
 import { Container, SectionHeader } from '@repo/ui';
 import type { Metadata } from 'next';
-import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];
@@ -11,13 +11,6 @@ export function generateMetadata(): Metadata {
   return { alternates: getAlternates('/about') };
 }
 
-// Public Google Maps rating shown on the stat card. These are a marketing
-// figure (our Google Business Profile), not on-site reviews, so they're a
-// fixed business fact rather than a live API aggregate. Update both together
-// if the Google rating changes. The rating value itself lives in i18n
-// (`stats.ratingValue`) so it can be formatted per locale (4.1 / 4,1).
-const GOOGLE_REVIEW_COUNT = 213;
-
 export default async function AboutPage({
   params,
 }: {
@@ -26,19 +19,13 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'web.marketing.about' });
-  const numberLocale = (await getLocale()) === 'pl' ? 'pl-PL' : 'en-US';
 
-  const ratingDisplay = {
-    value: t('stats.ratingValue'),
-    label: t('stats.ratingLabelDynamic', {
-      count: GOOGLE_REVIEW_COUNT.toLocaleString(numberLocale),
-    }),
-  };
-
-  const stats: Array<{ key: 'years' | 'wraps' | 'rating'; label: string; sub: string }> = [
+  // No unverified Google rating here — the same 4.1/213 figure was removed from
+  // the homepage as unsubstantiated social proof (Slice 7 / plan §H1). If the
+  // owner wants to show a real rating, wire it from a verified source.
+  const stats: Array<{ key: 'years' | 'wraps'; label: string; sub: string }> = [
     { key: 'years', label: t('stats.yearsValue'), sub: t('stats.yearsLabel') },
     { key: 'wraps', label: t('stats.wrapsValue'), sub: t('stats.wrapsLabel') },
-    { key: 'rating', label: ratingDisplay.value, sub: ratingDisplay.label },
   ];
 
   return (

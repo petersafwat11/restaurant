@@ -77,15 +77,19 @@ async function bootstrap() {
   // Socket.IO uses its own adapter over the Fastify HTTP server.
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  // Swagger UI at /api/v1/docs.
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Restaurant API')
-    .setDescription('Restaurant ordering platform — backend API.')
-    .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'bearer')
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/v1/docs', app, document);
+  // Swagger UI at /api/v1/docs — non-production only. In prod it would both leak
+  // the full API surface and render blank under the api domain's locked-down CSP
+  // (`default-src 'none'`).
+  if (env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Restaurant API')
+      .setDescription('Restaurant ordering platform — backend API.')
+      .setVersion('1.0')
+      .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'bearer')
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/v1/docs', app, document);
+  }
 
   await app.listen({ port: env.API_PORT, host: '0.0.0.0' });
 

@@ -31,6 +31,9 @@
     # CSP rolled out report-only first (plan §I3): collect violations, tune, then
     # rename the header to `Content-Security-Policy` to enforce. Includes the
     # Stripe.js / Elements / 3DS + OpenStreetMap directives the checkout needs.
+    # NOTE: report-only collects nothing until a collector is wired — add a
+    # `report-to`/`Reporting-Endpoints` (or `report-uri`) directive pointing at
+    # Sentry/Report-URI/etc. before relying on this phase to surface violations.
     header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://api.stripe.com https://nominatim.openstreetmap.org; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     reverse_proxy web:3000
 }

@@ -47,8 +47,15 @@ export class RateLimitGuard implements CanActivate {
 
     let count: number;
     try {
-      count = await this.redis.client.incr(key);
-      if (count === 1) await this.redis.client.expire(key, opts.windowSeconds);
+      // Atomic fixed-window: INCR + set the TTL on the first hit in a single
+      // Redis round-trip, so a crash between the two can never orphan a key
+      // with no expiry (which would lock a fingerprint out forever).
+      count = (await this.redis.client.eval(
+        "local c = redis.call('INCR', KEYS[1]); if c == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end; return c",
+        1,
+        key,
+        String(opts.windowSeconds),
+      )) as number;
     } catch (err) {
       // Fail-open: never let a Redis blip take down the endpoint.
       this.logger.warn(`Rate-limit check skipped (redis error): ${(err as Error).message}`);

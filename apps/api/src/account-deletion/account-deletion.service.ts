@@ -165,11 +165,11 @@ export class AccountDeletionService {
       });
     }
 
-    // Flip to CANCELLED and clear any outstanding token. The scheduled job is
-    // left in place — it re-checks status and no-ops. We also best-effort remove
-    // it so it doesn't sit in the delayed set.
-    await this.prisma.user.update({
-      where: { id: userId },
+    // Atomically flip PENDING→CANCELLED. If this matches 0 rows, the
+    // anonymisation job's claim won the race (status already COMPLETED) — re-read
+    // and reject so we never report a false "cancelled" over a done deletion.
+    const { count } = await this.prisma.user.updateMany({
+      where: { id: userId, deletionStatus: 'PENDING', anonymisedAt: null },
       data: {
         deletionStatus: 'CANCELLED',
         deletionScheduledAt: null,
@@ -177,6 +177,21 @@ export class AccountDeletionService {
         deletionConfirmTokenExpires: null,
       },
     });
+    if (count === 0) {
+      const fresh = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { anonymisedAt: true, deletionStatus: true },
+      });
+      if (fresh?.anonymisedAt || fresh?.deletionStatus === 'COMPLETED') {
+        throw new BadRequestException({
+          message: 'Account is already anonymised and cannot be restored',
+          code: 'accountAlreadyAnonymised',
+        });
+      }
+      // Otherwise it simply wasn't PENDING (already CANCELLED / NONE) — idempotent.
+    }
+    // The delayed job is left in place; it re-checks status inside its tx and
+    // no-ops. Best-effort remove so it doesn't linger in the delayed set.
     await this.removeScheduledJob(userId);
 
     return this.getStatus(userId);
@@ -232,8 +247,28 @@ export class AccountDeletionService {
     }
 
     const now = new Date();
+    let claimed = false;
     await this.prisma.$transaction(async (tx) => {
-      // 1. Revoke every session immediately.
+      // 0. Atomically CLAIM the row inside the transaction. A concurrent
+      //    cancel() flips status to CANCELLED; if it commits in the window
+      //    between the pre-check above and here, this matches 0 rows and we
+      //    delete nothing — the cancel wins. Only a still-PENDING, due, not-yet-
+      //    anonymised row is claimable. This is the real race guard (the
+      //    pre-check above is only a fast-path).
+      const claim = await tx.user.updateMany({
+        where: {
+          id: userId,
+          deletionStatus: 'PENDING',
+          anonymisedAt: null,
+          deletionScheduledAt: { lte: now },
+        },
+        data: { deletionStatus: 'COMPLETED', anonymisedAt: now },
+      });
+      if (claim.count === 0) return; // not claimable (cancelled/done) → abort
+      claimed = true;
+
+      // 1. Revoke sessions (delete refresh tokens). NB: already-issued, stateless
+      //    access JWTs stay valid until their short TTL expires.
       await tx.refreshToken.deleteMany({ where: { userId } });
       // 2. Delete PII / transient data no longer needed once the account is gone.
       await tx.userAddress.deleteMany({ where: { userId } });
@@ -252,19 +287,24 @@ export class AccountDeletionService {
         where: { userId },
         data: { userId: null, contactName: 'Deleted user', contactPhone: '' },
       });
-      // 4. Pseudonymise the (retained) User row.
+      // 4. Pseudonymise the (retained) User row's identity fields. Status +
+      //    anonymisedAt were already set by the claim above. Also clear the
+      //    user-supplied deletionReason (free text — may contain PII).
       await tx.user.update({
         where: { id: userId },
         data: {
           ...pseudonymiseUser(userId),
-          deletionStatus: 'COMPLETED',
-          anonymisedAt: now,
+          deletionReason: null,
           deletionConfirmTokenHash: null,
           deletionConfirmTokenExpires: null,
         },
       });
     });
 
+    if (!claimed) {
+      this.logger.log(`anonymise: user ${userId} no longer claimable (cancelled/done) — no-op`);
+      return { anonymised: false };
+    }
     this.logger.log(`anonymise: user ${userId} anonymised`);
     return { anonymised: true };
   }

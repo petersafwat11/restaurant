@@ -7,9 +7,16 @@ export class WebhookEventsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Attempt to record a new event id. Returns `true` if this is the first
-   * delivery (caller should process the event), `false` if it's a duplicate
-   * (caller should ack but skip handler logic).
+   * Claim an event for processing. Returns `true` if the caller should process
+   * it — either it's the first delivery, OR a prior delivery recorded it but
+   * never finished (`processedAt` still null, i.e. its dispatch threw and Stripe
+   * is retrying). Returns `false` only for a delivery that has already been
+   * fully processed (`markProcessed`).
+   *
+   * This is the safety guarantee: a `payment_intent.succeeded` /
+   * `charge.refunded` whose first dispatch failed transiently is re-processed on
+   * Stripe's retry instead of being silently acked-and-dropped. Dispatch
+   * handlers are idempotent, so re-processing an unfinished event is safe.
    *
    * Relies on the primary-key uniqueness of `WebhookEvent.id`.
    */
@@ -31,7 +38,13 @@ export class WebhookEventsService {
       return true;
     } catch (err) {
       if ((err as { code?: string }).code === 'P2002') {
-        return false;
+        // Already recorded — reprocess only if the prior delivery never
+        // completed (its handler threw). A completed event is a true duplicate.
+        const existing = await this.prisma.webhookEvent.findUnique({
+          where: { id: input.id },
+          select: { processedAt: true },
+        });
+        return existing?.processedAt == null;
       }
       throw err;
     }

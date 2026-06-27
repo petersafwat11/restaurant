@@ -41,7 +41,7 @@ A two-surface restaurant ordering platform behind one NestJS API and one shared 
 | Admin Dashboard (`apps/admin`) | Next.js 15 App Router | Owner / Manager / Kitchen / Cashier | Operations, KPIs, menu, orders, customers, reservations, reports |
 | API (`apps/api`) | NestJS 11 + Fastify | All clients | REST `/api/v1/*`, Socket.IO, BullMQ workers |
 
-The product is built around: industry-grade ordering UX; real-time order/kitchen updates across web + admin; multi-location ready; i18n with RTL support; hard separation of the customer app from admin (no shared route, no shared bundle).
+The product is built around: industry-grade ordering UX; real-time order/kitchen updates across web + admin; multi-location ready; bilingual i18n (Polish + English); hard separation of the customer app from admin (no shared route, no shared bundle).
 
 ---
 
@@ -66,7 +66,7 @@ The product is built around: industry-grade ordering UX; real-time order/kitchen
 - **shadcn/ui + Tailwind v4 + Radix** primitives on web/admin (UI components live in `packages/ui` — placeholder in this commit, planned for the UI sprint).
 - **TanStack Query v5** for server state; **React Hook Form** + Zod resolvers for forms.
 - **Zustand** for cart + auth state.
-- **next-intl** for i18n; **EN + AR** with RTL; locales in `packages/i18n`.
+- **next-intl** for i18n; **Polish + English** (Polish authoritative); locales in `packages/i18n`.
 - **Recharts** + **Tremor** for admin charts; **TanStack Table** for admin tables.
 
 ### Mobile — removed
@@ -656,7 +656,7 @@ Every sensitive endpoint carries `@AuditAction(action, resourceType, idFrom?)`. 
 | `@repo/api-client` | Typed HTTP client (web + admin) | `createApiClient({ baseUrl, getAccessToken, refreshAccessToken, onUnauthorized })` |
 | `@repo/auth-core` | JWT + bcrypt + OTP | `signAccess/RefreshToken`, `verify*`, `hashPassword`, `verifyPassword`, `generateOtp`, `hashToken` |
 | `@repo/jobs` | BullMQ queue names + job payload schemas | `QUEUE_EMAIL`, `JOB_EMAIL_RECEIPT`, `*Payload` schemas |
-| `@repo/i18n` | EN + AR catalogs, formatters, RTL helper | `getDir(locale)`, `negotiate`, `translator`, `format` |
+| `@repo/i18n` | Polish + English catalogs, formatters, locale helpers | `loadMessages`, `negotiate`, `format` |
 | `@repo/utils` | Pure helpers | `money`, `slugify`, `phone`, `assert`, `deepLink`, `structuredData`, `sitemap`, `loyalty` |
 | `@repo/config-runtime` | Env validation | `createEnv(schema)` |
 | `@repo/realtime-client` | Socket.IO wrapper | `createRealtimeClient({ url, getAccessToken })`, `ROOMS`, `RealtimeEventMap` |

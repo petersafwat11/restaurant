@@ -38,7 +38,7 @@ Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ 
 - Subscribe to room `order:{orderId}` in `useOrderTracking(id)` hook.
 
 **Jobs.**
-- Side effects (email, SMS, push, exports) go in BullMQ queues. Never `await` them in request handlers.
+- Side effects (email, SMS, exports, payment reconciliation) go in BullMQ queues. Never `await` them in request handlers.
 
 **Conventions.**
 - File names: kebab-case for files, PascalCase for component default export.

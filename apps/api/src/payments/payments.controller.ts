@@ -17,8 +17,8 @@ import {
 import { AuditAction } from '../audit-log/audit.decorator';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { Public } from '../common/decorators/public.decorator';
-import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { PaymentsService } from './payments.service';
 
 interface OptionalUser {

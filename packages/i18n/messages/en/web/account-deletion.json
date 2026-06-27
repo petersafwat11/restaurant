@@ -5,7 +5,7 @@
     "heading": "What happens when you delete your account",
     "sessions": "You'll be signed out everywhere and your login will stop working.",
     "profile": "Your name, email, phone and saved addresses are removed or anonymised.",
-    "retained": "Past orders, invoices and payment records are kept where the law requires (accounting, tax, fraud and dispute handling) — they are no longer linked to you by name.",
+    "retained": "Past orders, invoices and payment records — including the name, email and phone captured on each order — are kept only as long as the law requires (accounting, tax, fraud and dispute handling). They are no longer used to contact, profile or market to you.",
     "grace": "We schedule the deletion after a {graceDays}-day grace period. You can cancel any time before then.",
     "irreversible": "Once the grace period ends, anonymisation cannot be undone."
   },

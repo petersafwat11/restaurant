@@ -183,7 +183,7 @@
     "confirmAddress": "Please confirm your delivery address on the map.",
     "stripeNotInit": "Card form did not initialise. Please retry.",
     "createOrderFallback": "Could not place your order.",
-    "legalVersionChanged": "Our Terms changed since you opened checkout. Please review and accept them again to continue."
+    "legalVersionChanged": "Our Terms were updated while you were on this page. Please refresh the page to load the new version, then review and accept it to continue."
   },
   "return": {
     "confirming": "Confirming your payment…"
