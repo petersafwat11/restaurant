@@ -23,7 +23,13 @@ async function bootstrap() {
     tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
   });
 
-  const adapter = new FastifyAdapter({ logger: false, trustProxy: true });
+  // Trust EXACTLY ONE proxy hop (Caddy). `trustProxy: true` would trust the
+  // entire X-Forwarded-For chain, letting a client spoof the left-most entry and
+  // forge `req.ip` — which would defeat every IP-keyed rate limit (login
+  // brute-force, the card-testing control on payment intents, etc.). With `1`,
+  // `req.ip` is the address Caddy appended; client-supplied XFF entries are
+  // ignored. Caddy is also configured with `trusted_proxies` as defence-in-depth.
+  const adapter = new FastifyAdapter({ logger: false, trustProxy: 1 });
 
   // Capture the raw request body for the Stripe webhook route — needed for
   // signature verification. Replace Nest's default JSON parser with one that

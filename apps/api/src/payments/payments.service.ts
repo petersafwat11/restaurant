@@ -53,10 +53,13 @@ export class PaymentsService {
     @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
   ) {}
 
-  getConfig(): PaymentConfigDto {
+  async getConfig(): Promise<PaymentConfigDto> {
+    // Source the currency from the restaurant record so the payment config never
+    // drifts from the currency orders are actually charged in.
+    const restaurant = await this.prisma.restaurant.findFirst({ select: { currency: true } });
     return {
       stripePublishableKey: this.env.STRIPE_PUBLISHABLE_KEY,
-      currency: 'PLN',
+      currency: restaurant?.currency ?? 'PLN',
     };
   }
 

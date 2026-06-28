@@ -22,9 +22,12 @@ export interface LegalSnapshotInput {
     krs: string | null;
     regon: string | null;
     registryCourt: string | null;
+    shareCapital: string | null;
+    shareCapitalCurrency: string | null;
     registeredAddress: Address;
     registeredAddressSameAsTrading: boolean;
     supportEmail: string | null;
+    supportPhone: string | null;
     complaintsEmail: string | null;
     privacyEmail: string | null;
     defaultDeliveryFee: string;
@@ -61,10 +64,13 @@ export function buildLegalSnapshot(input: LegalSnapshotInput): OrderLegalSnapsho
       krs: r.krs,
       regon: r.regon,
       registryCourt: r.registryCourt,
+      shareCapital: r.shareCapital,
+      shareCapitalCurrency: r.shareCapitalCurrency,
       tradingAddress: r.address,
       // Only capture a separate registered address when it actually differs.
       registeredAddress: r.registeredAddressSameAsTrading ? null : r.registeredAddress,
       supportEmail: r.supportEmail,
+      supportPhone: r.supportPhone,
       complaintsEmail: r.complaintsEmail,
       privacyEmail: r.privacyEmail,
     },

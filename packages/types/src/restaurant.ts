@@ -76,19 +76,25 @@ export const RestaurantLegalSchema = z.object({
   supportPhone: z.string().nullable(),
   complaintsEmail: z.string().nullable(),
   privacyEmail: z.string().nullable(),
-  statementDescriptor: z.string().nullable(),
 });
 export type RestaurantLegalDto = z.infer<typeof RestaurantLegalSchema>;
 
-/** Admin output adds the same-as-trading switch (not exposed publicly). */
+/**
+ * Admin output adds the same-as-trading switch and the statement descriptor —
+ * both admin-only. `statementDescriptor` is an internal Stripe payment-config
+ * value (not part of public EU seller-identity disclosure), so it's deliberately
+ * NOT on the public `RestaurantLegalSchema`.
+ */
 export const RestaurantAdminLegalSchema = RestaurantLegalSchema.extend({
   registeredAddressSameAsTrading: z.boolean(),
+  statementDescriptor: z.string().nullable(),
 });
 export type RestaurantAdminLegalDto = z.infer<typeof RestaurantAdminLegalSchema>;
 
 // Required for the "Payment provider readiness" check (plan §B4/§B5). KRS and
 // share capital are recommended-but-conditional (sole traders have neither), so
-// they are surfaced as warnings rather than blocking completeness.
+// they are intentionally OMITTED from this list — they don't block completeness
+// (the check reports only `missing` required fields; there is no warnings tier).
 export const LEGAL_REQUIRED_FIELDS = [
   'legalName',
   'nip',

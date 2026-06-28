@@ -165,7 +165,7 @@ export default function DeleteAccountPage() {
             <button
               type="submit"
               disabled={requestMutation.isPending || password.length === 0}
-              className="inline-flex h-12 items-center justify-center rounded-button bg-danger px-6 text-[15px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="inline-flex h-12 items-center justify-center rounded-button bg-negative px-6 text-[15px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {requestMutation.isPending ? t('actions.requesting') : t('actions.request')}
             </button>

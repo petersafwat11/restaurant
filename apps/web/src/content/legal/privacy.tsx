@@ -369,31 +369,31 @@ function ProcessingTable({ locale }: { locale: 'pl' | 'en' }) {
       <table className="w-full border-collapse text-small">
         <thead>
           <tr>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.flow}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.categories}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.source}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.purpose}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.basis}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.required}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.recipients}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.transfer}
             </th>
-            <th className="border border-border/[var(--border-alpha)] bg-surface-2 px-3 py-2 text-left font-semibold text-fg">
+            <th>
               {h.retention}
             </th>
           </tr>
@@ -401,31 +401,31 @@ function ProcessingTable({ locale }: { locale: 'pl' | 'en' }) {
         <tbody>
           {PROCESSING_ROWS.map((row) => (
             <tr key={row.flow.en} className="text-fg-muted">
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top font-medium text-fg">
-                {row.flow[locale]}
+              <td>
+                <strong>{row.flow[locale]}</strong>
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.categories[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.source[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.purpose[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.basis[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.required[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.recipients[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {(row.transfer ?? DEFAULT_TRANSFER)[locale]}
               </td>
-              <td className="border border-border/[var(--border-alpha)] px-3 py-2 align-top">
+              <td>
                 {row.retention[locale]}
               </td>
             </tr>

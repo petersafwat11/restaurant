@@ -21,6 +21,7 @@ import {
   type RequestAccountDeletionDto,
 } from '@repo/types';
 import type { Queue } from 'bullmq';
+import { AuditService } from '../audit-log/audit.service';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { pseudonymiseUser } from './pseudonymise';
@@ -48,6 +49,7 @@ export class AccountDeletionService {
   constructor(
     @Inject(ENV) private readonly env: ENV_TYPE,
     private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
     @InjectQueue(QUEUE_ACCOUNT_DELETION) private readonly queue: Queue,
   ) {}
 
@@ -82,6 +84,11 @@ export class AccountDeletionService {
         message: 'Account is already anonymised',
         code: 'accountAlreadyAnonymised',
       });
+    }
+    // Already scheduled — repeat requests are idempotent: don't restart the grace
+    // clock or issue a fresh confirm token. The user must cancel() to start over.
+    if (user.deletionStatus === 'PENDING') {
+      return this.getStatus(userId);
     }
 
     if (dto.method === 'password') {
@@ -189,6 +196,14 @@ export class AccountDeletionService {
         });
       }
       // Otherwise it simply wasn't PENDING (already CANCELLED / NONE) — idempotent.
+    }
+    if (count > 0) {
+      await this.audit.record({
+        actorUserId: userId,
+        action: 'account.deletion.cancelled',
+        resourceType: 'user',
+        resourceId: userId,
+      });
     }
     // The delayed job is left in place; it re-checks status inside its tx and
     // no-ops. Best-effort remove so it doesn't linger in the delayed set.
@@ -305,6 +320,14 @@ export class AccountDeletionService {
       this.logger.log(`anonymise: user ${userId} no longer claimable (cancelled/done) — no-op`);
       return { anonymised: false };
     }
+    // Durable proof the erasure ran (the data subject is recorded as the actor).
+    await this.audit.record({
+      actorUserId: userId,
+      action: 'account.deletion.completed',
+      resourceType: 'user',
+      resourceId: userId,
+      afterJson: { anonymisedAt: now.toISOString() },
+    });
     this.logger.log(`anonymise: user ${userId} anonymised`);
     return { anonymised: true };
   }
@@ -332,8 +355,27 @@ export class AccountDeletionService {
     await this.queue.add(
       JOB_ACCOUNT_ANONYMISE,
       { userId },
-      { jobId: this.jobId(userId), delay: GRACE_MS },
+      {
+        jobId: this.jobId(userId),
+        delay: GRACE_MS,
+        // Retry transient failures (DB blip, lock timeout) so a single error in
+        // the anonymise transaction can't silently strand the erasure past its
+        // compliance deadline. Keep failed jobs for investigation.
+        attempts: 5,
+        backoff: { type: 'exponential', delay: 60_000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
     );
+
+    // Audit the lifecycle of a GDPR erasure (the data subject is the actor).
+    await this.audit.record({
+      actorUserId: userId,
+      action: 'account.deletion.scheduled',
+      resourceType: 'user',
+      resourceId: userId,
+      afterJson: { scheduledAt: scheduledAt.toISOString() },
+    });
   }
 
   private jobId(userId: string): string {

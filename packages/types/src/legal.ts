@@ -62,9 +62,14 @@ export const OrderLegalSnapshotSchema = z.object({
     krs: z.string().nullable(),
     regon: z.string().nullable(),
     registryCourt: z.string().nullable(),
+    // Share capital is part of the mandatory sp. z o.o. identity disclosure, so
+    // it's captured here to faithfully reproduce the entity block the customer saw.
+    shareCapital: z.string().nullable(),
+    shareCapitalCurrency: z.string().nullable(),
     tradingAddress: SnapshotAddressSchema.nullable(),
     registeredAddress: SnapshotAddressSchema.nullable(),
     supportEmail: z.string().nullable(),
+    supportPhone: z.string().nullable(),
     complaintsEmail: z.string().nullable(),
     privacyEmail: z.string().nullable(),
   }),

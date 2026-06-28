@@ -84,11 +84,19 @@ export class OrdersService {
 
   /**
    * Server-authoritative pricing shared by the checkout quote and order
-   * creation. Loads the caller's cart, re-validates each line against the live
-   * menu, re-validates the applied coupon, quotes loyalty redemption, and runs
-   * the single `PricingService.calculateTotals` calculator. Both `create()` and
+   * creation. Loads the caller's cart, re-validates each line's existence +
+   * availability against the live menu (and refreshes the name snapshot),
+   * re-validates the applied coupon, quotes loyalty redemption, and runs the
+   * single `PricingService.calculateTotals` calculator. Both `create()` and
    * `quote()` call this so the displayed total and the charged total cannot
    * diverge (plan §3.4 — never a second checkout calculator).
+   *
+   * NOTE on price: the line `unitPrice` is the server-set price captured at
+   * add-to-cart time (cart.service derives it from the live menu then) — it is
+   * intentionally NOT re-derived here, so the price is "locked when added". This
+   * never trusts a client price and never mischarges (quote and create read the
+   * same cart price); the only effect is that a later admin menu-price change is
+   * not retro-applied to an in-flight cart.
    */
   private async priceCheckout(
     actor: OrderActor,
@@ -111,9 +119,12 @@ export class OrdersService {
         krs: true,
         regon: true,
         registryCourt: true,
+        shareCapital: true,
+        shareCapitalCurrency: true,
         registeredAddress: true,
         registeredAddressSameAsTrading: true,
         supportEmail: true,
+        supportPhone: true,
         complaintsEmail: true,
         privacyEmail: true,
         estimatedDeliveryMinutesMin: true,
@@ -249,6 +260,11 @@ export class OrdersService {
    * Read-only checkout price quote — the single source of the totals the
    * checkout summary displays. Reuses `priceCheckout` so the quoted grand total
    * equals what `create()` will charge.
+   *
+   * Advisory only: the quote takes no address and does NOT enforce the delivery
+   * minimum-order or radius (those are checked authoritatively in `create()`).
+   * So a below-minimum / out-of-range cart still returns a price here and is
+   * rejected at submit — intended for a lightweight summary, never a mischarge.
    */
   async quote(actor: OrderActor, dto: CheckoutQuoteRequestDto): Promise<CheckoutQuoteDto> {
     const { restaurantRow, couponCode, couponDiscount, loyaltyDiscount, totals } =
@@ -427,9 +443,12 @@ export class OrdersService {
         krs: restaurantRow.krs,
         regon: restaurantRow.regon,
         registryCourt: restaurantRow.registryCourt,
+        shareCapital: restaurantRow.shareCapital?.toString() ?? null,
+        shareCapitalCurrency: restaurantRow.shareCapitalCurrency,
         registeredAddress: restaurantRow.registeredAddress as Record<string, unknown> | null,
         registeredAddressSameAsTrading: restaurantRow.registeredAddressSameAsTrading,
         supportEmail: restaurantRow.supportEmail,
+        supportPhone: restaurantRow.supportPhone,
         complaintsEmail: restaurantRow.complaintsEmail,
         privacyEmail: restaurantRow.privacyEmail,
         defaultDeliveryFee: restaurantRow.defaultDeliveryFee.toString(),

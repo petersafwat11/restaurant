@@ -14,9 +14,12 @@ const baseRestaurant: LegalSnapshotInput['restaurant'] = {
   krs: '0000897286',
   regon: '388771662',
   registryCourt: 'Sąd Rejonowy w Kielcach',
+  shareCapital: '5000.00',
+  shareCapitalCurrency: 'PLN',
   registeredAddress: { line1: 'ul. Inny 9', city: 'Kielce', country: 'PL' },
   registeredAddressSameAsTrading: true,
   supportEmail: 'support@szefdonald.pl',
+  supportPhone: '+48 22 555 0000',
   complaintsEmail: 'reklamacje@szefdonald.pl',
   privacyEmail: 'rodo@szefdonald.pl',
   defaultDeliveryFee: '8.00',
@@ -44,6 +47,8 @@ describe('buildLegalSnapshot', () => {
     expect(snap.seller.legalName).toBe('CIOSEK SAMANTA SP. Z O.O.');
     expect(snap.seller.tradeName).toBe('Szef Donald');
     expect(snap.seller.nip).toBe('6572959741');
+    expect(snap.seller.shareCapital).toBe('5000.00');
+    expect(snap.seller.shareCapitalCurrency).toBe('PLN');
     expect(snap.currency).toBe('PLN');
     expect(snap.acceptedAt).toBe('2026-06-27T10:00:00.000Z');
   });

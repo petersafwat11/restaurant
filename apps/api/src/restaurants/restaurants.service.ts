@@ -281,15 +281,18 @@ function toLegal(row: Restaurant): RestaurantPublicDto['legal'] {
     supportPhone: row.supportPhone,
     complaintsEmail: row.complaintsEmail,
     privacyEmail: row.privacyEmail,
-    statementDescriptor: row.statementDescriptor,
   };
 }
 
-/** Admin legal block — public block plus the registered-address-same-as-trading switch. */
+/**
+ * Admin legal block — public block plus the admin-only fields
+ * (registered-address-same-as-trading switch + the internal statement descriptor).
+ */
 function toAdminLegal(row: Restaurant): RestaurantAdminDto['legal'] {
   return {
     ...toLegal(row),
     registeredAddressSameAsTrading: row.registeredAddressSameAsTrading,
+    statementDescriptor: row.statementDescriptor,
   };
 }
 

@@ -36,7 +36,7 @@ export function LegalTableOfContents({
   return (
     <nav
       aria-label={heading}
-      className="mb-10 rounded-lg border border-border/[var(--border-alpha)] bg-surface-2 p-5 print:hidden"
+      className="mb-10 rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-6 print:hidden"
     >
       <p className="mb-3 text-small font-semibold uppercase tracking-wide text-fg-subtle">
         {heading}

@@ -14,8 +14,9 @@ import { RATE_LIMIT_KEY, type RateLimitOptions } from './rate-limit.decorator';
 /**
  * Global Redis-backed fixed-window rate limiter (plan §I1). Acts only on routes
  * carrying `@RateLimit(...)`; everything else passes through. Redis-backed so
- * the limit is shared across API replicas; uses Fastify's `request.ip` (the app
- * runs with `trustProxy: true`, so this is the real client IP behind Caddy).
+ * the limit is shared across API replicas; uses Fastify's `request.ip` — the app
+ * runs with `trustProxy: 1` (trust exactly the single Caddy hop), so `request.ip`
+ * is the address Caddy appended and a client cannot spoof it via X-Forwarded-For.
  *
  * Registered after the auth guard so an authenticated caller can be keyed on
  * their stable user id. If Redis is unreachable the request is allowed through
@@ -66,7 +67,9 @@ export class RateLimitGuard implements CanActivate {
       const ttl = await this.redis.client.ttl(key).catch(() => opts.windowSeconds);
       const retryAfter = ttl > 0 ? ttl : opts.windowSeconds;
       res.header('Retry-After', String(retryAfter));
-      // Security metric — lets ops alert on bursts without logging PII/secrets.
+      // Security metric so ops can alert on bursts. The fingerprint is the IP (or
+      // `u:<id>` when authed) — IP is personal data, retained under the
+      // legitimate-interest security basis only; never log tokens/secrets.
       this.logger.warn(`[RATE_LIMIT] ${opts.name} exceeded for ${fingerprint}`);
       throw new HttpException(
         'Too many requests — please slow down and try again shortly.',

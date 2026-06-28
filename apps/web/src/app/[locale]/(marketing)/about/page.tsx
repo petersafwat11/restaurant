@@ -63,7 +63,7 @@ export default async function AboutPage({
 
       <section className="bg-bg py-section-y-mobile sm:py-section-y">
         <Container>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             {stats.map((s) => (
               <div
                 key={s.key}

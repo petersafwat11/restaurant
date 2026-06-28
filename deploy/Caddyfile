@@ -6,6 +6,14 @@
     email {$CADDY_EMAIL}
     # Use the production ACME endpoint (default). To test changes, swap to:
     # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+    # Defence-in-depth for rate limiting: only trust X-Forwarded-* from private
+    # ranges (the Docker network) so a client cannot inject a spoofed
+    # X-Forwarded-For. The API additionally runs Fastify with `trustProxy: 1`
+    # (trust exactly this one hop), so `req.ip` is always the real client IP.
+    servers {
+        trusted_proxies static private_ranges
+    }
 }
 
 # Security headers shared by every site (plan §I3). HSTS is safe because Caddy
