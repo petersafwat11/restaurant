@@ -525,9 +525,7 @@ export function CheckoutApp() {
           setSubmitting(false);
           return;
         }
-        const tokenQuery = createdOrderToken
-          ? `?t=${encodeURIComponent(createdOrderToken)}`
-          : '';
+        const tokenQuery = createdOrderToken ? `?t=${encodeURIComponent(createdOrderToken)}` : '';
         router.push(`/checkout/success/${createdOrderId}${tokenQuery}`);
         return;
       }

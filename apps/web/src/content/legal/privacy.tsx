@@ -369,33 +369,15 @@ function ProcessingTable({ locale }: { locale: 'pl' | 'en' }) {
       <table className="w-full border-collapse text-small">
         <thead>
           <tr>
-            <th>
-              {h.flow}
-            </th>
-            <th>
-              {h.categories}
-            </th>
-            <th>
-              {h.source}
-            </th>
-            <th>
-              {h.purpose}
-            </th>
-            <th>
-              {h.basis}
-            </th>
-            <th>
-              {h.required}
-            </th>
-            <th>
-              {h.recipients}
-            </th>
-            <th>
-              {h.transfer}
-            </th>
-            <th>
-              {h.retention}
-            </th>
+            <th>{h.flow}</th>
+            <th>{h.categories}</th>
+            <th>{h.source}</th>
+            <th>{h.purpose}</th>
+            <th>{h.basis}</th>
+            <th>{h.required}</th>
+            <th>{h.recipients}</th>
+            <th>{h.transfer}</th>
+            <th>{h.retention}</th>
           </tr>
         </thead>
         <tbody>
@@ -404,30 +386,14 @@ function ProcessingTable({ locale }: { locale: 'pl' | 'en' }) {
               <td>
                 <strong>{row.flow[locale]}</strong>
               </td>
-              <td>
-                {row.categories[locale]}
-              </td>
-              <td>
-                {row.source[locale]}
-              </td>
-              <td>
-                {row.purpose[locale]}
-              </td>
-              <td>
-                {row.basis[locale]}
-              </td>
-              <td>
-                {row.required[locale]}
-              </td>
-              <td>
-                {row.recipients[locale]}
-              </td>
-              <td>
-                {(row.transfer ?? DEFAULT_TRANSFER)[locale]}
-              </td>
-              <td>
-                {row.retention[locale]}
-              </td>
+              <td>{row.categories[locale]}</td>
+              <td>{row.source[locale]}</td>
+              <td>{row.purpose[locale]}</td>
+              <td>{row.basis[locale]}</td>
+              <td>{row.required[locale]}</td>
+              <td>{row.recipients[locale]}</td>
+              <td>{(row.transfer ?? DEFAULT_TRANSFER)[locale]}</td>
+              <td>{row.retention[locale]}</td>
             </tr>
           ))}
         </tbody>

@@ -64,9 +64,7 @@ function flagExternalImages(
 }
 
 /** Collect every image reference out of a menu tree (categories + items). */
-function collectMenuImages(
-  tree: MenuTreeDto,
-): { url: string | null | undefined; where: string }[] {
+function collectMenuImages(tree: MenuTreeDto): { url: string | null | undefined; where: string }[] {
   const out: { url: string | null | undefined; where: string }[] = [];
   for (const c of tree.categories) {
     if (c.imageUrl) out.push({ url: c.imageUrl, where: `category:${c.slug}` });

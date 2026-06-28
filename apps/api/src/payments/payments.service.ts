@@ -80,13 +80,16 @@ export class PaymentsService {
     // exact order. A session key / order UUID alone is never accepted.
     this.authorizeOrderAccess(order, actor, orderToken);
 
-    if (order.status !== 'PENDING') {
-      throw new BadRequestException(`Order is not pending (status: ${order.status})`);
-    }
-    // Terminal payment states can never be re-intented (plan §F2).
+    // Terminal payment states can never be re-intented (plan §F2). Check this
+    // BEFORE the order-status guard: a paid order is also CONFIRMED, and the
+    // clear "already paid" reason is more useful (and matches §F2) than the
+    // generic "not pending".
     const existing = order.payment;
     if (existing && ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(existing.status)) {
       throw new BadRequestException(`Order payment is already ${existing.status.toLowerCase()}`);
+    }
+    if (order.status !== 'PENDING') {
+      throw new BadRequestException(`Order is not pending (status: ${order.status})`);
     }
 
     const provider = this.pickProvider(dto.provider, dto.methodKind);

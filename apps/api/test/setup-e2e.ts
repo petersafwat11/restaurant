@@ -105,6 +105,9 @@ export async function ensureRestaurant(app: NestFastifyApplication): Promise<voi
       name: 'E2E Restaurant',
       phone: '+48 22 555 0000',
       email: 'e2e@test.local',
+      // Match production (Polish restaurant) so the payment config + order
+      // currency are PLN, consistent with the rest of the e2e suite.
+      currency: 'PLN',
       address: { line1: 'ul. Test 1', city: 'Warsaw', country: 'PL' },
     },
   });
