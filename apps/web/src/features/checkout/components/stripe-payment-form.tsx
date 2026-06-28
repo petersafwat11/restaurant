@@ -28,12 +28,17 @@ interface StripePaymentFormProps {
   /** Submit handle: the parent calls this; returns null on success, error string on failure. */
   submitRef: React.MutableRefObject<(() => Promise<string | null>) | null>;
   /**
-   * Which Stripe method the customer picked. Mostly a label on the intent —
-   * `automatic_payment_methods` means the PaymentElement still surfaces every
-   * configured method (card, BLIK, P24…) as tabs — but it keeps the recorded
-   * Payment.method aligned with the customer's choice. Defaults to card.
+   * Which Stripe method the customer picked. The server now creates a
+   * method-specific intent (card-only / BLIK-only) for this kind, so the
+   * PaymentElement surfaces exactly that method (plan §F3). Defaults to card.
    */
   methodKind?: PaymentMethodKind;
+  /**
+   * Signed guest order token (plan §F1) — forwarded as X-Order-Token so a guest
+   * can create the payment intent without an auth session. Omitted for authed
+   * users (the bearer token authorizes them).
+   */
+  orderToken?: string | null;
   /** Called when the publishable key + clientSecret are both ready. */
   onReady?: () => void;
 }
@@ -49,6 +54,7 @@ export function StripePaymentForm({
   orderId,
   submitRef,
   methodKind = 'STRIPE_CARD',
+  orderToken,
   onReady,
 }: StripePaymentFormProps) {
   const t = useTranslations('web.shop.checkout.stripe');
@@ -60,11 +66,14 @@ export function StripePaymentForm({
     let mounted = true;
     (async () => {
       try {
-        const res = await getApiClient().payments.createIntent({
-          orderId,
-          provider: 'stripe',
-          methodKind,
-        });
+        const res = await getApiClient().payments.createIntent(
+          {
+            orderId,
+            provider: 'stripe',
+            methodKind,
+          },
+          orderToken,
+        );
         if (!mounted) return;
         if (!res.clientSecret) {
           setIntentError(t('notConfigured'));
@@ -80,7 +89,7 @@ export function StripePaymentForm({
     return () => {
       mounted = false;
     };
-  }, [orderId, onReady, t, methodKind]);
+  }, [orderId, onReady, t, methodKind, orderToken]);
 
   if (intentError) {
     return (

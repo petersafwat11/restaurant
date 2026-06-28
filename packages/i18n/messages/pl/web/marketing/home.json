@@ -4,7 +4,6 @@
   "ourStory": "Nasza historia",
   "locations": "Lokalizacje",
   "contactUs": "Skontaktuj się z nami",
-  "reserveTable": "Zarezerwuj stolik",
   "hero": {
     "eyebrow": "Kebab · Falafel · Tacos · Od 2019",
     "titleLine1": "Prawdziwy kebab.",
@@ -42,42 +41,8 @@
     "description": "Dania, które klienci zamawiają w kółko.",
     "seeFullMenu": "Zobacz pełne menu",
     "viewFullMenuCta": "Zobacz całe menu",
-    "addedToCart": "Dodano do koszyka",
-    "addedToCartDescription": "1 × {name}",
     "addAriaLabel": "Dodaj {name} do koszyka",
-    "soldOutLabel": "Wyprzedane dziś",
-    "dishes": {
-      "kebab-tortilla-srodni": {
-        "name": "Kebab Tortilla Średni",
-        "description": "Mieszanka wołowiny i jagnięciny, świeża sałatka, sos tahini w ciepłej tortilli. Nasz numer jeden.",
-        "imageAlt": "Kebab w tortilli na kremowym papierze"
-      },
-      "falafel-pita-duzy": {
-        "name": "Falafel Pita Duży",
-        "description": "Osiem ręcznie formowanych falafeli, hummus, kiszona rzepa, pietruszka.",
-        "imageAlt": "Falafel w picie z hummusem"
-      },
-      "kapsalon-duzy": {
-        "name": "Kapsalon Duży",
-        "description": "Klasyk z Rotterdamu. Frytki, kebab, roztopiony ser, sałatka, sos. Porcja dla dwojga.",
-        "imageAlt": "Kapsalon z kebabem i roztopionym serem"
-      },
-      "tacos-x3": {
-        "name": "Tacos x3",
-        "description": "Trzy miękkie tacos, do wyboru z kebabem lub falafelem, salsa.",
-        "imageAlt": "Trzy miękkie tacos"
-      },
-      "box-strips-mega": {
-        "name": "Box Strips Mega",
-        "description": "Chrupiące paski z kurczaka, frytki, surówka, dwa sosy.",
-        "imageAlt": "Box z chrupiącymi paskami z kurczaka i frytkami"
-      },
-      "salatka-kebab-duzy": {
-        "name": "Sałatka Kebab Duży",
-        "description": "Bez chleba — sama zieleninka, mięso z kebaba, tahini, granat.",
-        "imageAlt": "Sałatka z kebabem, zieleniną i granatem"
-      }
-    }
+    "soldOutLabel": "Wyprzedane dziś"
   },
   "story": {
     "eyebrow": "Nasza historia",
@@ -86,7 +51,7 @@
     "lead": "Mały lokal z kebabem i falafelem na Ściegiennego w Kielcach. Chleb pieczemy w ciągu dnia, falafel formujemy ręcznie, mięso marynujemy przez noc — wszystko na miejscu, nic z zamrażarki.",
     "body": "Prowadzi nas trójka i celowo tak zostaje. Ten sam róg od 2019 roku.",
     "readMore": "Przeczytaj całą historię",
-    "imageAlt": "Mięso krojone z pionowego rusztu w Szef Donald w Kielcach",
+    "imageAlt": "Mięso kebabowe krojone z pionowego rusztu",
     "yearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# lat}}",
     "yearsLabel": "Otwarte od {since}",
     "wrapsValue": "~{count} /tyg.",
@@ -113,37 +78,15 @@
   },
   "testimonials": {
     "eyebrow": "Opinie",
-    "title": "Ocena 4,1 w Google.",
-    "description": "Średnia 4,1 z 213 opinii gości w Kielcach.",
+    "title": "Co mówią nasi goście",
+    "description": "Najnowsze opinie gości w Kielcach.",
     "readAllReviews": "Przeczytaj wszystkie opinie",
     "starsAriaLabel": "{value} z 5 gwiazdek",
-    "anonymous": "Anonimowy",
-    "items": {
-      "0": {
-        "quote": "Najlepszy kebab w Kielcach, bez dwóch zdań. Sos tahini to inny poziom, a chleb jest wyraźnie świeży. Byłam trzy razy w tym miesiącu.",
-        "name": "Kasia W.",
-        "meta": "Lokalny przewodnik · 42 opinie"
-      },
-      "1": {
-        "quote": "Falafel w picie, który naprawdę smakuje jak powinien — chrupiący na zewnątrz, miękki w środku, dobrze przyprawiony. Mój ulubiony wegetariański obiad.",
-        "name": "Tomasz K.",
-        "meta": "12 opinii"
-      },
-      "2": {
-        "quote": "Kapsalon jest niebezpieczny. W dobrym znaczeniu.",
-        "name": "Anna M.",
-        "meta": "5 opinii"
-      },
-      "3": {
-        "quote": "Prawdziwa jakość w uczciwej cenie. Czasem trzeba poczekać w piątek, ale warto.",
-        "name": "Michał R.",
-        "meta": "Top recenzent"
-      }
-    }
+    "anonymous": "Anonimowy"
   },
   "newsletter": {
     "eyebrow": "Bądźmy w kontakcie",
-    "title": "Darmowa baklava do pierwszego zamówienia.",
+    "title": "Świeżo z kuchni, prosto do Twojej skrzynki.",
     "description": "Zapisz się — sporadyczne maile, zero spamu. Wypisanie w każdej chwili.",
     "emailPlaceholder": "Twój email",
     "subscribe": "Zapisz się",

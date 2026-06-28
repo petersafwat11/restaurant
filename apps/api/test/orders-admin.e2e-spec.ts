@@ -1,6 +1,6 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('orders admin list + detail enrichment (e2e)', () => {
   let app: NestFastifyApplication;
@@ -85,7 +85,7 @@ describe('orders admin list + detail enrichment (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type, tipAmount: '0' },
+      { type, tipAmount: '0', ...orderLegal() },
       token,
       { 'idempotency-key': idem },
     );

@@ -26,10 +26,12 @@
     }
   },
   "bottom": {
-    "copyright": "© 2026 Szef Donald sp. z o.o. · NIP 6572959741",
     "legal": {
       "privacy": "Privacy",
       "terms": "Terms",
+      "refundsComplaints": "Refunds & Complaints",
+      "deliveryCancellation": "Delivery & Cancellation",
+      "promotionTerms": "Promotion Terms",
       "cookies": "Cookies"
     }
   }

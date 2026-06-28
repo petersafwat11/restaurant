@@ -1,9 +1,7 @@
 import { randomInt } from 'node:crypto';
-import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Prisma } from '@repo/db';
-import { JOB_PUSH_LOYALTY, QUEUE_PUSH } from '@repo/jobs';
 import type {
   OrderStatusChangedEvent,
   ReferralListDto,
@@ -11,7 +9,6 @@ import type {
   ReferralMeDto,
 } from '@repo/types';
 import { REFERRAL_REFEREE_POINTS, REFERRAL_REFERRER_POINTS } from '@repo/utils/loyalty';
-import type { Queue } from 'bullmq';
 import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { LoyaltyService } from '../loyalty/loyalty.service';
@@ -29,7 +26,6 @@ export class ReferralsService {
     private readonly prisma: PrismaService,
     private readonly loyalty: LoyaltyService,
     @Inject(ENV) private readonly env: ENV_TYPE,
-    @InjectQueue(QUEUE_PUSH) private readonly pushQueue: Queue,
     private readonly analytics: AnalyticsProductService,
   ) {}
 
@@ -182,17 +178,6 @@ export class ReferralsService {
         REFERRAL_REFEREE_POINTS,
         'Welcome referral bonus',
       );
-      // Side-effect push (never awaited into the event path failure).
-      await this.pushQueue.add(JOB_PUSH_LOYALTY, {
-        userId: referral.referrerId,
-        points: REFERRAL_REFERRER_POINTS,
-        reason: 'REFERRAL',
-      });
-      await this.pushQueue.add(JOB_PUSH_LOYALTY, {
-        userId: referral.refereeId,
-        points: REFERRAL_REFEREE_POINTS,
-        reason: 'REFERRAL',
-      });
       this.analytics.capture('referral_completed', {
         referrerId: referral.referrerId,
         refereeId: referral.refereeId,

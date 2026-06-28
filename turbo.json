@@ -23,15 +23,13 @@
 		"APP_URL_WEB",
 		"APP_URL_ADMIN",
 		"APP_URL_API",
-		"APP_DEEP_LINK_SCHEME",
 		"API_PORT",
-		"NEXT_PUBLIC_API_URL",
-		"EXPO_PUBLIC_API_URL"
+		"NEXT_PUBLIC_API_URL"
 	],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", ".expo/**"]
+			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
 		},
 		"dev": {
 			"cache": false,

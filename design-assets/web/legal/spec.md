@@ -2,7 +2,7 @@
 
 **Pages:** Privacy Policy · Terms (Regulamin) · Cookie Policy
 **App:** `apps/web` (customer). PL is the default locale; EN is a secondary locale.
-**Status:** spec only — pages not built yet. Build after you approve content (see `EU-COMPLIANCE.md`).
+**Status:** the pages are **now built** and linked from footer + checkout; the seller-identity block renders from the DB legal fields and checkout records a server-side acceptance snapshot. The **binding legal wording still needs lawyer sign-off**. This file remains the layout/structure spec (see `EU-COMPLIANCE.md` for the substantive analysis).
 
 > These are long-form legal text pages. They share ONE layout (a centered reading column) and differ only in content. This spec defines that shared layout + the per-page content outline. Treat `exported.tsx` style references as N/A — build with `packages/ui` primitives.
 
@@ -76,14 +76,17 @@ Whichever: the **"Last updated" date and version** must be explicit and bump on 
 
 ## 6. Business identity block (shared)
 
-All three pages must surface the controller/seller identity. Pull what we can from the DB restaurant settings (name, address, email, phone) and add the company-registration fields that aren't in the DB yet (see `EU-COMPLIANCE.md` — needs a new settings group OR hardcode):
+All three pages surface the controller/seller identity, rendered from the DB restaurant legal fields (the admin "Legal entity" section now exists — legalName, NIP, REGON, KRS, registry court, share capital, registered address, support/complaints/privacy contacts). Render only the fields that are populated; omit blanks rather than show placeholders.
 
 ```
-Szef Donald sp. z o.o.
-[street, ZIP city]            ← from Restaurant.address (DB)
-NIP 6572959741 · REGON ____ · KRS ____   ← NIP known; REGON/KRS needed
-e-mail: ____  ·  tel: ____    ← from Restaurant.email / .phone (DB)
+<legalName>                   ← Restaurant.legalName (DB; owner-verified, NULL until entered)
+[street, ZIP city]            ← Restaurant.registeredAddress / address (DB)
+NIP <nip> · REGON <regon> · KRS <krs>   ← from DB (only NIP is backfilled today)
+registry court: <registryCourt> · share capital: <shareCapital>
+e-mail: <supportEmail>  ·  tel: <supportPhone>   ← from DB
 ```
+
+> Owner must enter & verify the legal values against an official KRS extract before publishing. Do not hardcode an inferred `sp. z o.o.` name or registry values.
 
 ## 7. Responsive & a11y
 
@@ -99,9 +102,9 @@ e-mail: ____  ·  tel: ____    ← from Restaurant.email / .phone (DB)
 
 ### 8a. Privacy Policy / Polityka Prywatności
 1. Who we are (controller identity + contact)
-2. What data we collect (account, orders, addresses, payments, contact, reviews, reservations, loyalty, referrals, device/push, usage)
+2. What data we collect (account, orders, addresses, payments, contact, reviews, reservations, loyalty, referrals, usage). No mobile-app device/push data — the app and push channel were removed; notifications are in-app + email + SMS.
 3. Why & legal basis (contract / consent / legitimate interest / legal obligation)
-4. Who we share it with (processors: Stripe, Resend, Twilio, Expo, hosting, OpenStreetMap) + international transfers
+4. Who we share it with (processors: Stripe, Resend, Twilio, Contabo hosting + local uploads, OpenStreetMap) + international transfers
 5. How long we keep it (retention, incl. 5-yr tax retention for invoices)
 6. Your rights (access, rectification, erasure, restriction, portability, objection, withdraw consent) + how to exercise
 7. Cookies → link to Cookie Policy
@@ -119,7 +122,7 @@ e-mail: ____  ·  tel: ____    ← from Restaurant.email / .phone (DB)
 8. Cancellations & **withdrawal right** — note the food/perishable + dated-reservation **exemptions**
 9. Complaints (reklamacje / rękojmia) — how & where
 10. Liability
-11. Out-of-court dispute resolution + EU ODR platform link
+11. Out-of-court dispute resolution — Polish ADR bodies / UOKiK. **Do NOT link the EU ODR platform (closed 20 July 2025).**
 12. Governing law (Polish) & jurisdiction
 13. Changes & effective date
 

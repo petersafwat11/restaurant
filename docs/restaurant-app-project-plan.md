@@ -1,6 +1,20 @@
 # Restaurant Ordering Platform — Complete Project Plan
 
-> Stack: Turborepo · Next.js · NestJS · PostgreSQL · Prisma · Redis · BullMQ · React Native (Expo) · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
+> Stack: Turborepo · Next.js · NestJS · PostgreSQL · Prisma · Redis · BullMQ · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
+
+> **⚠️ Historical planning document (superseded in places).** This is the
+> original 24-week plan. Several decisions changed and the sections below are
+> annotated where they no longer match reality. The current truth:
+> - **Surfaces are web + admin only.** The Expo mobile app + push channel were
+>   removed. Ignore all "Mobile (Expo)", React Native, NativeWind, EAS, and
+>   push-notification content below as a dropped surface — notification
+>   channels are in-app + email + Twilio SMS.
+> - **Hosting is a single Contabo VPS** (Docker Compose + Caddy + self-hosted
+>   PostgreSQL + Redis + local `/opt/restaurant/uploads`). **No** Vercel/Fly/
+>   Railway, **no** managed PostgreSQL/PITR, **no** Cloudflare R2/S3. See
+>   `deploy/RUNBOOK.md` and `docs/runbooks/backup-dr.md`.
+> - Checkout now creates the **order before the payment intent** (see §11
+>   annotation). Reconciliation is a real **15-min** BullMQ job (see §9).
 
 ---
 
@@ -12,7 +26,7 @@
 4. [Database Schema (Prisma)](#4-database-schema-prisma)
 5. [Backend Architecture (NestJS)](#5-backend-architecture-nestjs)
 6. [Web Architecture (Next.js)](#6-web-architecture-nextjs)
-7. [Mobile Architecture (Expo)](#7-mobile-architecture-expo)
+7. Mobile Architecture (Expo) — dropped
 8. [Feature Specification](#8-feature-specification)
 9. [Real-time, Jobs & Notifications](#9-real-time-jobs--notifications)
 10. [Auth & RBAC](#10-auth--rbac)
@@ -26,13 +40,13 @@
 
 ## 1. Executive Summary
 
-A full-stack restaurant ordering platform built around four shippable surfaces sharing one backend and a common type/UI foundation:
+A full-stack restaurant ordering platform built around shippable surfaces sharing one backend and a common type/UI foundation (the original plan had four surfaces; **the mobile surface was dropped** — web + admin only now):
 
 | Surface | Stack | Audience | Scope |
 |---|---|---|---|
 | **Customer Web** | Next.js 15 (App Router) | End users | Marketing pages + ordering + account |
 | **Admin Dashboard** | Next.js 15 (App Router) | Staff / owner | Operations, KPIs, menu, orders, customers |
-| **Customer Mobile** | Expo (RN) | End users | Native ordering experience |
+| ~~**Customer Mobile**~~ | ~~Expo (RN)~~ | — | ❌ dropped |
 | **API** | NestJS 11 | All clients | REST + WebSocket + jobs |
 
 Goals:
@@ -54,8 +68,8 @@ Goals:
 - **Socket.IO** Gateway for real-time order updates
 - **Stripe** primary, **Paymob** optional adapter for MENA, **Cash on Delivery** native
 - **Resend** for transactional email
-- **Twilio** for SMS / WhatsApp OTP
-- **Cloudflare R2** (S3-compatible) for image storage with image optimization via Next.js / Expo Image
+- **Twilio** for SMS OTP
+- **Local-disk uploads** on the Contabo VPS (`/opt/restaurant/uploads`, bind-mounted into the api container; served at `${APP_URL_API}/uploads/{key}`). *(The original plan said Cloudflare R2 — that was never adopted; production uses local storage.)*
 - **Zod** for env, DTOs, and request/response validation (shared with frontend)
 
 ### Frontend (Web)
@@ -68,22 +82,18 @@ Goals:
 - **Recharts** + **Tremor** for admin charts
 - **TanStack Table** for admin data tables
 
-### Mobile
-- **Expo SDK 52+** with EAS Build
-- **expo-router** (file-based routing matches the web mental model)
-- **NativeWind** (Tailwind for RN) — keeps tokens consistent with web
-- **TanStack Query** (same client setup pattern as web)
-- **React Hook Form** + Zod
-- **Zustand** for cart
-- **expo-notifications** for push
-- **Stripe React Native SDK**
+### Mobile — ❌ dropped
+> The Expo mobile surface (Expo SDK, EAS, expo-router, NativeWind,
+> expo-notifications push, Stripe React Native SDK) was **removed**. There is
+> no native app and no push channel. Disregard this subsection; the rest of the
+> plan applies to web + admin only.
 
 ### Tooling
 - **Turborepo** with remote caching
 - **pnpm** workspaces
 - **Biome** for lint+format (faster than ESLint+Prettier for a monorepo this size; ESLint kept only for Next-specific rules)
 - **TypeScript 5.6+** strict, project references
-- **GitHub Actions** for CI, Docker for backend, Vercel for web/admin, EAS for mobile
+- **GitHub Actions** for CI; **Docker Compose on a Contabo VPS** for all services (api, web, admin, Postgres, Redis, Caddy). *(Original plan said Vercel for web/admin + EAS for mobile — neither is used.)*
 
 ---
 
@@ -95,14 +105,14 @@ restaurant-app/
 │   ├── api/                    # NestJS backend
 │   ├── web/                    # Customer-facing Next.js (marketing + ordering)
 │   ├── admin/                  # Admin dashboard Next.js
-│   └── mobile/                 # Expo app (customer only)
+│   └── mobile/                 # ❌ Expo app — DROPPED (being removed)
 │
 ├── packages/
 │   ├── db/                     # Prisma schema, migrations, seed scripts, generated client
 │   ├── types/                  # Shared TS types + Zod schemas (DTOs, enums, errors)
-│   ├── api-client/             # Typed HTTP client (generated from OpenAPI or hand-rolled)
+│   ├── api-client/             # Typed HTTP client (web + admin)
 │   ├── ui/                     # Shared shadcn components used by web + admin
-│   ├── ui-mobile/              # NativeWind components for mobile
+│   ├── ui-mobile/              # ❌ NativeWind components — DROPPED (being removed)
 │   ├── auth-core/              # JWT + refresh helpers, RBAC permission map
 │   ├── jobs/                   # BullMQ queue + processor types (consumed by api, dashboards)
 │   ├── i18n/                   # Translation JSONs (en, ar) + helpers
@@ -130,9 +140,9 @@ restaurant-app/
 
 ### Why this split
 
-- `ui/` vs `ui-mobile/`: Tailwind classes don't translate to RN. Tokens are shared via `tooling/tailwind-config`, but components are duplicated by design — this is the only honest way to ship native quality.
+- ~~`ui/` vs `ui-mobile/`~~: obsolete — `ui-mobile` is dropped with the mobile surface. `ui/` (shadcn) serves web + admin; tokens come from `tooling/tailwind-config`.
 - `types/` is the contract layer. Every DTO is a Zod schema; types are inferred. The API validates requests with the same schema the frontend uses to validate forms — no drift, ever.
-- `api-client/` wraps fetch with typed routes. Consumed identically from web, admin, and mobile.
+- `api-client/` wraps fetch with typed routes. Consumed identically from web and admin.
 - `jobs/` exports queue names + payload types. The `api` app produces and consumes; admin/web only produce (e.g., resend-email button).
 
 ---
@@ -562,16 +572,15 @@ apps/api/src/
 │   ├── loyalty/                 # earn/redeem
 │   ├── reservations/            # availability, booking
 │   ├── reviews/                 # post-order reviews + moderation
-│   ├── notifications/           # in-app feed, push registration
+│   ├── notifications/           # in-app feed (no push — channel removed)
 │   ├── analytics/               # admin KPIs (queries via Prisma + cached in Redis)
-│   ├── uploads/                 # presigned R2/S3 URLs
+│   ├── uploads/                 # local-disk uploads (no R2/S3)
 │   └── realtime/                # Socket.IO gateway: order rooms, kitchen feed
 ├── jobs/                        # BullMQ processors
 │   ├── email.processor.ts
 │   ├── sms.processor.ts
-│   ├── push.processor.ts
 │   ├── analytics-rollup.processor.ts
-│   └── payment-reconcile.processor.ts
+│   └── reconciliation.processor.ts   # (push.processor.ts removed)
 └── seed/
 ```
 
@@ -659,7 +668,11 @@ Admin tables use TanStack Table with server-side pagination/filtering. Charts vi
 
 ---
 
-## 7. Mobile Architecture (Expo)
+## 7. Mobile Architecture (Expo) — ❌ DROPPED
+
+> This entire surface was removed. There is no Expo app, no push notifications,
+> no Stripe React Native, and no deep links. The architecture below is retained
+> only as historical context — it is **not** part of the current system.
 
 ```
 apps/mobile/
@@ -757,7 +770,7 @@ Mobile-only concerns:
 **Menu**
 - Categories CRUD with drag-reorder
 - Items table: bulk availability toggle, bulk price edit, search, filter
-- Item editor: drawer with image upload (presigned to R2), variants, modifier groups inline editor
+- Item editor: drawer with image upload (to local-disk uploads), variants, modifier groups inline editor
 - "Schedule availability" (e.g., breakfast menu only 6-11am)
 
 **Customers**
@@ -825,22 +838,27 @@ Events: `order.created`, `order.status_changed`, `order.cancelled`, `order.refun
 |---|---|---|---|
 | `email` | API | api worker | order confirmation, password reset, weekly digest |
 | `sms` | API | api worker | OTP, order ready |
-| `push` | API | api worker | order status updates |
 | `analytics-rollup` | cron (every 15m) | api worker | aggregate daily KPIs into a summary table for fast dashboard reads |
-| `payment-reconcile` | cron (hourly) | api worker | match Stripe webhook gaps |
+| `reconciliation` | cron (**every 15 min**) | api worker | compare non-terminal payments to Stripe, repair missed-webhook gaps, alert on mismatches |
 | `cleanup` | cron (daily) | api worker | expire abandoned guest carts older than 7d |
+
+> Note vs original plan: there is **no `push` queue** (push channel dropped),
+> and the reconciliation job is a real **15-min** repeat (not "hourly
+> payment-reconcile" — that earlier line was aspirational).
 
 ### Notification matrix
 
-| Event | Email | SMS | Push | In-app |
-|---|---|---|---|---|
-| Welcome / verify email | ✅ | — | — | — |
-| OTP login | — | ✅ | — | — |
-| Order placed | ✅ | — | ✅ | ✅ |
-| Order confirmed | — | ✅ | ✅ | ✅ |
-| Out for delivery | — | ✅ | ✅ | ✅ |
-| Delivered | — | — | ✅ | ✅ |
-| Promo / loyalty | ✅ (digest) | — | ✅ (opt-in) | ✅ |
+> Push removed — channels are in-app + email + Twilio SMS only.
+
+| Event | Email | SMS | In-app |
+|---|---|---|---|
+| Welcome / verify email | ✅ | — | — |
+| OTP login | — | ✅ | — |
+| Order placed | ✅ | — | ✅ |
+| Order confirmed | — | ✅ | ✅ |
+| Out for delivery | — | ✅ | ✅ |
+| Delivered | — | — | ✅ |
+| Promo / loyalty | ✅ (digest) | — | ✅ |
 
 ---
 
@@ -867,18 +885,30 @@ Seed roles:
 
 ### Architecture
 - `PaymentsService` is provider-agnostic. Each provider implements `PaymentProvider` interface: `createIntent`, `confirm`, `refund`, `parseWebhook`.
-- Order creation flow:
-  1. Validate cart server-side (recompute prices to prevent tampering)
-  2. Create `Order` (status: PENDING) + `Payment` (status: PENDING) in one DB transaction
-  3. Call provider to create payment intent
-  4. Return `clientSecret` to client
-  5. Client confirms with provider SDK
-  6. Webhook updates `Payment` + transitions `Order` to CONFIRMED
-- COD short-circuits steps 3-6: order is CONFIRMED immediately, payment marked PAID on delivery completion.
+- **Checkout flow (order-before-intent — current):**
+  1. Validate cart server-side (recompute prices to prevent tampering).
+  2. `POST /orders` creates the `Order` (status: PENDING) and returns a 7-day
+     **HMAC-signed order token** (so a guest can pay without a session).
+  3. `POST /payments/intent` (a `@Public()` route, authorized by the authed
+     owner **or** a valid `X-Order-Token` matching the order) creates the
+     PaymentIntent for the already-existing order and returns `clientSecret`.
+  4. Client confirms with the Stripe SDK.
+  5. Webhook updates `Payment` + transitions `Order` to CONFIRMED.
+  > The order is created **before** the payment intent (earlier drafts had the
+  > intent first). On retry after a decline the existing pending order is
+  > reused — no duplicate order.
+- COD short-circuits: order is CONFIRMED immediately, payment marked PAID on delivery completion.
 
 ### Idempotency
-- `Idempotency-Key` header required on `POST /orders` and `POST /payments/intent`.
+- **Order-level:** `Idempotency-Key` on `POST /orders`, plus a unique
+  `Payment(orderId)` row.
+- **PaymentIntent-level:** the server derives a **deterministic Stripe
+  idempotency key** (`pi:order:method:minor:ccy`) passed in the Stripe request
+  options, so same-method retries reuse one intent and a method switch cancels
+  the old intent before creating a new one. (This is stronger than only order
+  idempotency.)
 - Webhook events stored in `webhook_events` table; duplicate event IDs ignored.
+- A **`reconciliation`** BullMQ job (15-min repeat) repairs missed webhooks.
 
 ### Refunds
 - Partial or full, must reference an OrderItem set or full amount.
@@ -913,7 +943,7 @@ Two-week sprints. Order assumes you can run web + admin + mobile somewhat in par
 
 ### Sprint 2 — Restaurant + Menu (Weeks 4-5)
 - Restaurant model + hours + locations
-- Categories + items + images (R2 presigned upload)
+- Categories + items + images (local-disk upload)
 - Modifier groups + options
 - Public menu API (cached)
 - Admin: menu CRUD UI (categories drag-reorder, items table, item editor drawer)
@@ -1085,11 +1115,15 @@ These belong in `CLAUDE.md` (next section) but worth stating here in the plan:
 
 Drop this at repo root. It's the orientation doc Claude Code reads first.
 
+> Historical template — the live `CLAUDE.md`/`AGENTS.md` at repo root are the
+> source of truth. Note the mobile/Expo/`ui-mobile` references below are
+> obsolete (mobile surface removed).
+
 ````markdown
 # Project: Restaurant Ordering Platform
 
 ## Stack
-Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ · Expo · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
+Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ · Tailwind · shadcn/ui · Zod · React Hook Form · TanStack Query · Socket.IO · Stripe
 
 ## Working agreement
 
@@ -1120,12 +1154,10 @@ Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ 
 - Subscribe to room `order:{orderId}` in `useOrderTracking(id)` hook.
 
 **Jobs.**
-- Side effects (email, SMS, push, exports) go in BullMQ queues. Never `await` them in request handlers.
+- Side effects (email, SMS, exports, reconciliation) go in BullMQ queues. Never `await` them in request handlers.
 
-**Mobile-specific.**
-- Use `expo-router`. No React Navigation imports directly.
-- All styling via NativeWind. No StyleSheet.
-- Push tokens registered after login via `useRegisterPushToken()`.
+<!-- The "Mobile-specific" rules from the original template are removed: the
+     Expo app and push channel no longer exist. -->
 
 **Conventions.**
 - File names: kebab-case for files, PascalCase for component default export.
@@ -1150,16 +1182,20 @@ Turborepo · Next.js 15 · NestJS 11 · PostgreSQL · Prisma · Redis · BullMQ 
 ### Local
 - `docker compose up -d` for postgres, redis, mailhog
 - `pnpm dev` runs everything; or per-app: `pnpm --filter @repo/web dev`
-- Stripe CLI: `stripe listen --forward-to localhost:4000/api/v1/payments/webhook`
+- Stripe CLI: `stripe listen --forward-to localhost:4000/api/v1/payments/webhooks/stripe`
 
-### Hosting
-- **API**: Fly.io or Railway (single region near customers + read replica) — Docker image, autoscaling
-- **Postgres**: managed (Neon, Supabase, or Railway PG)
-- **Redis**: Upstash (HTTP for jobs producers from Vercel-hosted apps if needed) or Railway
-- **Object storage**: Cloudflare R2 (cheap egress)
-- **Web**: Vercel (preview deployments per PR)
-- **Admin**: Vercel (separate project for blast-radius isolation)
-- **Mobile**: EAS Build → TestFlight + Play Internal Testing → production
+### Hosting (actual — Contabo VPS)
+> The plan below originally proposed Fly/Railway + managed Postgres + R2 +
+> Vercel + EAS. **None of that is used.** Production is one Contabo VPS:
+- **Everything in Docker Compose on the VPS**: api (+ workers), web, admin,
+  **self-hosted PostgreSQL**, **self-hosted Redis**, and **Caddy** (TLS +
+  reverse proxy for `szefdonald.pl`, `admin.*`, `api.*`).
+- **Object storage**: none — images live on local disk at
+  `/opt/restaurant/uploads` (bind-mounted volume). No R2/S3.
+- **Backups**: nightly `pg_dump` on the VPS (offsite copy is the required next
+  step — see `docs/runbooks/backup-dr.md`). No managed PITR.
+- **Deploy**: push to `main` → GitHub Actions builds images → deploys to the
+  VPS (`deploy/RUNBOOK.md`).
 
 ### Env variables (all Zod-validated in `packages/config-runtime`)
 
@@ -1169,24 +1205,26 @@ REDIS_URL=
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
 STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
 STRIPE_WEBHOOK_SECRET=
-PAYMOB_API_KEY=          # optional
+ORDER_TRACKING_SECRET=   # HMAC for signed guest order-tracking token
 RESEND_API_KEY=
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
-R2_ENDPOINT=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET=
+TWILIO_FROM=
+UPLOADS_DIR=uploads      # local-disk uploads (no R2)
 APP_URL_WEB=
 APP_URL_ADMIN=
-APP_DEEP_LINK_SCHEME=restaurant
+APP_URL_API=
 ```
+> No `R2_*` vars (local uploads). No Expo vars (`EXPO_PUBLIC_API_URL`). No
+> Paymob. See `.env.example` (dev) and `deploy/.env.example.prod` (prod) for the
+> authoritative list.
 
 ### Observability
-- Sentry (api, web, admin, mobile)
-- PostHog (product analytics + session replay on web)
-- Healthchecks: `/healthz` on API; uptime via BetterStack
+- Sentry (api, web, admin) — optional, no-op when DSN unset
+- PostHog (product analytics) — optional, server-side
+- Healthchecks: `/healthz` on API
 
 ---
 

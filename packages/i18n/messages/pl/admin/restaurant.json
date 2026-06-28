@@ -12,7 +12,9 @@
     "contact": "Kontakt",
     "location": "Lokalizacja",
     "discovery": "Discovery",
-    "channels": "Kanały"
+    "channels": "Kanały",
+    "legal": "Dane firmy",
+    "payments": "Płatności i wsparcie"
   },
   "identity": {
     "title": "Tożsamość",
@@ -83,6 +85,54 @@
     "rangeError": {
       "incomplete": "Ustaw min i maks albo zostaw oba puste.",
       "order": "Minimum musi być mniejsze lub równe maksimum."
+    }
+  },
+  "legal": {
+    "title": "Dane firmy",
+    "description": "Oficjalna tożsamość firmy używana na fakturach, u dostawcy płatności i na stronach prawnych.",
+    "verifyWarning": "Te wartości muszą dokładnie odpowiadać danym z KRS, Stripe oraz rachunku bankowego do wypłat. Sprawdź je w aktualnym odpisie z KRS przed wprowadzeniem — aplikacja nie weryfikuje rejestrów zewnętrznych.",
+    "legalNameLabel": "Nazwa prawna",
+    "legalNameHint": "Dokładna nazwa rejestrowa firmy (np. „… SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ”), nie nazwa handlowa.",
+    "nipLabel": "NIP",
+    "nipHint": "10 cyfr.",
+    "regonLabel": "REGON",
+    "regonHint": "9 lub 14 cyfr.",
+    "krsLabel": "KRS",
+    "krsHint": "10 cyfr. Zostaw puste dla JDG / form bez KRS.",
+    "registryCourtLabel": "Sąd rejestrowy",
+    "registryCourtHint": "Sąd i wydział, np. „Sąd Rejonowy w Kielcach, X Wydział Gospodarczy KRS”.",
+    "shareCapitalLabel": "Kapitał zakładowy",
+    "shareCapitalHint": "Kwota, np. 5000.00. Tylko spółki.",
+    "shareCapitalCurrencyLabel": "Waluta kapitału",
+    "registeredSameLabel": "Adres rejestrowy taki sam jak adres działalności",
+    "registeredSameHint": "Wyłącz, aby wpisać osobny adres rejestrowy (KRS).",
+    "registeredAddressTitle": "Adres rejestrowy"
+  },
+  "payments": {
+    "title": "Płatności i obsługa klienta",
+    "description": "Kanały wsparcia pokazywane klientom oraz oczekiwany opis na wyciągu karty.",
+    "supportEmailLabel": "E-mail wsparcia",
+    "supportPhoneLabel": "Telefon wsparcia",
+    "complaintsEmailLabel": "E-mail do reklamacji",
+    "complaintsEmailHint": "Kanał zwrotów / reklamacji.",
+    "privacyEmailLabel": "E-mail ds. prywatności (RODO)",
+    "statementDescriptorLabel": "Opis na wyciągu",
+    "statementDescriptorHint": "5–22 znaki widoczne na wyciągu karty (litery/cyfry/spacje; bez < > \\ ' \" *).",
+    "readiness": {
+      "title": "Gotowość do płatności online",
+      "complete": "Wszystkie wymagane dane prawne i kontaktowe są uzupełnione. Nie oznacza to weryfikacji w rejestrach zewnętrznych.",
+      "incompleteHint": "Uzupełnij wymagane pola przed włączeniem płatności online:",
+      "fields": {
+        "legalName": "Nazwa prawna",
+        "nip": "NIP",
+        "regon": "REGON",
+        "registryCourt": "Sąd rejestrowy",
+        "registeredAddress": "Adres rejestrowy",
+        "supportEmail": "E-mail wsparcia",
+        "complaintsEmail": "E-mail do reklamacji",
+        "privacyEmail": "E-mail ds. prywatności",
+        "statementDescriptor": "Opis na wyciągu"
+      }
     }
   },
   "saveBar": {

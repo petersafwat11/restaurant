@@ -104,7 +104,7 @@ export function CartSheet({
     deliveryValue = 'Calculated at checkout',
     total: totalLabel = 'Total',
     checkoutCta,
-    footerHint = 'Free baklava on first order — code at checkout.',
+    footerHint = 'Delivery fee and taxes are calculated at checkout.',
   } = labels ?? {};
   const itemCount = lines.reduce((s, l) => s + l.quantity, 0);
   const formattedTotal = formatMoney(subtotal, currency);

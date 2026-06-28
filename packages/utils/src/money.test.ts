@@ -3,10 +3,13 @@ import { formatMoney } from './format';
 import {
   addAll,
   clampNonNegative,
+  currencyMinorUnitExponent,
   decimalToString,
+  fromMinorUnits,
   multiply,
   round2,
   toDecimal,
+  toMinorUnits,
 } from './money';
 
 describe('money', () => {
@@ -74,5 +77,40 @@ describe('money', () => {
   it('formatMoney accepts an explicit locale override', () => {
     const polishLocale = formatMoney('12.5', 'USD', 'pl-PL');
     expect(polishLocale).toMatch(/12,50/);
+  });
+});
+
+describe('provider minor units (Stripe)', () => {
+  it('converts 2dp currencies to minor units exactly', () => {
+    expect(toMinorUnits('12.34', 'PLN')).toBe(1234);
+    expect(toMinorUnits('0.00', 'PLN')).toBe(0);
+    expect(toMinorUnits('0.01', 'PLN')).toBe(1);
+    expect(toMinorUnits('1000000.99', 'EUR')).toBe(100000099);
+  });
+
+  it('is exact at the cent boundary (no float drift)', () => {
+    // 0.1 + 0.2 in float is 0.30000000000000004; Decimal-based stays exact.
+    expect(toMinorUnits(toDecimal('0.1').plus('0.2'), 'PLN')).toBe(30);
+    expect(toMinorUnits('19.99', 'USD')).toBe(1999);
+  });
+
+  it('handles zero-decimal currencies', () => {
+    expect(toMinorUnits('1234', 'JPY')).toBe(1234);
+    expect(fromMinorUnits(1234, 'JPY')).toBe('1234');
+  });
+
+  it('round-trips through minor units', () => {
+    expect(fromMinorUnits(toMinorUnits('87.65', 'PLN'), 'PLN')).toBe('87.65');
+    expect(fromMinorUnits(1, 'PLN')).toBe('0.01');
+  });
+
+  it('rejects unsupported currencies instead of assuming 2dp', () => {
+    expect(() => toMinorUnits('10.00', 'XYZ')).toThrow(/Unsupported currency/);
+    expect(() => fromMinorUnits(1000, 'XYZ')).toThrow(/Unsupported currency/);
+    expect(() => currencyMinorUnitExponent('ZZZ')).toThrow(/Unsupported currency/);
+  });
+
+  it('rejects sub-minor-unit precision', () => {
+    expect(() => toMinorUnits('1.234', 'PLN')).toThrow(/whole number of minor units/);
   });
 });

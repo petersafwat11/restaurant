@@ -26,6 +26,7 @@ import {
 } from '@repo/types';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { CartService } from './cart.service';
 
@@ -126,6 +127,8 @@ export class CartController {
   }
 
   @Public()
+  // Coupon brute-force guard (§I1): cap validation attempts per user/IP.
+  @RateLimit({ name: 'cart:coupon', limit: 20, windowSeconds: 300 })
   @Post('coupon')
   applyCoupon(
     @CurrentUserOptional() user: OptionalUser | null,

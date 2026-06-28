@@ -25,7 +25,6 @@ const EnvSchema = z.object({
   APP_URL_WEB: z.string().url().default('http://localhost:3000'),
   APP_URL_ADMIN: z.string().url().default('http://localhost:3001'),
   APP_URL_API: z.string().url().default('http://localhost:4000'),
-  APP_DEEP_LINK_SCHEME: z.string().default('restaurant'),
 
   // Local-disk uploads. Files are written under UPLOADS_DIR and served via
   // the API at `${APP_URL_API}/uploads/{key}` (static middleware in main.ts).
@@ -45,7 +44,7 @@ const EnvSchema = z.object({
   ORDER_TRACKING_SECRET: z.string().optional().default(''),
 
   // Sprint 12 — observability + analytics + feature flags. All optional;
-  // empty → safe no-op (same contract as Stripe/R2 above).
+  // empty → safe no-op (same optional contract as Stripe above).
   SENTRY_DSN: z.string().optional().default(''),
   SENTRY_ENV: z.string().optional().default(''),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),

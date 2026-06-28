@@ -15,6 +15,11 @@ export const ORDER_SEARCH_DESCRIPTORS: readonly ColumnSearch[] = [
   { kind: 'string', field: 'user.firstName' },
   { kind: 'string', field: 'user.lastName' },
   { kind: 'string', field: 'user.email' },
+  // Order contact snapshot — lets staff find guest orders (no User row) by the
+  // name/email/phone captured at checkout.
+  { kind: 'string', field: 'customerName' },
+  { kind: 'string', field: 'customerEmail' },
+  { kind: 'string', field: 'customerPhone' },
   { kind: 'enum', field: 'type', values: ORDER_TYPES },
   { kind: 'enum', field: 'status', values: ORDER_STATUSES },
   { kind: 'decimal', field: 'grandTotal' },

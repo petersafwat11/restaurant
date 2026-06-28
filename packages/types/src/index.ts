@@ -8,6 +8,8 @@ export * from './menu';
 export * from './upload';
 export * from './cart';
 export * from './order';
+export * from './legal';
+export * from './account-deletion';
 export * from './promotion';
 export * from './payment';
 export * from './realtime';

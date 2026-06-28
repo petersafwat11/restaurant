@@ -1,5 +1,6 @@
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
+import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
@@ -13,6 +14,7 @@ export default async function MarketingLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'common' });
+  const restaurant = await fetchPublicRestaurant();
 
   return (
     <>
@@ -21,7 +23,7 @@ export default async function MarketingLayout({
       </a>
       <SiteChrome initialVariant="transparent-on-hero" />
       <main id="main">{children}</main>
-      <SzefSiteFooter />
+      <SzefSiteFooter initialRestaurant={restaurant} />
     </>
   );
 }

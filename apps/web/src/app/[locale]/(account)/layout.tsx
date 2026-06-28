@@ -1,6 +1,7 @@
 import { AccountNav } from '@/components/account-nav';
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
+import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { Container } from '@repo/ui';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -25,6 +26,7 @@ export default async function AccountLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'common' });
+  const restaurant = await fetchPublicRestaurant();
 
   return (
     <>
@@ -40,7 +42,7 @@ export default async function AccountLayout({
           </div>
         </Container>
       </main>
-      <SzefSiteFooter />
+      <SzefSiteFooter initialRestaurant={restaurant} />
     </>
   );
 }

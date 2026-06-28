@@ -3,12 +3,10 @@
 import { useAddToCart } from '@/features/cart/hooks';
 import { useMenuTree } from '@/features/menu/hooks';
 import { Link } from '@/i18n/navigation';
-import { mockFeaturedDishes } from '@/lib/mock/szef-donald';
 import { Container, DishCard, SectionHeader } from '@repo/ui';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
-import { toast } from 'sonner';
 
 type FeaturedItem = {
   href: string;
@@ -21,9 +19,11 @@ type FeaturedItem = {
 };
 
 /**
- * Pulls the 6 featured dishes from the live menu tree. Falls back to the
- * Szef Donald brand mock when the API returns zero featured items — the
- * landing has to look complete even before a restaurant tags any dish.
+ * Pulls the featured dishes from the live menu tree (DB). There is NO mock
+ * fallback: if no dish is tagged `isFeatured`, the section is hidden entirely
+ * (Phase H1). Showing arbitrary or fabricated dishes under "Our customers'
+ * favourites" would misrepresent the live catalogue to customers and payment
+ * crawlers, so an empty featured set means no section.
  */
 export function LandingFeaturedDishes() {
   const t = useTranslations('web.marketing.home.featured');
@@ -42,7 +42,7 @@ export function LandingFeaturedDishes() {
     [tChips],
   );
 
-  const realFeatured = React.useMemo<FeaturedItem[]>(() => {
+  const items = React.useMemo<FeaturedItem[]>(() => {
     if (!treeQuery.data) return [];
     const currency = 'PLN';
     return treeQuery.data.categories
@@ -75,31 +75,8 @@ export function LandingFeaturedDishes() {
       }));
   }, [treeQuery.data, addMutation]);
 
-  const items: FeaturedItem[] =
-    realFeatured.length > 0
-      ? realFeatured
-      : mockFeaturedDishes.map((d) => {
-          const name = t(`dishes.${d.slug}.name` as 'dishes.kebab-tortilla-srodni.name');
-          const description = t(
-            `dishes.${d.slug}.description` as 'dishes.kebab-tortilla-srodni.description',
-          );
-          const imageAlt = t(
-            `dishes.${d.slug}.imageAlt` as 'dishes.kebab-tortilla-srodni.imageAlt',
-          );
-          return {
-            href: `/menu#${d.slug}`,
-            image: { src: d.image.src, alt: imageAlt },
-            name,
-            description,
-            price: d.price,
-            flags: d.flags,
-            onAdd: () => {
-              toast.success(t('addedToCart'), {
-                description: t('addedToCartDescription', { name }),
-              });
-            },
-          };
-        });
+  // No live featured dishes → hide the section rather than show mock content.
+  if (items.length === 0) return null;
 
   return (
     <section

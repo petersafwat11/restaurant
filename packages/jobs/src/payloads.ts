@@ -23,12 +23,6 @@ export const SmsOtpPayloadSchema = z.object({
 });
 export type SmsOtpPayload = z.infer<typeof SmsOtpPayloadSchema>;
 
-export const PushWelcomePayloadSchema = z.object({
-  userId: z.string(),
-  firstName: z.string().nullable(),
-});
-export type PushWelcomePayload = z.infer<typeof PushWelcomePayloadSchema>;
-
 export const ReceiptGeneratePayloadSchema = z.object({
   orderId: z.string(),
 });
@@ -86,14 +80,6 @@ export const SmsOrderStatusPayloadSchema = z.object({
 });
 export type SmsOrderStatusPayload = z.infer<typeof SmsOrderStatusPayloadSchema>;
 
-export const PushOrderStatusPayloadSchema = z.object({
-  orderId: z.string(),
-  userId: z.string(),
-  orderNumber: z.string(),
-  toStatus: OrderStatusEnumSchema,
-});
-export type PushOrderStatusPayload = z.infer<typeof PushOrderStatusPayloadSchema>;
-
 // Sprint 10 — contact-form: notify the restaurant + auto-reply the sender.
 export const EmailContactPayloadSchema = z.object({
   contactMessageId: z.string(),
@@ -141,14 +127,7 @@ export const EmailNewsletterConfirmPayloadSchema = z.object({
 });
 export type EmailNewsletterConfirmPayload = z.infer<typeof EmailNewsletterConfirmPayloadSchema>;
 
-// Sprint 11 — loyalty / referral reward push + referral invite email.
-export const PushLoyaltyPayloadSchema = z.object({
-  userId: z.string(),
-  points: z.number().int(),
-  reason: z.enum(['EARN', 'REFERRAL']),
-});
-export type PushLoyaltyPayload = z.infer<typeof PushLoyaltyPayloadSchema>;
-
+// Sprint 11 — referral invite email.
 export const EmailReferralInvitePayloadSchema = z.object({
   toEmail: z.string().email(),
   inviterName: z.string().nullable(),
@@ -157,17 +136,30 @@ export const EmailReferralInvitePayloadSchema = z.object({
 });
 export type EmailReferralInvitePayload = z.infer<typeof EmailReferralInvitePayloadSchema>;
 
-// Sprint 9 — prune push tokens unused for `staleDays` (default 60).
-export const PushTokenCleanupPayloadSchema = z.object({
-  staleDays: z.number().int().positive().optional(),
-});
-export type PushTokenCleanupPayload = z.infer<typeof PushTokenCleanupPayloadSchema>;
-
 // Sprint 8 — analytics + audit.
 export const AnalyticsRollupPayloadSchema = z.object({
   date: z.string().optional(),
 });
 export type AnalyticsRollupPayload = z.infer<typeof AnalyticsRollupPayloadSchema>;
+
+// Slice 9 / §G2 — anonymise the account once the grace period elapses. The
+// processor re-reads the user and no-ops unless the request is still PENDING and
+// due, so a stale/duplicate job is harmless.
+export const AccountAnonymisePayloadSchema = z.object({
+  userId: z.string(),
+});
+export type AccountAnonymisePayload = z.infer<typeof AccountAnonymisePayloadSchema>;
+
+// Single-use email-confirmation link for the no-password account-deletion path.
+export const AccountDeletionConfirmEmailPayloadSchema = z.object({
+  userId: z.string(),
+  email: z.string().email(),
+  firstName: z.string().nullable(),
+  confirmUrl: z.string().url(),
+});
+export type AccountDeletionConfirmEmailPayload = z.infer<
+  typeof AccountDeletionConfirmEmailPayloadSchema
+>;
 
 export const AuditWritePayloadSchema = z.object({
   actorUserId: z.string(),

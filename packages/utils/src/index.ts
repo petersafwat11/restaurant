@@ -8,7 +8,6 @@ export * from './assert';
 // client bundles even with sideEffects:false (TS-via-transpilePackages
 // doesn't tree-shake `export *`).
 export * from './format';
-export * from './deep-link';
 export * from './geo';
 export * from './structured-data';
 export * from './sitemap';

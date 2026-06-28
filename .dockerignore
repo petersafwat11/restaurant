@@ -12,7 +12,6 @@
 **/dist
 **/build
 **/out
-**/.expo
 **/*.tsbuildinfo
 
 # Tests + coverage
@@ -40,12 +39,3 @@ docker-compose.yml
 **/.prisma
 **/prisma/migrations/dev.db*
 dump.rdb
-
-# Mobile
-.expo
-.expo-shared
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision

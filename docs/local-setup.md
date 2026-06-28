@@ -35,7 +35,6 @@ After `pnpm dev`:
 | Web (customer) | http://localhost:3000 |
 | Admin | http://localhost:3001 |
 | Mailhog UI | http://localhost:8025 |
-| Mobile (Expo) | press `w` for web, `i` for iOS sim, `a` for Android |
 
 ## Seeded test users
 
@@ -98,27 +97,19 @@ under *Settings → Payment methods* for the test mode account you're using.
 webhook handler and create the missing `Refund` rows automatically (logged
 with `[STRIPE_DASHBOARD_REFUND]`).
 
-### Cloudflare R2 — image uploads
+### Local disk uploads — images
 
-Set:
+No external object store. Images are written to a local directory and served by
+the API as static files at `${APP_URL_API}/uploads/{key}`.
 
 ```
-R2_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_BUCKET=restaurant-uploads
-R2_PUBLIC_URL=https://cdn.example.com   # optional, falls back to endpoint/bucket
+UPLOADS_DIR=uploads        # local dev: a folder in the api workspace
 ```
 
-Stub mode returns `http://localhost/no-r2/<key>` URLs from the presign endpoint
-so e2e tests don't need real credentials. The orphan cleanup job
-(`r2.orphan-cleanup`, runs daily at 03:00 UTC) detects stub mode and exits
-without listing.
-
-Live mode: image deletes call `DeleteObjectCommand` immediately; the daily
-sweep is the safety net for any failures and for keys that were uploaded but
-never linked to a DB row. Objects newer than 7 days are skipped from the sweep
-to give in-flight uploads a buffer.
+In production this is a bind-mounted Docker volume (`/opt/restaurant/uploads`
+mapped to `/var/uploads` in the api container — see `deploy/RUNBOOK.md`). There
+is no Cloudflare R2 / S3 dependency; the orphan-cleanup job sweeps unreferenced
+files from `UPLOADS_DIR` on the local filesystem.
 
 ### Twilio — SMS
 
@@ -145,12 +136,8 @@ Stub mode sends to Mailhog over SMTP (`localhost:1025`). Browse the inbox at
 http://localhost:8025 — receipts, refund confirmations, and order-status
 emails all show up there in dev.
 
-### Expo push — mobile notifications
-
-No env var. Tokens are stored per-user in the `PushToken` table. Mobile
-clients register their token after login via `useRegisterPushToken()` (added
-in Sprint 1). With zero tokens for a user, the `push.processor` logs and
-exits; nothing breaks.
+> Notification channels are **in-app + email + SMS (Twilio)**. There is no push
+> channel: the Expo mobile app and its push infrastructure were removed.
 
 ## Troubleshooting
 

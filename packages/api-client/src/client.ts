@@ -4,6 +4,13 @@ import {
   // Sprint 7
   type AcceptStaffInviteDto,
   AcceptStaffInviteSchema,
+  // Slice 9 — account deletion / anonymisation
+  type AccountDeletionStatusResponseDto,
+  AccountDeletionStatusResponseSchema,
+  type ConfirmAccountDeletionDto,
+  ConfirmAccountDeletionSchema,
+  type RequestAccountDeletionDto,
+  RequestAccountDeletionSchema,
   type AddCartItemDto,
   AddCartItemSchema,
   type AddMenuItemImageDto,
@@ -69,6 +76,10 @@ import {
   CreateMenuCategorySchema,
   type CreateMenuItemDto,
   CreateMenuItemSchema,
+  type CheckoutQuoteDto,
+  type CheckoutQuoteRequestDto,
+  CheckoutQuoteRequestSchema,
+  CheckoutQuoteSchema,
   type CreateModifierGroupDto,
   CreateModifierGroupSchema,
   type CreateModifierOptionDto,
@@ -202,8 +213,6 @@ import {
   type RefundDto,
   RefundSchema,
   type RegisterDto,
-  type RegisterPushTokenDto,
-  RegisterPushTokenSchema,
   RegisterSchema,
   type ReorderDto,
   type ReorderItemsDto,
@@ -557,6 +566,32 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
   };
 
+  // ---- account deletion (Slice 9 / §G2) --------------------------------
+  const accountDeletion = {
+    status: (): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion', {
+        method: 'GET',
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    request: (input: RequestAccountDeletionDto): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/request', {
+        method: 'POST',
+        body: RequestAccountDeletionSchema.parse(input),
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    confirm: (input: ConfirmAccountDeletionDto): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/confirm', {
+        method: 'POST',
+        body: ConfirmAccountDeletionSchema.parse(input),
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+    cancel: (): Promise<AccountDeletionStatusResponseDto> =>
+      request('/account/deletion/cancel', {
+        method: 'POST',
+        responseSchema: AccountDeletionStatusResponseSchema,
+      }),
+  };
+
   // ---- addresses --------------------------------------------------------
   const addresses = {
     list: (): Promise<AddressDto[]> =>
@@ -890,6 +925,14 @@ export function createApiClient(opts: ApiClientOptions) {
         headers: { 'Idempotency-Key': idempotencyKey },
         responseSchema: OrderSchema,
       }),
+    // Server-authoritative checkout price quote (guest-safe via sessionKey).
+    quote: (input: CheckoutQuoteRequestDto): Promise<CheckoutQuoteDto> =>
+      request('/orders/quote', {
+        method: 'POST',
+        auth: false,
+        body: CheckoutQuoteRequestSchema.parse(input),
+        responseSchema: CheckoutQuoteSchema,
+      }),
     list: (query?: OrderListQuery): Promise<OrderListDto> =>
       request('/orders', {
         method: 'GET',
@@ -1027,15 +1070,22 @@ export function createApiClient(opts: ApiClientOptions) {
         auth: false,
         responseSchema: PaymentConfigSchema,
       }),
-    createIntent: (input: CreatePaymentIntentDto): Promise<PaymentIntentResponseDto> =>
+    // `orderToken` (signed guest order token) is sent as X-Order-Token so guests
+    // can create a payment intent / recover status without an auth session.
+    createIntent: (
+      input: CreatePaymentIntentDto,
+      orderToken?: string | null,
+    ): Promise<PaymentIntentResponseDto> =>
       request('/payments/intent', {
         method: 'POST',
         body: CreatePaymentIntentSchema.parse(input),
+        ...(orderToken ? { headers: { 'X-Order-Token': orderToken } } : {}),
         responseSchema: PaymentIntentResponseSchema,
       }),
-    byOrderId: (orderId: string): Promise<PaymentDto | null> =>
+    byOrderId: (orderId: string, orderToken?: string | null): Promise<PaymentDto | null> =>
       request(`/payments/by-order/${encodeURIComponent(orderId)}`, {
         method: 'GET',
+        ...(orderToken ? { headers: { 'X-Order-Token': orderToken } } : {}),
         responseSchema: PaymentSchema.nullable(),
       }),
     refund: (paymentId: string, input: CreateRefundDto): Promise<RefundDto> =>
@@ -1247,15 +1297,6 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
     markAllRead: (): Promise<{ success: true; count: number }> =>
       request('/notifications/read-all', { method: 'POST' }),
-    registerPushToken: (input: RegisterPushTokenDto): Promise<{ success: true }> =>
-      request('/notifications/push-tokens', {
-        method: 'POST',
-        body: RegisterPushTokenSchema.parse(input),
-      }),
-    unregisterPushToken: (token: string): Promise<{ success: true }> =>
-      request(`/notifications/push-tokens/${encodeURIComponent(token)}`, {
-        method: 'DELETE',
-      }),
     getPreferences: (): Promise<NotificationPreferenceDto> =>
       request('/notifications/preferences', {
         method: 'GET',
@@ -1680,6 +1721,7 @@ export function createApiClient(opts: ApiClientOptions) {
   return {
     auth,
     users,
+    accountDeletion,
     addresses,
     restaurant,
     menu,

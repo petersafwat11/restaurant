@@ -20,5 +20,5 @@
   "itemCount": "{count, plural, one {# item} other {# items}}",
   "checkout": "Checkout",
   "checkoutCta": "Checkout · {total}",
-  "footerHint": "Free baklava on first order — code at checkout."
+  "footerHint": "Delivery fee and taxes are calculated at checkout."
 }
