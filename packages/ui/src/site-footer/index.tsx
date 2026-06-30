@@ -58,7 +58,7 @@ export function SiteFooter({
           <div className="mt-16 flex flex-col gap-4 border-t border-surface/10 pt-6 text-small text-surface/60 sm:flex-row sm:items-center sm:justify-between">
             <div>{bottom.copyright}</div>
             {bottom.legal && (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 {bottom.legal.map((l) => (
                   <LinkComponent
                     key={l.label}
