@@ -368,6 +368,7 @@ model MenuItemModifierOption {
   name       String
   nameEn     String? // EN translation; falls back to `name` when null
   priceDelta Decimal @default(0) @db.Decimal(10, 2)
+  grams      Int? // meat weight in grams for this option — set on size options (Mały/Średni/Duży/Mega); null for non-size options
   isDefault  Boolean @default(false)
 
   group MenuItemModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -466,6 +467,10 @@ model Order {
   deliveryAddress     Json?
   pickupAt            DateTime?
   notes               String?
+  // Staff-set total prep/delivery time in minutes, measured from order
+  // placement (createdAt). When null the ETA falls back to the status-based
+  // heuristic in order-tracking.ts. Lets staff promise a per-order time.
+  prepMinutesOverride Int?
   couponCode          String?
   loyaltyPointsUsed   Int         @default(0)
   loyaltyPointsEarned Int         @default(0)

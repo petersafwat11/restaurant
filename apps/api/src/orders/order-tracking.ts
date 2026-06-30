@@ -39,18 +39,29 @@ export function computeEta(input: {
   type: OrderType;
   status: OrderStatus;
   anchorAt: Date;
+  /** Order placement time — the anchor for a staff ETA override. */
+  createdAt?: Date;
+  /** Staff-set total prep/delivery minutes from placement; overrides the heuristic. */
+  prepMinutesOverride?: number | null;
+  /** "Now" for the override countdown; defaults to anchorAt to keep the
+   *  status-based path deterministic for tests. */
+  now?: Date;
 }): { etaMinutes: number | null; estimatedReadyAt: string | null } {
   if (isTerminalStatus(input.status)) {
     return { etaMinutes: null, estimatedReadyAt: null };
   }
+  // Staff override wins: order is promised ready at (placement + override
+  // minutes); the customer sees a live countdown to that fixed target.
+  if (input.prepMinutesOverride != null && input.createdAt) {
+    const readyAt = new Date(input.createdAt.getTime() + input.prepMinutesOverride * 60_000);
+    const now = input.now ?? input.anchorAt;
+    const etaMinutes = Math.max(0, Math.round((readyAt.getTime() - now.getTime()) / 60_000));
+    return { etaMinutes, estimatedReadyAt: readyAt.toISOString() };
+  }
   const base = REMAINING_BY_STATUS[input.status] ?? 0;
   const deliveryLeg =
-    input.type === 'DELIVERY' && input.status !== 'OUT_FOR_DELIVERY'
-      ? DELIVERY_LEG_MINUTES
-      : 0;
+    input.type === 'DELIVERY' && input.status !== 'OUT_FOR_DELIVERY' ? DELIVERY_LEG_MINUTES : 0;
   const etaMinutes = base + deliveryLeg;
-  const estimatedReadyAt = new Date(
-    input.anchorAt.getTime() + etaMinutes * 60_000,
-  ).toISOString();
+  const estimatedReadyAt = new Date(input.anchorAt.getTime() + etaMinutes * 60_000).toISOString();
   return { etaMinutes, estimatedReadyAt };
 }

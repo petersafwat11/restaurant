@@ -13,6 +13,7 @@ export function useCreateModifierGroup(itemId: string) {
     mutationFn: (input) => getApiClient().menu.modifierGroups.create(itemId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.items() });
       notify('success', 'Modifier group created');
     },
     onError: (err) => notify('error', err.message),

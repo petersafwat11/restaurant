@@ -561,6 +561,37 @@ export class OrdersService {
       throw err;
     }
 
+    // Cash on delivery: finalize synchronously at order creation. This is the
+    // only path that works for guests (POST /orders is public, but
+    // POST /payments/intent requires an authed owner). We record a COD Payment
+    // row and confirm the order, mirroring PaymentsService.createIntent's COD
+    // branch exactly (provider 'cod', status 'PAID', then confirmPendingOrder).
+    // Online methods (card/BLIK) are left PENDING for the Stripe Elements flow.
+    //
+    // Done BEFORE emitting `order.created` so the realtime event (and the admin
+    // live orders list, which patches its cache from this event) carries the
+    // true post-confirm status. Otherwise a COD order shows as PENDING on the
+    // board while its freshly-fetched detail reads CONFIRMED — the table/popup
+    // inconsistency. `confirmPendingOrder` stays deliberately silent on
+    // `order.status_changed` (no customer SMS / e2e shape change); we surface
+    // the confirm purely through the created event's status field here.
+    let realtimeStatus: OrderDto['status'] = created.status;
+    if (dto.paymentMethod === 'COD') {
+      await this.prisma.payment.create({
+        data: {
+          orderId: created.id,
+          provider: 'cod',
+          providerRef: `cod_${created.id}`,
+          method: 'COD',
+          amount: created.grandTotal,
+          currency: created.currency,
+          status: 'PAID',
+        },
+      });
+      const confirmed = await this.confirmPendingOrder(created.id, 'Payment confirmed');
+      if (confirmed) realtimeStatus = 'CONFIRMED';
+    }
+
     // Emit an internal event so the realtime/notification dispatcher can react.
     // Prefer the order's contact snapshot (populated for guests too).
     const customerName = created.customerName ?? (await this.loadCustomerName(created.userId));
@@ -568,7 +599,7 @@ export class OrdersService {
       orderId: created.id,
       orderNumber: created.orderNumber,
       userId: created.userId,
-      status: created.status,
+      status: realtimeStatus,
       type: created.type,
       grandTotal: created.grandTotal.toFixed(2),
       currency: created.currency,
@@ -585,27 +616,6 @@ export class OrdersService {
         points: loyaltyPointsToBurn,
         discount: loyaltyDiscount.toFixed(2),
       });
-    }
-
-    // Cash on delivery: finalize synchronously at order creation. This is the
-    // only path that works for guests (POST /orders is public, but
-    // POST /payments/intent requires an authed owner). We record a COD Payment
-    // row and confirm the order, mirroring PaymentsService.createIntent's COD
-    // branch exactly (provider 'cod', status 'PAID', then confirmPendingOrder).
-    // Online methods (card/BLIK) are left PENDING for the Stripe Elements flow.
-    if (dto.paymentMethod === 'COD') {
-      await this.prisma.payment.create({
-        data: {
-          orderId: created.id,
-          provider: 'cod',
-          providerRef: `cod_${created.id}`,
-          method: 'COD',
-          amount: created.grandTotal,
-          currency: created.currency,
-          status: 'PAID',
-        },
-      });
-      await this.confirmPendingOrder(created.id, 'Payment confirmed');
     }
 
     // Just-created order — bypass the ownership check so guests (no userId)
@@ -691,6 +701,23 @@ export class OrdersService {
     // Customer-side: only the owner may move PENDING → CANCELLED.
     if (actorRole === 'customer' && order.userId !== actor.userId) {
       throw new ForbiddenException('Not your order');
+    }
+
+    // A paid ONLINE order can't be plain-cancelled — its money must be returned
+    // via the refund flow (which transitions it to REFUNDED). COD is recorded as
+    // PAID at creation but takes cash on hand-over, so it (and any unpaid order)
+    // cancels freely. Gate on method, never status (COD looks PAID).
+    if (to === 'CANCELLED') {
+      const payment = await this.prisma.payment.findUnique({ where: { orderId } });
+      if (
+        payment &&
+        payment.method !== 'COD' &&
+        (payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED')
+      ) {
+        throw new BadRequestException(
+          'This order was paid online — issue a refund instead of cancelling.',
+        );
+      }
     }
 
     const next = await this.applyTransition(orderId, order.status, to, actor.userId, note);
@@ -812,6 +839,44 @@ export class OrdersService {
         status: order.status,
         byUserId: actor.userId,
         note,
+      },
+    });
+    return this.toDtoById(orderId);
+  }
+
+  /**
+   * Staff-set per-order ETA: total prep/delivery minutes measured from order
+   * placement (or `null` to clear and fall back to the status-based estimate).
+   * Records a NOTE event for the activity timeline / audit trail.
+   */
+  async setEta(
+    actor: { userId: string | null; permissions: string[] },
+    orderId: string,
+    prepMinutesOverride: number | null,
+  ): Promise<OrderDto> {
+    if (!actor.permissions.includes('order:status_update')) {
+      throw new ForbiddenException('Not allowed to set order ETA');
+    }
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, status: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { prepMinutesOverride },
+    });
+    await this.prisma.orderStatusEvent.create({
+      data: {
+        orderId,
+        kind: 'NOTE',
+        status: order.status,
+        byUserId: actor.userId,
+        note:
+          prepMinutesOverride != null
+            ? `Estimated time set to ${prepMinutesOverride} min`
+            : 'Estimated time cleared',
       },
     });
     return this.toDtoById(orderId);
@@ -1044,6 +1109,9 @@ export class OrdersService {
       type: order.type,
       status: order.status,
       anchorAt,
+      createdAt: order.createdAt,
+      prepMinutesOverride: order.prepMinutesOverride,
+      now: new Date(),
     });
 
     return {
@@ -1261,6 +1329,7 @@ function toOrderDto(row: OrderWithRelations): OrderDto {
     pickupAt: row.pickupAt?.toISOString() ?? null,
     notes: row.notes,
     couponCode: row.couponCode,
+    prepMinutesOverride: row.prepMinutesOverride,
     items: row.items.map((it) => ({
       id: it.id,
       menuItemId: it.menuItemId,

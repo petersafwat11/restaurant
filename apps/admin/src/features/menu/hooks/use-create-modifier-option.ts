@@ -13,6 +13,7 @@ export function useCreateModifierOption(groupId: string) {
     mutationFn: (input) => getApiClient().menu.modifierOptions.create(groupId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.items() });
       notify('success', 'Option added');
     },
     onError: (err) => notify('error', err.message),

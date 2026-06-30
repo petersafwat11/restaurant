@@ -28,6 +28,7 @@ function orderStub(status: OrderDto['status']): OrderDto {
     pickupAt: null,
     notes: null,
     couponCode: null,
+    prepMinutesOverride: null,
     items: [],
     statusEvents: [],
     createdAt: '2026-05-15T10:00:00.000Z',

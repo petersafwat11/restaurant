@@ -35,6 +35,9 @@ export const ModifierOptionSchema = z.object({
   groupId: z.string(),
   name: z.string(),
   priceDelta: MoneyStringSchema,
+  // Meat weight in grams for this option — populated on size options
+  // (Mały/Średni/Duży/Mega); null for non-size options (sauces, add-ons…).
+  grams: z.number().int().nullable(),
   isDefault: z.boolean(),
 });
 export type ModifierOptionDto = z.infer<typeof ModifierOptionSchema>;
@@ -42,6 +45,7 @@ export type ModifierOptionDto = z.infer<typeof ModifierOptionSchema>;
 export const CreateModifierOptionSchema = z.object({
   name: z.string().min(1).max(120),
   priceDelta: MoneyStringSchema.optional(),
+  grams: z.number().int().min(0).nullish(),
   isDefault: z.boolean().optional(),
 });
 export type CreateModifierOptionDto = z.infer<typeof CreateModifierOptionSchema>;

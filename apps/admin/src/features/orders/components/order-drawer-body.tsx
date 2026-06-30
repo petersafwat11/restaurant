@@ -1,8 +1,11 @@
 'use client';
 
+import { usePermissions } from '@/features/auth/hooks/use-permissions';
+import { useSetOrderEta } from '@/features/orders/hooks';
 import type { OrderDto, OrderStatus, PaymentStatus } from '@repo/types';
 import {
   ActivityTimeline,
+  Input,
   PAYMENT_TOKENS,
   STATUS_TOKENS,
   StatusPill,
@@ -19,6 +22,8 @@ interface OrderDrawerBodyProps {
 export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
   const t = useTranslations('admin.orders.detail');
   const tStatus = useTranslations('shared.orderStatus');
+  const { has } = usePermissions();
+  const canSetEta = has('order:status_update');
 
   const translatedTokens = React.useMemo(() => {
     const result = { ...STATUS_TOKENS };
@@ -75,7 +80,13 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
                 <div className="text-sm text-fg">{item.nameSnapshot}</div>
                 {item.modifierSnapshot.length > 0 && (
                   <div className="mt-0.5 text-xs text-fg-subtle">
-                    {item.modifierSnapshot.map((m) => m.optionName).join(' · ')}
+                    {item.modifierSnapshot
+                      .map((m) =>
+                        m.grams != null && m.grams > 0
+                          ? `${m.optionName} (${m.grams} g)`
+                          : m.optionName,
+                      )
+                      .join(' · ')}
                   </div>
                 )}
                 {item.notes && (
@@ -199,9 +210,68 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
         </Section>
       )}
 
+      {canSetEta && (
+        <Section title={t('body.etaHeading')}>
+          <EtaControl order={order} />
+          <p className="mt-2 text-xs text-fg-subtle">{t('body.etaHelper')}</p>
+        </Section>
+      )}
+
       <Section title={t('body.timelineHeading')}>
         <ActivityTimeline entries={timeline} />
       </Section>
+    </div>
+  );
+}
+
+/**
+ * Staff-set per-order ETA: total minutes from order placement. Commits on blur
+ * / Enter; clearing the field reverts to the automatic estimate.
+ */
+function EtaControl({ order }: { order: OrderDto }) {
+  const t = useTranslations('admin.orders.detail');
+  const setEta = useSetOrderEta(order.id);
+  const toDraft = (v: number | null) => (v != null ? String(v) : '');
+  const [draft, setDraft] = React.useState(toDraft(order.prepMinutesOverride));
+  React.useEffect(() => {
+    setDraft(toDraft(order.prepMinutesOverride));
+  }, [order.prepMinutesOverride]);
+
+  function commit() {
+    const trimmed = draft.trim();
+    if (trimmed === '') {
+      if (order.prepMinutesOverride != null) setEta.mutate({ prepMinutesOverride: null });
+      return;
+    }
+    const n = Number.parseInt(trimmed, 10);
+    if (Number.isFinite(n) && n >= 1 && n <= 600) {
+      if (n !== order.prepMinutesOverride) setEta.mutate({ prepMinutesOverride: n });
+    } else {
+      setDraft(toDraft(order.prepMinutesOverride));
+    }
+  }
+
+  return (
+    <div className="relative w-32">
+      <Input
+        type="number"
+        min={1}
+        max={600}
+        value={draft}
+        placeholder={t('body.etaPlaceholder')}
+        disabled={setEta.isPending}
+        aria-label={t('body.etaHeading')}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') setDraft(toDraft(order.prepMinutesOverride));
+        }}
+        className="pr-10 tabular-nums"
+      />
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-subtle">
+        min
+      </span>
     </div>
   );
 }

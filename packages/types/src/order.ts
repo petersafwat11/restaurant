@@ -21,6 +21,75 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
+// ---- Order status transition graph -----------------------------------------
+
+/**
+ * Single source of truth for the order-status transition graph, shared by the
+ * API state machine (`apps/api/src/orders/order-state-machine.ts`) and the
+ * admin UI (`packages/ui/src/tokens/order.ts`). Keeping one definition stops
+ * the two from drifting — the bug that let the UI offer transitions the API
+ * rejects (e.g. a type-blind READY → OUT_FOR_DELIVERY for pickup orders).
+ *
+ * `REFUNDED` is intentionally absent: it's reached only via the refund flow
+ * (system actor, from any post-payment state) and never a staff button.
+ */
+export interface OrderTransitionDef {
+  from: OrderStatus;
+  to: OrderStatus;
+  /** Valid only for these order types (omitted = all types). */
+  onlyForTypes?: readonly OrderType[];
+  /** Fired only by the system (payment webhook / grace-period job) — never a staff button. */
+  systemOnly?: boolean;
+  /** A reason must accompany the transition (cancellations). */
+  reasonRequired?: boolean;
+}
+
+export const ORDER_TRANSITIONS_GRAPH: readonly OrderTransitionDef[] = [
+  // Payment-confirmed — fired by the COD short-circuit + Stripe webhook only.
+  { from: 'PENDING', to: 'CONFIRMED', systemOnly: true },
+  // Pre-payment cancellation (customer or staff).
+  { from: 'PENDING', to: 'CANCELLED' },
+  // Kitchen workflow.
+  { from: 'CONFIRMED', to: 'PREPARING' },
+  { from: 'CONFIRMED', to: 'CANCELLED', reasonRequired: true },
+  { from: 'PREPARING', to: 'READY' },
+  { from: 'PREPARING', to: 'CANCELLED', reasonRequired: true },
+  // Hand-off — type-gated.
+  { from: 'READY', to: 'OUT_FOR_DELIVERY', onlyForTypes: ['DELIVERY'] },
+  { from: 'READY', to: 'COMPLETED', onlyForTypes: ['PICKUP', 'DINE_IN'] },
+  { from: 'READY', to: 'CANCELLED', reasonRequired: true },
+  { from: 'OUT_FOR_DELIVERY', to: 'DELIVERED' },
+  // Manual "complete now" (staff) or the post-delivery grace-period job (system).
+  { from: 'DELIVERED', to: 'COMPLETED' },
+] as const;
+
+/**
+ * Forward (non-cancel, non-system) transitions a staff member can initiate for
+ * an order of the given type — what the admin UI renders as "advance" actions.
+ * The API always re-validates, so this is purely for discoverability.
+ */
+export function forwardTransitions(status: OrderStatus, type: OrderType): OrderStatus[] {
+  return ORDER_TRANSITIONS_GRAPH.filter(
+    (r) =>
+      r.from === status &&
+      !r.systemOnly &&
+      r.to !== 'CANCELLED' &&
+      r.to !== 'REFUNDED' &&
+      (!r.onlyForTypes || r.onlyForTypes.includes(type)),
+  ).map((r) => r.to);
+}
+
+/** The single next status for the "Advance" button (first forward transition). */
+export function nextStatusFor(status: OrderStatus, type: OrderType): OrderStatus | undefined {
+  return forwardTransitions(status, type)[0];
+}
+
+/** Whether staff may cancel an order in this status (the API additionally
+ *  blocks cancelling an order with a captured online payment — refund instead). */
+export function canStaffCancelFrom(status: OrderStatus): boolean {
+  return ORDER_TRANSITIONS_GRAPH.some((r) => r.from === status && r.to === 'CANCELLED');
+}
+
 // ---- Order creation --------------------------------------------------------
 
 // Inline delivery address — used by guest delivery checkout where there is no
@@ -139,6 +208,9 @@ export const OrderItemSchema = z.object({
       optionId: z.string(),
       optionName: z.string(),
       priceDelta: MoneyStringSchema,
+      // Meat weight (grams) for size options, frozen at order time. Optional
+      // so historical orders placed before per-size grams stay valid.
+      grams: z.number().int().nullable().optional(),
     }),
   ),
   notes: z.string().nullable(),
@@ -214,6 +286,9 @@ export const OrderSchema = z.object({
   pickupAt: z.string().nullable(),
   notes: z.string().nullable(),
   couponCode: z.string().nullable(),
+  // Staff-set total prep/delivery time (minutes from order placement); null =
+  // use the status-based ETA estimate.
+  prepMinutesOverride: z.number().int().nullable(),
   items: z.array(OrderItemSchema),
   statusEvents: z.array(OrderStatusEventSchema),
   // Admin-only: present when the caller has `order:read` (staff view).
@@ -228,6 +303,13 @@ export const OrderSchema = z.object({
   updatedAt: z.string(),
 });
 export type OrderDto = z.infer<typeof OrderSchema>;
+
+// Staff sets (or clears) the per-order prep/delivery estimate, in minutes from
+// order placement. `null` reverts to the status-based heuristic.
+export const SetOrderEtaSchema = z.object({
+  prepMinutesOverride: z.number().int().min(1).max(600).nullable(),
+});
+export type SetOrderEtaDto = z.infer<typeof SetOrderEtaSchema>;
 
 // ---- Order list summary ----------------------------------------------------
 

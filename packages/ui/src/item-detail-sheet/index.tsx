@@ -189,6 +189,14 @@ export function ItemDetailSheet({
   const unitPrice = computeUnitPrice(item, modState);
   const total = (Number.parseFloat(unitPrice) * qty).toFixed(2);
 
+  // When a size option (one carrying its own meat weight) is selected, surface
+  // that size's grams in the header meta; otherwise fall back to the item's
+  // base grams. Only size options have a grams value, so the first match wins.
+  const displayGrams =
+    (item.modifierGroups ?? [])
+      .flatMap((g) => (modState[g.id] ?? []).map((id) => g.options.find((o) => o.id === id)))
+      .find((o) => o?.grams != null)?.grams ?? item.grams;
+
   const unfilled = (item.modifierGroups ?? []).filter(
     (g) => g.required && (modState[g.id] ?? []).length < g.min,
   );
@@ -281,10 +289,10 @@ export function ItemDetailSheet({
                     <span>{item.calories} kcal</span>
                   </>
                 )}
-                {item.grams != null && item.grams > 0 && (
+                {displayGrams != null && displayGrams > 0 && (
                   <>
                     <span aria-hidden>·</span>
-                    <span>{item.grams} g</span>
+                    <span>{displayGrams} g</span>
                   </>
                 )}
               </div>

@@ -66,6 +66,7 @@ function adaptModifierGroup(g: ModifierGroupDto): ModifierGroupShape {
       id: o.id,
       name: o.name,
       priceDelta: o.priceDelta,
+      grams: o.grams,
       default: o.isDefault,
     })),
   };
