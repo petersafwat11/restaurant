@@ -80,7 +80,7 @@ export function ModifierGroup({
           <div className="text-h3 font-semibold text-fg">{group.name}</div>
         </legend>
         {group.required && group.min > 0 && (
-          <span className="rounded-full bg-accent/[0.10] px-2 py-0.5 text-[11px] font-medium text-accent">
+          <span className="shrink-0 rounded-full bg-accent/[0.10] px-2 py-0.5 text-[11px] font-medium text-accent">
             Required
           </span>
         )}
@@ -122,7 +122,7 @@ export function ModifierGroup({
                     <span className="h-1.5 w-1.5 rounded-full bg-text-on-accent" />
                   ))}
               </span>
-              <span className="flex-1 text-body text-fg">
+              <span className="min-w-0 flex-1 text-body text-fg">
                 {opt.name}
                 {opt.grams != null && opt.grams > 0 && (
                   <span className="ml-2 text-small tabular-nums text-fg-subtle">{opt.grams} g</span>
@@ -136,7 +136,7 @@ export function ModifierGroup({
               {delta !== 0 && (
                 <span
                   className={cn(
-                    'tabular-nums text-small',
+                    'shrink-0 tabular-nums text-small',
                     delta < 0 ? 'text-positive' : 'text-fg-subtle',
                   )}
                 >
