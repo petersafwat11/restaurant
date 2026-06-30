@@ -220,6 +220,10 @@ async function seedRestaurants() {
     estimatedDeliveryMinutesMax: 45,
     estimatedPickupMinutesMin: 12,
     estimatedPickupMinutesMax: 20,
+    // Free delivery on the web shop (owner can change it in Settings → Financials).
+    defaultDeliveryFee: 0,
+    // Delivery radius in km — owner-adjustable in admin restaurant settings.
+    deliveryRadiusKm: 7,
     // Payment-provider readiness (plan §B). Only the known NIP + provisional
     // support contacts are seeded; the legal identity (legalName/KRS/REGON/
     // registryCourt/shareCapital) is intentionally left unset so the admin
@@ -238,20 +242,20 @@ async function seedRestaurants() {
     create: { slug: RESTAURANT_SLUG, ...restaurantData },
   });
 
-  // 7 days, 11:00-23:00 except Mondays closed.
+  // Mon–Fri 10:00–21:00, Sat 12:00–21:00, Sun closed.
   const days: Array<{
     dayOfWeek: number;
     opensAt: string;
     closesAt: string;
     isClosed: boolean;
   }> = [
-    { dayOfWeek: 0, opensAt: '12:00', closesAt: '22:00', isClosed: false }, // Sun
-    { dayOfWeek: 1, opensAt: '00:00', closesAt: '00:00', isClosed: true }, // Mon
-    { dayOfWeek: 2, opensAt: '11:00', closesAt: '22:00', isClosed: false },
-    { dayOfWeek: 3, opensAt: '11:00', closesAt: '22:00', isClosed: false },
-    { dayOfWeek: 4, opensAt: '11:00', closesAt: '23:00', isClosed: false },
-    { dayOfWeek: 5, opensAt: '11:00', closesAt: '23:00', isClosed: false },
-    { dayOfWeek: 6, opensAt: '12:00', closesAt: '23:00', isClosed: false },
+    { dayOfWeek: 0, opensAt: '00:00', closesAt: '00:00', isClosed: true }, // Sun — closed
+    { dayOfWeek: 1, opensAt: '10:00', closesAt: '21:00', isClosed: false }, // Mon
+    { dayOfWeek: 2, opensAt: '10:00', closesAt: '21:00', isClosed: false }, // Tue
+    { dayOfWeek: 3, opensAt: '10:00', closesAt: '21:00', isClosed: false }, // Wed
+    { dayOfWeek: 4, opensAt: '10:00', closesAt: '21:00', isClosed: false }, // Thu
+    { dayOfWeek: 5, opensAt: '10:00', closesAt: '21:00', isClosed: false }, // Fri
+    { dayOfWeek: 6, opensAt: '12:00', closesAt: '21:00', isClosed: false }, // Sat
   ];
 
   for (const d of days) {
@@ -287,12 +291,20 @@ interface SeedItem {
     isRequired?: boolean;
     minSelect?: number;
     maxSelect?: number;
-    options: Array<{ name: string; nameEn?: string; priceDelta?: string; isDefault?: boolean }>;
+    options: Array<{
+      name: string;
+      nameEn?: string;
+      priceDelta?: string;
+      grams?: number;
+      isDefault?: boolean;
+    }>;
   }>;
 }
 
 interface SeedCategory {
   slug: string;
+  /** Explicit display order (falls back to array index when omitted). */
+  position?: number;
   name: string;
   nameEn?: string;
   description: string;
@@ -315,9 +327,15 @@ const MEAT_OPTIONS = [
 const ADDONS_OPTIONS = [
   { name: 'Ser żółty', priceDelta: '4.00' },
   { name: 'Ser feta', priceDelta: '4.00' },
-  { name: 'Dodatkowy sos', priceDelta: '1.00' },
+  { name: 'Dodatkowy sos', priceDelta: '3.00' },
+  { name: 'Frytki', priceDelta: '5.00' },
+  { name: 'Dodatkowe mięso', priceDelta: '10.00' },
   { name: 'Opakowanie', priceDelta: '1.00' },
 ];
+
+// Optional swap offered on the sandwich wraps/buns: replace the side salad with
+// fries ("Holenderski"). Single-select, optional.
+const ZAMIANA_OPTIONS = [{ name: 'Holenderski (frytki zamiast sałatki)', priceDelta: '9.00' }];
 
 type ModGroup = NonNullable<SeedItem['modifierGroups']>[number];
 
@@ -333,7 +351,7 @@ const falafelMods = (): ModGroup[] => [
 ];
 
 const sizeGroup = (
-  options: Array<{ name: string; priceDelta: string; isDefault?: boolean }>,
+  options: Array<{ name: string; priceDelta: string; grams?: number; isDefault?: boolean }>,
 ): ModGroup => ({
   name: 'Rozmiar',
   isRequired: true,
@@ -342,9 +360,19 @@ const sizeGroup = (
   options,
 });
 
+// Optional salad→fries swap, added only to items that come with salad.
+const swapGroup = (): ModGroup => ({
+  name: 'Zamiana',
+  isRequired: false,
+  minSelect: 0,
+  maxSelect: 1,
+  options: ZAMIANA_OPTIONS,
+});
+
 const CATEGORIES: SeedCategory[] = [
   {
     slug: 'kebab',
+    position: 0,
     name: 'Kebab',
     description: 'Mięso (kurczak, wołowina lub mieszane) + surówki + sos.',
     items: [
@@ -355,16 +383,17 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '21.00',
         isFeatured: true,
         prepMinutes: 8,
-        grams: 200,
+        grams: 150,
         allergens: ['gluten', 'milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
-            { name: 'Mały', priceDelta: '0.00', isDefault: true },
-            { name: 'Średni', priceDelta: '3.00' },
-            { name: 'Duży', priceDelta: '6.00' },
-            { name: 'Mega', priceDelta: '10.00' },
+            { name: 'Mały', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Średni', priceDelta: '3.00', grams: 200 },
+            { name: 'Duży', priceDelta: '6.00', grams: 250 },
+            { name: 'Mega', priceDelta: '10.00', grams: 300 },
           ]),
           ...kebabMods(),
+          swapGroup(),
         ],
       },
       {
@@ -373,15 +402,16 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Kebab w picie — mięso, surówki i sos.',
         basePrice: '21.00',
         prepMinutes: 8,
-        grams: 200,
+        grams: 150,
         modifierGroups: [
           sizeGroup([
-            { name: 'Mały', priceDelta: '0.00', isDefault: true },
-            { name: 'Średni', priceDelta: '3.00' },
-            { name: 'Duży', priceDelta: '6.00' },
-            { name: 'Mega', priceDelta: '10.00' },
+            { name: 'Mały', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Średni', priceDelta: '3.00', grams: 200 },
+            { name: 'Duży', priceDelta: '6.00', grams: 250 },
+            { name: 'Mega', priceDelta: '10.00', grams: 300 },
           ]),
           ...kebabMods(),
+          swapGroup(),
         ],
       },
       {
@@ -390,16 +420,17 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Kebab w bułce — mięso, surówki i sos.',
         basePrice: '22.00',
         prepMinutes: 8,
-        grams: 180,
+        grams: 150,
         allergens: ['gluten', 'milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
-            { name: 'Mały', priceDelta: '0.00', isDefault: true },
-            { name: 'Średni', priceDelta: '3.00' },
-            { name: 'Duży', priceDelta: '6.00' },
-            { name: 'Mega', priceDelta: '10.00' },
+            { name: 'Mały', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Średni', priceDelta: '3.00', grams: 200 },
+            { name: 'Duży', priceDelta: '6.00', grams: 250 },
+            { name: 'Mega', priceDelta: '10.00', grams: 300 },
           ]),
           ...kebabMods(),
+          swapGroup(),
         ],
       },
       {
@@ -409,12 +440,12 @@ const CATEGORIES: SeedCategory[] = [
         basePrice: '36.00',
         isFeatured: true,
         prepMinutes: 12,
-        grams: 300,
+        grams: 250,
         allergens: ['gluten', 'milk'],
         modifierGroups: [
           sizeGroup([
-            { name: 'Duży', priceDelta: '0.00', isDefault: true },
-            { name: 'Mega', priceDelta: '6.00' },
+            { name: 'Duży', priceDelta: '0.00', grams: 250, isDefault: true },
+            { name: 'Mega', priceDelta: '6.00', grams: 300 },
           ]),
           ...kebabMods(),
         ],
@@ -422,16 +453,16 @@ const CATEGORIES: SeedCategory[] = [
       {
         slug: 'kebab-na-talerzu',
         name: 'Kebab na Talerzu',
-        description: 'Kebab na talerzu — mięso, surówki i sos.',
+        description: 'Kebab na talerzu — mięso, frytki, surówki i sos.',
         basePrice: '29.00',
         prepMinutes: 10,
-        grams: 250,
+        grams: 150,
         allergens: ['milk', 'sesame'],
         modifierGroups: [
           sizeGroup([
-            { name: 'Standard', priceDelta: '0.00', isDefault: true },
-            { name: 'Duży', priceDelta: '5.00' },
-            { name: 'Mega', priceDelta: '11.00' },
+            { name: 'Standard', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Duży', priceDelta: '5.00', grams: 250 },
+            { name: 'Mega', priceDelta: '11.00', grams: 300 },
           ]),
           ...kebabMods(),
         ],
@@ -439,14 +470,15 @@ const CATEGORIES: SeedCategory[] = [
       {
         slug: 'kebab-box',
         name: 'Kebab Box',
-        description: 'Mięso, surówki, frytki i sos w boxie.',
+        description: 'Mięso, frytki i sos w boxie.',
         basePrice: '26.00',
         prepMinutes: 10,
+        grams: 150,
         modifierGroups: [
           sizeGroup([
-            { name: 'Standard', priceDelta: '0.00', isDefault: true },
-            { name: 'Duży', priceDelta: '6.00' },
-            { name: 'Mega', priceDelta: '12.00' },
+            { name: 'Standard', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Duży', priceDelta: '6.00', grams: 250 },
+            { name: 'Mega', priceDelta: '12.00', grams: 300 },
           ]),
           ...kebabMods(),
         ],
@@ -457,6 +489,7 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Mięso, surówki, frytki i sos w tortilli.',
         basePrice: '29.00',
         prepMinutes: 10,
+        grams: 200,
         modifierGroups: kebabMods(),
       },
       {
@@ -465,11 +498,12 @@ const CATEGORIES: SeedCategory[] = [
         description: 'Sałatka z mięsem, surówkami i sosem.',
         basePrice: '26.00',
         prepMinutes: 8,
+        grams: 150,
         modifierGroups: [
           sizeGroup([
-            { name: 'Standard', priceDelta: '0.00', isDefault: true },
-            { name: 'Duży', priceDelta: '6.00' },
-            { name: 'Mega', priceDelta: '12.00' },
+            { name: 'Standard', priceDelta: '0.00', grams: 150, isDefault: true },
+            { name: 'Duży', priceDelta: '6.00', grams: 250 },
+            { name: 'Mega', priceDelta: '12.00', grams: 300 },
           ]),
           ...kebabMods(),
         ],
@@ -478,6 +512,7 @@ const CATEGORIES: SeedCategory[] = [
   },
   {
     slug: 'falafel',
+    position: 4,
     name: 'Danie Vege — Falafel',
     description: 'Falafel, sałata + sos łagodny, mieszany lub ostry.',
     items: [
@@ -552,12 +587,13 @@ const CATEGORIES: SeedCategory[] = [
   },
   {
     slug: 'strips-tacos',
-    name: 'Box Strips i Tacos',
+    position: 1,
+    name: 'Polędwiczki i Tacos',
     description: 'Stripsy z kurczaka i tacos.',
     items: [
       {
         slug: 'box-strips',
-        name: 'Box Strips',
+        name: 'Polędwiczki',
         description: 'Stripsy + frytki + surówki + sos.',
         basePrice: '28.00',
         prepMinutes: 10,
@@ -598,14 +634,15 @@ const CATEGORIES: SeedCategory[] = [
   },
   {
     slug: 'zestawy',
+    position: 2,
     name: 'Zestawy',
     description: 'Zestawy kebab + Coca-Cola 0.5L w cenie promocyjnej.',
     items: [
       {
         slug: 'zestaw-kebab-tortilla-sredni-cola',
         name: 'Kebab Tortilla Średni + Coca-Cola 0.5L',
-        description: 'Kebab Tortilla Średni z napojem Coca-Cola 0.5L. Oszczędzasz 2 zł.',
-        basePrice: '34.00',
+        description: 'Kebab Tortilla Średni z napojem Coca-Cola 0.5L. Oszczędzasz 1,50 zł.',
+        basePrice: '31.00',
         isFeatured: true,
         prepMinutes: 10,
         modifierGroups: kebabMods(),
@@ -623,6 +660,7 @@ const CATEGORIES: SeedCategory[] = [
   },
   {
     slug: 'dodatki',
+    position: 3,
     name: 'Dodatki',
     description: 'Frytki i deser.',
     items: [
@@ -654,6 +692,7 @@ const CATEGORIES: SeedCategory[] = [
   },
   {
     slug: 'napoje-zimne',
+    position: 5,
     name: 'Napoje Zimne',
     description: 'Napoje gazowane, soki, woda.',
     items: [
@@ -760,7 +799,7 @@ const CATEGORY_EN: Record<string, { name: string; description: string }> = {
     name: 'Vegetarian — Falafel',
     description: 'Falafel and salad with mild, mixed or spicy sauce.',
   },
-  'strips-tacos': { name: 'Box Strips & Tacos', description: 'Chicken strips and tacos.' },
+  'strips-tacos': { name: 'Strips & Tacos', description: 'Chicken strips and tacos.' },
   zestawy: { name: 'Combo Deals', description: 'Kebab + Coca-Cola 0.5L at a combo price.' },
   dodatki: { name: 'Sides', description: 'Fries and dessert.' },
   'napoje-zimne': { name: 'Cold Drinks', description: 'Soft drinks, juices and water.' },
@@ -786,9 +825,9 @@ const ITEM_EN: Record<string, { name: string; description: string }> = {
   },
   'kebab-na-talerzu': {
     name: 'Kebab Plate',
-    description: 'Döner kebab on a plate — meat, fresh salad and sauce.',
+    description: 'Döner kebab on a plate — meat, fries, fresh salad and sauce.',
   },
-  'kebab-box': { name: 'Kebab Box', description: 'Meat, fresh salad, fries and sauce in a box.' },
+  'kebab-box': { name: 'Kebab Box', description: 'Meat, fries and sauce in a box.' },
   'fryto-kebab': {
     name: 'Fryto Kebab',
     description: 'Meat, fresh salad, fries and sauce wrapped in a tortilla.',
@@ -814,7 +853,7 @@ const ITEM_EN: Record<string, { name: string; description: string }> = {
     description: 'Falafel on a plate with salad and sauce.',
   },
   'box-strips': {
-    name: 'Chicken Strips Box',
+    name: 'Chicken Strips',
     description: 'Chicken strips with fries, fresh salad and sauce.',
   },
   tacos: {
@@ -824,7 +863,7 @@ const ITEM_EN: Record<string, { name: string; description: string }> = {
   },
   'zestaw-kebab-tortilla-sredni-cola': {
     name: 'Medium Kebab Tortilla + Coca-Cola 0.5L',
-    description: 'Medium kebab tortilla with a Coca-Cola 0.5L. Save 2 zł.',
+    description: 'Medium kebab tortilla with a Coca-Cola 0.5L. Save 1.50 zł.',
   },
   'zestaw-kapsalon-duzy-cola': {
     name: 'Large Kapsalon + Coca-Cola 0.5L',
@@ -850,6 +889,7 @@ const GROUP_NAME_EN: Record<string, string> = {
   Mięso: 'Meat',
   Sos: 'Sauce',
   Dodatki: 'Add-ons',
+  Zamiana: 'Swap',
 };
 
 const OPTION_NAME_EN: Record<string, string> = {
@@ -862,6 +902,9 @@ const OPTION_NAME_EN: Record<string, string> = {
   'Ser żółty': 'Cheese',
   'Ser feta': 'Feta',
   'Dodatkowy sos': 'Extra sauce',
+  Frytki: 'Fries',
+  'Dodatkowe mięso': 'Extra meat',
+  'Holenderski (frytki zamiast sałatki)': 'Holenderski (fries instead of salad)',
   Opakowanie: 'Packaging',
   Mały: 'Small',
   Średni: 'Medium',
@@ -906,7 +949,7 @@ async function seedMenu() {
         nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
         descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
-        position: cIdx,
+        position: cat.position ?? cIdx,
         isActive: true,
       },
       create: {
@@ -915,7 +958,7 @@ async function seedMenu() {
         nameEn: catEn?.name ?? cat.nameEn ?? null,
         description: cat.description,
         descriptionEn: catEn?.description ?? cat.descriptionEn ?? null,
-        position: cIdx,
+        position: cat.position ?? cIdx,
         isActive: true,
       },
     });
@@ -1016,6 +1059,7 @@ async function seedMenu() {
               name: o.name,
               nameEn: o.nameEn ?? optionNameEn(o.name),
               priceDelta: new Prisma.Decimal(o.priceDelta ?? '0'),
+              grams: o.grams ?? null,
               isDefault: o.isDefault ?? false,
             })),
           });

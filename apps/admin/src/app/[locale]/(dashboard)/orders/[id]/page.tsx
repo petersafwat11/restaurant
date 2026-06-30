@@ -8,10 +8,10 @@ import { RefundModal } from '@/features/orders/components/refund-modal';
 import { useAddOrderNote, useAdvanceOrder, useOrderTracking } from '@/features/orders/hooks';
 import { Link, useRouter } from '@/i18n/navigation';
 import type { OrderStatus } from '@repo/types';
+import { nextStatusFor } from '@repo/types';
 import {
   Button,
   EmptyState,
-  ORDER_TRANSITIONS,
   PageSpinner,
   RelativeTime,
   STATUS_TOKENS,
@@ -56,12 +56,28 @@ export default function AdminOrderDetailPage() {
   const canCancel = has('order:cancel');
   const canNote = has('order:update');
 
-  // Cancel has its own dedicated button below, so don't propose it as the
-  // primary "advance" target — pick the first non-CANCELLED transition.
+  // Type-aware next step (mirrors the API FSM); DELIVERED is advanceable now.
   const nextStatus: OrderStatus | undefined = order
-    ? ORDER_TRANSITIONS[order.status]?.find((s) => s !== 'CANCELLED')
+    ? nextStatusFor(order.status, order.type)
     : undefined;
-  const isTerminal = order ? ['DELIVERED', 'CANCELLED', 'COMPLETED'].includes(order.status) : false;
+  const isTerminal = order ? ['CANCELLED', 'COMPLETED', 'REFUNDED'].includes(order.status) : false;
+
+  // Refund only for online-paid orders; Cancel only for COD/unpaid (mirrors API).
+  const payment = order?.payment ?? null;
+  const isOnlinePaid =
+    !!payment &&
+    payment.method !== 'COD' &&
+    (payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED');
+  const showRefund =
+    !!order &&
+    canRefund &&
+    isOnlinePaid &&
+    ['CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(order.status);
+  const showCancel =
+    !!order &&
+    canCancel &&
+    !isOnlinePaid &&
+    ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status);
 
   const noteRef = React.useRef<HTMLTextAreaElement | null>(null);
   React.useEffect(() => {
@@ -72,8 +88,8 @@ export default function AdminOrderDetailPage() {
         return;
       }
       if (e.key === 'Escape') router.push('/orders');
-      if (e.key === 'r' && canRefund && !isTerminal) setRefundOpen(true);
-      if (e.key === 'c' && canCancel && !isTerminal) setCancelOpen(true);
+      if (e.key === 'r' && showRefund) setRefundOpen(true);
+      if (e.key === 'c' && showCancel) setCancelOpen(true);
       if (e.key === 'n' && canNote) {
         e.preventDefault();
         noteRef.current?.focus();
@@ -81,7 +97,7 @@ export default function AdminOrderDetailPage() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [router, canRefund, canCancel, canNote, isTerminal]);
+  }, [router, showRefund, showCancel, canNote]);
 
   if (q.isLoading) {
     return <PageSpinner label={t('loading')} />;
@@ -130,6 +146,7 @@ export default function AdminOrderDetailPage() {
               advance.mutate({
                 orderId: order.id,
                 currentStatus: order.status,
+                type: order.type,
                 to: nextStatus,
               })
             }
@@ -139,18 +156,20 @@ export default function AdminOrderDetailPage() {
                 {t('advanceTo', { status: tStatus(nextStatus) })}
                 <ArrowRight size={14} />
               </>
+            ) : order.status === 'PENDING' ? (
+              t('awaitingPayment')
             ) : isTerminal ? (
               t('orderComplete')
             ) : (
               t('noNextState')
             )}
           </Button>
-          {!isTerminal && canRefund && (
+          {showRefund && (
             <Button variant="ghost" onClick={() => setRefundOpen(true)}>
               {t('refund')}
             </Button>
           )}
-          {!isTerminal && canCancel && (
+          {showCancel && (
             <Button
               variant="ghost"
               onClick={() => setCancelOpen(true)}
@@ -221,12 +240,12 @@ export default function AdminOrderDetailPage() {
                   <Kbd>N</Kbd> {t('keyboard.addNote')}
                 </li>
               )}
-              {!isTerminal && canRefund && (
+              {showRefund && (
                 <li>
                   <Kbd>R</Kbd> {t('keyboard.refund')}
                 </li>
               )}
-              {!isTerminal && canCancel && (
+              {showCancel && (
                 <li>
                   <Kbd>C</Kbd> {t('keyboard.cancel')}
                 </li>

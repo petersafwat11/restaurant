@@ -12,6 +12,7 @@ export function useDeleteModifierGroup() {
     mutationFn: ({ id }) => getApiClient().menu.modifierGroups.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.items() });
       notify('success', 'Modifier group deleted');
     },
     onError: (err) => notify('error', err.message),

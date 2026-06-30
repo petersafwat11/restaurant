@@ -50,34 +50,10 @@ export const STATUS_TOKENS: Record<OrderStatus, VisualToken> = {
   REFUNDED: tok('REFUNDED', 'Refunded', 'refunded'),
 };
 
-/**
- * Allowed forward transitions per current status. Used by StatusPill's
- * "Advance to" menu and BulkActionBar's "Advance N orders" action.
- *
- * Mirrors the backend FSM in apps/api/src/orders/order-state-machine.ts —
- * keep them in sync. Notable: PENDING → CONFIRMED is system-only (fired by
- * the Stripe webhook / COD short-circuit), so staff have no manual advance
- * from PENDING — only Cancel.
- */
-export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: ['CANCELLED'],
-  CONFIRMED: ['PREPARING', 'CANCELLED'],
-  PREPARING: ['READY'],
-  READY: ['OUT_FOR_DELIVERY', 'DELIVERED'],
-  OUT_FOR_DELIVERY: ['DELIVERED'],
-  DELIVERED: ['COMPLETED'],
-  COMPLETED: [],
-  CANCELLED: [],
-  REFUNDED: [],
-};
-
-/** Linear "next" status for the Advance shortcut (key 1 → ?, etc.). */
-export const ADVANCE_NEXT: Partial<Record<OrderStatus, OrderStatus>> = {
-  CONFIRMED: 'PREPARING',
-  PREPARING: 'READY',
-  READY: 'OUT_FOR_DELIVERY',
-  OUT_FOR_DELIVERY: 'DELIVERED',
-};
+// Forward-transition logic moved to `@repo/types` (`forwardTransitions`,
+// `nextStatusFor`) — a single, TYPE-AWARE source of truth shared with the API
+// state machine. The old map here was type-blind (offered OUT_FOR_DELIVERY for
+// pickup orders) and drifted from the backend; importers now call the helpers.
 
 export const PAYMENT_TOKENS: Record<PaymentStatus, VisualToken> = {
   PENDING: tok('PENDING', 'Pending', 'preparing'), // amber

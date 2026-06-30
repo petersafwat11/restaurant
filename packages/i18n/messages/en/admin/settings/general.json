@@ -25,6 +25,7 @@
     "taxRate": "Tax rate",
     "defaultDeliveryFee": "Default delivery fee ({currency})",
     "minOrder": "Minimum order ({currency})",
+    "deliveryRadius": "Delivery radius (km)",
     "effectiveMinimum": "Effective minimum"
   },
   "reservations": {

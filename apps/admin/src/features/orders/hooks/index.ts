@@ -16,4 +16,5 @@ export { useRefundOrder } from './use-refund-order';
 export { useOrderChime } from './use-order-chime';
 export { useOrderNotifications } from './use-order-notifications';
 export { useAddOrderNote } from './use-add-order-note';
+export { useSetOrderEta } from './use-set-order-eta';
 export { useExportOrders } from './use-export-orders';

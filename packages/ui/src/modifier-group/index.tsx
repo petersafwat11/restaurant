@@ -1,8 +1,8 @@
 'use client';
 
+import { formatMoney } from '@repo/utils';
 import { Check } from 'lucide-react';
 import * as React from 'react';
-import { formatMoney } from '@repo/utils';
 import { cn } from '../lib/cn';
 
 export interface ModifierGroupShape {
@@ -20,6 +20,8 @@ export interface ModifierOptionShape {
   name: string;
   /** MoneyString delta (signed) — formatted via formatMoney. */
   priceDelta: string;
+  /** Meat weight in grams for this option (size options); shown next to the name. */
+  grams?: number | null;
   default?: boolean;
   unavailable?: boolean;
 }
@@ -88,7 +90,7 @@ export function ModifierGroup({
       <div className="flex flex-col gap-1">
         {group.options.map((opt) => {
           const selected = value.includes(opt.id);
-          const delta = parseFloat(opt.priceDelta);
+          const delta = Number.parseFloat(opt.priceDelta);
           return (
             <label
               key={opt.id}
@@ -122,6 +124,9 @@ export function ModifierGroup({
               </span>
               <span className="flex-1 text-body text-fg">
                 {opt.name}
+                {opt.grams != null && opt.grams > 0 && (
+                  <span className="ml-2 text-small tabular-nums text-fg-subtle">{opt.grams} g</span>
+                )}
                 {opt.unavailable && (
                   <span className="ml-2 inline-block rounded-md bg-surface-warm px-1.5 py-0.5 text-[11px] text-fg-subtle">
                     Sold out

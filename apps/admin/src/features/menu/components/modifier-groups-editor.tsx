@@ -176,6 +176,59 @@ function CommitOnBlurNumber({
   );
 }
 
+/**
+ * Nullable meat-weight (grams) input. Empty commits `null` (option has no
+ * weight — e.g. a sauce); a number commits the gram value. Used on size
+ * options so each size carries its own meat weight.
+ */
+function CommitOnBlurGrams({
+  value,
+  onCommit,
+  ariaLabel,
+}: {
+  value: number | null;
+  onCommit: (n: number | null) => void;
+  ariaLabel?: string;
+}) {
+  const [draft, setDraft] = React.useState(value == null ? '' : String(value));
+  React.useEffect(() => {
+    setDraft(value == null ? '' : String(value));
+  }, [value]);
+  function commit() {
+    const trimmed = draft.trim();
+    if (trimmed === '') {
+      if (value !== null) onCommit(null);
+      return;
+    }
+    const n = Number.parseInt(trimmed, 10);
+    if (Number.isFinite(n) && n >= 0 && n !== value) onCommit(n);
+    else setDraft(value == null ? '' : String(value));
+  }
+  return (
+    <div className="relative">
+      <Input
+        type="number"
+        min={0}
+        value={draft}
+        aria-label={ariaLabel}
+        placeholder="— g"
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') setDraft(value == null ? '' : String(value));
+        }}
+        className="h-7 w-full pr-5 tabular-nums"
+      />
+      {draft.trim() !== '' && (
+        <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-fg-subtle">
+          g
+        </span>
+      )}
+    </div>
+  );
+}
+
 function ModifierOptionRow({
   option,
   currency,
@@ -193,6 +246,13 @@ function ModifierOptionRow({
           value={option.name}
           onCommit={(name) => update.mutate({ name })}
           ariaLabel="Option name"
+        />
+      </div>
+      <div className="w-20" title="Meat weight (g) — set on size options, leave blank otherwise">
+        <CommitOnBlurGrams
+          value={option.grams}
+          onCommit={(g) => update.mutate({ grams: g })}
+          ariaLabel="Meat weight in grams"
         />
       </div>
       <div className="w-28">

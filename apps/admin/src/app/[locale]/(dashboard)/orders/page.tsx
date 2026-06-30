@@ -24,7 +24,7 @@ import {
 } from '@/features/orders/hooks';
 import { getApiClient } from '@/lib/api-client';
 import { useDebouncedValue } from '@/lib/use-debounced-value';
-import type { OrderListItemDto, OrderStatus, RestaurantPublicDto } from '@repo/types';
+import type { OrderListItemDto, OrderStatus, OrderType, RestaurantPublicDto } from '@repo/types';
 import {
   ActionModal,
   type BulkAction,
@@ -149,8 +149,8 @@ export default function OrdersPage() {
   });
 
   const onAdvance = React.useCallback(
-    (orderId: string, currentStatus: OrderStatus, to?: OrderStatus) => {
-      advance.mutate({ orderId, currentStatus, to });
+    (orderId: string, currentStatus: OrderStatus, type: OrderType, to?: OrderStatus) => {
+      advance.mutate({ orderId, currentStatus, type, to });
     },
     [advance],
   );
@@ -174,7 +174,7 @@ export default function OrdersPage() {
   );
 
   function runBulkAdvance() {
-    for (const r of selectedRows) onAdvance(r.id, r.status);
+    for (const r of selectedRows) onAdvance(r.id, r.status, r.type);
     setSelected(new Set());
     setConfirmBulkAdvance(false);
   }
@@ -189,7 +189,7 @@ export default function OrdersPage() {
         onClick: () => {
           if (selectedRows.length > 1) setConfirmBulkAdvance(true);
           else {
-            for (const r of selectedRows) onAdvance(r.id, r.status);
+            for (const r of selectedRows) onAdvance(r.id, r.status, r.type);
             setSelected(new Set());
           }
         },
@@ -372,8 +372,16 @@ export default function OrdersPage() {
       <OrderDetailDrawer
         orderId={drawerOrderId}
         onOpenChange={(o) => !o && setDrawerOrderId(null)}
-        onRefund={(id) => setRefundOrderId(id)}
-        onCancel={(id) => setCancelOrderId(id)}
+        onRefund={(id) => {
+          // Close the drawer before opening the modal — a modal stacked over the
+          // drawer's focus-trap can swallow clicks. The modal refetches the order.
+          setDrawerOrderId(null);
+          setRefundOrderId(id);
+        }}
+        onCancel={(id) => {
+          setDrawerOrderId(null);
+          setCancelOrderId(id);
+        }}
       />
       <RefundModal orderId={refundOrderId} onOpenChange={(o) => !o && setRefundOrderId(null)} />
       <CancelModal orderId={cancelOrderId} onOpenChange={(o) => !o && setCancelOrderId(null)} />

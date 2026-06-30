@@ -37,6 +37,9 @@ export const ModifierSnapshotEntrySchema = z.object({
   optionId: z.string(),
   optionName: z.string(),
   priceDelta: MoneyStringSchema,
+  // Meat weight (grams) frozen at add-to-cart for size options; optional so
+  // pre-existing snapshots (without grams) stay valid. Null/absent = no weight.
+  grams: z.number().int().nullable().optional(),
 });
 export type ModifierSnapshotEntry = z.infer<typeof ModifierSnapshotEntrySchema>;
 

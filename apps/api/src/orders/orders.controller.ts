@@ -25,6 +25,8 @@ import {
   OrderExportQuerySchema,
   type OrderListQuery,
   OrderListQuerySchema,
+  type SetOrderEtaDto,
+  SetOrderEtaSchema,
   type UpdateOrderStatusDto,
   UpdateOrderStatusSchema,
 } from '@repo/types';
@@ -253,6 +255,20 @@ export class OrdersController {
       { userId: user.id, permissions: user.permissions },
       id,
       dto.note,
+    );
+  }
+
+  @Post(':id/eta')
+  @AuditAction('order:eta_set', 'order')
+  setEta(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(SetOrderEtaSchema)) dto: SetOrderEtaDto,
+  ) {
+    return this.orders.setEta(
+      { userId: user.id, permissions: user.permissions },
+      id,
+      dto.prepMinutesOverride,
     );
   }
 }

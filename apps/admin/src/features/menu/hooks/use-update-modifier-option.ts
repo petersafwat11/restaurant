@@ -13,6 +13,7 @@ export function useUpdateModifierOption(id: string) {
     mutationFn: (input) => getApiClient().menu.modifierOptions.update(id, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.items() });
       notify('success', 'Option updated');
     },
     onError: (err) => notify('error', err.message),

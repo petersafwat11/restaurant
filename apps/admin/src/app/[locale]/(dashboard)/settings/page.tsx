@@ -119,6 +119,46 @@ function MoneyField({
   );
 }
 
+function KmField({
+  label,
+  value,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  onCommit: (next: number) => void;
+}) {
+  const [draft, setDraft] = React.useState(String(value));
+  React.useEffect(() => setDraft(String(value)), [value]);
+  return (
+    <label className="flex items-center justify-between gap-4">
+      <span className="text-small text-fg-muted">{label}</span>
+      <div className="inline-flex h-9 items-center overflow-hidden rounded-button border border-border/[var(--border-strong-alpha)] focus-within:border-accent">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => {
+            const n = Number(draft);
+            if (Number.isFinite(n) && n > 0 && n <= 100) {
+              if (n !== value) onCommit(n);
+            } else {
+              setDraft(String(value));
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+            if (e.key === 'Escape') setDraft(String(value));
+          }}
+          className="w-20 bg-transparent px-3 text-right text-small tabular-nums text-fg outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+        />
+        <span className="pr-2 text-small text-fg-muted">km</span>
+      </div>
+    </label>
+  );
+}
+
 function PercentField({
   label,
   value,
@@ -272,6 +312,11 @@ export default function AdminSettingsPage() {
             label={t('financials.minOrder', { currency: s.currency })}
             value={s.minOrderAmount}
             onCommit={(minOrderAmount) => commit({ minOrderAmount })}
+          />
+          <KmField
+            label={t('financials.deliveryRadius')}
+            value={s.deliveryRadiusKm}
+            onCommit={(deliveryRadiusKm) => commit({ deliveryRadiusKm })}
           />
           <div className="flex items-center justify-between border-t border-border/[var(--border-alpha)] pt-3 text-small">
             <span className="text-fg-muted">{t('financials.effectiveMinimum')}</span>

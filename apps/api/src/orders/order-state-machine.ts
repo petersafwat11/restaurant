@@ -58,11 +58,29 @@ const RULES: readonly TransitionRule[] = [
     allowed: KITCHEN_OR_STAFF,
     description: 'Order entered preparation',
   },
+  // Staff post-confirmation cancellation (e.g. out of stock, customer no-show).
+  // The OrdersService additionally blocks cancelling an order with a captured
+  // ONLINE payment — those must be refunded (→ REFUNDED) instead, so money is
+  // never orphaned. COD / unpaid orders cancel freely.
+  {
+    from: 'CONFIRMED',
+    to: 'CANCELLED',
+    allowed: STAFF,
+    reasonRequired: true,
+    description: 'Staff cancellation (COD/unpaid — paid orders refund instead)',
+  },
   {
     from: 'PREPARING',
     to: 'READY',
     allowed: KITCHEN_OR_STAFF,
     description: 'Order ready for pickup/delivery',
+  },
+  {
+    from: 'PREPARING',
+    to: 'CANCELLED',
+    allowed: STAFF,
+    reasonRequired: true,
+    description: 'Staff cancellation (COD/unpaid — paid orders refund instead)',
   },
   {
     from: 'READY',
@@ -79,6 +97,13 @@ const RULES: readonly TransitionRule[] = [
     description: 'Pickup or dine-in order completed at counter',
   },
   {
+    from: 'READY',
+    to: 'CANCELLED',
+    allowed: STAFF,
+    reasonRequired: true,
+    description: 'Staff cancellation (COD/unpaid — paid orders refund instead)',
+  },
+  {
     from: 'OUT_FOR_DELIVERY',
     to: 'DELIVERED',
     allowed: STAFF,
@@ -87,15 +112,17 @@ const RULES: readonly TransitionRule[] = [
   {
     from: 'DELIVERED',
     to: 'COMPLETED',
-    allowed: [], // system-only — fired by post-delivery grace-period job
-    description: 'Auto-complete after delivery grace period',
+    // Staff "complete now" OR the post-delivery grace-period job (system).
+    allowed: STAFF,
+    description: 'Order completed after delivery',
   },
 ];
 
-// `* → CANCELLED` covered by the PENDING rule above. Plan requires that
-// **post-payment** cancellations go through the refund flow instead — so
-// staff cannot cancel a CONFIRMED-or-later order. Refund transitions to
-// REFUNDED are fired by the payments service (system role).
+// Staff may cancel through READY (rules above). The split is enforced in
+// OrdersService.transition: an order with a captured ONLINE payment cannot be
+// plain-cancelled (it must be refunded → REFUNDED so the money is returned),
+// while COD/unpaid orders cancel → CANCELLED. Refund transitions to REFUNDED
+// are fired by the payments service (system role).
 const ANY_TO_REFUNDED: readonly OrderStatus[] = [
   'CONFIRMED',
   'PREPARING',
@@ -153,6 +180,11 @@ export function canTransition(ctx: TransitionContext): TransitionResult {
 
   // System bypass for role gating (e.g., webhook-driven PENDING → CONFIRMED).
   if (ctx.actor === 'system') return { ok: true };
+
+  // A reason is mandatory for transitions that require one (cancellations).
+  if (rule.reasonRequired && !ctx.reason?.trim()) {
+    return { ok: false, reason: `A reason is required to ${ctx.to.toLowerCase()} this order` };
+  }
 
   if (rule.allowed.length === 0) {
     return { ok: false, reason: `Transition ${ctx.from} → ${ctx.to} is system-only` };
