@@ -36,7 +36,7 @@ export default async function AuthLayout({
       </a>
       <header className="flex h-[72px] items-center justify-between px-6 sm:px-10">
         <Link href="/" aria-label={tLayout('brandHome')}>
-          <Logo variant="full" size={36} />
+          <Logo variant="mark" size={36} />
         </Link>
         <LanguageSwitcher />
       </header>

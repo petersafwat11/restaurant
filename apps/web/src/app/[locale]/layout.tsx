@@ -47,6 +47,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     metadataBase: new URL(base),
+    // Explicit icon links (not the app-root file convention): this app has no
+    // `app/layout.tsx` — the <head> is rendered here under `[locale]`, so a top-level
+    // `app/icon.png` would not reliably emit a <link>. Files live in `public/`.
+    icons: {
+      icon: '/icon.png',
+      apple: '/apple-icon.png',
+    },
     title: {
       default: baseTitle,
       // `%s` is replaced by per-route titles via Next's title template merge.

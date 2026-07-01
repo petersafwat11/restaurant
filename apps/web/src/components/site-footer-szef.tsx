@@ -48,7 +48,7 @@ export function SzefSiteFooter() {
     <SiteFooter
       brandSlot={
         <div className="flex flex-col gap-4">
-          <Logo variant="inverse" size={40} />
+          <Logo variant="mark" size={40} />
           <p className="text-body text-surface/80">{t('tagline')}</p>
           {restaurant?.sameAs && restaurant.sameAs.length > 0 && (
             <div className="flex items-center gap-3">
