@@ -26,6 +26,8 @@ export interface SiteNavProps {
   notifications?: React.ReactNode;
   cart?: React.ReactNode;
   langSwitcher?: React.ReactNode;
+  /** Auth cluster (Log in / Sign up, or an account link). Hidden below `lg`. */
+  auth?: React.ReactNode;
   cta?: React.ReactNode;
   /** Escape hatch for one-offs (e.g. order-tracking page chip). */
   rightSlot?: React.ReactNode;
@@ -56,6 +58,7 @@ export function SiteNav({
   notifications,
   cart,
   langSwitcher,
+  auth,
   cta,
   rightSlot,
   variant = 'transparent',
@@ -101,6 +104,7 @@ export function SiteNav({
           {langSwitcher && <div className="hidden lg:block">{langSwitcher}</div>}
           {notifications}
           {cart}
+          {auth && <div className="hidden lg:flex">{auth}</div>}
           {cta && <div className="hidden sm:block">{cta}</div>}
           {rightSlot}
           {onOpenMobile && (

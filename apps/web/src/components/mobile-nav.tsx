@@ -14,6 +14,10 @@ export interface MobileNavProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   links: MobileNavLink[];
+  /** Brand logo, shown at the top of the drawer (links home). */
+  logo: React.ReactNode;
+  /** Auth cluster (Log in / Sign up, or an account link). */
+  auth: React.ReactNode;
   /** Language switcher element (rendered in the drawer footer). */
   langSwitcher: React.ReactNode;
   /** Primary CTA element (e.g. "Order now"). */
@@ -32,6 +36,8 @@ export function MobileNav({
   open,
   onOpenChange,
   links,
+  logo,
+  auth,
   langSwitcher,
   cta,
   title,
@@ -40,9 +46,16 @@ export function MobileNav({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-[86vw] max-w-[360px] gap-0 p-0">
-        <SheetTitle className="border-b border-border/[var(--border-alpha)] px-6 py-4 font-display text-h3 text-fg">
-          {title}
-        </SheetTitle>
+        {/* Brand header — logo links home and closes the drawer. The visible
+            title is replaced by the logo; the SheetTitle stays for a11y (Radix
+            requires an accessible dialog title). The Sheet's own close button
+            sits top-right. */}
+        <div className="flex items-center border-b border-border/[var(--border-alpha)] px-6 py-4">
+          <Link href="/" aria-label="Szef Donald" onClick={() => onOpenChange(false)}>
+            {logo}
+          </Link>
+        </div>
+        <SheetTitle className="sr-only">{title}</SheetTitle>
 
         <nav aria-label="Mobile" className="flex flex-col gap-1 px-3 py-4">
           {links.map((l) => (
@@ -62,6 +75,7 @@ export function MobileNav({
         </nav>
 
         <div className="mt-auto flex flex-col gap-4 border-t border-border/[var(--border-alpha)] px-6 py-5">
+          {auth}
           {/* The CTA is a Link; the drawer auto-closes on route change (see
               site-chrome). No onClick wrapper needed. */}
           {cta}

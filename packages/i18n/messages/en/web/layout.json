@@ -20,5 +20,10 @@
   },
   "notifications": {
     "ariaLabel": "Notifications"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "account": "Account"
   }
 }

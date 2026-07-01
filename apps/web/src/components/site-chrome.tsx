@@ -1,5 +1,6 @@
 'use client';
 
+import { AuthNav } from '@/components/auth-nav';
 import { CartButton } from '@/components/cart-button';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
@@ -86,12 +87,15 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
           />
         }
         langSwitcher={<LanguageSwitcher />}
+        auth={<AuthNav variant="bar" />}
         cta={orderNowCta}
       />
       <MobileNav
         open={mobileOpen}
         onOpenChange={setMobileOpen}
         links={links}
+        logo={<Logo variant="full" size={30} />}
+        auth={<AuthNav variant="drawer" onNavigate={() => setMobileOpen(false)} />}
         langSwitcher={<LanguageSwitcher />}
         cta={orderNowCta}
         title={t('mobileMenuTitle')}
