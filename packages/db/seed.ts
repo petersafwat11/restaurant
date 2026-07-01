@@ -465,6 +465,7 @@ const CATEGORIES: SeedCategory[] = [
             { name: 'Mega', priceDelta: '11.00', grams: 300 },
           ]),
           ...kebabMods(),
+          swapGroup(),
         ],
       },
       {
@@ -506,6 +507,25 @@ const CATEGORIES: SeedCategory[] = [
             { name: 'Mega', priceDelta: '12.00', grams: 300 },
           ]),
           ...kebabMods(),
+        ],
+      },
+      {
+        // Tacos live under Kebab (owner: tacos are part of the kebab family, not
+        // a separate section). Moved here from the old "Polędwiczki i Tacos".
+        slug: 'tacos',
+        name: 'Tacos',
+        description: 'Ser, sos, sałata lodowa, frytki i 3 polędwiczki w tortilli.',
+        basePrice: '29.00',
+        prepMinutes: 10,
+        modifierGroups: [
+          { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
+          {
+            name: 'Dodatki',
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 4,
+            options: ADDONS_OPTIONS,
+          },
         ],
       },
     ],
@@ -588,13 +608,13 @@ const CATEGORIES: SeedCategory[] = [
   {
     slug: 'strips-tacos',
     position: 1,
-    name: 'Polędwiczki i Tacos',
-    description: 'Stripsy z kurczaka i tacos.',
+    name: 'Polędwiczki',
+    description: 'Polędwiczki z kurczaka — frytki, surówki i sos.',
     items: [
       {
         slug: 'box-strips',
         name: 'Polędwiczki',
-        description: 'Stripsy + frytki + surówki + sos.',
+        description: 'Polędwiczki + frytki + surówki + sos.',
         basePrice: '28.00',
         prepMinutes: 10,
         modifierGroups: [
@@ -603,23 +623,6 @@ const CATEGORIES: SeedCategory[] = [
             { name: 'Duży (4 szt)', priceDelta: '5.00' },
             { name: 'Mega (5 szt)', priceDelta: '11.00' },
           ]),
-          { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
-          {
-            name: 'Dodatki',
-            isRequired: false,
-            minSelect: 0,
-            maxSelect: 4,
-            options: ADDONS_OPTIONS,
-          },
-        ],
-      },
-      {
-        slug: 'tacos',
-        name: 'Tacos',
-        description: 'Ser, sos, sałata lodowa, frytki i 3 stripsy w tortilli.',
-        basePrice: '29.00',
-        prepMinutes: 10,
-        modifierGroups: [
           { name: 'Sos', isRequired: true, minSelect: 1, maxSelect: 1, options: SAUCE_OPTIONS },
           {
             name: 'Dodatki',
@@ -799,7 +802,7 @@ const CATEGORY_EN: Record<string, { name: string; description: string }> = {
     name: 'Vegetarian — Falafel',
     description: 'Falafel and salad with mild, mixed or spicy sauce.',
   },
-  'strips-tacos': { name: 'Strips & Tacos', description: 'Chicken strips and tacos.' },
+  'strips-tacos': { name: 'Polędwiczki', description: 'Chicken tenders with fries, salad and sauce.' },
   zestawy: { name: 'Combo Deals', description: 'Kebab + Coca-Cola 0.5L at a combo price.' },
   dodatki: { name: 'Sides', description: 'Fries and dessert.' },
   'napoje-zimne': { name: 'Cold Drinks', description: 'Soft drinks, juices and water.' },
@@ -853,13 +856,13 @@ const ITEM_EN: Record<string, { name: string; description: string }> = {
     description: 'Falafel on a plate with salad and sauce.',
   },
   'box-strips': {
-    name: 'Chicken Strips',
-    description: 'Chicken strips with fries, fresh salad and sauce.',
+    name: 'Polędwiczki',
+    description: 'Chicken tenders with fries, fresh salad and sauce.',
   },
   tacos: {
     name: 'Tacos',
     description:
-      'Three chicken strips in a tortilla with cheese, sauce, iceberg lettuce and fries.',
+      'Three chicken tenders in a tortilla with cheese, sauce, iceberg lettuce and fries.',
   },
   'zestaw-kebab-tortilla-sredni-cola': {
     name: 'Medium Kebab Tortilla + Coca-Cola 0.5L',
