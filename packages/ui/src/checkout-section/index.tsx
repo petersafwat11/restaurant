@@ -50,34 +50,39 @@ export function CheckoutSection({
         className,
       )}
     >
-      <div className="flex items-center gap-3 px-5 py-4">
-        <span
-          aria-hidden
-          className={cn(
-            'grid h-7 w-7 shrink-0 place-items-center rounded-full text-small font-semibold',
-            status === 'complete' && 'bg-positive text-text-on-accent',
-            status === 'active' && 'bg-accent text-text-on-accent',
-            status === 'error' && 'bg-negative text-text-on-accent',
-            status === 'pending' && 'border border-border/[var(--border-strong-alpha)] text-fg-subtle',
-          )}
-        >
-          {status === 'complete' ? (
-            <Check size={14} strokeWidth={3} />
-          ) : status === 'error' ? (
-            '!'
-          ) : (
-            step
-          )}
-        </span>
-        <div className="flex flex-1 items-baseline gap-3">
-          <span id={`co-sec-${step}`} className="text-body font-semibold text-fg">
+      {/* The header wraps on narrow viewports: the number + title stay together
+          on the first line, while the summary and the right-hand controls drop
+          to their own lines instead of forcing the row (and the whole page)
+          wider than the screen. `min-w-0` + `truncate` let long values (e.g. a
+          phone number with no spaces) ellipsize rather than overflow. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            aria-hidden
+            className={cn(
+              'grid h-7 w-7 shrink-0 place-items-center rounded-full text-small font-semibold',
+              status === 'complete' && 'bg-positive text-text-on-accent',
+              status === 'active' && 'bg-accent text-text-on-accent',
+              status === 'error' && 'bg-negative text-text-on-accent',
+              status === 'pending' && 'border border-border/[var(--border-strong-alpha)] text-fg-subtle',
+            )}
+          >
+            {status === 'complete' ? (
+              <Check size={14} strokeWidth={3} />
+            ) : status === 'error' ? (
+              '!'
+            ) : (
+              step
+            )}
+          </span>
+          <span id={`co-sec-${step}`} className="min-w-0 truncate text-body font-semibold text-fg">
             {title}
           </span>
-          {summary && status === 'complete' && (
-            <span className="text-small text-fg-muted">{summary}</span>
-          )}
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        {summary && status === 'complete' && (
+          <span className="min-w-0 max-w-full truncate text-small text-fg-muted">{summary}</span>
+        )}
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           {rightSlot}
           {status === 'complete' && onEdit && (
             <button

@@ -699,7 +699,7 @@ export function CheckoutApp() {
       )}
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[62fr_38fr]">
-        <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>
+        <form className="flex min-w-0 flex-col gap-5" onSubmit={onSubmit} noValidate>
           {/* 1 — Order type */}
           <CheckoutSection
             step={1}
@@ -740,7 +740,7 @@ export function CheckoutApp() {
             step={2}
             title={t('sections.contact.title')}
             status={sectionStatus(2, 1)}
-            summary={`${form.watch('contact.name')} · +${form.watch('contact.phone')}`}
+            summary={`${form.watch('contact.name')} · +${(form.watch('contact.phone') ?? '').replace(/^\+/, '')}`}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 2: false }))}
             rightSlot={
               !user && (
@@ -1093,7 +1093,7 @@ export function CheckoutApp() {
           )}
         </form>
 
-        <div>
+        <div className="min-w-0">
           <OrderSummaryPanel
             variant="sticky-rail"
             lines={lines}
