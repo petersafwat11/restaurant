@@ -5,6 +5,7 @@ export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
 export const QUEUE_RECONCILIATION = 'reconciliation';
 export const QUEUE_ACCOUNT_DELETION = 'account-deletion';
+export const QUEUE_ORDERS = 'orders';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
@@ -14,6 +15,7 @@ export const QUEUE_NAMES = {
   audit: QUEUE_AUDIT,
   reconciliation: QUEUE_RECONCILIATION,
   accountDeletion: QUEUE_ACCOUNT_DELETION,
+  orders: QUEUE_ORDERS,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -44,3 +46,7 @@ export const JOB_ACCOUNT_ANONYMISE = 'account.anonymise';
 // Queued (never awaited in the request handler) on this queue so the deletion
 // module owns its own side-effects without touching the shared email processor.
 export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-email';
+// Auto-archive a delivered order (DELIVERED → COMPLETED) once its post-delivery
+// grace window elapses. Enqueued (delayed) when an order is marked DELIVERED; the
+// processor re-reads the order and no-ops unless it is still DELIVERED.
+export const JOB_ORDER_AUTO_COMPLETE = 'order.auto-complete';

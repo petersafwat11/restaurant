@@ -59,8 +59,11 @@ export const ORDER_TRANSITIONS_GRAPH: readonly OrderTransitionDef[] = [
   { from: 'READY', to: 'COMPLETED', onlyForTypes: ['PICKUP', 'DINE_IN'] },
   { from: 'READY', to: 'CANCELLED', reasonRequired: true },
   { from: 'OUT_FOR_DELIVERY', to: 'DELIVERED' },
-  // Manual "complete now" (staff) or the post-delivery grace-period job (system).
-  { from: 'DELIVERED', to: 'COMPLETED' },
+  // Post-delivery auto-archive, fired by the order-auto-complete grace job — never
+  // a staff button (`systemOnly` → the admin UI stops offering it, so staff's last
+  // action is "Delivered"). The backend RULES still permit staff as a harmless
+  // manual override; the parity test compares (from,to) pairs only.
+  { from: 'DELIVERED', to: 'COMPLETED', systemOnly: true },
 ] as const;
 
 /**

@@ -53,10 +53,12 @@ export function OrderDetailDrawer({
   const canCancel = has('order:cancel');
 
   // Type-aware next step (delivery vs pickup hand-off) — mirrors the API FSM.
+  // DELIVERED is `systemOnly` in the graph (the server grace job archives it to
+  // COMPLETED), so nextStatusFor returns undefined there — staff's last action is
+  // "Delivered".
   const nextStatus: OrderStatus | undefined = order
     ? nextStatusFor(order.status, order.type)
     : undefined;
-  // True terminals only — DELIVERED is advanceable (→ COMPLETED) by staff now.
   const isTerminal = order ? ['CANCELLED', 'COMPLETED', 'REFUNDED'].includes(order.status) : false;
 
   // Refund vs Cancel split by payment: an order paid ONLINE (not COD) is
@@ -144,6 +146,8 @@ export function OrderDetailDrawer({
                 </>
               ) : order.status === 'PENDING' ? (
                 t('awaitingPayment')
+              ) : order.status === 'DELIVERED' ? (
+                t('autoCompleting')
               ) : isTerminal ? (
                 t('orderComplete')
               ) : (

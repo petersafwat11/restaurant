@@ -12,6 +12,7 @@
   "noNextState": "No next state",
   "awaitingPayment": "Awaiting payment",
   "orderComplete": "Order complete",
+  "autoCompleting": "Completes automatically",
   "refund": "Refund",
   "cancel": "Cancel",
   "print": "Print",

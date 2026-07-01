@@ -1,5 +1,6 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { OrdersService } from '../src/orders/orders.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
@@ -191,5 +192,31 @@ describe('order state machine (e2e)', () => {
     const last = events[events.length - 1];
     expect(last.status).toBe('PREPARING');
     expect(last.note).toBe('starting prep');
+  });
+
+  it('auto-completes a DELIVERED order (post-delivery grace job)', async () => {
+    const prisma = app.get(PrismaService);
+    // Simulate a delivery order that has been marked DELIVERED (direct DB update,
+    // same shortcut this suite uses for CONFIRMED).
+    await prisma.order.update({ where: { id: orderId }, data: { status: 'DELIVERED' } });
+
+    // The order-auto-complete worker calls this service method after the grace
+    // window. It transitions as `system` → COMPLETED.
+    await app.get(OrdersService).autoCompleteDelivered(orderId);
+
+    const after = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    expect(after.status).toBe('COMPLETED');
+    const completedEvents = await prisma.orderStatusEvent.findMany({
+      where: { orderId, status: 'COMPLETED' },
+    });
+    expect(completedEvents.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('auto-complete is a no-op when the order is not DELIVERED', async () => {
+    const prisma = app.get(PrismaService);
+    // Order is CONFIRMED from beforeEach — a stale/duplicate job must not force it.
+    await app.get(OrdersService).autoCompleteDelivered(orderId);
+    const after = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    expect(after.status).toBe('CONFIRMED');
   });
 });

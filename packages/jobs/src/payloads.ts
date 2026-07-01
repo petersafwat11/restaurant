@@ -161,6 +161,14 @@ export type AccountDeletionConfirmEmailPayload = z.infer<
   typeof AccountDeletionConfirmEmailPayloadSchema
 >;
 
+// Auto-archive a delivered order to COMPLETED after the post-delivery grace
+// window. The processor re-reads the order and no-ops unless it is still
+// DELIVERED, so a stale/duplicate job is harmless.
+export const OrderAutoCompletePayloadSchema = z.object({
+  orderId: z.string(),
+});
+export type OrderAutoCompletePayload = z.infer<typeof OrderAutoCompletePayloadSchema>;
+
 export const AuditWritePayloadSchema = z.object({
   actorUserId: z.string(),
   action: z.string(),

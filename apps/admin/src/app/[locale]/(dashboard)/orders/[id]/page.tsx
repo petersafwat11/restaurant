@@ -56,7 +56,9 @@ export default function AdminOrderDetailPage() {
   const canCancel = has('order:cancel');
   const canNote = has('order:update');
 
-  // Type-aware next step (mirrors the API FSM); DELIVERED is advanceable now.
+  // Type-aware next step (mirrors the API FSM). DELIVERED is `systemOnly` in the
+  // graph — the server grace job archives it to COMPLETED — so nextStatusFor
+  // returns undefined there and staff's last action is "Delivered".
   const nextStatus: OrderStatus | undefined = order
     ? nextStatusFor(order.status, order.type)
     : undefined;
@@ -158,6 +160,8 @@ export default function AdminOrderDetailPage() {
               </>
             ) : order.status === 'PENDING' ? (
               t('awaitingPayment')
+            ) : order.status === 'DELIVERED' ? (
+              t('autoCompleting')
             ) : isTerminal ? (
               t('orderComplete')
             ) : (

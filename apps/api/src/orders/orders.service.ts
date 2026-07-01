@@ -10,7 +10,12 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma } from '@repo/db';
 import type { Order, OrderItem, OrderStatusEvent } from '@repo/db';
-import { JOB_RECEIPT_GENERATE, QUEUE_RECEIPT } from '@repo/jobs';
+import {
+  JOB_ORDER_AUTO_COMPLETE,
+  JOB_RECEIPT_GENERATE,
+  QUEUE_ORDERS,
+  QUEUE_RECEIPT,
+} from '@repo/jobs';
 import { LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import type { Queue } from 'bullmq';
 import type {
@@ -64,6 +69,13 @@ interface OrderActor {
   roles?: string[];
 }
 
+// Grace window before a DELIVERED order auto-archives to COMPLETED. Deliberately
+// in the "hours" range, not minutes: while an order is DELIVERED it stays
+// refundable via the normal flow (a COMPLETED order is not), so this window also
+// serves as the post-delivery refund window. Staff never click "Complete" — the
+// order-auto-complete worker does it. One constant to tune (or lift to env later).
+const AUTO_COMPLETE_GRACE_MS = 2 * 60 * 60 * 1000; // 2 hours
+
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -78,6 +90,7 @@ export class OrdersService {
     private readonly analytics: AnalyticsProductService,
     private readonly events: EventEmitter2,
     @InjectQueue(QUEUE_RECEIPT) private readonly receiptQueue: Queue,
+    @InjectQueue(QUEUE_ORDERS) private readonly ordersQueue: Queue,
   ) {}
 
   // ---- Shared checkout pricing -------------------------------------------
@@ -810,7 +823,57 @@ export class OrdersService {
     ) {
       this.events.emit('kitchen.ticket_removed', statusEvent);
     }
+
+    // Delivery hand-off done → schedule the auto-archive to COMPLETED after the
+    // grace window. Staff's last action is "Delivered"; the system closes it out.
+    // Deterministic jobId so it never double-schedules; best-effort (a scheduling
+    // failure must not fail the delivery transition itself).
+    if (to === 'DELIVERED') {
+      this.ordersQueue
+        .add(
+          JOB_ORDER_AUTO_COMPLETE,
+          { orderId },
+          {
+            delay: AUTO_COMPLETE_GRACE_MS,
+            jobId: `order-autocomplete:${orderId}`,
+            removeOnComplete: true,
+            removeOnFail: 100,
+          },
+        )
+        .catch((err) =>
+          this.logger.error(`failed to schedule auto-complete for order ${orderId}: ${err}`),
+        );
+    }
     return updated;
+  }
+
+  /**
+   * Auto-archive a delivered order to COMPLETED once its grace window elapses.
+   * Called by the order-auto-complete worker. Idempotent + safe on a stale or
+   * duplicate job: re-reads the order and no-ops unless it is still DELIVERED (a
+   * refund or manual change may have moved it on). Fires as the `system` actor,
+   * and swallows a lost race so the worker never retry-storms.
+   */
+  async autoCompleteDelivered(orderId: string): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { status: true },
+    });
+    if (!order) {
+      this.logger.warn(`autoCompleteDelivered: order ${orderId} not found — skipping`);
+      return;
+    }
+    if (order.status !== 'DELIVERED') {
+      // Already completed / refunded / otherwise moved on — nothing to do.
+      return;
+    }
+    try {
+      await this.forceTransition(orderId, 'COMPLETED', null, 'Auto-completed after delivery');
+    } catch (err) {
+      // Lost a race (status changed between the read above and the transition).
+      // Benign — log and return cleanly so BullMQ doesn't treat it as a failure.
+      this.logger.warn(`autoCompleteDelivered: could not complete ${orderId} — ${err}`);
+    }
   }
 
   /**

@@ -12,6 +12,7 @@
   "noNextState": "Brak następnego statusu",
   "awaitingPayment": "Oczekuje na płatność",
   "orderComplete": "Zamówienie zakończone",
+  "autoCompleting": "Zakończy się automatycznie",
   "refund": "Zwrot",
   "cancel": "Anuluj",
   "print": "Drukuj",
