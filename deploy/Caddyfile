@@ -6,23 +6,59 @@
     email {$CADDY_EMAIL}
     # Use the production ACME endpoint (default). To test changes, swap to:
     # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+    # Defence-in-depth for rate limiting: only trust X-Forwarded-* from private
+    # ranges (the Docker network) so a client cannot inject a spoofed
+    # X-Forwarded-For. The API additionally runs Fastify with `trustProxy: 1`
+    # (trust exactly this one hop), so `req.ip` is always the real client IP.
+    servers {
+        trusted_proxies static private_ranges
+    }
+}
+
+# Security headers shared by every site (plan §I3). HSTS is safe because Caddy
+# serves all three hostnames over HTTPS. `preload` is intentionally omitted — it
+# is a hard-to-reverse commitment the owner should opt into separately.
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=(self), interest-cohort=()"
+        X-Frame-Options "DENY"
+        # Strip server-fingerprinting headers (Next.js sets X-Powered-By).
+        -X-Powered-By
+        -Server
+    }
 }
 
 # Customer web — root domain
 {$DOMAIN} {
     encode zstd gzip
+    import security_headers
+    # CSP rolled out report-only first (plan §I3): collect violations, tune, then
+    # rename the header to `Content-Security-Policy` to enforce. Includes the
+    # Stripe.js / Elements / 3DS + OpenStreetMap directives the checkout needs.
+    # NOTE: report-only collects nothing until a collector is wired — add a
+    # `report-to`/`Reporting-Endpoints` (or `report-uri`) directive pointing at
+    # Sentry/Report-URI/etc. before relying on this phase to surface violations.
+    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://api.stripe.com https://nominatim.openstreetmap.org; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     reverse_proxy web:3000
 }
 
-# Staff/owner admin
+# Staff/owner admin — stricter CSP (no Stripe Elements here).
 admin.{$DOMAIN} {
     encode zstd gzip
+    import security_headers
+    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     reverse_proxy admin:3001
 }
 
-# API + Socket.IO + uploads static
+# API + Socket.IO + uploads static. JSON API → lock CSP all the way down.
 api.{$DOMAIN} {
     encode zstd gzip
+    import security_headers
+    header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
     # Generous client_max for menu image uploads (server enforces 5 MB cap).
     request_body {
         max_size 10MB

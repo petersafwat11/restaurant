@@ -16,7 +16,11 @@ export function cartItemToDisplay(
 ): CartLineDisplay {
   const modifierSummary =
     item.modifierSnapshot.length > 0
-      ? item.modifierSnapshot.map((m) => m.optionName).join(' · ')
+      ? item.modifierSnapshot
+          .map((m) =>
+            m.grams != null && m.grams > 0 ? `${m.optionName} (${m.grams} g)` : m.optionName,
+          )
+          .join(' · ')
       : undefined;
   return {
     id: item.id,

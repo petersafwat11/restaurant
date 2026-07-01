@@ -38,6 +38,7 @@ import enSharedOrderStatus from '../messages/en/shared/order-status.json';
 import enSharedOrderTracking from '../messages/en/shared/order-tracking.json';
 import enSharedOrder from '../messages/en/shared/order.json';
 import enValidation from '../messages/en/validation.json';
+import enWebAccountDeletion from '../messages/en/web/account-deletion.json';
 import enWebAccountAddresses from '../messages/en/web/account/addresses.json';
 import enWebAccountLayout from '../messages/en/web/account/layout.json';
 import enWebAccountLoyalty from '../messages/en/web/account/loyalty.json';
@@ -107,6 +108,7 @@ import plSharedOrderStatus from '../messages/pl/shared/order-status.json';
 import plSharedOrderTracking from '../messages/pl/shared/order-tracking.json';
 import plSharedOrder from '../messages/pl/shared/order.json';
 import plValidation from '../messages/pl/validation.json';
+import plWebAccountDeletion from '../messages/pl/web/account-deletion.json';
 import plWebAccountAddresses from '../messages/pl/web/account/addresses.json';
 import plWebAccountLayout from '../messages/pl/web/account/layout.json';
 import plWebAccountLoyalty from '../messages/pl/web/account/loyalty.json';
@@ -194,6 +196,7 @@ const EN_MESSAGES = {
   },
   validation: enValidation,
   web: {
+    accountDeletion: enWebAccountDeletion,
     account: {
       addresses: enWebAccountAddresses,
       layout: enWebAccountLayout,
@@ -295,6 +298,7 @@ const PL_MESSAGES = {
   },
   validation: plValidation,
   web: {
+    accountDeletion: plWebAccountDeletion,
     account: {
       addresses: plWebAccountAddresses,
       layout: plWebAccountLayout,

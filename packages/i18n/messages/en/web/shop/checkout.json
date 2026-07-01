@@ -154,10 +154,7 @@
     "inputAriaLabel": "Promo code",
     "removeAriaLabel": "Remove promo",
     "notValid": "Code not valid.",
-    "mock": {
-      "baklava": "15% off — first order",
-      "student": "5,00 zł off"
-    }
+    "appliedLabel": "{amount} off"
   },
   "loyalty": {
     "trigger": "Use points?",
@@ -185,7 +182,8 @@
     "minOrderToast": "Minimum order for delivery is {amount} — add a bit more.",
     "confirmAddress": "Please confirm your delivery address on the map.",
     "stripeNotInit": "Card form did not initialise. Please retry.",
-    "createOrderFallback": "Could not place your order."
+    "createOrderFallback": "Could not place your order.",
+    "legalVersionChanged": "Our Terms were updated while you were on this page. Please refresh the page to load the new version, then review and accept it to continue."
   },
   "return": {
     "confirming": "Confirming your payment…"

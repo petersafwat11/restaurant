@@ -84,6 +84,7 @@ export function resolveModifierSelections(
         optionId: option.id,
         optionName: option.name,
         priceDelta: option.priceDelta.toFixed(2),
+        grams: option.grams ?? null,
       });
     }
   }

@@ -25,6 +25,7 @@
     "taxRate": "Stawka podatku",
     "defaultDeliveryFee": "Domyślna opłata za dostawę ({currency})",
     "minOrder": "Minimalna wartość zamówienia ({currency})",
+    "deliveryRadius": "Promień dostawy (km)",
     "effectiveMinimum": "Efektywne minimum"
   },
   "reservations": {

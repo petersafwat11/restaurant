@@ -2,11 +2,12 @@
 
 import { useCartSessionKey } from '@/components/cart-session-provider';
 import { useAddresses } from '@/features/addresses/hooks';
-import { useCart, useSetCartLoyalty } from '@/features/cart/hooks';
+import { useApplyCoupon, useCart, useRemoveCoupon, useSetCartLoyalty } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
 import { StripePaymentForm } from '@/features/checkout/components/stripe-payment-form';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
+import { useCheckoutQuote } from '@/features/checkout/hooks/use-checkout-quote';
 import { useFeatureFlag } from '@/features/feature-flags/hooks';
 import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
 import { useCreateOrder } from '@/features/orders/hooks';
@@ -19,9 +20,8 @@ import {
   type OrderType,
   type PaymentMethodKind,
 } from '@repo/types';
-import { CheckoutFormSchema } from '@repo/types';
+import { CheckoutFormSchema, LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import {
-  type AppliedPromo,
   CheckoutSection,
   type CheckoutSectionStatus,
   Container,
@@ -31,6 +31,7 @@ import {
   type LoyaltyApplyResult,
   LoyaltyRedeemInput,
   OrderSummaryPanel,
+  type PromoApplyResult,
   PromoCodeInput,
   RadioCardGroup,
   type RadioCardOption,
@@ -57,79 +58,13 @@ import {
   Truck,
   Utensils,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-// Mock promo store — wires to a future server endpoint. For now, in-memory.
-// `labelKey` resolves via the `promo.mock.*` translation namespace.
-const MOCK_PROMOS: Record<
-  string,
-  { discountPercent?: number; discountAmount?: string; labelKey: 'baklava' | 'student' }
-> = {
-  BAKLAVA: { discountPercent: 15, labelKey: 'baklava' },
-  STUDENT: { discountAmount: '5.00', labelKey: 'student' },
-};
-
-function computeSummary(
-  subtotal: string,
-  orderType: OrderType,
-  appliedPromo: AppliedPromo | null,
-  tipAmount: string,
-  deliveryFee: string,
-  freeLabel: string,
-  loyalty: { amount: string; label: string } | null,
-) {
-  let discountAmount = 0;
-  let discountLabel: string | undefined;
-  if (appliedPromo) {
-    const promo = MOCK_PROMOS[appliedPromo.code];
-    if (promo) {
-      if (promo.discountPercent) {
-        discountAmount = (Number.parseFloat(subtotal) * promo.discountPercent) / 100;
-      } else if (promo.discountAmount) {
-        discountAmount = Math.min(
-          Number.parseFloat(promo.discountAmount),
-          Number.parseFloat(subtotal),
-        );
-      }
-      discountLabel = appliedPromo.label;
-    }
-  }
-  const sub = Number.parseFloat(subtotal);
-  // Loyalty redemption is applied server-side at order creation; clamp the
-  // display so the running total never dips below the post-promo subtotal.
-  const loyaltyAmount = loyalty
-    ? Math.min(Number.parseFloat(loyalty.amount), Math.max(0, sub - discountAmount))
-    : 0;
-  const subAfter = sub - discountAmount - loyaltyAmount;
-  let deliveryAmount = 0;
-  let deliveryLabel: string | undefined;
-  if (orderType === 'PICKUP' || orderType === 'DINE_IN') {
-    deliveryLabel = freeLabel;
-  } else {
-    deliveryAmount = Number.parseFloat(deliveryFee);
-  }
-  const total = (subAfter + deliveryAmount + Number.parseFloat(tipAmount || '0')).toFixed(2);
-  const delivery: DeliveryRow = deliveryLabel
-    ? { label: deliveryLabel }
-    : { amount: deliveryAmount.toFixed(2) };
-  return {
-    discount:
-      discountAmount > 0 && discountLabel
-        ? { amount: discountAmount.toFixed(2), label: discountLabel }
-        : undefined,
-    loyaltyDiscount:
-      loyalty && loyaltyAmount > 0
-        ? { amount: loyaltyAmount.toFixed(2), label: loyalty.label }
-        : undefined,
-    delivery,
-    total,
-  };
-}
-
 export function CheckoutApp() {
   const t = useTranslations('web.shop.checkout');
+  const locale = useLocale();
   // The indicative ETA strings (eta.*) live in the success-page namespace, which
   // is the single source so the order-type cards and the success page never
   // diverge. See features/checkout/estimate.ts.
@@ -150,10 +85,14 @@ export function CheckoutApp() {
   const loyaltyAccountQuery = useLoyaltyAccount();
   const redeemQuote = useLoyaltyRedeemQuote();
   const setCartLoyalty = useSetCartLoyalty();
+  // Real coupon apply/remove — replaces the old client-side MOCK_PROMOS. Both
+  // atomically swap the cart query/store with the API response, which busts the
+  // checkout quote (keyed on cart.updatedAt) so totals re-fetch authoritatively.
+  const applyCoupon = useApplyCoupon();
+  const removeCoupon = useRemoveCoupon();
 
   const restaurant = restaurantQuery.data;
 
-  const [appliedPromo, setAppliedPromo] = React.useState<AppliedPromo | null>(null);
   const [appliedLoyalty, setAppliedLoyalty] = React.useState<{
     points: number;
     discountAmount: string;
@@ -161,6 +100,9 @@ export function CheckoutApp() {
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [createdOrderId, setCreatedOrderId] = React.useState<string | null>(null);
+  // Signed guest order token from the create response — lets a guest create the
+  // Stripe intent (and recover status) without an auth session (plan §F1).
+  const [createdOrderToken, setCreatedOrderToken] = React.useState<string | null>(null);
   const [stripeConfig, setStripeConfig] = React.useState<{ publishableKey: string } | null>(null);
   const stripeSubmitRef = React.useRef<(() => Promise<string | null>) | null>(null);
   const stripeElementsEnabled = useFeatureFlag('payments.stripe_elements');
@@ -299,23 +241,42 @@ export function CheckoutApp() {
   const orderType = form.watch('orderType');
   const tipAmount = form.watch('tipAmount');
   const geoPoint = form.watch('address.geoPoint');
+
+  // Server-authoritative price quote — the single source of every money value
+  // shown in the summary. Re-quotes when orderType, tip, or the cart (items,
+  // coupon, loyalty — all reflected in cart.updatedAt) change.
+  const quoteQuery = useCheckoutQuote({
+    orderType,
+    tipAmount,
+    cartVersion: cart?.updatedAt ?? '',
+    enabled: !!cart && lines.length > 0,
+  });
+  const quote = quoteQuery.data;
+
+  // Display rows derived from the quote strings — never recomputed client-side.
   const summary = React.useMemo(() => {
-    const loyalty = appliedLoyalty
-      ? {
-          amount: appliedLoyalty.discountAmount,
-          label: t('loyalty.discountLabel', { points: appliedLoyalty.points }),
-        }
-      : null;
-    return computeSummary(
-      subtotal,
-      orderType,
-      appliedPromo,
-      tipAmount,
-      defaultDeliveryFee,
-      t('free'),
-      loyalty,
-    );
-  }, [subtotal, orderType, appliedPromo, tipAmount, defaultDeliveryFee, t, appliedLoyalty]);
+    const delivery: DeliveryRow =
+      orderType === 'DELIVERY'
+        ? { amount: quote?.deliveryFee ?? defaultDeliveryFee }
+        : { label: t('free') };
+    return {
+      delivery,
+      discount:
+        cart?.appliedCoupon && quote
+          ? { amount: quote.couponDiscount, label: cart.appliedCoupon.code }
+          : undefined,
+      loyaltyDiscount:
+        appliedLoyalty && quote
+          ? {
+              amount: quote.loyaltyDiscount,
+              label: t('loyalty.discountLabel', { points: appliedLoyalty.points }),
+            }
+          : undefined,
+      // Falls back to the cart subtotal only until the first quote resolves; the
+      // place-order CTA is disabled until `quote` is present.
+      total: quote?.grandTotal ?? subtotal,
+    };
+  }, [quote, cart?.appliedCoupon, appliedLoyalty, orderType, defaultDeliveryFee, subtotal, t]);
 
   // ---- Loyalty redemption --------------------------------------------------
   const loyaltyBalance = user ? (loyaltyAccountQuery.data?.points ?? 0) : 0;
@@ -507,13 +468,34 @@ export function CheckoutApp() {
     if (ok) setCompletedSteps((s) => ({ ...s, [step]: true }));
   };
 
-  const handleApplyPromo = async (code: string) => {
-    await new Promise((r) => setTimeout(r, 400));
-    const found = MOCK_PROMOS[code];
-    if (!found) return { ok: false as const, error: t('promo.notValid') };
-    const label = t(`promo.mock.${found.labelKey}`);
-    setAppliedPromo({ code, label });
-    return { ok: true as const, label };
+  // Real server-validated coupon apply/remove. The hooks swap the cart query
+  // with the API response, which re-quotes the totals (keyed on cart.updatedAt).
+  const handleApplyPromo = async (code: string): Promise<PromoApplyResult> => {
+    try {
+      const next = await applyCoupon.mutateAsync({ code });
+      const applied = next.appliedCoupon;
+      return {
+        ok: true,
+        label: applied
+          ? t('promo.appliedLabel', { amount: formatMoney(applied.discountAmount, currency) })
+          : undefined,
+      };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : t('promo.notValid') };
+    }
+  };
+  const handleRemovePromo = () => removeCoupon.mutate();
+
+  // Wait for the mounted Stripe Elements form to be ready, then run its confirm.
+  // Returns null on success or an error string. Shared by the first attempt and
+  // the recovery retry so neither re-creates an order (plan §F4).
+  const runStripeConfirm = async (): Promise<string | null> => {
+    const deadline = Date.now() + 8000;
+    while (!stripeSubmitRef.current && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    if (!stripeSubmitRef.current) return t('errors.stripeNotInit');
+    return stripeSubmitRef.current();
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -531,6 +513,23 @@ export function CheckoutApp() {
 
     setSubmitting(true);
     try {
+      // F4 recovery: a pending order was already created on a prior attempt
+      // (e.g. a Stripe decline). The cart was cleared server-side at creation,
+      // so DON'T create a second order — just retry the payment for the existing
+      // one. The server reuses the same PaymentIntent via its deterministic
+      // idempotency key, so no duplicate intent either.
+      if (createdOrderId && onlinePaymentsReady && stripeConfig && isOnlineMethod) {
+        const retryErr = await runStripeConfirm();
+        if (retryErr) {
+          setSubmitError(retryErr);
+          setSubmitting(false);
+          return;
+        }
+        const tokenQuery = createdOrderToken ? `?t=${encodeURIComponent(createdOrderToken)}` : '';
+        router.push(`/checkout/success/${createdOrderId}${tokenQuery}`);
+        return;
+      }
+
       // DELIVERY path:
       //  - Authenticated users save the address (so they can reuse it) and
       //    pass `deliveryAddressId` to /orders.
@@ -581,7 +580,18 @@ export function CheckoutApp() {
         notes: values.orderNotes || null,
         tipAmount: values.tipAmount,
         paymentMethod: paymentMethodForApi,
-        acceptedTermsAt: new Date().toISOString(),
+        // Customer contact snapshot — the server stores this verbatim so guest
+        // receipts/notifications work and don't depend on a User row.
+        contact: {
+          name: values.contact.name,
+          email: values.contact.email,
+          phone: values.contact.phone,
+        },
+        checkoutLocale: locale === 'en' ? 'en' : 'pl',
+        // Durable legal acceptance: the server validates the version, sets the
+        // timestamp, and writes the immutable snapshot/hash (plan §C2).
+        legalAccepted: true,
+        legalBundleVersion: LEGAL_BUNDLE_VERSION,
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
@@ -592,15 +602,11 @@ export function CheckoutApp() {
       // Only reachable when online payments are ready (card/BLIK enabled).
       if (onlinePaymentsReady && stripeConfig && isOnlineMethod) {
         setCreatedOrderId(order.id);
-        const deadline = Date.now() + 8000;
-        while (!stripeSubmitRef.current && Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, 100));
-        }
-        if (!stripeSubmitRef.current) {
-          throw new Error(t('errors.stripeNotInit'));
-        }
-        const stripeErr = await stripeSubmitRef.current();
+        setCreatedOrderToken(order.trackingToken ?? null);
+        const stripeErr = await runStripeConfirm();
         if (stripeErr) {
+          // Keep the pending order recoverable — the next submit retries the
+          // payment for it instead of creating a new order (guard above).
           setSubmitError(stripeErr);
           setSubmitting(false);
           return;
@@ -610,8 +616,20 @@ export function CheckoutApp() {
       const tokenQuery = order.trackingToken ? `?t=${encodeURIComponent(order.trackingToken)}` : '';
       router.push(`/checkout/success/${order.id}${tokenQuery}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('errors.createOrderFallback');
-      setSubmitError(msg);
+      // The legal bundle changed between page load and submit — force the
+      // customer to re-read and re-accept rather than binding stale terms.
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code?: string }).code === LEGAL_VERSION_CHANGED
+      ) {
+        form.setValue('acceptedTerms', false);
+        setSubmitError(t('errors.legalVersionChanged'));
+      } else {
+        const msg = err instanceof Error ? err.message : t('errors.createOrderFallback');
+        setSubmitError(msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -681,7 +699,7 @@ export function CheckoutApp() {
       )}
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[62fr_38fr]">
-        <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>
+        <form className="flex min-w-0 flex-col gap-5" onSubmit={onSubmit} noValidate>
           {/* 1 — Order type */}
           <CheckoutSection
             step={1}
@@ -722,7 +740,7 @@ export function CheckoutApp() {
             step={2}
             title={t('sections.contact.title')}
             status={sectionStatus(2, 1)}
-            summary={`${form.watch('contact.name')} · +${form.watch('contact.phone')}`}
+            summary={`${form.watch('contact.name')} · +${(form.watch('contact.phone') ?? '').replace(/^\+/, '')}`}
             onEdit={() => setCompletedSteps((s) => ({ ...s, 2: false }))}
             rightSlot={
               !user && (
@@ -1018,6 +1036,7 @@ export function CheckoutApp() {
                 <StripePaymentForm
                   publishableKey={stripeConfig.publishableKey}
                   orderId={createdOrderId}
+                  orderToken={createdOrderToken}
                   submitRef={stripeSubmitRef}
                   methodKind={selectedMethod === 'blik' ? 'BLIK' : 'STRIPE_CARD'}
                 />
@@ -1074,7 +1093,7 @@ export function CheckoutApp() {
           )}
         </form>
 
-        <div>
+        <div className="min-w-0">
           <OrderSummaryPanel
             variant="sticky-rail"
             lines={lines}
@@ -1099,9 +1118,21 @@ export function CheckoutApp() {
             }}
             promoInput={
               <PromoCodeInput
-                applied={appliedPromo}
+                applied={
+                  cart?.appliedCoupon
+                    ? {
+                        code: cart.appliedCoupon.code,
+                        label: t('promo.appliedLabel', {
+                          amount: formatMoney(
+                            quote?.couponDiscount ?? cart.appliedCoupon.discountAmount,
+                            currency,
+                          ),
+                        }),
+                      }
+                    : null
+                }
                 onApply={handleApplyPromo}
-                onRemove={() => setAppliedPromo(null)}
+                onRemove={handleRemovePromo}
                 labels={{
                   trigger: t('promo.trigger'),
                   placeholder: t('promo.placeholder'),

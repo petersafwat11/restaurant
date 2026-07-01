@@ -4,10 +4,25 @@ import { usePageHeader } from '@/components/shell/page-title-context';
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
-import type { RestaurantAdminDto, UpdateRestaurantDto } from '@repo/types';
+import {
+  type RestaurantAdminDto,
+  type UpdateRestaurantDto,
+  getRestaurantLegalReadiness,
+} from '@repo/types';
 import { EmptyState, PageSpinner, SettingsAnchorNav, SettingsSectionCard, Switch } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Compass, Mail, Palette, Search, ToggleRight } from 'lucide-react';
+import {
+  Building2,
+  Check,
+  Compass,
+  CreditCard,
+  Landmark,
+  Mail,
+  Palette,
+  Search,
+  ToggleRight,
+  X,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
@@ -66,6 +81,26 @@ interface FormState {
   cuisineRaw: string; // comma-separated input; split on submit
   priceRange: string; // schema.org priceRange — "$$" or a range like "20–40 zł"; '' = unset
   sameAsRaw: string; // one URL per line; split on submit
+  // Legal entity (payment-provider readiness). '' = unset.
+  legalName: string;
+  nip: string;
+  regon: string;
+  krs: string;
+  registryCourt: string;
+  shareCapital: string;
+  shareCapitalCurrency: string;
+  registeredAddressSameAsTrading: boolean;
+  regAddrLine1: string;
+  regCity: string;
+  regState: string;
+  regZip: string;
+  regCountry: string;
+  // Payments & customer support
+  supportEmail: string;
+  supportPhone: string;
+  complaintsEmail: string;
+  privacyEmail: string;
+  statementDescriptor: string;
 }
 
 function splitCsv(raw: string): string[] {
@@ -123,6 +158,24 @@ function fromDto(r: RestaurantAdminDto): FormState {
     cuisineRaw: r.servesCuisine.join(', '),
     priceRange: r.priceRange ?? '',
     sameAsRaw: r.sameAs.join('\n'),
+    legalName: r.legal.legalName ?? '',
+    nip: r.legal.nip ?? '',
+    regon: r.legal.regon ?? '',
+    krs: r.legal.krs ?? '',
+    registryCourt: r.legal.registryCourt ?? '',
+    shareCapital: r.legal.shareCapital ?? '',
+    shareCapitalCurrency: r.legal.shareCapitalCurrency ?? '',
+    registeredAddressSameAsTrading: r.legal.registeredAddressSameAsTrading,
+    regAddrLine1: r.legal.registeredAddress?.line1 ?? '',
+    regCity: r.legal.registeredAddress?.city ?? '',
+    regState: r.legal.registeredAddress?.state ?? '',
+    regZip: r.legal.registeredAddress?.zip ?? '',
+    regCountry: r.legal.registeredAddress?.country ?? 'PL',
+    supportEmail: r.legal.supportEmail ?? '',
+    supportPhone: r.legal.supportPhone ?? '',
+    complaintsEmail: r.legal.complaintsEmail ?? '',
+    privacyEmail: r.legal.privacyEmail ?? '',
+    statementDescriptor: r.legal.statementDescriptor ?? '',
   };
 }
 
@@ -185,6 +238,52 @@ function diff(initial: FormState, current: FormState): UpdateRestaurantDto {
   if (initial.sameAsRaw !== current.sameAsRaw) {
     set('sameAs', splitLines(current.sameAsRaw));
   }
+  // Legal entity & support — send raw strings; the server normalizes/validates
+  // (empty → null). NIP/REGON/KRS digit-strip + format-check happen server-side.
+  if (initial.legalName !== current.legalName) set('legalName', current.legalName || null);
+  if (initial.nip !== current.nip) set('nip', current.nip || null);
+  if (initial.regon !== current.regon) set('regon', current.regon || null);
+  if (initial.krs !== current.krs) set('krs', current.krs || null);
+  if (initial.registryCourt !== current.registryCourt)
+    set('registryCourt', current.registryCourt || null);
+  if (initial.shareCapital !== current.shareCapital)
+    set('shareCapital', current.shareCapital || null);
+  if (initial.shareCapitalCurrency !== current.shareCapitalCurrency)
+    set('shareCapitalCurrency', current.shareCapitalCurrency || null);
+  if (initial.registeredAddressSameAsTrading !== current.registeredAddressSameAsTrading)
+    set('registeredAddressSameAsTrading', current.registeredAddressSameAsTrading);
+  // Registered address: stored only when it differs from the trading address.
+  const regAddrChanged =
+    initial.regAddrLine1 !== current.regAddrLine1 ||
+    initial.regCity !== current.regCity ||
+    initial.regState !== current.regState ||
+    initial.regZip !== current.regZip ||
+    initial.regCountry !== current.regCountry ||
+    initial.registeredAddressSameAsTrading !== current.registeredAddressSameAsTrading;
+  if (regAddrChanged) {
+    set(
+      'registeredAddress',
+      current.registeredAddressSameAsTrading || !current.regAddrLine1
+        ? null
+        : {
+            line1: current.regAddrLine1,
+            city: current.regCity,
+            state: current.regState || null,
+            zip: current.regZip || null,
+            country: current.regCountry,
+          },
+    );
+  }
+  if (initial.supportEmail !== current.supportEmail)
+    set('supportEmail', current.supportEmail || null);
+  if (initial.supportPhone !== current.supportPhone)
+    set('supportPhone', current.supportPhone || null);
+  if (initial.complaintsEmail !== current.complaintsEmail)
+    set('complaintsEmail', current.complaintsEmail || null);
+  if (initial.privacyEmail !== current.privacyEmail)
+    set('privacyEmail', current.privacyEmail || null);
+  if (initial.statementDescriptor !== current.statementDescriptor)
+    set('statementDescriptor', current.statementDescriptor || null);
   return patch;
 }
 
@@ -319,6 +418,8 @@ export default function RestaurantProfilePage() {
       { id: 'location', label: t('nav.location'), icon: <Compass className="h-4 w-4" /> },
       { id: 'discovery', label: t('nav.discovery'), icon: <Search className="h-4 w-4" /> },
       { id: 'channels', label: t('nav.channels'), icon: <ToggleRight className="h-4 w-4" /> },
+      { id: 'legal', label: t('nav.legal'), icon: <Landmark className="h-4 w-4" /> },
+      { id: 'payments', label: t('nav.payments'), icon: <CreditCard className="h-4 w-4" /> },
     ],
     [t],
   );
@@ -390,6 +491,35 @@ export default function RestaurantProfilePage() {
       />
     );
   }
+
+  // Live "payment provider readiness" against the current draft. Shares the same
+  // helper the API/public-fail-safe use — it only reports unset factual fields,
+  // never that the app verified an external registry.
+  const readiness = getRestaurantLegalReadiness({
+    legalName: draft.legalName || null,
+    nip: draft.nip || null,
+    regon: draft.regon || null,
+    krs: draft.krs || null,
+    registryCourt: draft.registryCourt || null,
+    shareCapital: draft.shareCapital || null,
+    shareCapitalCurrency: draft.shareCapitalCurrency || null,
+    registeredAddress:
+      draft.registeredAddressSameAsTrading || !draft.regAddrLine1
+        ? null
+        : {
+            line1: draft.regAddrLine1,
+            city: draft.regCity,
+            state: draft.regState || null,
+            zip: draft.regZip || null,
+            country: draft.regCountry,
+          },
+    supportEmail: draft.supportEmail || null,
+    supportPhone: draft.supportPhone || null,
+    complaintsEmail: draft.complaintsEmail || null,
+    privacyEmail: draft.privacyEmail || null,
+    statementDescriptor: draft.statementDescriptor || null,
+    registeredAddressSameAsTrading: draft.registeredAddressSameAsTrading,
+  });
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[240px_1fr] pb-24">
@@ -660,6 +790,185 @@ export default function RestaurantProfilePage() {
                 maxPlaceholder={t('channels.rangeMaxPlaceholder')}
               />
             </Field>
+          </div>
+        </SettingsSectionCard>
+
+        <SettingsSectionCard
+          id="legal"
+          title={t('legal.title')}
+          description={t('legal.description')}
+        >
+          <div className="rounded-card border border-border/[var(--border-strong-alpha)] bg-surface-2 p-3 text-small text-fg-muted">
+            {t('legal.verifyWarning')}
+          </div>
+          <Field label={t('legal.legalNameLabel')} hint={t('legal.legalNameHint')}>
+            <Input
+              value={draft.legalName}
+              maxLength={200}
+              onChange={(e) => patch('legalName', e.target.value)}
+            />
+          </Field>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <Field label={t('legal.nipLabel')} hint={t('legal.nipHint')}>
+              <Input
+                value={draft.nip}
+                inputMode="numeric"
+                onChange={(e) => patch('nip', e.target.value)}
+              />
+            </Field>
+            <Field label={t('legal.regonLabel')} hint={t('legal.regonHint')}>
+              <Input
+                value={draft.regon}
+                inputMode="numeric"
+                onChange={(e) => patch('regon', e.target.value)}
+              />
+            </Field>
+            <Field label={t('legal.krsLabel')} hint={t('legal.krsHint')}>
+              <Input
+                value={draft.krs}
+                inputMode="numeric"
+                onChange={(e) => patch('krs', e.target.value)}
+              />
+            </Field>
+          </div>
+          <Field label={t('legal.registryCourtLabel')} hint={t('legal.registryCourtHint')}>
+            <Input
+              value={draft.registryCourt}
+              maxLength={200}
+              onChange={(e) => patch('registryCourt', e.target.value)}
+            />
+          </Field>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Field label={t('legal.shareCapitalLabel')} hint={t('legal.shareCapitalHint')}>
+              <Input
+                value={draft.shareCapital}
+                inputMode="decimal"
+                placeholder="5000.00"
+                onChange={(e) => patch('shareCapital', e.target.value)}
+              />
+            </Field>
+            <Field label={t('legal.shareCapitalCurrencyLabel')}>
+              <Input
+                value={draft.shareCapitalCurrency}
+                maxLength={3}
+                placeholder="PLN"
+                onChange={(e) => patch('shareCapitalCurrency', e.target.value.toUpperCase())}
+              />
+            </Field>
+          </div>
+          <ToggleRow
+            label={t('legal.registeredSameLabel')}
+            description={t('legal.registeredSameHint')}
+            checked={draft.registeredAddressSameAsTrading}
+            onChange={(b) => patch('registeredAddressSameAsTrading', b)}
+          />
+          {!draft.registeredAddressSameAsTrading && (
+            <div className="grid grid-cols-1 gap-3 border-t border-border/[var(--border-alpha)] pt-4">
+              <span className="text-caption uppercase tracking-wider text-fg-subtle">
+                {t('legal.registeredAddressTitle')}
+              </span>
+              <Field label={t('contact.addressLineLabel')}>
+                <Input
+                  value={draft.regAddrLine1}
+                  maxLength={200}
+                  onChange={(e) => patch('regAddrLine1', e.target.value)}
+                />
+              </Field>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                <Field label={t('contact.cityLabel')}>
+                  <Input value={draft.regCity} onChange={(e) => patch('regCity', e.target.value)} />
+                </Field>
+                <Field label={t('contact.stateLabel')}>
+                  <Input
+                    value={draft.regState}
+                    onChange={(e) => patch('regState', e.target.value)}
+                  />
+                </Field>
+                <Field label={t('contact.zipLabel')}>
+                  <Input value={draft.regZip} onChange={(e) => patch('regZip', e.target.value)} />
+                </Field>
+                <Field label={t('contact.countryLabel')} hint={t('contact.countryHint')}>
+                  <Input
+                    value={draft.regCountry}
+                    maxLength={2}
+                    onChange={(e) => patch('regCountry', e.target.value.toUpperCase())}
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+        </SettingsSectionCard>
+
+        <SettingsSectionCard
+          id="payments"
+          title={t('payments.title')}
+          description={t('payments.description')}
+        >
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Field label={t('payments.supportEmailLabel')}>
+              <Input
+                type="email"
+                value={draft.supportEmail}
+                onChange={(e) => patch('supportEmail', e.target.value)}
+              />
+            </Field>
+            <Field label={t('payments.supportPhoneLabel')}>
+              <Input
+                type="tel"
+                value={draft.supportPhone}
+                onChange={(e) => patch('supportPhone', e.target.value)}
+              />
+            </Field>
+            <Field
+              label={t('payments.complaintsEmailLabel')}
+              hint={t('payments.complaintsEmailHint')}
+            >
+              <Input
+                type="email"
+                value={draft.complaintsEmail}
+                onChange={(e) => patch('complaintsEmail', e.target.value)}
+              />
+            </Field>
+            <Field label={t('payments.privacyEmailLabel')}>
+              <Input
+                type="email"
+                value={draft.privacyEmail}
+                onChange={(e) => patch('privacyEmail', e.target.value)}
+              />
+            </Field>
+          </div>
+          <Field
+            label={t('payments.statementDescriptorLabel')}
+            hint={t('payments.statementDescriptorHint')}
+          >
+            <Input
+              value={draft.statementDescriptor}
+              maxLength={22}
+              onChange={(e) => patch('statementDescriptor', e.target.value)}
+            />
+          </Field>
+          <div className="border-t border-border/[var(--border-alpha)] pt-4">
+            <span className="block text-small font-medium text-fg">
+              {t('payments.readiness.title')}
+            </span>
+            {readiness.complete ? (
+              <p className="mt-2 flex items-start gap-2 text-small text-fg-muted">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                {t('payments.readiness.complete')}
+              </p>
+            ) : (
+              <div className="mt-2 space-y-1">
+                <p className="text-small text-fg-muted">{t('payments.readiness.incompleteHint')}</p>
+                <ul className="space-y-1">
+                  {readiness.missing.map((key) => (
+                    <li key={key} className="flex items-center gap-2 text-small text-fg-muted">
+                      <X className="h-4 w-4 shrink-0 text-negative" />
+                      {t(`payments.readiness.fields.${key}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </SettingsSectionCard>
       </div>

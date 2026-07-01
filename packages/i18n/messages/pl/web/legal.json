@@ -1,6 +1,8 @@
 {
   "eyebrow": "Informacje prawne",
   "lastUpdated": "Ostatnia aktualizacja: {date}",
+  "toc": "Spis treści",
+  "print": "Drukuj / zapisz PDF",
   "footerQuestion": "Masz pytania dotyczące tej polityki?",
   "footerLink": "Skontaktuj się z nami",
   "privacy": {
@@ -11,5 +13,20 @@
   },
   "cookies": {
     "title": "Polityka plików cookie"
+  },
+  "refundsComplaints": {
+    "title": "Zwroty i reklamacje"
+  },
+  "deliveryCancellation": {
+    "title": "Dostawa i anulowanie"
+  },
+  "promotionTerms": {
+    "title": "Regulamin promocji"
+  },
+  "archive": {
+    "eyebrow": "Zarchiwizowana wersja {version}",
+    "effective": "Wersja obowiązująca od: {date}",
+    "currentNotice": "To zarchiwizowana wersja.",
+    "currentLink": "Zobacz aktualną wersję"
   }
 }

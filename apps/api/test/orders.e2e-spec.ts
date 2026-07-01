@@ -1,9 +1,11 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   createTestApp,
   ensureOwnerToken,
   ensureRestaurant,
+  orderLegal,
   resetDb,
   resetMenuDb,
 } from './setup-e2e';
@@ -96,6 +98,7 @@ describe('orders (e2e)', () => {
     const body = {
       type: 'PICKUP' as const,
       tipAmount: '0',
+      ...orderLegal(),
     };
 
     const r1 = await inject('POST', '/api/v1/orders', body, userToken, {
@@ -117,7 +120,7 @@ describe('orders (e2e)', () => {
   });
 
   it('concurrent POST /orders with the same Idempotency-Key never creates two orders', async () => {
-    const body = { type: 'PICKUP' as const, tipAmount: '0' };
+    const body = { type: 'PICKUP' as const, tipAmount: '0', ...orderLegal() };
     const headers = { 'idempotency-key': 'idem-concurrent' };
     const [r1, r2] = await Promise.all([
       inject('POST', '/api/v1/orders', body, userToken, headers),
@@ -142,7 +145,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
     );
     expect(res.statusCode).toBe(400);
@@ -152,7 +155,7 @@ describe('orders (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-scope' },
     );
@@ -187,7 +190,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-coupon' },
     );
@@ -218,6 +221,7 @@ describe('orders (e2e)', () => {
         sessionKey,
         type: 'DELIVERY' as const,
         tipAmount: '0',
+        ...orderLegal({ guest: true }),
         deliveryAddress: {
           line1: 'ul. Marszałkowska 102',
           city: 'Warsaw',
@@ -241,7 +245,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'DELIVERY' as const, tipAmount: '0' },
+      { type: 'DELIVERY' as const, tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-noaddr' },
     );
@@ -272,6 +276,7 @@ describe('orders (e2e)', () => {
         sessionKey,
         type: 'DELIVERY' as const,
         tipAmount: '0',
+        ...orderLegal({ guest: true }),
         deliveryAddress: {
           line1: 'far away',
           city: 'Łódź',
@@ -309,6 +314,7 @@ describe('orders (e2e)', () => {
         sessionKey,
         type: 'DELIVERY' as const,
         tipAmount: '0',
+        ...orderLegal({ guest: true }),
         deliveryAddress: {
           line1: 'ul. Marszałkowska 102',
           city: 'Warsaw',
@@ -331,6 +337,7 @@ describe('orders (e2e)', () => {
       {
         type: 'DELIVERY' as const,
         tipAmount: '0',
+        ...orderLegal(),
         deliveryAddressId: 'addr_fake',
         deliveryAddress: {
           line1: 'a',
@@ -356,7 +363,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-unavail' },
     );
@@ -369,7 +376,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD' },
+      { type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-cod-authed' },
     );
@@ -399,7 +406,7 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { sessionKey, type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD' },
+      { sessionKey, type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD', ...orderLegal({ guest: true }) },
       undefined,
       { 'idempotency-key': 'idem-cod-guest' },
     );
@@ -419,11 +426,93 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'idempotency-key': 'idem-nocod' },
     );
     expect(res.statusCode).toBe(201);
     expect(res.json().status).toBe('PENDING');
+  });
+
+  // ---- Customer snapshot + legal acceptance (Slice 4 / plan §C1, §C2) ----
+
+  it('snapshots guest contact onto the order so staff can see it (plan §C1)', async () => {
+    const sessionKey = 'guest-snapshot-1';
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
+
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        sessionKey,
+        type: 'PICKUP' as const,
+        tipAmount: '0',
+        contact: {
+          name: 'Guest Gabriela',
+          email: 'gabriela.guest@test.local',
+          phone: '+48555111222',
+        },
+        legalAccepted: true,
+        legalBundleVersion: LEGAL_BUNDLE_VERSION,
+      },
+      undefined,
+      { 'idempotency-key': 'idem-guest-snapshot' },
+    );
+    expect(res.statusCode).toBe(201);
+    const orderId = res.json().id;
+
+    // Staff (order:read) see the guest contact from the snapshot — no User row.
+    const owner = await inject('GET', `/api/v1/orders/${orderId}`, undefined, ownerToken);
+    expect(owner.json().customer).toMatchObject({
+      id: null,
+      name: 'Guest Gabriela',
+      email: 'gabriela.guest@test.local',
+      phone: '+48555111222',
+    });
+
+    // The guest order is searchable by its snapshot contact in the admin list.
+    const list = await inject('GET', '/api/v1/orders?search=Gabriela', undefined, ownerToken);
+    expect(
+      list.json().items.some((o: { customerName: string | null }) => o.customerName === 'Guest Gabriela'),
+    ).toBe(true);
+  });
+
+  it('rejects a guest order with no contact details (plan §C1)', async () => {
+    const sessionKey = 'guest-nocontact';
+    await inject('POST', `/api/v1/cart/items?sessionKey=${sessionKey}`, {
+      menuItemId: burgerId,
+      quantity: 1,
+      modifierSelections: [],
+    });
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        sessionKey,
+        type: 'PICKUP',
+        tipAmount: '0',
+        legalAccepted: true,
+        legalBundleVersion: LEGAL_BUNDLE_VERSION,
+      },
+      undefined,
+      { 'idempotency-key': 'idem-guest-nocontact' },
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('rejects a stale legal bundle version with LEGAL_VERSION_CHANGED (plan §C2)', async () => {
+    const res = await inject(
+      'POST',
+      '/api/v1/orders',
+      { type: 'PICKUP', tipAmount: '0', legalAccepted: true, legalBundleVersion: '1999-01-01' },
+      userToken,
+      { 'idempotency-key': 'idem-stale-legal' },
+    );
+    expect(res.statusCode).toBe(409);
+    expect(res.json().code).toBe(LEGAL_VERSION_CHANGED);
   });
 });

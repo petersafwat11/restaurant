@@ -6,6 +6,7 @@ import {
   createTestApp,
   ensureOwnerToken,
   ensureRestaurant,
+  orderLegal,
   resetDb,
   resetMenuDb,
 } from './setup-e2e';
@@ -131,7 +132,7 @@ describe('loyalty earn/redeem (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'Idempotency-Key': 'loyalty-redeem-1' },
     );
@@ -181,7 +182,7 @@ describe('loyalty earn/redeem (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       userToken,
       { 'Idempotency-Key': 'loyalty-coupon-cap' },
     );

@@ -1,17 +1,19 @@
 export const QUEUE_EMAIL = 'email';
 export const QUEUE_SMS = 'sms';
-export const QUEUE_PUSH = 'push';
 export const QUEUE_RECEIPT = 'receipt';
 export const QUEUE_ANALYTICS = 'analytics';
 export const QUEUE_AUDIT = 'audit';
+export const QUEUE_RECONCILIATION = 'reconciliation';
+export const QUEUE_ACCOUNT_DELETION = 'account-deletion';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
   sms: QUEUE_SMS,
-  push: QUEUE_PUSH,
   receipt: QUEUE_RECEIPT,
   analytics: QUEUE_ANALYTICS,
   audit: QUEUE_AUDIT,
+  reconciliation: QUEUE_RECONCILIATION,
+  accountDeletion: QUEUE_ACCOUNT_DELETION,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -28,12 +30,17 @@ export const JOB_EMAIL_PROMO = 'email.promo';
 export const JOB_EMAIL_NEWSLETTER_CONFIRM = 'email.newsletter-confirm';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
-export const JOB_PUSH_WELCOME = 'push.welcome';
-export const JOB_PUSH_ORDER_STATUS = 'push.order-status';
-export const JOB_PUSH_TOKEN_CLEANUP = 'push.token-cleanup';
-export const JOB_PUSH_LOYALTY = 'push.loyalty';
 export const JOB_EMAIL_REFERRAL_INVITE = 'email.referral-invite';
 export const JOB_RECEIPT_GENERATE = 'receipt.generate';
 export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';
 export const JOB_ANALYTICS_ROLLUP_FINALIZE = 'analytics.rollup-finalize';
 export const JOB_AUDIT_WRITE = 'audit.write';
+export const JOB_PAYMENT_RECONCILE = 'payment.reconcile';
+// Slice 9 / §G2 — anonymise an account whose grace period has elapsed. Enqueued
+// (delayed) when a deletion is confirmed; the processor re-checks state and
+// no-ops if the request was cancelled.
+export const JOB_ACCOUNT_ANONYMISE = 'account.anonymise';
+// Send the single-use email-confirmation link for the no-password reauth path.
+// Queued (never awaited in the request handler) on this queue so the deletion
+// module owns its own side-effects without touching the shared email processor.
+export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-email';

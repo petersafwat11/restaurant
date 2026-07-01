@@ -1,7 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 describe('order state machine (e2e)', () => {
   let app: NestFastifyApplication;
@@ -54,7 +54,7 @@ describe('order state machine (e2e)', () => {
     const order = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       customerToken,
       { 'idempotency-key': 'sm-idem-1' },
     );
@@ -133,12 +133,46 @@ describe('order state machine (e2e)', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it('rejects PREPARING → CANCELLED (post-payment cancellation must go through refund)', async () => {
+  it('staff can cancel an unpaid order (no online payment) with a reason', async () => {
     await inject('POST', `/api/v1/orders/${orderId}/status`, { to: 'PREPARING' }, ownerToken);
     const res = await inject(
       'POST',
       `/api/v1/orders/${orderId}/status`,
+      { to: 'CANCELLED', reason: 'Out of stock' },
+      ownerToken,
+    );
+    expect(res.statusCode).toBe(201);
+    expect(res.json().status).toBe('CANCELLED');
+  });
+
+  it('rejects a post-confirmation cancellation with no reason', async () => {
+    const res = await inject(
+      'POST',
+      `/api/v1/orders/${orderId}/status`,
       { to: 'CANCELLED' },
+      ownerToken,
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('a paid-online order cannot be plain-cancelled — it must be refunded', async () => {
+    const prisma = app.get(PrismaService);
+    const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    await prisma.payment.create({
+      data: {
+        orderId,
+        provider: 'stripe',
+        providerRef: 'pi_test_cancel_guard',
+        method: 'STRIPE_CARD',
+        amount: order.grandTotal,
+        currency: order.currency,
+        status: 'PAID',
+      },
+    });
+    const res = await inject(
+      'POST',
+      `/api/v1/orders/${orderId}/status`,
+      { to: 'CANCELLED', reason: 'Customer changed mind' },
       ownerToken,
     );
     expect(res.statusCode).toBe(400);

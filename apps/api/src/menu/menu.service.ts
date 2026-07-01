@@ -392,6 +392,7 @@ export class MenuService {
         groupId,
         name: dto.name,
         priceDelta: dto.priceDelta,
+        grams: dto.grams ?? null,
         isDefault: dto.isDefault ?? false,
       },
     });
@@ -408,6 +409,7 @@ export class MenuService {
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.priceDelta !== undefined ? { priceDelta: dto.priceDelta } : {}),
+        ...(dto.grams !== undefined ? { grams: dto.grams } : {}),
         ...(dto.isDefault !== undefined ? { isDefault: dto.isDefault } : {}),
       },
     });
@@ -595,6 +597,7 @@ function toOptionDto(row: MenuItemModifierOption, locale: ContentLocale = 'pl'):
     groupId: row.groupId,
     name: pickLocale(locale, row.name, row.nameEn),
     priceDelta: decimalToString(row.priceDelta.toString()),
+    grams: row.grams,
     isDefault: row.isDefault,
   };
 }

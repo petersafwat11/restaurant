@@ -29,6 +29,7 @@ import {
 } from '../common/auth/cookies';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { type AuthIssueResult, AuthService } from './auth.service';
@@ -42,6 +43,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @RateLimit({ name: 'auth:register', limit: 10, windowSeconds: 3600, perUser: false })
   @Post('register')
   @HttpCode(201)
   async register(
@@ -54,6 +56,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:login', limit: 10, windowSeconds: 300, perUser: false })
   @Post('login')
   @HttpCode(200)
   async login(
@@ -66,6 +69,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:refresh', limit: 30, windowSeconds: 300, perUser: false })
   @Post('refresh')
   @HttpCode(200)
   refresh(@Body(new ZodValidationPipe(RefreshSchema)) dto: RefreshDto) {
@@ -95,6 +99,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:request-otp', limit: 5, windowSeconds: 600, perUser: false })
   @Post('request-otp')
   @HttpCode(200)
   async requestOtp(@Body(new ZodValidationPipe(RequestOtpSchema)) dto: RequestOtpDto) {
@@ -103,6 +108,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:verify-otp', limit: 10, windowSeconds: 600, perUser: false })
   @Post('verify-otp')
   @HttpCode(200)
   async verifyOtp(
@@ -115,6 +121,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:forgot-password', limit: 5, windowSeconds: 900, perUser: false })
   @Post('forgot-password')
   @HttpCode(200)
   async forgotPassword(@Body(new ZodValidationPipe(ForgotPasswordSchema)) dto: ForgotPasswordDto) {
@@ -123,6 +130,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:reset-password', limit: 10, windowSeconds: 900, perUser: false })
   @Post('reset-password')
   @HttpCode(200)
   async resetPassword(@Body(new ZodValidationPipe(ResetPasswordSchema)) dto: ResetPasswordDto) {
@@ -131,6 +139,7 @@ export class AuthController {
   }
 
   @Public()
+  @RateLimit({ name: 'auth:verify-email', limit: 10, windowSeconds: 900, perUser: false })
   @Post('verify-email')
   @HttpCode(200)
   async verifyEmail(@Body(new ZodValidationPipe(VerifyEmailSchema)) dto: VerifyEmailDto) {

@@ -12,6 +12,7 @@ export function useDeleteModifierOption() {
     mutationFn: ({ id }) => getApiClient().menu.modifierOptions.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: menuQueryKeys.tree() });
+      qc.invalidateQueries({ queryKey: menuQueryKeys.items() });
       notify('success', 'Option deleted');
     },
     onError: (err) => notify('error', err.message),

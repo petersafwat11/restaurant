@@ -1,4 +1,5 @@
 import type { OrderStatus, OrderType } from '@repo/types';
+import { ORDER_TRANSITIONS_GRAPH } from '@repo/types';
 import { describe, expect, it } from 'vitest';
 import {
   type ActorRole,
@@ -103,6 +104,31 @@ describe('order state machine', () => {
         ).toEqual({ ok: true });
       }
     });
+
+    it('DELIVERED → COMPLETED by staff (manual "complete now")', () => {
+      expect(
+        canTransition({
+          from: 'DELIVERED',
+          to: 'COMPLETED',
+          actor: 'cashier',
+          orderType: 'DELIVERY',
+        }),
+      ).toEqual({ ok: true });
+    });
+
+    it('staff may cancel a post-confirmation order WITH a reason', () => {
+      for (const from of ['CONFIRMED', 'PREPARING', 'READY'] as const) {
+        expect(
+          canTransition({
+            from,
+            to: 'CANCELLED',
+            actor: 'manager',
+            orderType: 'PICKUP',
+            reason: 'Out of stock',
+          }),
+        ).toEqual({ ok: true });
+      }
+    });
   });
 
   describe('canTransition: illegal paths', () => {
@@ -136,12 +162,24 @@ describe('order state machine', () => {
       expect(r.ok).toBe(false);
     });
 
-    it('rejects post-payment cancellations', () => {
+    it('requires a reason for a post-confirmation cancellation', () => {
       const r = canTransition({
         from: 'CONFIRMED',
         to: 'CANCELLED',
         actor: 'owner',
         orderType: 'PICKUP',
+        // no reason supplied
+      });
+      expect(r.ok).toBe(false);
+    });
+
+    it('kitchen cannot cancel a post-confirmation order', () => {
+      const r = canTransition({
+        from: 'CONFIRMED',
+        to: 'CANCELLED',
+        actor: 'kitchen',
+        orderType: 'PICKUP',
+        reason: 'Out of stock',
       });
       expect(r.ok).toBe(false);
     });
@@ -181,6 +219,19 @@ describe('order state machine', () => {
           }
         }
       }
+    });
+  });
+
+  describe('parity with the shared transition graph', () => {
+    // The admin UI derives its advance/transition options from
+    // ORDER_TRANSITIONS_GRAPH (@repo/types). This asserts the backend RULES
+    // cover exactly the same (from, to) pairs, so the UI can never offer a
+    // transition the API rejects (the original "READY → OUT_FOR_DELIVERY for
+    // pickup orders" drift).
+    it('backend RULES match ORDER_TRANSITIONS_GRAPH (from,to) pairs', () => {
+      const backend = new Set(legalTransitions().map((t) => `${t.from}|${t.to}`));
+      const shared = new Set(ORDER_TRANSITIONS_GRAPH.map((r) => `${r.from}|${r.to}`));
+      expect(backend).toEqual(shared);
     });
   });
 });

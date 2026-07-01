@@ -3,6 +3,7 @@ import { CartSessionProvider } from '@/components/cart-session-provider';
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
 import { getCartSessionKey } from '@/lib/cart-session';
+import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 
@@ -25,6 +26,7 @@ export default async function ShopLayout({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'common' });
   const initialSessionKey = await getCartSessionKey();
+  const restaurant = await fetchPublicRestaurant();
 
   return (
     <CartSessionProvider initial={initialSessionKey}>
@@ -34,7 +36,7 @@ export default async function ShopLayout({
       <SiteChrome initialVariant="solid" />
       <main id="main">{children}</main>
       <CartContainer />
-      <SzefSiteFooter />
+      <SzefSiteFooter initialRestaurant={restaurant} />
     </CartSessionProvider>
   );
 }

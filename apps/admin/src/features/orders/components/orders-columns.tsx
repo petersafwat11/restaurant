@@ -1,21 +1,19 @@
 'use client';
 
-import type { OrderListItemDto, OrderStatus } from '@repo/types';
-import {
-  ColumnDef,
-  ORDER_TRANSITIONS,
-  RelativeTime,
-  STATUS_TOKENS,
-  StatusPill,
-  TypeBadge,
-  cn,
-} from '@repo/ui';
+import type { OrderListItemDto, OrderStatus, OrderType } from '@repo/types';
+import { forwardTransitions } from '@repo/types';
+import { ColumnDef, RelativeTime, STATUS_TOKENS, StatusPill, TypeBadge, cn } from '@repo/ui';
 import { elapsedMinutes, fmtPrep, formatMoney } from '@repo/utils';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 interface BuildColumnsArgs {
-  onAdvance: (orderId: string, currentStatus: OrderStatus, to?: OrderStatus) => void;
+  onAdvance: (
+    orderId: string,
+    currentStatus: OrderStatus,
+    type: OrderType,
+    to?: OrderStatus,
+  ) => void;
 }
 
 export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<OrderListItemDto>[] {
@@ -97,13 +95,16 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
         accessorKey: 'status',
         cell: (info) => {
           const status = info.getValue<OrderStatus>();
-          const orderId = info.row.original.id;
+          const row = info.row.original;
+          // Type-aware forward transitions only — Cancel is intentionally not a
+          // quick action here (it needs a reason); cancel via the row drawer or
+          // the bulk action, both of which route through the cancel modal.
           return (
             <StatusPill
               status={status}
               tokens={translatedTokens}
-              transitions={ORDER_TRANSITIONS[status]}
-              onTransition={(next) => onAdvance(orderId, status, next)}
+              transitions={forwardTransitions(status, row.type)}
+              onTransition={(next) => onAdvance(row.id, status, row.type, next)}
             />
           );
         },

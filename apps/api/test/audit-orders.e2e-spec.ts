@@ -1,6 +1,6 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createTestApp, ensureOwnerToken, ensureRestaurant, resetDb, resetMenuDb } from './setup-e2e';
+import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 /**
  * Sprint 6 wires `@AuditAction` onto the order/payment write surface. The
@@ -95,7 +95,7 @@ describe('audit log on order writes (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       aliceToken,
       { 'idempotency-key': 'audit-create-1' },
     );
@@ -112,7 +112,7 @@ describe('audit log on order writes (e2e)', () => {
     const created = await inject(
       'POST',
       '/api/v1/orders',
-      { type: 'PICKUP', tipAmount: '0' },
+      { type: 'PICKUP', tipAmount: '0', ...orderLegal() },
       aliceToken,
       { 'idempotency-key': 'audit-refund-1' },
     );

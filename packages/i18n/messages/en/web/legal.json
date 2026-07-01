@@ -1,6 +1,8 @@
 {
   "eyebrow": "Legal",
   "lastUpdated": "Last updated {date}",
+  "toc": "Contents",
+  "print": "Print / Save as PDF",
   "footerQuestion": "Questions about this policy?",
   "footerLink": "Contact us",
   "privacy": {
@@ -11,5 +13,20 @@
   },
   "cookies": {
     "title": "Cookie Policy"
+  },
+  "refundsComplaints": {
+    "title": "Refunds & Complaints"
+  },
+  "deliveryCancellation": {
+    "title": "Delivery & Cancellation"
+  },
+  "promotionTerms": {
+    "title": "Promotion Terms"
+  },
+  "archive": {
+    "eyebrow": "Archived version {version}",
+    "effective": "Version effective from {date}",
+    "currentNotice": "This is an archived version.",
+    "currentLink": "View the current version"
   }
 }

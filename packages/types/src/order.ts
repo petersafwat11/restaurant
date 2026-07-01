@@ -21,6 +21,75 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
+// ---- Order status transition graph -----------------------------------------
+
+/**
+ * Single source of truth for the order-status transition graph, shared by the
+ * API state machine (`apps/api/src/orders/order-state-machine.ts`) and the
+ * admin UI (`packages/ui/src/tokens/order.ts`). Keeping one definition stops
+ * the two from drifting — the bug that let the UI offer transitions the API
+ * rejects (e.g. a type-blind READY → OUT_FOR_DELIVERY for pickup orders).
+ *
+ * `REFUNDED` is intentionally absent: it's reached only via the refund flow
+ * (system actor, from any post-payment state) and never a staff button.
+ */
+export interface OrderTransitionDef {
+  from: OrderStatus;
+  to: OrderStatus;
+  /** Valid only for these order types (omitted = all types). */
+  onlyForTypes?: readonly OrderType[];
+  /** Fired only by the system (payment webhook / grace-period job) — never a staff button. */
+  systemOnly?: boolean;
+  /** A reason must accompany the transition (cancellations). */
+  reasonRequired?: boolean;
+}
+
+export const ORDER_TRANSITIONS_GRAPH: readonly OrderTransitionDef[] = [
+  // Payment-confirmed — fired by the COD short-circuit + Stripe webhook only.
+  { from: 'PENDING', to: 'CONFIRMED', systemOnly: true },
+  // Pre-payment cancellation (customer or staff).
+  { from: 'PENDING', to: 'CANCELLED' },
+  // Kitchen workflow.
+  { from: 'CONFIRMED', to: 'PREPARING' },
+  { from: 'CONFIRMED', to: 'CANCELLED', reasonRequired: true },
+  { from: 'PREPARING', to: 'READY' },
+  { from: 'PREPARING', to: 'CANCELLED', reasonRequired: true },
+  // Hand-off — type-gated.
+  { from: 'READY', to: 'OUT_FOR_DELIVERY', onlyForTypes: ['DELIVERY'] },
+  { from: 'READY', to: 'COMPLETED', onlyForTypes: ['PICKUP', 'DINE_IN'] },
+  { from: 'READY', to: 'CANCELLED', reasonRequired: true },
+  { from: 'OUT_FOR_DELIVERY', to: 'DELIVERED' },
+  // Manual "complete now" (staff) or the post-delivery grace-period job (system).
+  { from: 'DELIVERED', to: 'COMPLETED' },
+] as const;
+
+/**
+ * Forward (non-cancel, non-system) transitions a staff member can initiate for
+ * an order of the given type — what the admin UI renders as "advance" actions.
+ * The API always re-validates, so this is purely for discoverability.
+ */
+export function forwardTransitions(status: OrderStatus, type: OrderType): OrderStatus[] {
+  return ORDER_TRANSITIONS_GRAPH.filter(
+    (r) =>
+      r.from === status &&
+      !r.systemOnly &&
+      r.to !== 'CANCELLED' &&
+      r.to !== 'REFUNDED' &&
+      (!r.onlyForTypes || r.onlyForTypes.includes(type)),
+  ).map((r) => r.to);
+}
+
+/** The single next status for the "Advance" button (first forward transition). */
+export function nextStatusFor(status: OrderStatus, type: OrderType): OrderStatus | undefined {
+  return forwardTransitions(status, type)[0];
+}
+
+/** Whether staff may cancel an order in this status (the API additionally
+ *  blocks cancelling an order with a captured online payment — refund instead). */
+export function canStaffCancelFrom(status: OrderStatus): boolean {
+  return ORDER_TRANSITIONS_GRAPH.some((r) => r.from === status && r.to === 'CANCELLED');
+}
+
 // ---- Order creation --------------------------------------------------------
 
 // Inline delivery address — used by guest delivery checkout where there is no
@@ -39,6 +108,16 @@ export const InlineDeliveryAddressSchema = z.object({
 });
 export type InlineDeliveryAddressDto = z.infer<typeof InlineDeliveryAddressSchema>;
 
+// Immutable customer contact snapshot captured at checkout. Required for every
+// order (the checkout form always collects it) so guest receipts can be emailed
+// and a historical order never depends on the mutable `User` row (plan §C1).
+export const OrderContactSchema = z.object({
+  name: z.string().min(1).max(80),
+  email: z.string().email().max(160),
+  phone: z.string().min(3).max(40),
+});
+export type OrderContactDto = z.infer<typeof OrderContactSchema>;
+
 export const CreateOrderSchema = z
   .object({
     sessionKey: z.string().min(1).optional(), // required for guests
@@ -53,8 +132,19 @@ export const CreateOrderSchema = z
     // /payments/intent requires an authed owner). Online methods (card/BLIK)
     // leave the order PENDING for the Stripe Elements flow to finalize.
     paymentMethod: z.enum(PAYMENT_METHOD_KINDS).optional(),
-    // When the customer accepted the Regulamin + Privacy Policy at checkout.
-    acceptedTermsAt: z.string().datetime().nullish(),
+    // Customer contact snapshot — snapshotted onto the order by the server.
+    // Required for guest checkout (enforced server-side, where guest identity is
+    // known); for authed checkout it is accepted + snapshotted when provided.
+    contact: OrderContactSchema.optional(),
+    // Locale the checkout + legal copy was shown in; drives guest notifications.
+    checkoutLocale: z.enum(['pl', 'en']).default('pl'),
+    // Durable legal acceptance (plan §C2): the client sends an explicit accept
+    // boolean plus the bundle version it displayed. The server validates the
+    // version, sets the timestamp, and writes the immutable snapshot + hash —
+    // the client cannot choose the timestamp/hash. Replaces the old
+    // client-supplied `acceptedTermsAt`.
+    legalAccepted: z.literal(true),
+    legalBundleVersion: z.string().min(1).max(40),
   })
   .refine((d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress, {
     message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
@@ -65,6 +155,42 @@ export const CreateOrderSchema = z
     path: ['deliveryAddress'],
   });
 export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
+
+// ---- Checkout quote --------------------------------------------------------
+// Server-authoritative price quote for the checkout summary. The client sends
+// the order-time-only inputs (order type + tip); coupon and loyalty come from
+// the persisted cart. The server computes every money value with the same
+// `PricingService.calculateTotals` used at order creation — the client must
+// display these strings and never recompute chargeable money. Order creation
+// still recomputes authoritatively; if the final total differs the client is
+// asked to review rather than being silently charged a different amount.
+
+export const CheckoutQuoteRequestSchema = z.object({
+  type: z.enum(ORDER_TYPES),
+  tipAmount: MoneyStringSchema.default('0'),
+  // Guests pass their cart session key; authed callers are resolved by token.
+  sessionKey: z.string().min(1).optional(),
+});
+export type CheckoutQuoteRequestDto = z.infer<typeof CheckoutQuoteRequestSchema>;
+
+export const CheckoutQuoteSchema = z.object({
+  subtotal: MoneyStringSchema,
+  couponDiscount: MoneyStringSchema,
+  loyaltyDiscount: MoneyStringSchema,
+  // coupon + loyalty, clamped to subtotal (matches Order.discountTotal).
+  discountTotal: MoneyStringSchema,
+  deliveryFee: MoneyStringSchema,
+  taxTotal: MoneyStringSchema,
+  tipAmount: MoneyStringSchema,
+  grandTotal: MoneyStringSchema,
+  currency: z.string(),
+  couponCode: z.string().nullable(),
+  // Echo of the requested order type + an ISO timestamp so the client can detect
+  // a stale quote. The server remains authoritative regardless.
+  orderType: z.enum(ORDER_TYPES),
+  quotedAt: z.string(),
+});
+export type CheckoutQuoteDto = z.infer<typeof CheckoutQuoteSchema>;
 
 // ---- Order items snapshot --------------------------------------------------
 
@@ -82,6 +208,9 @@ export const OrderItemSchema = z.object({
       optionId: z.string(),
       optionName: z.string(),
       priceDelta: MoneyStringSchema,
+      // Meat weight (grams) for size options, frozen at order time. Optional
+      // so historical orders placed before per-size grams stay valid.
+      grams: z.number().int().nullable().optional(),
     }),
   ),
   notes: z.string().nullable(),
@@ -114,7 +243,8 @@ export type AddOrderNoteDto = z.infer<typeof AddOrderNoteSchema>;
 // ---- Admin-only enrichment (populated only for callers with order:read) ----
 
 export const OrderCustomerSchema = z.object({
-  id: z.string(),
+  // Null for guest orders — the contact comes from the order snapshot, not a User.
+  id: z.string().nullable(),
   name: z.string().nullable(),
   email: z.string(),
   phone: z.string().nullable(),
@@ -156,6 +286,9 @@ export const OrderSchema = z.object({
   pickupAt: z.string().nullable(),
   notes: z.string().nullable(),
   couponCode: z.string().nullable(),
+  // Staff-set total prep/delivery time (minutes from order placement); null =
+  // use the status-based ETA estimate.
+  prepMinutesOverride: z.number().int().nullable(),
   items: z.array(OrderItemSchema),
   statusEvents: z.array(OrderStatusEventSchema),
   // Admin-only: present when the caller has `order:read` (staff view).
@@ -170,6 +303,13 @@ export const OrderSchema = z.object({
   updatedAt: z.string(),
 });
 export type OrderDto = z.infer<typeof OrderSchema>;
+
+// Staff sets (or clears) the per-order prep/delivery estimate, in minutes from
+// order placement. `null` reverts to the status-based heuristic.
+export const SetOrderEtaSchema = z.object({
+  prepMinutesOverride: z.number().int().min(1).max(600).nullable(),
+});
+export type SetOrderEtaDto = z.infer<typeof SetOrderEtaSchema>;
 
 // ---- Order list summary ----------------------------------------------------
 

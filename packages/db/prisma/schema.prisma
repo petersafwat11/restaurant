@@ -17,6 +17,15 @@ datasource db {
 // Identity & access
 // ---------------------------------------------------------------------------
 
+// Account-deletion lifecycle (plan §G2). MUST stay identical to the Zod
+// `AccountDeletionStatusSchema` enum in packages/types/src/account-deletion.ts.
+enum AccountDeletionStatus {
+  NONE
+  PENDING
+  CANCELLED
+  COMPLETED
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -31,6 +40,20 @@ model User {
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  // --- Account deletion / anonymisation (GDPR erasure, plan §G2) -------------
+  // All additive/nullable. A verified request schedules an anonymisation job
+  // after a grace period; on execution the row is pseudonymised (NOT deleted —
+  // Review.userId is FK-restrict and retained orders keep their user link).
+  deletionStatus              AccountDeletionStatus @default(NONE)
+  deletionRequestedAt         DateTime? // when the customer requested deletion
+  deletionScheduledAt         DateTime? // when the anonymisation job runs (grace end)
+  deletionReason              String? // optional free-form feedback
+  // Single-use email-confirmation token (SHA-256 hash; never store the raw token)
+  // for the no-password reauth path. Cleared once consumed.
+  deletionConfirmTokenHash    String?
+  deletionConfirmTokenExpires DateTime?
+  anonymisedAt                DateTime? // set when the anonymisation job completes
 
   roles                  UserRole[]
   addresses              UserAddress[]
@@ -137,6 +160,7 @@ model PaymentMethod {
   @@index([userId])
 }
 
+// DEPRECATED (Slice 10): push removed; table dropped in a later migration after prod count check.
 model PushToken {
   id         String    @id @default(cuid())
   userId     String
@@ -153,9 +177,11 @@ model PushToken {
 model NotificationPreference {
   id                String   @id @default(cuid())
   userId            String   @unique
+  // DEPRECATED (Slice 10): push removed; columns dropped in a later migration after prod count check.
   orderUpdatesPush  Boolean  @default(true)
   orderUpdatesEmail Boolean  @default(true)
   orderUpdatesSms   Boolean  @default(true)
+  // DEPRECATED (Slice 10): push removed; columns dropped in a later migration after prod count check.
   promotionsPush    Boolean  @default(false)
   promotionsEmail   Boolean  @default(false)
   createdAt         DateTime @default(now())
@@ -227,8 +253,29 @@ model Restaurant {
   servesCuisine               String[] @default([])
   priceRange                  String?
   sameAs                      String[] @default([])
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+
+  // --- Legal entity & customer-support data (payment-provider readiness) -----
+  // All nullable/additive: populated by the owner in admin against an official
+  // current KRS extract before Stripe go-live. `name` stays the trade/brand
+  // name and `address` stays the trading/fulfilment address — never overwrite
+  // either with the legal name/registered address.
+  legalName                      String? // exact KRS/Stripe/bank entity name
+  nip                            String? // Polish tax ID, 10 digits
+  regon                          String? // REGON, 9 or 14 digits
+  krs                            String? // KRS, normally 10 digits; null for non-KRS forms
+  registryCourt                  String? // registry court + division
+  shareCapital                   Decimal? @db.Decimal(14, 2)
+  shareCapitalCurrency           String? // normally PLN
+  registeredAddress              Json? // shared address shape; null when same as trading
+  registeredAddressSameAsTrading Boolean  @default(true)
+  supportEmail                   String? // customer-service channel
+  supportPhone                   String?
+  complaintsEmail                String? // complaint/refund channel
+  privacyEmail                   String? // GDPR/RODO requests
+  statementDescriptor            String? // expected card statement text (5–22 chars)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model OperatingHours {
@@ -244,46 +291,46 @@ model OperatingHours {
 // ---------------------------------------------------------------------------
 
 model MenuCategory {
-  id          String  @id @default(cuid())
-  name        String
+  id            String  @id @default(cuid())
+  name          String
   // English translations (PL columns are the source/default; EN falls back to
   // PL when null). Served per-locale on the public menu + SEO endpoints.
   nameEn        String?
-  slug        String  @unique
-  description String?
+  slug          String  @unique
+  description   String?
   descriptionEn String?
-  imageUrl    String?
-  position    Int     @default(0)
-  isActive    Boolean @default(true)
+  imageUrl      String?
+  position      Int     @default(0)
+  isActive      Boolean @default(true)
 
   items MenuItem[]
 }
 
 model MenuItem {
-  id           String   @id @default(cuid())
-  categoryId   String
-  name         String
+  id            String   @id @default(cuid())
+  categoryId    String
+  name          String
   // English translations (PL columns are the source/default; EN falls back to
   // PL when null). Served per-locale on the public menu + SEO endpoints.
-  nameEn       String?
-  slug         String
-  description  String?
+  nameEn        String?
+  slug          String
+  description   String?
   descriptionEn String?
-  basePrice    Decimal  @db.Decimal(10, 2)
-  compareAt    Decimal? @db.Decimal(10, 2)
-  calories     Int?
-  prepMinutes  Int?
-  grams        Int? // net weight / portion size in grams (e.g. meat weight on a kebab)
-  allergens    String[] // EU FIC 1169/2011 allergen keys (see packages/types ALLERGENS)
-  isAvailable  Boolean  @default(true)
-  isFeatured   Boolean  @default(false)
-  isVegetarian Boolean  @default(false)
-  isVegan      Boolean  @default(false)
-  isGlutenFree Boolean  @default(false)
-  spiceLevel   Int      @default(0) // 0-3
-  position     Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  basePrice     Decimal  @db.Decimal(10, 2)
+  compareAt     Decimal? @db.Decimal(10, 2)
+  calories      Int?
+  prepMinutes   Int?
+  grams         Int? // net weight / portion size in grams (e.g. meat weight on a kebab)
+  allergens     String[] // EU FIC 1169/2011 allergen keys (see packages/types ALLERGENS)
+  isAvailable   Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  isVegetarian  Boolean  @default(false)
+  isVegan       Boolean  @default(false)
+  isGlutenFree  Boolean  @default(false)
+  spiceLevel    Int      @default(0) // 0-3
+  position      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   category       MenuCategory            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   images         MenuItemImage[]
@@ -321,6 +368,7 @@ model MenuItemModifierOption {
   name       String
   nameEn     String? // EN translation; falls back to `name` when null
   priceDelta Decimal @default(0) @db.Decimal(10, 2)
+  grams      Int? // meat weight in grams for this option — set on size options (Mały/Średni/Duży/Mega); null for non-size options
   isDefault  Boolean @default(false)
 
   group MenuItemModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -419,12 +467,31 @@ model Order {
   deliveryAddress     Json?
   pickupAt            DateTime?
   notes               String?
+  // Staff-set total prep/delivery time in minutes, measured from order
+  // placement (createdAt). When null the ETA falls back to the status-based
+  // heuristic in order-tracking.ts. Lets staff promise a per-order time.
+  prepMinutesOverride Int?
   couponCode          String?
   loyaltyPointsUsed   Int         @default(0)
   loyaltyPointsEarned Int         @default(0)
   // Consumer-law: timestamp the customer accepted the Regulamin + Privacy
   // Policy at checkout (proof of informed consent before purchase).
+  // DEPRECATED: superseded by `legalAcceptedAt` (+ snapshot/hash) below; kept
+  // for back-compat until a later migration drops it.
   acceptedTermsAt     DateTime?
+  // Immutable customer snapshot — required for guest checkout so receipts can be
+  // emailed and historical orders never depend on the mutable `User` row.
+  customerName        String?
+  customerEmail       String?
+  customerPhone       String?
+  checkoutLocale      String? // 'pl' | 'en' — locale the order/legal copy was shown in
+  // Server-generated legal acceptance evidence. The client sends an explicit
+  // accept boolean + bundle version; the server validates the current version
+  // and writes the timestamp, immutable snapshot, and SHA-256 hash.
+  legalAcceptedAt     DateTime?
+  legalBundleVersion  String?
+  legalSnapshot       Json?
+  legalSnapshotHash   String?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 

@@ -2,9 +2,11 @@
 
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
+import { getCompanyInfo } from '@/features/legal/company';
 import { useRestaurant } from '@/features/restaurants/hooks';
 import { formatAddressLine2, hoursToRows } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
+import type { RestaurantPublicDto } from '@repo/types';
 import { HoursTable, SiteFooter } from '@repo/ui';
 import { Facebook, Globe, Instagram, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -30,10 +32,20 @@ function socialMeta(url: string): { Icon: typeof Instagram; label: string } {
  * `useRestaurant()` — social links come from the `sameAs` field, set in admin),
  * not from static mock data. Wraps the theme-agnostic `<SiteFooter>` primitive.
  */
-export function SzefSiteFooter() {
+export function SzefSiteFooter({
+  initialRestaurant,
+}: {
+  initialRestaurant?: RestaurantPublicDto | null;
+}) {
   const t = useTranslations('web.footer');
   const tCommon = useTranslations('common');
-  const { data: restaurant } = useRestaurant();
+  const { data: restaurant } = useRestaurant(initialRestaurant ?? undefined);
+  // Copyright legal name + NIP come from the DB legal block (never a hardcoded
+  // translation string). Falls back to the public brand name until the owner
+  // verifies the legal entity.
+  const company = getCompanyInfo(restaurant ?? null);
+  const year = new Date().getFullYear();
+  const copyright = `© ${year} ${company.displayName}${company.nip ? ` · NIP ${company.nip}` : ''}`;
   const dayLabels = [
     tCommon('daysShort.sunday'),
     tCommon('daysShort.monday'),
@@ -150,10 +162,13 @@ export function SzefSiteFooter() {
         },
       ]}
       bottom={{
-        copyright: t('bottom.copyright'),
+        copyright,
         legal: [
-          { href: '/privacy', label: t('bottom.legal.privacy') },
           { href: '/terms', label: t('bottom.legal.terms') },
+          { href: '/privacy', label: t('bottom.legal.privacy') },
+          { href: '/refunds-complaints', label: t('bottom.legal.refundsComplaints') },
+          { href: '/delivery-cancellation', label: t('bottom.legal.deliveryCancellation') },
+          { href: '/promotion-terms', label: t('bottom.legal.promotionTerms') },
           { href: '/cookies', label: t('bottom.legal.cookies') },
         ],
         rightSlot: <LanguageSwitcher />,

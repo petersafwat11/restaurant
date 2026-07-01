@@ -23,6 +23,7 @@ export const RestaurantSettingsSchema = z.object({
   taxRate: MoneyStringSchema,
   defaultDeliveryFee: MoneyStringSchema,
   minOrderAmount: MoneyStringSchema,
+  deliveryRadiusKm: z.number().positive(),
   holidayDates: z.array(HolidaySchema),
   reservationSlotMinutes: z.number().int().min(15).max(360),
   reservationBufferMinutes: z.number().int().min(0).max(120),
@@ -36,6 +37,7 @@ export const UpdateRestaurantSettingsSchema = z
     taxRate: MoneyStringSchema.optional(),
     defaultDeliveryFee: MoneyStringSchema.optional(),
     minOrderAmount: MoneyStringSchema.optional(),
+    deliveryRadiusKm: z.number().positive().max(100).optional(),
     reservationSlotMinutes: z.number().int().min(15).max(360).optional(),
     reservationBufferMinutes: z.number().int().min(0).max(120).optional(),
   })

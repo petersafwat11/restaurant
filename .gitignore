@@ -7,7 +7,6 @@ dist
 build
 out
 .next
-.expo
 .turbo
 *.tsbuildinfo
 
@@ -42,15 +41,6 @@ Thumbs.db
 packages/db/src/generated
 .prisma
 prisma/migrations/dev.db*
-
-# react native
-.expo
-.expo-shared
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
 
 # misc
 .cache

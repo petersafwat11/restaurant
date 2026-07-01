@@ -23,10 +23,6 @@ export const FLAG_CATALOG = {
     description: 'Serve the new marketing landing aggregation',
     default: false,
   },
-  'mobile.push_v2': {
-    description: 'New mobile push payload + deep links',
-    default: false,
-  },
   soft_launch: {
     description: 'Master soft-launch gate (kill switch)',
     default: false,

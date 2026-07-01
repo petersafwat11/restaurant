@@ -3,10 +3,10 @@
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { useAdvanceOrder, useOrder } from '@/features/orders/hooks';
 import type { OrderStatus } from '@repo/types';
+import { nextStatusFor } from '@repo/types';
 import {
   Button,
   DetailDrawer,
-  ORDER_TRANSITIONS,
   RelativeTime,
   STATUS_TOKENS,
   Spinner,
@@ -52,10 +52,31 @@ export function OrderDetailDrawer({
   const canRefund = has('order:refund') || has('payment:refund');
   const canCancel = has('order:cancel');
 
+  // Type-aware next step (delivery vs pickup hand-off) — mirrors the API FSM.
   const nextStatus: OrderStatus | undefined = order
-    ? ORDER_TRANSITIONS[order.status]?.find((s) => s !== 'CANCELLED')
+    ? nextStatusFor(order.status, order.type)
     : undefined;
-  const isTerminal = order ? ['DELIVERED', 'CANCELLED', 'COMPLETED'].includes(order.status) : false;
+  // True terminals only — DELIVERED is advanceable (→ COMPLETED) by staff now.
+  const isTerminal = order ? ['CANCELLED', 'COMPLETED', 'REFUNDED'].includes(order.status) : false;
+
+  // Refund vs Cancel split by payment: an order paid ONLINE (not COD) is
+  // refunded (money back → REFUNDED); a COD/unpaid order is cancelled. COD is
+  // recorded as PAID, so gate on method, not status.
+  const payment = order?.payment ?? null;
+  const isOnlinePaid =
+    !!payment &&
+    payment.method !== 'COD' &&
+    (payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED');
+  const showRefund =
+    !!order &&
+    canRefund &&
+    isOnlinePaid &&
+    ['CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(order.status);
+  const showCancel =
+    !!order &&
+    canCancel &&
+    !isOnlinePaid &&
+    ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status);
 
   return (
     <DetailDrawer
@@ -108,7 +129,12 @@ export function OrderDetailDrawer({
               title={!canAdvance ? t('noPermissionAdvanceLong') : undefined}
               onClick={() =>
                 nextStatus &&
-                advance.mutate({ orderId: order.id, currentStatus: order.status, to: nextStatus })
+                advance.mutate({
+                  orderId: order.id,
+                  currentStatus: order.status,
+                  type: order.type,
+                  to: nextStatus,
+                })
               }
             >
               {nextStatus ? (
@@ -116,18 +142,20 @@ export function OrderDetailDrawer({
                   {t('advanceTo', { status: tStatus(nextStatus) })}
                   <ArrowRight size={14} />
                 </>
+              ) : order.status === 'PENDING' ? (
+                t('awaitingPayment')
               ) : isTerminal ? (
                 t('orderComplete')
               ) : (
                 t('noNextState')
               )}
             </Button>
-            {!isTerminal && canRefund && (
+            {showRefund && (
               <Button variant="ghost" onClick={() => onRefund(order.id)}>
                 {t('refund')}
               </Button>
             )}
-            {!isTerminal && canCancel && (
+            {showCancel && (
               <Button
                 variant="ghost"
                 onClick={() => onCancel(order.id)}
@@ -136,7 +164,12 @@ export function OrderDetailDrawer({
                 {t('cancel')}
               </Button>
             )}
-            <Button variant="ghost" size="icon" aria-label={t('print')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('print')}
+              onClick={() => window.print()}
+            >
               <Printer size={14} />
             </Button>
           </div>

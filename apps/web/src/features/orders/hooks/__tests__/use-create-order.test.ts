@@ -1,5 +1,6 @@
 import { renderHookWithProviders } from '@/test/render-hook';
 import { server } from '@/test/setup';
+import { LEGAL_BUNDLE_VERSION } from '@repo/types';
 import { waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -43,7 +44,14 @@ describe('useCreateOrder', () => {
     const { result } = renderHookWithProviders(() => useCreateOrder());
 
     // Two mutate() calls in quick succession should reuse the same key.
-    const input = { type: 'PICKUP' as const, tipAmount: '0' };
+    const input = {
+      type: 'PICKUP' as const,
+      tipAmount: '0',
+      contact: { name: 'Jan Test', email: 'jan@test.local', phone: '+48555000111' },
+      checkoutLocale: 'pl' as const,
+      legalAccepted: true as const,
+      legalBundleVersion: LEGAL_BUNDLE_VERSION,
+    };
     result.current.mutate(input);
     result.current.mutate(input);
 

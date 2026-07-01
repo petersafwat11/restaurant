@@ -104,7 +104,7 @@ export function CartSheet({
     deliveryValue = 'Calculated at checkout',
     total: totalLabel = 'Total',
     checkoutCta,
-    footerHint = 'Free baklava on first order — code at checkout.',
+    footerHint = 'Delivery fee and taxes are calculated at checkout.',
   } = labels ?? {};
   const itemCount = lines.reduce((s, l) => s + l.quantity, 0);
   const formattedTotal = formatMoney(subtotal, currency);
@@ -114,7 +114,7 @@ export function CartSheet({
       <SheetContent
           side="right"
           hideCloseButton
-          className="!w-[480px] !max-w-full !bg-surface !border-l-0 flex flex-col gap-0 p-0 shadow-lg"
+          className="w-full max-w-[100vw] sm:w-[480px] !bg-surface !border-l-0 flex flex-col gap-0 p-0 shadow-lg"
         >
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/[var(--border-alpha)] px-6">
             <div className="flex items-baseline gap-2">

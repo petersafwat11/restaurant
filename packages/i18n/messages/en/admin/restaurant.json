@@ -12,7 +12,9 @@
     "contact": "Contact",
     "location": "Location",
     "discovery": "Discovery",
-    "channels": "Channels"
+    "channels": "Channels",
+    "legal": "Legal entity",
+    "payments": "Payments & support"
   },
   "identity": {
     "title": "Identity",
@@ -83,6 +85,54 @@
     "rangeError": {
       "incomplete": "Set both a min and a max, or leave both blank.",
       "order": "Minimum must be less than or equal to maximum."
+    }
+  },
+  "legal": {
+    "title": "Legal entity",
+    "description": "Official company identity used on invoices, the payment provider, and your legal pages.",
+    "verifyWarning": "These values must match your KRS, Stripe, and payout-bank records exactly. Verify against an official current KRS extract before entering — the app does not check external registries.",
+    "legalNameLabel": "Legal name",
+    "legalNameHint": "Exact registered company name (e.g. \"… SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ\"), not the brand name.",
+    "nipLabel": "NIP",
+    "nipHint": "10 digits.",
+    "regonLabel": "REGON",
+    "regonHint": "9 or 14 digits.",
+    "krsLabel": "KRS",
+    "krsHint": "10 digits. Leave blank for sole traders / non-KRS forms.",
+    "registryCourtLabel": "Registry court",
+    "registryCourtHint": "Court and division, e.g. \"Sąd Rejonowy w Kielcach, X Wydział Gospodarczy KRS\".",
+    "shareCapitalLabel": "Share capital",
+    "shareCapitalHint": "Amount, e.g. 5000.00. Companies only.",
+    "shareCapitalCurrencyLabel": "Capital currency",
+    "registeredSameLabel": "Registered address same as trading address",
+    "registeredSameHint": "Turn off to enter a separate registered (KRS) address.",
+    "registeredAddressTitle": "Registered address"
+  },
+  "payments": {
+    "title": "Payments & customer support",
+    "description": "Support channels shown to customers and the expected card statement descriptor.",
+    "supportEmailLabel": "Support email",
+    "supportPhoneLabel": "Support phone",
+    "complaintsEmailLabel": "Complaints email",
+    "complaintsEmailHint": "Channel for refunds / reklamacje.",
+    "privacyEmailLabel": "Privacy (RODO) email",
+    "statementDescriptorLabel": "Statement descriptor",
+    "statementDescriptorHint": "5–22 characters shown on card statements (letters/numbers/spaces; no < > \\ ' \" *).",
+    "readiness": {
+      "title": "Payment provider readiness",
+      "complete": "All required legal & support fields are filled. This does not verify your data against external registries.",
+      "incompleteHint": "Fill these required fields before enabling online payments:",
+      "fields": {
+        "legalName": "Legal name",
+        "nip": "NIP",
+        "regon": "REGON",
+        "registryCourt": "Registry court",
+        "registeredAddress": "Registered address",
+        "supportEmail": "Support email",
+        "complaintsEmail": "Complaints email",
+        "privacyEmail": "Privacy email",
+        "statementDescriptor": "Statement descriptor"
+      }
     }
   },
   "saveBar": {

@@ -189,6 +189,14 @@ export function ItemDetailSheet({
   const unitPrice = computeUnitPrice(item, modState);
   const total = (Number.parseFloat(unitPrice) * qty).toFixed(2);
 
+  // When a size option (one carrying its own meat weight) is selected, surface
+  // that size's grams in the header meta; otherwise fall back to the item's
+  // base grams. Only size options have a grams value, so the first match wins.
+  const displayGrams =
+    (item.modifierGroups ?? [])
+      .flatMap((g) => (modState[g.id] ?? []).map((id) => g.options.find((o) => o.id === id)))
+      .find((o) => o?.grams != null)?.grams ?? item.grams;
+
   const unfilled = (item.modifierGroups ?? []).filter(
     (g) => g.required && (modState[g.id] ?? []).length < g.min,
   );
@@ -230,7 +238,7 @@ export function ItemDetailSheet({
       <SheetContent
         side="right"
         hideCloseButton
-        className="!w-[560px] !max-w-full !bg-surface !border-l-0 flex flex-col gap-0 p-0 shadow-lg"
+        className="w-full max-w-[100vw] sm:w-[560px] !bg-surface !border-l-0 flex flex-col gap-0 p-0 shadow-lg"
       >
         <div className="flex h-16 shrink-0 items-center justify-end px-3">
           <button
@@ -281,10 +289,10 @@ export function ItemDetailSheet({
                     <span>{item.calories} kcal</span>
                   </>
                 )}
-                {item.grams != null && item.grams > 0 && (
+                {displayGrams != null && displayGrams > 0 && (
                   <>
                     <span aria-hidden>·</span>
-                    <span>{item.grams} g</span>
+                    <span>{displayGrams} g</span>
                   </>
                 )}
               </div>
@@ -366,7 +374,7 @@ export function ItemDetailSheet({
 
         <div className="shrink-0 border-t border-border/[var(--border-alpha)] bg-surface-2 px-6 py-4">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <span className="text-caption uppercase tracking-wide text-fg-subtle">
                 {totalLabel}
               </span>
@@ -388,7 +396,7 @@ export function ItemDetailSheet({
                     : undefined
               }
               className={cn(
-                'inline-flex h-14 items-center gap-2 rounded-button px-6 text-[15px] font-medium text-text-on-accent transition-colors',
+                'inline-flex h-14 shrink-0 items-center gap-2 whitespace-nowrap rounded-button px-6 text-[15px] font-medium text-text-on-accent transition-colors',
                 canAdd ? 'bg-accent hover:bg-accent-hover' : 'cursor-not-allowed bg-accent/40',
               )}
             >

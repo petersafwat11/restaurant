@@ -71,8 +71,13 @@ export class LoyaltyService {
     points: number,
     subtotal: DecimalLike,
   ): Promise<LoyaltyRedeemQuoteDto> {
-    const account = await this.ensureAccount(userId);
-    const max = maxRedeemablePoints(account.points, subtotal);
+    // READ-ONLY: this runs on the public `POST /orders/quote` path, so it must
+    // not write. Use a plain lookup (treat a missing account as a zero balance)
+    // rather than `ensureAccount`, which upserts. The account is lazily created
+    // when points are actually earned/redeemed inside the order transaction.
+    const account = await this.prisma.loyaltyAccount.findUnique({ where: { userId } });
+    const balance = account?.points ?? 0;
+    const max = maxRedeemablePoints(balance, subtotal);
     const appliable = Math.max(0, Math.min(Math.floor(points), max));
     const discount = discountForPoints(appliable);
     return {
@@ -80,7 +85,7 @@ export class LoyaltyService {
       appliablePoints: appliable,
       maxRedeemablePoints: max,
       discountAmount: discount.toFixed(2),
-      balanceAfter: account.points - appliable,
+      balanceAfter: balance - appliable,
     };
   }
 

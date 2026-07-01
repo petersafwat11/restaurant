@@ -4,7 +4,6 @@ import type {
   NotificationListDto,
   NotificationListQuery,
   NotificationPreferenceDto,
-  RegisterPushTokenDto,
   UpdateNotificationPreferenceDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -62,32 +61,6 @@ export class NotificationsService {
       data: { readAt: new Date() },
     });
     return { success: true, count: res.count };
-  }
-
-  // ---- Push tokens ------------------------------------------------------
-
-  async registerPushToken(
-    userId: string,
-    dto: RegisterPushTokenDto,
-  ): Promise<{ success: true }> {
-    // Idempotent: the token is globally unique. If it was registered to a
-    // different user (shared device, account switch) re-point it.
-    await this.prisma.pushToken.upsert({
-      where: { token: dto.token },
-      create: {
-        userId,
-        token: dto.token,
-        platform: dto.platform,
-        lastUsedAt: new Date(),
-      },
-      update: { userId, platform: dto.platform, lastUsedAt: new Date() },
-    });
-    return { success: true };
-  }
-
-  async unregisterPushToken(userId: string, token: string): Promise<{ success: true }> {
-    await this.prisma.pushToken.deleteMany({ where: { token, userId } });
-    return { success: true };
   }
 
   // ---- Preferences ------------------------------------------------------

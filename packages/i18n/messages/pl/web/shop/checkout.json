@@ -154,10 +154,7 @@
     "inputAriaLabel": "Kod promocyjny",
     "removeAriaLabel": "Usuń kod",
     "notValid": "Kod jest nieprawidłowy.",
-    "mock": {
-      "baklava": "15% rabatu — pierwsze zamówienie",
-      "student": "5,00 zł rabatu"
-    }
+    "appliedLabel": "{amount} rabatu"
   },
   "loyalty": {
     "trigger": "Użyć punktów?",
@@ -185,7 +182,8 @@
     "minOrderToast": "Minimalna wartość zamówienia z dostawą to {amount} — dodaj jeszcze coś.",
     "confirmAddress": "Potwierdź adres dostawy na mapie.",
     "stripeNotInit": "Formularz karty nie został zainicjalizowany. Spróbuj ponownie.",
-    "createOrderFallback": "Nie udało się złożyć zamówienia."
+    "createOrderFallback": "Nie udało się złożyć zamówienia.",
+    "legalVersionChanged": "Nasz Regulamin został zaktualizowany, gdy byłeś na tej stronie. Odśwież stronę, aby wczytać nową wersję, a następnie zapoznaj się z nią i zaakceptuj, aby kontynuować."
   },
   "return": {
     "confirming": "Potwierdzanie płatności…"

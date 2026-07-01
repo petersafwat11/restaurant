@@ -89,6 +89,12 @@ Nightly `pg_dump` runs at 03:15 UTC via cron (installed by `bootstrap.sh`).
 Backups land in `/opt/restaurant/backups/` as `db-YYYYMMDD-HHMMSS.dump`.
 Retention: 7 days.
 
+> ⚠️ These backups live **on the same VPS** — a host/disk loss takes the
+> backups with it. There is no managed PITR. Until encrypted offsite backups
+> are configured, copy the latest dump (and `/opt/restaurant/uploads`) off the
+> VPS regularly; see `docs/runbooks/backup-dr.md` for the required offsite +
+> restore-drill plan.
+
 **Manual backup right now:**
 ```bash
 /bin/bash /opt/restaurant/scripts/backup-db.sh
@@ -126,6 +132,10 @@ cat backups/db-YYYYMMDD-HHMMSS.dump \
 # Bring apps back
 docker compose start api web admin
 ```
+
+> After restoring, do **not** trust payment state from the dump alone. The
+> `reconciliation` BullMQ job (15-min repeat) re-syncs non-terminal payments
+> against Stripe (the source of truth) and repairs missed-webhook gaps.
 
 ---
 

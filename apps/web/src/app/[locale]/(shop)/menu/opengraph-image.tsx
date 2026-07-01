@@ -9,6 +9,6 @@ export default function MenuOgImage() {
   return renderBrandOgImage({
     eyebrow: 'Menu',
     title: 'Pick your wrap.',
-    description: 'Kebab, falafel, tacos. Every item made fresh, no freezer shortcuts.',
+    description: 'Kebab and falafel. Every item made fresh, no freezer shortcuts.',
   });
 }

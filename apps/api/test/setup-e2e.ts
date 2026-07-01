@@ -1,12 +1,28 @@
 import fastifyMultipart from '@fastify/multipart';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
-import { MAX_UPLOAD_BYTES } from '@repo/types';
+import { LEGAL_BUNDLE_VERSION, MAX_UPLOAD_BYTES } from '@repo/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { RedisService } from '../src/redis/redis.service';
 
 const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
+
+/**
+ * Legal-acceptance fields every POST /orders payload must now carry (plan §C2).
+ * Spread into an order body: `{ type, tipAmount, ...orderLegal() }`. Pass
+ * `{ guest: true }` to also include the contact snapshot required for guest
+ * checkout (no User row to fall back to).
+ */
+export function orderLegal(opts: { guest?: boolean } = {}) {
+  return {
+    legalAccepted: true as const,
+    legalBundleVersion: LEGAL_BUNDLE_VERSION,
+    ...(opts.guest
+      ? { contact: { name: 'Guest E2E', email: 'guest.e2e@test.local', phone: '+48555000222' } }
+      : {}),
+  };
+}
 
 export async function createTestApp(): Promise<NestFastifyApplication> {
   const moduleRef = await Test.createTestingModule({
@@ -65,6 +81,13 @@ export async function resetDb(app: NestFastifyApplication): Promise<void> {
   const redis = app.get(RedisService);
   const keys = await redis.client.keys('idempotency:order:*');
   if (keys.length > 0) await redis.client.del(...keys);
+
+  // Rate-limit counters (plan §I1) are also Redis-backed and IP-keyed, so the
+  // shared test IP would carry counts across runs/tests against a persistent
+  // dev Redis. Flush them so throttle suites are repeatable. No-op on CI's
+  // fresh Redis. Pattern matches RateLimitGuard's `rl:<name>:<fingerprint>`.
+  const rlKeys = await redis.client.keys('rl:*');
+  if (rlKeys.length > 0) await redis.client.del(...rlKeys);
 }
 
 /**
@@ -82,6 +105,9 @@ export async function ensureRestaurant(app: NestFastifyApplication): Promise<voi
       name: 'E2E Restaurant',
       phone: '+48 22 555 0000',
       email: 'e2e@test.local',
+      // Match production (Polish restaurant) so the payment config + order
+      // currency are PLN, consistent with the rest of the e2e suite.
+      currency: 'PLN',
       address: { line1: 'ul. Test 1', city: 'Warsaw', country: 'PL' },
     },
   });

@@ -19,6 +19,7 @@ export class SettingsService {
       taxRate: r.taxRate.toString(),
       defaultDeliveryFee: r.defaultDeliveryFee.toFixed(2),
       minOrderAmount: r.minOrderAmount.toFixed(2),
+      deliveryRadiusKm: r.deliveryRadiusKm,
       holidayDates: (r.holidayDates as unknown as HolidayDto[]) ?? [],
       reservationSlotMinutes: r.reservationSlotMinutes,
       reservationBufferMinutes: r.reservationBufferMinutes,
@@ -36,6 +37,9 @@ export class SettingsService {
     }
     if (dto.minOrderAmount !== undefined) {
       data.minOrderAmount = new Prisma.Decimal(dto.minOrderAmount);
+    }
+    if (dto.deliveryRadiusKm !== undefined) {
+      data.deliveryRadiusKm = dto.deliveryRadiusKm;
     }
     if (dto.reservationSlotMinutes !== undefined) {
       data.reservationSlotMinutes = dto.reservationSlotMinutes;

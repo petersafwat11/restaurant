@@ -9,6 +9,9 @@ const apiUrl = new URL(process.env.APP_URL_API ?? "http://localhost:4000");
 const config: NextConfig = {
 	reactStrictMode: true,
 	output: "standalone",
+	// Don't advertise the framework (plan §I3). Caddy also strips this at the
+	// edge; disabling at the source is defense-in-depth.
+	poweredByHeader: false,
 	// Trace workspace files from the repo root so the standalone build pulls
 	// in the workspace packages (api-client, ui, types, utils, etc.).
 	outputFileTracingRoot: path.join(__dirname, "../.."),

@@ -119,13 +119,15 @@ export function OrderSummaryPanel({
                   className="h-14 w-14 shrink-0 rounded-md object-cover"
                 />
               )}
-              <div className="flex flex-1 flex-col leading-tight">
-                <span className="text-small font-medium text-fg">{line.name}</span>
+              <div className="flex min-w-0 flex-1 flex-col leading-tight">
+                <span className="break-words text-small font-medium text-fg">{line.name}</span>
                 {line.modifierSummary && (
-                  <span className="text-[12px] text-fg-muted">{line.modifierSummary}</span>
+                  <span className="break-words text-[12px] text-fg-muted">
+                    {line.modifierSummary}
+                  </span>
                 )}
                 {line.notes && (
-                  <span className="text-[12px] italic text-fg-subtle">
+                  <span className="break-words text-[12px] italic text-fg-subtle">
                     {notePrefix}
                     {line.notes}
                   </span>
