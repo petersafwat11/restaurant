@@ -484,8 +484,9 @@ export function PrivacyEN({ c }: { c: CompanyInfo }) {
         </li>
         <li>
           <strong>eService</strong> (part of Global Payments) — online card/BLIK payment processing
-          and fraud prevention on its hosted payment page, when online payments are enabled. eService
-          acts as an independent controller for some of this processing under its own privacy policy.{' '}
+          and fraud prevention on its hosted payment page, when online payments are enabled.
+          eService acts as an independent controller for some of this processing under its own
+          privacy policy.{' '}
           {/* LAWYER: add the exact eService / Global Payments privacy-policy link + confirm the
           controller/processor split. */}
         </li>
