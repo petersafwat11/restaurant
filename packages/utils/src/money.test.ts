@@ -80,7 +80,7 @@ describe('money', () => {
   });
 });
 
-describe('provider minor units (Stripe)', () => {
+describe('provider minor units', () => {
   it('converts 2dp currencies to minor units exactly', () => {
     expect(toMinorUnits('12.34', 'PLN')).toBe(1234);
     expect(toMinorUnits('0.00', 'PLN')).toBe(0);

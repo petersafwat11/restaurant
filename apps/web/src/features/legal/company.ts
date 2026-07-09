@@ -36,7 +36,7 @@ function addressLines(a: { line1: string; zip?: string | null; city: string }): 
  * returned as `null` so consumers omit them rather than render placeholders.
  *
  * The owner populates these against an official current KRS extract before
- * Stripe go-live (see the admin "Payment provider readiness" check); until then
+ * eService go-live (see the admin "Payment provider readiness" check); until then
  * `displayName` falls back to the public brand name (never `${brand} sp. z o.o.`).
  */
 export function getCompanyInfo(r: RestaurantPublicDto | null): CompanyInfo {

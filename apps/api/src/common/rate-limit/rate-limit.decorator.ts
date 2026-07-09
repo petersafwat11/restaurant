@@ -21,6 +21,6 @@ export interface RateLimitOptions {
 /**
  * Mark a route for Redis-backed fixed-window rate limiting (plan §I1). Enforced
  * by the global `RateLimitGuard`. Routes without this decorator are unlimited —
- * notably Stripe webhooks, which must never be customer-rate-limited.
+ * notably payment-provider webhooks, which must never be customer-rate-limited.
  */
 export const RateLimit = (options: RateLimitOptions) => SetMetadata(RATE_LIMIT_KEY, options);

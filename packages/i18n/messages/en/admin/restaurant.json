@@ -90,7 +90,7 @@
   "legal": {
     "title": "Legal entity",
     "description": "Official company identity used on invoices, the payment provider, and your legal pages.",
-    "verifyWarning": "These values must match your KRS, Stripe, and payout-bank records exactly. Verify against an official current KRS extract before entering — the app does not check external registries.",
+    "verifyWarning": "These values must match your KRS, eService, and payout-bank records exactly. Verify against an official current KRS extract before entering — the app does not check external registries.",
     "legalNameLabel": "Legal name",
     "legalNameHint": "Exact registered company name (e.g. \"… SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ\"), not the brand name.",
     "nipLabel": "NIP",

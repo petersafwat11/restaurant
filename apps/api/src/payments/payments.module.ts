@@ -2,11 +2,11 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { QUEUE_EMAIL, QUEUE_RECONCILIATION } from '@repo/jobs';
 import { OrdersModule } from '../orders/orders.module';
+import { EserviceProvider } from './eservice.provider';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { PaymentsWebhooksController } from './payments.webhooks.controller';
 import { CodProvider } from './providers/cod.provider';
-import { StripeProvider } from './providers/stripe.provider';
 import { ReconciliationProcessor } from './reconciliation.processor';
 import { WebhookEventsService } from './webhook-events.service';
 
@@ -20,11 +20,11 @@ import { WebhookEventsService } from './webhook-events.service';
   controllers: [PaymentsController, PaymentsWebhooksController],
   providers: [
     PaymentsService,
-    StripeProvider,
+    EserviceProvider,
     CodProvider,
     WebhookEventsService,
     ReconciliationProcessor,
   ],
-  exports: [PaymentsService, StripeProvider, CodProvider],
+  exports: [PaymentsService, EserviceProvider, CodProvider],
 })
 export class PaymentsModule {}

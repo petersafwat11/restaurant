@@ -6,7 +6,7 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { RedisService } from '../src/redis/redis.service';
 
-const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
+const ESERVICE_WEBHOOK_PATH = '/api/v1/payments/webhooks/eservice';
 
 /**
  * Legal-acceptance fields every POST /orders payload must now carry (plan §C2).
@@ -34,7 +34,7 @@ export async function createTestApp(): Promise<NestFastifyApplication> {
   instance.removeContentTypeParser('application/json');
   instance.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
     try {
-      if (req.url?.startsWith(STRIPE_WEBHOOK_PATH)) {
+      if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
         (req as unknown as { rawBody: Buffer }).rawBody = body as Buffer;
       }
       const buf = body as Buffer;

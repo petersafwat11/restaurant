@@ -9,14 +9,14 @@ export class WebhookEventsService {
   /**
    * Claim an event for processing. Returns `true` if the caller should process
    * it — either it's the first delivery, OR a prior delivery recorded it but
-   * never finished (`processedAt` still null, i.e. its dispatch threw and Stripe
-   * is retrying). Returns `false` only for a delivery that has already been
-   * fully processed (`markProcessed`).
+   * never finished (`processedAt` still null, i.e. its dispatch threw and the
+   * provider is retrying). Returns `false` only for a delivery that has already
+   * been fully processed (`markProcessed`).
    *
-   * This is the safety guarantee: a `payment_intent.succeeded` /
-   * `charge.refunded` whose first dispatch failed transiently is re-processed on
-   * Stripe's retry instead of being silently acked-and-dropped. Dispatch
-   * handlers are idempotent, so re-processing an unfinished event is safe.
+   * This is the safety guarantee: a `payment.succeeded` / `payment.refunded`
+   * whose first dispatch failed transiently is re-processed on the provider's
+   * retry instead of being silently acked-and-dropped. Dispatch handlers are
+   * idempotent, so re-processing an unfinished event is safe.
    *
    * Relies on the primary-key uniqueness of `WebhookEvent.id`.
    */

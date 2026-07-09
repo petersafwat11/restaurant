@@ -55,7 +55,7 @@ export class AnalyticsProductService implements OnModuleDestroy {
 
   @OnEvent('order.status_changed')
   onOrderStatusChanged(e: OrderStatusChangedEvent): void {
-    // Order moves to CONFIRMED once payment is settled (Stripe webhook or
+    // Order moves to CONFIRMED once payment is settled (eService webhook or
     // COD short-circuit) — the cleanest server-side "paid" signal.
     if (e.to === 'CONFIRMED') {
       this.capture('payment_succeeded', {

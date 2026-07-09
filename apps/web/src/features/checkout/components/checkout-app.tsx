@@ -5,12 +5,11 @@ import { useAddresses } from '@/features/addresses/hooks';
 import { useApplyCoupon, useCart, useRemoveCoupon, useSetCartLoyalty } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { PaymentLogos } from '@/features/checkout/components/payment-logos';
-import { StripePaymentForm } from '@/features/checkout/components/stripe-payment-form';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useCheckoutQuote } from '@/features/checkout/hooks/use-checkout-quote';
-import { useFeatureFlag } from '@/features/feature-flags/hooks';
 import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
 import { useCreateOrder } from '@/features/orders/hooks';
+import { usePaymentConfig } from '@/features/payments/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -98,33 +97,21 @@ export function CheckoutApp() {
     discountAmount: string;
   } | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  // Set right before the browser navigates to eService, and never reset — keeps
+  // the "redirecting" overlay up until the page unloads (no checkout/empty flash).
+  const [redirecting, setRedirecting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [createdOrderId, setCreatedOrderId] = React.useState<string | null>(null);
   // Signed guest order token from the create response — lets a guest create the
-  // Stripe intent (and recover status) without an auth session (plan §F1).
+  // eService payment (and recover status) without an auth session (plan §F1).
   const [createdOrderToken, setCreatedOrderToken] = React.useState<string | null>(null);
-  const [stripeConfig, setStripeConfig] = React.useState<{ publishableKey: string } | null>(null);
-  const stripeSubmitRef = React.useRef<(() => Promise<string | null>) | null>(null);
-  const stripeElementsEnabled = useFeatureFlag('payments.stripe_elements');
 
-  // Resolve the Stripe publishable key once on mount (server-side env decides).
-  React.useEffect(() => {
-    if (!stripeElementsEnabled) return;
-    let mounted = true;
-    (async () => {
-      try {
-        const apiClient = (await import('@/lib/api-client')).getApiClient();
-        const cfg = await apiClient.payments.getConfig();
-        if (!mounted || !cfg.stripePublishableKey) return;
-        setStripeConfig({ publishableKey: cfg.stripePublishableKey });
-      } catch {
-        // Silently fall back to bare inputs.
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [stripeElementsEnabled]);
+  // Whether the eService online processor is configured (cards/BLIK). Sourced
+  // from a resilient React Query hook (retries + focus/reconnect refetch) rather
+  // than a fire-once fetch, so a transient API hiccup never silently strips
+  // online payments and pins the customer to COD. Defaults to false (COD-only)
+  // while loading or if it can't be resolved.
+  const onlinePaymentsEnabled = usePaymentConfig().data?.onlinePaymentsEnabled ?? false;
 
   const form = useForm<CheckoutFormInput>({
     resolver: zodResolver(CheckoutFormSchema),
@@ -232,11 +219,11 @@ export function CheckoutApp() {
     [t, etaDescription],
   );
 
-  // Online payments (card / BLIK via Stripe) are "ready" only when the
-  // `payments.stripe_elements` flag is on AND the backend returned a publishable
-  // key. Until then those methods are disabled and cash-on-delivery is the only
-  // way to pay. This single flag drives every payment-method decision below.
-  const onlinePaymentsReady = stripeElementsEnabled && !!stripeConfig?.publishableKey;
+  // Online payments (card / BLIK via eService) are "ready" only when the backend
+  // reports the eService processor is configured. Until then those methods are
+  // disabled and cash-on-delivery is the only way to pay. This drives every
+  // payment-method decision below.
+  const onlinePaymentsReady = onlinePaymentsEnabled;
 
   const orderType = form.watch('orderType');
   const tipAmount = form.watch('tipAmount');
@@ -486,16 +473,36 @@ export function CheckoutApp() {
   };
   const handleRemovePromo = () => removeCoupon.mutate();
 
-  // Wait for the mounted Stripe Elements form to be ready, then run its confirm.
-  // Returns null on success or an error string. Shared by the first attempt and
-  // the recovery retry so neither re-creates an order (plan §F4).
-  const runStripeConfirm = async (): Promise<string | null> => {
-    const deadline = Date.now() + 8000;
-    while (!stripeSubmitRef.current && Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, 100));
+  // Create the eService Hosted Payment Page link for an order and redirect the
+  // browser to it. On success the browser navigates away (returns null after
+  // initiating the redirect); on failure returns an error string. Shared by the
+  // first attempt and the recovery retry so neither re-creates an order (plan §F4).
+  const redirectToPayment = async (
+    orderId: string,
+    token: string | null,
+    method: 'card' | 'blik',
+  ): Promise<string | null> => {
+    try {
+      const apiClient = (await import('@/lib/api-client')).getApiClient();
+      const res = await apiClient.payments.createIntent(
+        { orderId, provider: 'eservice', methodKind: method === 'blik' ? 'BLIK' : 'CARD' },
+        token,
+      );
+      if (!res.redirectUrl) return t('errors.paymentInitFailed');
+      // Guest-token continuity: the full-page redirect to eService wipes React
+      // state, so stash the tracking token locally to restore the order on return
+      // (the ?t= param on the return URL is the fallback).
+      try {
+        window.localStorage.setItem('checkout:pending', JSON.stringify({ orderId, token }));
+      } catch {
+        // localStorage unavailable (e.g. private mode) — rely on the ?t= fallback.
+      }
+      setRedirecting(true);
+      window.location.assign(res.redirectUrl);
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : t('errors.paymentInitFailed');
     }
-    if (!stripeSubmitRef.current) return t('errors.stripeNotInit');
-    return stripeSubmitRef.current();
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -505,8 +512,8 @@ export function CheckoutApp() {
       return;
     }
     // Only cash-on-delivery is finalized server-side at order creation (the
-    // guest-safe path). Card/BLIK leave the order PENDING and are settled by
-    // the Stripe Elements flow below — which only runs when it's actually ready.
+    // guest-safe path). Card/BLIK leave the order PENDING and are settled by the
+    // eService redirect flow below — which only runs when online is actually ready.
     const isOnlineMethod = values.paymentMethod === 'card' || values.paymentMethod === 'blik';
     const paymentMethodForApi: PaymentMethodKind | undefined =
       values.paymentMethod === 'cod' ? 'COD' : undefined;
@@ -514,19 +521,21 @@ export function CheckoutApp() {
     setSubmitting(true);
     try {
       // F4 recovery: a pending order was already created on a prior attempt
-      // (e.g. a Stripe decline). The cart was cleared server-side at creation,
-      // so DON'T create a second order — just retry the payment for the existing
-      // one. The server reuses the same PaymentIntent via its deterministic
-      // idempotency key, so no duplicate intent either.
-      if (createdOrderId && onlinePaymentsReady && stripeConfig && isOnlineMethod) {
-        const retryErr = await runStripeConfirm();
+      // (e.g. an eService decline / abandoned payment). The cart was cleared
+      // server-side at creation, so DON'T create a second order — re-create the
+      // payment link for the existing one. The server reuses the same HPP link
+      // (providerRedirectUrl) for a same-method retry, so there is no double charge.
+      if (createdOrderId && onlinePaymentsReady && isOnlineMethod) {
+        const retryErr = await redirectToPayment(
+          createdOrderId,
+          createdOrderToken,
+          values.paymentMethod as 'card' | 'blik',
+        );
         if (retryErr) {
           setSubmitError(retryErr);
           setSubmitting(false);
-          return;
         }
-        const tokenQuery = createdOrderToken ? `?t=${encodeURIComponent(createdOrderToken)}` : '';
-        router.push(`/checkout/success/${createdOrderId}${tokenQuery}`);
+        // On success the browser is navigating to eService; nothing more to do.
         return;
       }
 
@@ -597,22 +606,29 @@ export function CheckoutApp() {
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
       });
 
-      // Stripe Elements two-phase flow: order is now PENDING; PaymentIntent
-      // mounts, user confirms inline, webhook flips Payment.status → PAID.
-      // Only reachable when online payments are ready (card/BLIK enabled).
-      if (onlinePaymentsReady && stripeConfig && isOnlineMethod) {
+      // Online (card/BLIK): the order is now PENDING. Create the eService Hosted
+      // Payment Page link and redirect the browser to pay; the status webhook
+      // flips Payment.status → PAID and the confirmation page's realtime tracking
+      // reflects it when the customer returns. Only reachable when online is ready.
+      if (onlinePaymentsReady && isOnlineMethod) {
         setCreatedOrderId(order.id);
         setCreatedOrderToken(order.trackingToken ?? null);
-        const stripeErr = await runStripeConfirm();
-        if (stripeErr) {
+        const payErr = await redirectToPayment(
+          order.id,
+          order.trackingToken ?? null,
+          values.paymentMethod as 'card' | 'blik',
+        );
+        if (payErr) {
           // Keep the pending order recoverable — the next submit retries the
           // payment for it instead of creating a new order (guard above).
-          setSubmitError(stripeErr);
+          setSubmitError(payErr);
           setSubmitting(false);
-          return;
         }
+        // On success the browser is navigating to eService.
+        return;
       }
 
+      // COD: confirmed server-side at creation — go straight to confirmation.
       const tokenQuery = order.trackingToken ? `?t=${encodeURIComponent(order.trackingToken)}` : '';
       router.push(`/checkout/success/${order.id}${tokenQuery}`);
     } catch (err) {
@@ -635,7 +651,9 @@ export function CheckoutApp() {
     }
   });
 
-  if (cartQuery.isSuccess && lines.length === 0) {
+  // Don't flash the empty-cart state while a payment is being started/redirected
+  // (the cart may be mid-clear, or we're about to leave for eService).
+  if (cartQuery.isSuccess && lines.length === 0 && !submitting && !redirecting) {
     return (
       <Container className="py-24">
         <EmptyState
@@ -668,6 +686,22 @@ export function CheckoutApp() {
 
   return (
     <Container className="py-12">
+      {(submitting || redirecting) && ctaIsPayment && (
+        // Full-screen "redirecting to payment" overlay as a polite live region.
+        // `aria-live="polite"` + `aria-atomic` is exactly the semantics of
+        // role="status" without the explicit role (which has no matching semantic
+        // element, so it would trip a11y/useSemanticElements).
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-surface-2/95 text-center backdrop-blur-sm"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-accent" />
+          <p className="max-w-xs px-6 text-body text-fg-muted">
+            {t('sections.payment.redirectNotice')}
+          </p>
+        </div>
+      )}
       <Link
         href="/menu"
         className="inline-flex items-center gap-1.5 text-small text-fg-muted transition-colors hover:text-accent"
@@ -1030,17 +1064,9 @@ export function CheckoutApp() {
                 />
               )}
             />
-            {onlinePaymentsReady &&
-              stripeConfig &&
-              (selectedMethod === 'card' || selectedMethod === 'blik') && (
-                <StripePaymentForm
-                  publishableKey={stripeConfig.publishableKey}
-                  orderId={createdOrderId}
-                  orderToken={createdOrderToken}
-                  submitRef={stripeSubmitRef}
-                  methodKind={selectedMethod === 'blik' ? 'BLIK' : 'STRIPE_CARD'}
-                />
-              )}
+            {onlinePaymentsReady && (selectedMethod === 'card' || selectedMethod === 'blik') && (
+              <p className="text-small text-fg-muted">{t('sections.payment.redirectNotice')}</p>
+            )}
             <button
               type="button"
               onClick={() => continueFrom(5)}

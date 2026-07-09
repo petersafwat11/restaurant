@@ -494,6 +494,10 @@ export class OrdersService {
           data: {
             orderNumber,
             userId: actor.userId,
+            // Remember the source cart so confirmation can clear it server-side
+            // (the single guarantee that a confirmed order empties the basket for
+            // every payment type + guests). See confirmPendingOrder.
+            cartId: cart.id,
             type: dto.type,
             status: 'PENDING',
             subtotal,
@@ -557,12 +561,17 @@ export class OrdersService {
           await this.loyalty.burnForOrderTx(tx, actor.userId, order.id, loyaltyPointsToBurn);
         }
 
-        // Clear the cart so the user doesn't re-submit the same items.
-        await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
-        await tx.cart.update({
-          where: { id: cart.id },
-          data: { appliedPromotionId: null, loyaltyPointsToRedeem: 0 },
-        });
+        // Clear the cart at creation ONLY for COD (finalized synchronously below).
+        // Online orders stay PENDING until eService confirms — keep the basket so a
+        // declined/abandoned payment doesn't lose it. The web confirmation page
+        // clears the cart once it sees the order confirmed.
+        if (dto.paymentMethod === 'COD') {
+          await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+          await tx.cart.update({
+            where: { id: cart.id },
+            data: { appliedPromotionId: null, loyaltyPointsToRedeem: 0 },
+          });
+        }
 
         return order;
       });
@@ -579,7 +588,7 @@ export class OrdersService {
     // POST /payments/intent requires an authed owner). We record a COD Payment
     // row and confirm the order, mirroring PaymentsService.createIntent's COD
     // branch exactly (provider 'cod', status 'PAID', then confirmPendingOrder).
-    // Online methods (card/BLIK) are left PENDING for the Stripe Elements flow.
+    // Online methods (card/BLIK) are left PENDING for the eService redirect flow.
     //
     // Done BEFORE emitting `order.created` so the realtime event (and the admin
     // live orders list, which patches its cache from this event) carries the
@@ -645,7 +654,7 @@ export class OrdersService {
 
   /**
    * Confirm a still-PENDING order once its payment is settled. Shared by the
-   * COD-at-checkout path (above) and PaymentsService (Stripe webhook / COD
+   * COD-at-checkout path (above) and PaymentsService (eService webhook / COD
    * intent) so both behave identically.
    *
    * Idempotent + state-safe: the conditional update only matches a still
@@ -671,8 +680,40 @@ export class OrdersService {
       data: { orderId, status: 'CONFIRMED', note },
     });
     await this.receiptQueue.add(JOB_RECEIPT_GENERATE, { orderId });
+    // Empty the basket the moment the order is confirmed — the server-side
+    // guarantee for EVERY payment type and EVERY user. COD already cleared at
+    // creation (this is then a no-op); online (card/BLIK) clears here when
+    // eService settles via the return handler / webhook / reconcile — which is
+    // the only reliable point for guests, who get no realtime and whose success
+    // page can load before settle-on-return finishes. Best-effort: a clear
+    // failure must never un-confirm the order (the client success page + the next
+    // reconcile pass are backstops).
+    try {
+      await this.clearOrderCart(orderId);
+    } catch (err) {
+      this.logger.warn(`Order ${orderId} cart-clear skipped: ${(err as Error).message}`);
+    }
     this.logger.log(`Order ${orderId} confirmed`);
     return true;
+  }
+
+  /**
+   * Delete the items of the cart an order was created from and reset its applied
+   * promo/loyalty (mirrors the COD-at-creation clear). No-op when the order has
+   * no linked cart or the cart was already emptied/deleted (guest login-merge),
+   * so it is safe to call on every confirm.
+   */
+  private async clearOrderCart(orderId: string): Promise<void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { cartId: true },
+    });
+    if (!order?.cartId) return;
+    await this.prisma.cartItem.deleteMany({ where: { cartId: order.cartId } });
+    await this.prisma.cart.updateMany({
+      where: { id: order.cartId },
+      data: { appliedPromotionId: null, loyaltyPointsToRedeem: 0 },
+    });
   }
 
   // Public read by signed HMAC token — used by /checkout/success on refresh

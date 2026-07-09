@@ -34,7 +34,7 @@ function scrub(value: unknown): unknown {
 
 /**
  * Initialize Sentry for a Node process. No-ops when `dsn` is empty — mirrors
- * the project's Stripe/R2 "empty env → safe stub" convention so dev + tests
+ * the project's "empty env → safe stub" convention so dev + tests
  * never need real credentials. PII (auth headers, bodies) is scrubbed.
  */
 export function initNodeSentry(opts: SentryInitOptions): boolean {

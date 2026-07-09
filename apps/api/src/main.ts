@@ -12,7 +12,7 @@ import { initNodeSentry } from '@repo/observability';
 import { AppModule } from './app.module';
 import { env } from './config/env';
 
-const STRIPE_WEBHOOK_PATH = '/api/v1/payments/webhooks/stripe';
+const ESERVICE_WEBHOOK_PATH = '/api/v1/payments/webhooks/eservice';
 
 async function bootstrap() {
   // Initialize Sentry before anything else so early errors are captured.
@@ -31,14 +31,15 @@ async function bootstrap() {
   // ignored. Caddy is also configured with `trusted_proxies` as defence-in-depth.
   const adapter = new FastifyAdapter({ logger: false, trustProxy: 1 });
 
-  // Capture the raw request body for the Stripe webhook route — needed for
-  // signature verification. Replace Nest's default JSON parser with one that
-  // stashes raw bytes onto the request for the webhook path only.
+  // Capture the raw request body for the eService webhook route — needed for
+  // the SHA512(rawBody + app_key) signature verification. Replace Nest's default
+  // JSON parser with one that stashes raw bytes onto the request for the webhook
+  // path only.
   const instance = adapter.getInstance();
   instance.removeContentTypeParser('application/json');
   instance.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
     try {
-      if (req.url?.startsWith(STRIPE_WEBHOOK_PATH)) {
+      if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
         (req as unknown as { rawBody: Buffer }).rawBody = body as Buffer;
       }
       const buf = body as Buffer;
@@ -48,6 +49,28 @@ async function bootstrap() {
       done(err as Error);
     }
   });
+
+  // eService's HPP POSTs the transaction result to `return_url` (and may POST the
+  // status_url notification) as application/x-www-form-urlencoded. Parse it into an
+  // object for controllers, and capture rawBody on the webhook path so the
+  // signature check works if a notification ever arrives form-encoded.
+  instance.addContentTypeParser(
+    'application/x-www-form-urlencoded',
+    { parseAs: 'buffer' },
+    (req, body, done) => {
+      try {
+        const buf = body as Buffer;
+        if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
+          (req as unknown as { rawBody: Buffer }).rawBody = buf;
+        }
+        const obj: Record<string, string> = {};
+        for (const [k, v] of new URLSearchParams(buf.toString('utf8'))) obj[k] = v;
+        done(null, obj);
+      } catch (err) {
+        done(err as Error);
+      }
+    },
+  );
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bodyParser: false,

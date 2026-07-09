@@ -1,5 +1,6 @@
 'use client';
 
+import { useClearCart } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
@@ -71,6 +72,24 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
   // Indicative ETA comes from the admin-configured restaurant estimate. Warm in
   // the QueryClient cache from checkout, so it usually resolves with no flash.
   const restaurantQuery = useRestaurant();
+
+  // Online orders keep their cart until payment confirms (so a declined/abandoned
+  // payment doesn't lose the basket); clear it once this page sees the order
+  // confirmed. COD carts were already cleared server-side, so this is a no-op there.
+  const clearCart = useClearCart();
+  const clearedRef = React.useRef(false);
+  const orderStatus = orderQuery.data?.status;
+  React.useEffect(() => {
+    if (
+      !clearedRef.current &&
+      orderStatus &&
+      orderStatus !== 'PENDING' &&
+      orderStatus !== 'CANCELLED'
+    ) {
+      clearedRef.current = true;
+      clearCart.mutate();
+    }
+  }, [orderStatus, clearCart]);
 
   if (orderQuery.isLoading) {
     return (

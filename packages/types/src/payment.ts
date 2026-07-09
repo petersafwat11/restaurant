@@ -4,18 +4,10 @@ const MoneyStringSchema = z
   .string()
   .regex(/^-?\d+(\.\d{1,2})?$/, 'Money must be a decimal string with ≤2dp');
 
-export const PAYMENT_PROVIDERS = ['stripe', 'cod'] as const;
+export const PAYMENT_PROVIDERS = ['eservice', 'cod'] as const;
 export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
 
-export const PAYMENT_METHOD_KINDS = [
-  'STRIPE_CARD',
-  'APPLE_PAY',
-  'GOOGLE_PAY',
-  'COD',
-  'WALLET',
-  'P24',
-  'BLIK',
-] as const;
+export const PAYMENT_METHOD_KINDS = ['CARD', 'BLIK', 'COD'] as const;
 export type PaymentMethodKind = (typeof PAYMENT_METHOD_KINDS)[number];
 
 export const PAYMENT_STATUSES = [
@@ -41,10 +33,11 @@ export const PaymentIntentResponseSchema = z.object({
   paymentId: z.string(),
   provider: z.enum(PAYMENT_PROVIDERS),
   status: z.enum(PAYMENT_STATUSES),
-  /** Stripe-only — present when provider === 'stripe'. */
-  clientSecret: z.string().nullable(),
-  /** Stripe-only — present when provider === 'stripe'. */
-  publishableKey: z.string().nullable(),
+  /**
+   * eService: the Hosted Payment Page redirect URL — send the browser here to pay
+   * (cards / BLIK / 3-D Secure all handled on eService). null for COD.
+   */
+  redirectUrl: z.string().nullable(),
   /** COD — true when the order was auto-confirmed (no further client action). */
   confirmed: z.boolean(),
 });
@@ -88,8 +81,9 @@ export type CreateRefundDto = z.infer<typeof CreateRefundSchema>;
 // ---- Public config ---------------------------------------------------------
 
 export const PaymentConfigSchema = z.object({
-  stripePublishableKey: z.string(),
   currency: z.string(),
+  /** True when the eService online processor is configured (cards/BLIK available). */
+  onlinePaymentsEnabled: z.boolean(),
 });
 export type PaymentConfigDto = z.infer<typeof PaymentConfigSchema>;
 

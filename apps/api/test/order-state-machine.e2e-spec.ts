@@ -162,9 +162,10 @@ describe('order state machine (e2e)', () => {
     await prisma.payment.create({
       data: {
         orderId,
-        provider: 'stripe',
-        providerRef: 'pi_test_cancel_guard',
-        method: 'STRIPE_CARD',
+        provider: 'eservice',
+        providerRef: 'ref_test_cancel_guard',
+        providerTxnId: 'TRN_test_cancel_guard',
+        method: 'CARD',
         amount: order.grandTotal,
         currency: order.currency,
         status: 'PAID',

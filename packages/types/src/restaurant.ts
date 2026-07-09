@@ -81,7 +81,7 @@ export type RestaurantLegalDto = z.infer<typeof RestaurantLegalSchema>;
 
 /**
  * Admin output adds the same-as-trading switch and the statement descriptor —
- * both admin-only. `statementDescriptor` is an internal Stripe payment-config
+ * both admin-only. `statementDescriptor` is an internal payment-config
  * value (not part of public EU seller-identity disclosure), so it's deliberately
  * NOT on the public `RestaurantLegalSchema`.
  */
@@ -110,7 +110,7 @@ export type LegalReadinessField = (typeof LEGAL_REQUIRED_FIELDS)[number] | 'regi
 
 /**
  * Shared readiness check used by both the admin checklist and the API's
- * Stripe-enablement fail-safe. It only reports which factual fields are unset —
+ * online-payments-enablement fail-safe. It only reports which factual fields are unset —
  * it never claims the application verified an external registry.
  */
 export function getRestaurantLegalReadiness(legal: RestaurantAdminLegalDto): {
@@ -161,7 +161,7 @@ const optionalCurrency = z
   )
   .optional();
 
-// Stripe statement descriptor: 5–22 chars, at least one letter, excludes < > \ ' " *
+// Card statement descriptor: 5–22 chars, at least one letter, excludes < > \ ' " *
 const optionalStatementDescriptor = z
   .preprocess(
     emptyToNull,

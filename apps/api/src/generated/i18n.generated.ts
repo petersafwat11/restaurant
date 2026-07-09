@@ -509,6 +509,8 @@ export type I18nTranslations = {
                 "location": string;
                 "discovery": string;
                 "channels": string;
+                "legal": string;
+                "payments": string;
             };
             "identity": {
                 "title": string;
@@ -579,6 +581,54 @@ export type I18nTranslations = {
                 "rangeError": {
                     "incomplete": string;
                     "order": string;
+                };
+            };
+            "legal": {
+                "title": string;
+                "description": string;
+                "verifyWarning": string;
+                "legalNameLabel": string;
+                "legalNameHint": string;
+                "nipLabel": string;
+                "nipHint": string;
+                "regonLabel": string;
+                "regonHint": string;
+                "krsLabel": string;
+                "krsHint": string;
+                "registryCourtLabel": string;
+                "registryCourtHint": string;
+                "shareCapitalLabel": string;
+                "shareCapitalHint": string;
+                "shareCapitalCurrencyLabel": string;
+                "registeredSameLabel": string;
+                "registeredSameHint": string;
+                "registeredAddressTitle": string;
+            };
+            "payments": {
+                "title": string;
+                "description": string;
+                "supportEmailLabel": string;
+                "supportPhoneLabel": string;
+                "complaintsEmailLabel": string;
+                "complaintsEmailHint": string;
+                "privacyEmailLabel": string;
+                "statementDescriptorLabel": string;
+                "statementDescriptorHint": string;
+                "readiness": {
+                    "title": string;
+                    "complete": string;
+                    "incompleteHint": string;
+                    "fields": {
+                        "legalName": string;
+                        "nip": string;
+                        "regon": string;
+                        "registryCourt": string;
+                        "registeredAddress": string;
+                        "supportEmail": string;
+                        "complaintsEmail": string;
+                        "privacyEmail": string;
+                        "statementDescriptor": string;
+                    };
                 };
             };
             "saveBar": {
@@ -946,7 +996,9 @@ export type I18nTranslations = {
                 "back": string;
                 "advanceTo": string;
                 "noNextState": string;
+                "awaitingPayment": string;
                 "orderComplete": string;
+                "autoCompleting": string;
                 "refund": string;
                 "cancel": string;
                 "print": string;
@@ -977,6 +1029,9 @@ export type I18nTranslations = {
                     "pricingHeading": string;
                     "paymentHeading": string;
                     "customerHeading": string;
+                    "etaHeading": string;
+                    "etaHelper": string;
+                    "etaPlaceholder": string;
                     "timelineHeading": string;
                     "noteFallback": string;
                     "subtotal": string;
@@ -994,13 +1049,9 @@ export type I18nTranslations = {
                         "DINE_IN": string;
                     };
                     "paymentMethods": {
-                        "STRIPE_CARD": string;
-                        "APPLE_PAY": string;
-                        "GOOGLE_PAY": string;
-                        "COD": string;
-                        "WALLET": string;
-                        "P24": string;
+                        "CARD": string;
                         "BLIK": string;
+                        "COD": string;
                     };
                 };
                 "types": {
@@ -1379,6 +1430,7 @@ export type I18nTranslations = {
                     "taxRate": string;
                     "defaultDeliveryFee": string;
                     "minOrder": string;
+                    "deliveryRadius": string;
                     "effectiveMinimum": string;
                 };
                 "reservations": {
@@ -1530,6 +1582,50 @@ export type I18nTranslations = {
         };
     };
     "web": {
+        "account-deletion": {
+            "title": string;
+            "intro": string;
+            "consequences": {
+                "heading": string;
+                "sessions": string;
+                "profile": string;
+                "retained": string;
+                "grace": string;
+                "irreversible": string;
+            };
+            "password": {
+                "label": string;
+                "placeholder": string;
+                "help": string;
+            };
+            "reasonLabel": string;
+            "reasonPlaceholder": string;
+            "actions": {
+                "request": string;
+                "requesting": string;
+                "cancel": string;
+                "cancelling": string;
+                "sendEmail": string;
+                "sending": string;
+            };
+            "status": {
+                "pendingHeading": string;
+                "pending": string;
+                "cancelledHeading": string;
+                "cancelled": string;
+                "completedHeading": string;
+                "completed": string;
+                "emailSentHeading": string;
+                "emailSent": string;
+            };
+            "noPassword": {
+                "note": string;
+            };
+            "guestNote": string;
+            "errors": {
+                "generic": string;
+            };
+        };
         "footer": {
             "tagline": string;
             "social": {
@@ -1558,10 +1654,12 @@ export type I18nTranslations = {
                 };
             };
             "bottom": {
-                "copyright": string;
                 "legal": {
                     "privacy": string;
                     "terms": string;
+                    "refundsComplaints": string;
+                    "deliveryCancellation": string;
+                    "promotionTerms": string;
                     "cookies": string;
                 };
             };
@@ -1593,6 +1691,8 @@ export type I18nTranslations = {
         "legal": {
             "eyebrow": string;
             "lastUpdated": string;
+            "toc": string;
+            "print": string;
             "footerQuestion": string;
             "footerLink": string;
             "privacy": {
@@ -1603,6 +1703,21 @@ export type I18nTranslations = {
             };
             "cookies": {
                 "title": string;
+            };
+            "refundsComplaints": {
+                "title": string;
+            };
+            "deliveryCancellation": {
+                "title": string;
+            };
+            "promotionTerms": {
+                "title": string;
+            };
+            "archive": {
+                "eyebrow": string;
+                "effective": string;
+                "currentNotice": string;
+                "currentLink": string;
             };
         };
         "newsletter": {
@@ -1962,9 +2077,6 @@ export type I18nTranslations = {
                     "yearsLabel": string;
                     "wrapsValue": string;
                     "wrapsLabel": string;
-                    "ratingValue": string;
-                    "ratingLabel": string;
-                    "ratingLabelDynamic": string;
                 };
             };
             "contact": {
@@ -2009,7 +2121,6 @@ export type I18nTranslations = {
                 "ourStory": string;
                 "locations": string;
                 "contactUs": string;
-                "reserveTable": string;
                 "hero": {
                     "eyebrow": string;
                     "titleLine1": string;
@@ -2047,42 +2158,8 @@ export type I18nTranslations = {
                     "description": string;
                     "seeFullMenu": string;
                     "viewFullMenuCta": string;
-                    "addedToCart": string;
-                    "addedToCartDescription": string;
                     "addAriaLabel": string;
                     "soldOutLabel": string;
-                    "dishes": {
-                        "kebab-tortilla-srodni": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                        "falafel-pita-duzy": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                        "kapsalon-duzy": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                        "tacos-x3": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                        "box-strips-mega": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                        "salatka-kebab-duzy": {
-                            "name": string;
-                            "description": string;
-                            "imageAlt": string;
-                        };
-                    };
                 };
                 "story": {
                     "eyebrow": string;
@@ -2123,28 +2200,6 @@ export type I18nTranslations = {
                     "readAllReviews": string;
                     "starsAriaLabel": string;
                     "anonymous": string;
-                    "items": {
-                        "0": {
-                            "quote": string;
-                            "name": string;
-                            "meta": string;
-                        };
-                        "1": {
-                            "quote": string;
-                            "name": string;
-                            "meta": string;
-                        };
-                        "2": {
-                            "quote": string;
-                            "name": string;
-                            "meta": string;
-                        };
-                        "3": {
-                            "quote": string;
-                            "name": string;
-                            "meta": string;
-                        };
-                    };
                 };
                 "newsletter": {
                     "eyebrow": string;
@@ -2422,11 +2477,9 @@ export type I18nTranslations = {
                         "options": {
                             "DELIVERY": {
                                 "label": string;
-                                "description": string;
                             };
                             "PICKUP": {
                                 "label": string;
-                                "description": string;
                                 "badge": string;
                             };
                             "DINE_IN": {
@@ -2484,6 +2537,7 @@ export type I18nTranslations = {
                         "title": string;
                         "ariaLabel": string;
                         "comingSoon": string;
+                        "redirectNotice": string;
                         "options": {
                             "card": {
                                 "label": string;
@@ -2536,10 +2590,7 @@ export type I18nTranslations = {
                     "inputAriaLabel": string;
                     "removeAriaLabel": string;
                     "notValid": string;
-                    "mock": {
-                        "baklava": string;
-                        "student": string;
-                    };
+                    "appliedLabel": string;
                 };
                 "loyalty": {
                     "trigger": string;
@@ -2566,19 +2617,12 @@ export type I18nTranslations = {
                     "minOrderInline": string;
                     "minOrderToast": string;
                     "confirmAddress": string;
-                    "stripeNotInit": string;
+                    "paymentInitFailed": string;
                     "createOrderFallback": string;
+                    "legalVersionChanged": string;
                 };
                 "return": {
                     "confirming": string;
-                };
-                "stripe": {
-                    "notConfigured": string;
-                    "willAppear": string;
-                    "preparing": string;
-                    "notReady": string;
-                    "declined": string;
-                    "initFailed": string;
                 };
             };
             "menu-category": {

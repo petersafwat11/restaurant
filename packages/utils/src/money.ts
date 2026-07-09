@@ -72,7 +72,7 @@ export function decimalToString(value: DecimalLike): string {
   return round2(value).toFixed(2);
 }
 
-// ---- Provider minor units (Stripe etc.) -----------------------------------
+// ---- Provider minor units --------------------------------------------------
 //
 // Minor-unit exponent per ISO-4217 currency we support. We list currencies
 // explicitly and reject anything else rather than silently assuming 2dp — a

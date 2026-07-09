@@ -1324,9 +1324,10 @@ async function seedOrders() {
       const payment = await prisma.payment.create({
         data: {
           orderId: order.id,
-          provider: s.type === 'DINE_IN' ? 'cod' : 'stripe',
-          providerRef: `pi_seed_${i}`,
-          method: s.type === 'DINE_IN' ? 'COD' : 'STRIPE_CARD',
+          provider: s.type === 'DINE_IN' ? 'cod' : 'eservice',
+          providerRef: `ref_seed_${i}`,
+          providerTxnId: s.type === 'DINE_IN' ? null : `TRN_seed_${i}`,
+          method: s.type === 'DINE_IN' ? 'COD' : 'CARD',
           amount: money(grandTotal),
           currency: 'PLN',
           status: refunded ? 'PARTIALLY_REFUNDED' : 'PAID',

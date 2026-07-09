@@ -63,13 +63,9 @@
       "DINE_IN": "Dine-in"
     },
     "paymentMethods": {
-      "STRIPE_CARD": "Card",
-      "APPLE_PAY": "Apple Pay",
-      "GOOGLE_PAY": "Google Pay",
-      "COD": "Cash on delivery",
-      "WALLET": "Wallet",
-      "P24": "Przelewy24",
-      "BLIK": "BLIK"
+      "CARD": "Card",
+      "BLIK": "BLIK",
+      "COD": "Cash on delivery"
     }
   },
   "types": {

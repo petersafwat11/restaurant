@@ -90,7 +90,7 @@
   "legal": {
     "title": "Dane firmy",
     "description": "Oficjalna tożsamość firmy używana na fakturach, u dostawcy płatności i na stronach prawnych.",
-    "verifyWarning": "Te wartości muszą dokładnie odpowiadać danym z KRS, Stripe oraz rachunku bankowego do wypłat. Sprawdź je w aktualnym odpisie z KRS przed wprowadzeniem — aplikacja nie weryfikuje rejestrów zewnętrznych.",
+    "verifyWarning": "Te wartości muszą dokładnie odpowiadać danym z KRS, eService oraz rachunku bankowego do wypłat. Sprawdź je w aktualnym odpisie z KRS przed wprowadzeniem — aplikacja nie weryfikuje rejestrów zewnętrznych.",
     "legalNameLabel": "Nazwa prawna",
     "legalNameHint": "Dokładna nazwa rejestrowa firmy (np. „… SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ”), nie nazwa handlowa.",
     "nipLabel": "NIP",

@@ -27,11 +27,11 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
 import { verifyOrderTrackingToken } from '../orders/order-tracking-token';
 import { OrdersService } from '../orders/orders.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EserviceProvider } from './eservice.provider';
+import { mapTransactionStatus } from './eservice-status';
 import type { ParsedWebhookEvent, PaymentProvider } from './provider.interface';
 import { CodProvider } from './providers/cod.provider';
-import { StripeProvider } from './providers/stripe.provider';
 import { reconcileAction } from './reconcile';
-import { stripeIntentIdempotencyKey } from './stripe-intent';
 import { WebhookEventsService } from './webhook-events.service';
 
 interface PaymentActor {
@@ -46,7 +46,7 @@ export class PaymentsService {
   constructor(
     @Inject(ENV) private readonly env: ENV_TYPE,
     private readonly prisma: PrismaService,
-    private readonly stripeProvider: StripeProvider,
+    private readonly eserviceProvider: EserviceProvider,
     private readonly codProvider: CodProvider,
     private readonly webhookEvents: WebhookEventsService,
     private readonly orders: OrdersService,
@@ -58,9 +58,62 @@ export class PaymentsService {
     // drifts from the currency orders are actually charged in.
     const restaurant = await this.prisma.restaurant.findFirst({ select: { currency: true } });
     return {
-      stripePublishableKey: this.env.STRIPE_PUBLISHABLE_KEY,
       currency: restaurant?.currency ?? 'PLN',
+      // Online (card/BLIK) payments are available only when eService is
+      // configured; in stub mode the storefront should offer COD only.
+      onlinePaymentsEnabled: !this.eserviceProvider.stubMode,
     };
+  }
+
+  /**
+   * HTML the eService HPP renders at `return_url` after payment. eService needs a
+   * publicly reachable return URL that contains "basic HTML and JavaScript" — it
+   * can't reach `localhost`, so the return URL points at this (tunnelled) API and
+   * we bounce the customer's TOP-level browser window to the web app, which the
+   * browser itself can reach. `window.top` breaks out of any iframe eService uses.
+   */
+  buildReturnRedirectHtml(orderId: string | undefined, status: string | undefined): string {
+    const web = this.env.APP_URL_WEB.replace(/\/$/, '');
+    const failed = ['DECLINED', 'CANCELLED', 'EXPIRED', 'ERROR', 'REJECTED'].includes(
+      (status ?? '').toUpperCase(),
+    );
+    const target = !orderId
+      ? `${web}/menu`
+      : failed
+        ? `${web}/checkout`
+        : `${web}/checkout/return?orderId=${encodeURIComponent(orderId)}`;
+    const safe = JSON.stringify(target);
+    return `<!doctype html><html><head><meta charset="utf-8"><title>Redirecting…</title></head><body style="font-family:system-ui,sans-serif;text-align:center;padding:2rem;color:#444">Finalizing your payment…<script>window.top.location.href=${safe};</script><noscript><a href=${safe}>Continue</a></noscript></body></html>`;
+  }
+
+  /**
+   * Confirm an eService order from the provider's authoritative record. Called on
+   * the HPP return so the order settles instantly, without waiting for the
+   * status_url webhook (which can be delayed or, in some eService configs,
+   * undelivered). Idempotent; the 15-min reconcile job is the backstop for
+   * customers who never return.
+   */
+  async settleEserviceOrderIfPaid(orderId: string): Promise<void> {
+    const payment = await this.prisma.payment.findFirst({
+      where: { orderId },
+      include: { order: true },
+    });
+    if (!payment || payment.provider !== 'eservice' || !payment.providerRef) return;
+    if (['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) return;
+
+    const txn = await this.eserviceProvider.retrieveTransaction(payment.providerRef);
+    if (!txn || (txn.status ?? '').toUpperCase() !== 'CAPTURED') return;
+
+    // Settle the payment (never clobber an already-terminal row) and persist the
+    // TRN id so refunds have a target, then confirm the order through the FSM.
+    const { count } = await this.prisma.payment.updateMany({
+      where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
+      data: { status: 'PAID', providerTxnId: txn.id ?? payment.providerTxnId },
+    });
+    if (count > 0 && payment.order.status === 'PENDING') {
+      await this.confirmOrderFromPayment(payment.order, payment.id);
+      this.logger.log(`Order ${payment.order.orderNumber} settled on return (payment ${payment.id})`);
+    }
   }
 
   // ---- Create intent -----------------------------------------------------
@@ -94,47 +147,84 @@ export class PaymentsService {
 
     const provider = this.pickProvider(dto.provider, dto.methodKind);
 
-    // Method switch (e.g. card → BLIK): the old intent is method-specific and
-    // can't be confirmed the new way, so cancel it before creating a fresh one
-    // (plan §F2). Same-method retries reuse via the deterministic key below.
+    // Same-method retry reuse (plan §F2): the customer re-opened checkout for
+    // the same method and we already minted an HPP link that's still open. Reuse
+    // it verbatim — no new eService link, no new reference — so the redirect URL
+    // is stable across refreshes and we don't leave orphaned links behind.
     if (
-      provider.id === 'stripe' &&
-      existing?.provider === 'stripe' &&
+      provider.id === 'eservice' &&
+      existing?.provider === 'eservice' &&
       existing.status === 'PENDING' &&
-      existing.providerRef &&
+      existing.method === dto.methodKind &&
+      existing.providerRedirectUrl
+    ) {
+      return {
+        paymentId: existing.id,
+        provider: provider.id,
+        status: existing.status,
+        redirectUrl: existing.providerRedirectUrl,
+        confirmed: false,
+      };
+    }
+
+    // Method switch (e.g. card → BLIK): the old HPP link is method-specific and
+    // can't be paid the new way, so expire it before creating a fresh one (plan
+    // §F2). The expire endpoint targets the LNK id (providerLinkId), not our
+    // reference.
+    if (
+      provider.id === 'eservice' &&
+      existing?.provider === 'eservice' &&
+      existing.status === 'PENDING' &&
+      existing.providerLinkId &&
       existing.method !== dto.methodKind
     ) {
-      await provider.cancelIntent?.(existing.providerRef);
+      await provider.cancelIntent?.(existing.providerLinkId);
     }
 
     const amount = order.grandTotal.toFixed(2);
-    const idempotencyKey =
-      provider.id === 'stripe'
-        ? stripeIntentIdempotencyKey({
-            orderId: order.id,
-            methodKind: dto.methodKind,
-            amount,
-            currency: order.currency,
-          })
-        : undefined;
+
+    // Reconcilable metadata (plan §F2). Payer name/email feed the HPP payer
+    // block; the rest is PII-free reconciliation context. Only include the payer
+    // keys when present so the map stays a clean Record<string, string>.
+    const metadata: Record<string, string> = {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      environment: this.env.NODE_ENV ?? 'unknown',
+    };
+    // eService's HPP requires a payer email (HPP_CUSTOMER_EMAIL). Prefer the
+    // order's guest contact snapshot; fall back to the authed user's email/name
+    // so logged-in orders (which may not snapshot contact fields) still supply one.
+    let payerEmail = order.customerEmail;
+    let payerName = order.customerName;
+    if ((!payerEmail || !payerName) && order.userId) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: order.userId },
+        select: { email: true, firstName: true, lastName: true },
+      });
+      payerEmail = payerEmail ?? user?.email ?? null;
+      payerName =
+        payerName ?? (user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || null : null);
+    }
+    if (provider.id === 'eservice' && !payerEmail) {
+      throw new BadRequestException('A customer email is required for online payment.');
+    }
+    if (payerName) metadata.payerName = payerName;
+    if (payerEmail) metadata.payerEmail = payerEmail;
+    if (order.checkoutLocale) metadata.language = order.checkoutLocale;
 
     const intent = await provider.createIntent({
       orderId: order.id,
       amount,
       currency: order.currency,
       methodKind: dto.methodKind,
-      // Reconcilable, PII-free metadata (plan §F2).
-      metadata: {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        environment: this.env.NODE_ENV ?? 'unknown',
-      },
-      idempotencyKey,
+      metadata,
     });
 
     const data = {
       provider: provider.id,
       providerRef: intent.providerRef,
+      providerLinkId: intent.linkId ?? null,
+      providerRedirectUrl: intent.redirectUrl,
       method: dto.methodKind,
       amount: order.grandTotal,
       currency: order.currency,
@@ -148,9 +238,10 @@ export class PaymentsService {
       try {
         await this.prisma.payment.create({ data: { orderId: order.id, ...data } });
       } catch (err) {
-        // Lost the create race to a concurrent request — fall through to the
-        // same conditional update path (both carry the same providerRef via the
-        // deterministic idempotency key).
+        // Lost the create race to a concurrent request (unique on orderId) —
+        // fall through to the same conditional update path, which overwrites the
+        // ref/link/redirect with this attempt's values without clobbering a PAID
+        // row.
         if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')) {
           throw err;
         }
@@ -175,8 +266,8 @@ export class PaymentsService {
     });
 
     // COD short-circuits: confirm the order immediately and emit the same
-    // events the Stripe webhook would, so the notification dispatcher can listen
-    // on a single channel.
+    // events the eService webhook would, so the notification dispatcher can
+    // listen on a single channel.
     if (intent.confirmed) {
       await this.confirmOrderFromPayment(order, payment.id);
     }
@@ -185,8 +276,8 @@ export class PaymentsService {
       paymentId: payment.id,
       provider: provider.id,
       status: payment.status,
-      clientSecret: intent.clientSecret,
-      publishableKey: provider.id === 'stripe' ? this.env.STRIPE_PUBLISHABLE_KEY : null,
+      // eService: the HPP redirect URL the browser is sent to. null for COD.
+      redirectUrl: intent.redirectUrl,
       confirmed: intent.confirmed,
     };
   }
@@ -237,8 +328,12 @@ export class PaymentsService {
     if (payment.status !== 'PAID' && payment.status !== 'PARTIALLY_REFUNDED') {
       throw new BadRequestException('Payment is not refundable');
     }
-    if (!payment.providerRef) {
-      throw new BadRequestException('Payment is missing providerRef');
+    // eService refunds target the settled transaction (TRN), which we only learn
+    // once a capture webhook (or reconcile) lands. Without it there is nothing to
+    // refund yet — surface a clear reason rather than calling with a null id. COD
+    // has no transaction and refunds are DB-only, so it is exempt.
+    if (payment.provider === 'eservice' && !payment.providerTxnId) {
+      throw new BadRequestException('Payment is not refundable until captured');
     }
 
     const alreadyRefunded = addAll(payment.refunds.map((r) => r.amount));
@@ -254,15 +349,19 @@ export class PaymentsService {
       );
     }
 
-    if (payment.method === 'PAYMOB') {
-      throw new BadRequestException('PAYMOB provider is not supported');
-    }
     const provider = this.pickProvider(
-      payment.provider as 'stripe' | 'cod',
+      payment.provider as 'eservice' | 'cod',
       payment.method as PaymentMethodKind,
     );
+    // eService refunds go against the transaction id (providerTxnId, guarded
+    // above); COD refunds are DB-only and ignore the ref, so fall back to
+    // providerRef for it.
+    const refundTarget =
+      payment.provider === 'eservice'
+        ? (payment.providerTxnId as string)
+        : (payment.providerRef ?? payment.id);
     const result = await provider.refund({
-      providerRef: payment.providerRef,
+      providerRef: refundTarget,
       amount: decimalToString(requested),
       currency: payment.currency,
       reason: dto.reason,
@@ -363,15 +462,15 @@ export class PaymentsService {
 
   // ---- Webhook handler ---------------------------------------------------
 
-  async handleStripeWebhook(rawBody: Buffer, signature: string | undefined): Promise<void> {
-    const event = this.stripeProvider.parseWebhook?.(rawBody, signature);
+  async handleEserviceWebhook(rawBody: Buffer, signature: string | undefined): Promise<void> {
+    const event = this.eserviceProvider.parseWebhook?.(rawBody, signature);
     if (!event) {
       throw new BadRequestException('Invalid webhook signature');
     }
 
     const isNew = await this.webhookEvents.recordIfNew({
       id: event.id,
-      provider: 'stripe',
+      provider: 'eservice',
       type: event.type,
       payload: event.raw,
     });
@@ -392,7 +491,7 @@ export class PaymentsService {
   // ---- Reconciliation (plan §F6) -----------------------------------------
 
   /**
-   * Reconcile non-terminal Stripe payments against the provider. Repairs rows
+   * Reconcile non-terminal eService payments against the provider. Repairs rows
    * where a webhook was missed (provider succeeded → PAID + confirm order) or
    * the intent died (canceled/failed → FAILED), and alerts on anything
    * unexpected. Status-guarded + idempotent, so safe to run on a schedule.
@@ -404,7 +503,7 @@ export class PaymentsService {
     const cutoff = new Date(Date.now() - (opts.olderThanMinutes ?? 15) * 60_000);
     const stale = await this.prisma.payment.findMany({
       where: {
-        provider: 'stripe',
+        provider: 'eservice',
         status: { in: ['PENDING', 'AUTHORIZED'] },
         // Only rows that have sat un-settled past the grace window — avoids
         // racing an intent the customer is actively completing.
@@ -420,14 +519,21 @@ export class PaymentsService {
 
     for (const payment of stale) {
       if (!payment.providerRef) continue;
-      const status = (await this.stripeProvider.retrieveIntentStatus?.(payment.providerRef)) ?? null;
+      // Fetch the settled transaction (id + status) in one call. We need the
+      // status to decide the action AND the TRN id to persist on repair — eService
+      // refunds target the transaction, so a row we settle here from a *missed
+      // webhook* must carry providerTxnId or a later refund is blocked (see the
+      // refund guard). `mapTransactionStatus(undefined)` is null, matching the
+      // previous `retrieveIntentStatus` "couldn't determine → leave" behaviour.
+      const txn = await this.eserviceProvider.retrieveTransaction(payment.providerRef);
+      const status = mapTransactionStatus(txn?.status);
       checked += 1;
       const action = reconcileAction(status, payment.status as PaymentStatus);
 
       if (action === 'mark_paid') {
         const { count } = await this.prisma.payment.updateMany({
           where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
-          data: { status: 'PAID' },
+          data: { status: 'PAID', ...(txn?.id ? { providerTxnId: txn.id } : {}) },
         });
         if (count > 0) {
           repaired += 1;
@@ -443,11 +549,13 @@ export class PaymentsService {
         });
         if (count > 0) {
           repaired += 1;
-          this.logger.warn(`[RECONCILE] payment ${payment.id} → FAILED (stripe: ${status})`);
+          this.logger.warn(`[RECONCILE] payment ${payment.id} → FAILED (eservice: ${status})`);
         }
       } else if (action === 'attention') {
         attention += 1;
-        this.logger.error(`[RECONCILE] payment ${payment.id} unexpected stripe status: ${status}`);
+        this.logger.error(
+          `[RECONCILE] payment ${payment.id} unexpected eservice status: ${status}`,
+        );
       }
     }
 
@@ -463,11 +571,11 @@ export class PaymentsService {
   // ---- Internal ----------------------------------------------------------
 
   private pickProvider(
-    provider: 'stripe' | 'cod',
+    provider: 'eservice' | 'cod',
     method: PaymentMethodKind,
   ): PaymentProvider {
     const candidate: PaymentProvider =
-      provider === 'stripe' ? this.stripeProvider : this.codProvider;
+      provider === 'eservice' ? this.eserviceProvider : this.codProvider;
     if (!candidate.supports.includes(method)) {
       throw new BadRequestException(
         `Provider ${provider} does not support method ${method}`,
@@ -477,7 +585,7 @@ export class PaymentsService {
   }
 
   private async confirmOrderFromPayment(order: Order, paymentId: string): Promise<void> {
-    // Delegate to OrdersService so the payment-driven confirm (Stripe webhook /
+    // Delegate to OrdersService so the payment-driven confirm (eService webhook /
     // COD intent) and the COD-at-checkout path share one implementation:
     // idempotent PENDING→CONFIRMED guard, status event, receipt enqueue.
     const confirmed = await this.orders.confirmPendingOrder(order.id, 'Payment confirmed');
@@ -487,23 +595,27 @@ export class PaymentsService {
   }
 
   private async dispatchEvent(event: ParsedWebhookEvent): Promise<void> {
-    if (event.type === 'payment_intent.succeeded') {
-      if (!event.paymentIntentId) return;
+    if (event.type === 'payment.succeeded') {
+      if (!event.providerRef) return;
       const payment = await this.prisma.payment.findFirst({
-        where: { providerRef: event.paymentIntentId },
+        where: { providerRef: event.providerRef },
         include: { order: true },
       });
       if (!payment) {
-        this.logger.warn(`Webhook ${event.id}: no Payment for intent ${event.paymentIntentId}`);
+        this.logger.warn(`Webhook ${event.id}: no Payment for reference ${event.providerRef}`);
         return;
       }
       // Only settle a non-terminal payment — never flip an already-PAID or
       // refunded row back to PAID (out-of-order / duplicate delivery safety,
-      // symmetric with the failed/canceled guard below). Idempotent: an
-      // already-settled row matches 0 and skips the confirm.
+      // symmetric with the failed guard below). Idempotent: an already-settled
+      // row matches 0 and skips the confirm. Persist the TRN id so refunds
+      // (which target the transaction) have a handle.
       const { count } = await this.prisma.payment.updateMany({
         where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
-        data: { status: 'PAID' },
+        data: {
+          status: 'PAID',
+          ...(event.transactionId ? { providerTxnId: event.transactionId } : {}),
+        },
       });
       if (count > 0 && payment.order.status === 'PENDING') {
         await this.confirmOrderFromPayment(payment.order, payment.id);
@@ -511,16 +623,13 @@ export class PaymentsService {
       return;
     }
 
-    if (
-      event.type === 'payment_intent.payment_failed' ||
-      event.type === 'payment_intent.canceled'
-    ) {
-      if (!event.paymentIntentId) return;
-      // Guard against out-of-order delivery: a late failed/canceled event must
-      // never clobber an already-settled (PAID/refunded) payment (plan §F6).
+    if (event.type === 'payment.failed') {
+      if (!event.providerRef) return;
+      // Guard against out-of-order delivery: a late failed event must never
+      // clobber an already-settled (PAID/refunded) payment (plan §F6).
       await this.prisma.payment.updateMany({
         where: {
-          providerRef: event.paymentIntentId,
+          providerRef: event.providerRef,
           status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] },
         },
         data: { status: 'FAILED' },
@@ -528,29 +637,35 @@ export class PaymentsService {
       return;
     }
 
-    if (event.type === 'charge.refunded') {
+    if (event.type === 'payment.refunded') {
       await this.syncDashboardRefund(event);
       return;
     }
   }
 
   /**
-   * Sync a `charge.refunded` event from Stripe. Creates missing `Refund` rows
-   * (matching on `Refund.providerRef = stripe refund id`) and transitions the
-   * order to REFUNDED if the aggregate refunded amount covers the payment.
+   * Sync a refund notification from eService (e.g. a refund issued from the
+   * eService dashboard). Creates missing `Refund` rows (matching on
+   * `Refund.providerRef = eService refund id`) and transitions the order to
+   * REFUNDED if the aggregate refunded amount covers the payment. Matched by our
+   * `reference` (providerRef), like the succeeded/failed paths.
+   *
+   * TODO(verify): confirm eService refund-notification field names against a
+   * live sample — the refund detail shape (see `parseNotification`) was not
+   * captured live during integration.
    */
   private async syncDashboardRefund(event: ParsedWebhookEvent): Promise<void> {
-    if (!event.paymentIntentId) {
-      this.logger.warn(`charge.refunded ${event.id}: missing payment_intent`);
+    if (!event.providerRef) {
+      this.logger.warn(`payment.refunded ${event.id}: missing reference`);
       return;
     }
     const payment = await this.prisma.payment.findFirst({
-      where: { providerRef: event.paymentIntentId },
+      where: { providerRef: event.providerRef },
       include: { refunds: true },
     });
     if (!payment) {
       this.logger.warn(
-        `charge.refunded ${event.id}: no Payment for intent ${event.paymentIntentId}`,
+        `payment.refunded ${event.id}: no Payment for reference ${event.providerRef}`,
       );
       return;
     }
@@ -573,13 +688,13 @@ export class PaymentsService {
       });
       createdCount += 1;
       this.logger.log(
-        `[STRIPE_DASHBOARD_REFUND] payment=${payment.id} refund=${r.id} amount=${r.amount}`,
+        `[ESERVICE_DASHBOARD_REFUND] payment=${payment.id} refund=${r.id} amount=${r.amount}`,
       );
     }
 
     if (createdCount === 0) {
       this.logger.log(
-        `[STRIPE_DASHBOARD_REFUND] payment=${payment.id} all refunds already recorded`,
+        `[ESERVICE_DASHBOARD_REFUND] payment=${payment.id} all refunds already recorded`,
       );
       return;
     }
@@ -602,13 +717,13 @@ export class PaymentsService {
           payment.orderId,
           'REFUNDED',
           null,
-          'Refunded via Stripe dashboard',
+          'Refunded via eService dashboard',
         );
       } catch (err) {
         // State machine rejects transitions from terminal states. Log and
         // continue — the Refund rows are still persisted, which is the goal.
         this.logger.warn(
-          `[STRIPE_DASHBOARD_REFUND] could not transition order ${payment.orderId}: ${(err as Error).message}`,
+          `[ESERVICE_DASHBOARD_REFUND] could not transition order ${payment.orderId}: ${(err as Error).message}`,
         );
       }
     }

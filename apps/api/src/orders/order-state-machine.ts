@@ -36,7 +36,7 @@ interface TransitionRule {
 }
 
 const RULES: readonly TransitionRule[] = [
-  // Payment-confirmed (also fired by COD short-circuit + Stripe webhook).
+  // Payment-confirmed (also fired by COD short-circuit + eService webhook).
   {
     from: 'PENDING',
     to: 'CONFIRMED',

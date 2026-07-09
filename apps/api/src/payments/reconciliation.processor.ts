@@ -4,8 +4,8 @@ import { JOB_PAYMENT_RECONCILE, QUEUE_RECONCILIATION } from '@repo/jobs';
 import type { Job, Queue } from 'bullmq';
 import { PaymentsService } from './payments.service';
 
-// Every 15 minutes — repair payments where a Stripe webhook was missed or the
-// intent died, and surface anything unexpected (plan §F6).
+// Every 15 minutes — repair payments where an eService webhook was missed or
+// the intent died, and surface anything unexpected (plan §F6).
 const RECONCILE_CRON = '*/15 * * * *';
 const CRON_TZ = 'UTC';
 

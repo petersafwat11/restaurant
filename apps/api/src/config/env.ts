@@ -31,12 +31,19 @@ const EnvSchema = z.object({
   // In prod, UPLOADS_DIR is a bind-mounted Docker volume (`/var/uploads`).
   UPLOADS_DIR: z.string().default('uploads'),
 
-  // Stripe. Empty in dev → payments module runs a fake provider that issues
-  // a deterministic `client_secret` so the frontend SDK path can still be
-  // exercised without real Stripe keys.
-  STRIPE_SECRET_KEY: z.string().optional().default(''),
-  STRIPE_PUBLISHABLE_KEY: z.string().optional().default(''),
-  STRIPE_WEBHOOK_SECRET: z.string().optional().default(''),
+  // eService (Global Payments GP API) — Hosted Payment Page integration.
+  // Empty ESERVICE_APP_ID in dev → the payments module runs a fake provider
+  // that issues a deterministic HPP redirect URL so the checkout redirect flow
+  // can still be exercised without real eService credentials. `ESERVICE_ENV`
+  // picks the API base URL (sandbox vs production).
+  ESERVICE_ENV: z.enum(['sandbox', 'production']).optional().default('sandbox'),
+  ESERVICE_APP_ID: z.string().optional().default(''),
+  ESERVICE_APP_KEY: z.string().optional().default(''),
+  ESERVICE_ACCOUNT_NAME: z.string().optional().default(''),
+  // Public API base used to build the webhook (status_url) sent to eService.
+  ESERVICE_WEBHOOK_URL: z.string().optional().default(''),
+  // Web return-page base — the HPP redirects the customer here after payment.
+  ESERVICE_RETURN_URL: z.string().optional().default(''),
 
   // Secret used to HMAC-sign public deep links (order tracking URLs sent in
   // confirmation emails). Falls back to JWT_ACCESS_SECRET in non-prod for dev
@@ -44,7 +51,7 @@ const EnvSchema = z.object({
   ORDER_TRACKING_SECRET: z.string().optional().default(''),
 
   // Sprint 12 — observability + analytics + feature flags. All optional;
-  // empty → safe no-op (same optional contract as Stripe above).
+  // empty → safe no-op (same optional contract as eService above).
   SENTRY_DSN: z.string().optional().default(''),
   SENTRY_ENV: z.string().optional().default(''),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),

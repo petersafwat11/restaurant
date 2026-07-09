@@ -154,14 +154,16 @@ describe('security hardening (e2e)', () => {
     expect(throttled?.headers['retry-after']).toBeDefined();
   });
 
-  it('C10: does NOT rate-limit the Stripe webhook endpoint', async () => {
+  it('C10: does NOT rate-limit the eService webhook endpoint', async () => {
     // Webhooks must never be customer-rate-limited (§I1). Fire many; none 429.
     const codes: number[] = [];
     for (let i = 0; i < 25; i++) {
-      const res = await inject('POST', '/api/v1/payments/webhooks/stripe', {
-        id: `evt_rl_probe_${i}`,
-        type: 'payment_intent.succeeded',
-        data: { object: { id: `pi_none_${i}` } },
+      const res = await inject('POST', '/api/v1/payments/webhooks/eservice', {
+        id: `TRN_rl_probe_${i}`,
+        status: 'CAPTURED',
+        reference: `ref_none_${i}`,
+        payment_method: { result: '00' },
+        action: { id: `ACT_rl_probe_${i}`, type: 'STATUS_NOTIFICATION' },
       });
       codes.push(res.statusCode);
     }

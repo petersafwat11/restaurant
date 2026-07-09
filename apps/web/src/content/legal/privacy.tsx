@@ -64,7 +64,7 @@ interface ProcessingRow {
 }
 
 /**
- * Neutral default for the international-transfer column. Stripe/Twilio/email may
+ * Neutral default for the international-transfer column. eService/Twilio/email may
  * process outside the EEA under SCCs; the exact per-processor mechanism is
  * confirmed by the owner/lawyer (see §6). We do not assert a specific mechanism
  * per processor here.
@@ -167,8 +167,8 @@ const PROCESSING_ROWS: ProcessingRow[] = [
       en: 'from you via the payment provider’s secure form (we never see the full card number)',
     },
     purpose: {
-      pl: 'realizacja płatności, zapobieganie nadużyciom (Stripe Radar/3DS)',
-      en: 'taking payment, fraud prevention (Stripe Radar/3DS)',
+      pl: 'realizacja płatności, zapobieganie nadużyciom (kontrole antyfraudowe eService / Global Payments, 3-D Secure)',
+      en: 'taking payment, fraud prevention (eService / Global Payments fraud checks, 3-D Secure)',
     },
     basis: {
       pl: 'umowa (art. 6 ust. 1 lit. b); uzasadniony interes — bezpieczeństwo płatności (art. 6 ust. 1 lit. f)',
@@ -179,8 +179,8 @@ const PROCESSING_ROWS: ProcessingRow[] = [
       en: 'required for online payment (cash on delivery is an alternative where available)',
     },
     recipients: {
-      pl: 'dostawca płatności (Stripe) jako odrębny administrator/podmiot przetwarzający',
-      en: 'payment provider (Stripe) acting as separate controller/processor',
+      pl: 'dostawca płatności (eService) jako odrębny administrator/podmiot przetwarzający',
+      en: 'payment provider (eService / Global Payments) acting as separate controller/processor',
     },
     retention: {
       pl: 'referencje płatności z dokumentacją zamówienia', // LAWYER: confirm
@@ -483,13 +483,11 @@ export function PrivacyEN({ c }: { c: CompanyInfo }) {
           {/* LAWYER/OWNER: confirm data-centre region + DPA reference. */}
         </li>
         <li>
-          <strong>Stripe</strong> — online card/BLIK payment processing and fraud prevention, when
-          online payments are enabled. Stripe acts as an independent controller for some processing;
-          see Stripe’s{' '}
-          <a href="https://stripe.com/privacy" target="_blank" rel="noreferrer">
-            privacy policy
-          </a>
-          .
+          <strong>eService</strong> (part of Global Payments) — online card/BLIK payment processing
+          and fraud prevention on its hosted payment page, when online payments are enabled. eService
+          acts as an independent controller for some of this processing under its own privacy policy.{' '}
+          {/* LAWYER: add the exact eService / Global Payments privacy-policy link + confirm the
+          controller/processor split. */}
         </li>
         <li>
           <strong>Email provider</strong> — transactional email (order confirmations, receipts,
@@ -540,9 +538,10 @@ export function PrivacyEN({ c }: { c: CompanyInfo }) {
         .
       </p>
       <p>
-        Where online payments are enabled, an automated fraud assessment (Stripe Radar) may be
-        applied to a transaction to protect against fraud; you can contact us to ask about a
-        decision. {/* LAWYER: confirm Art. 22 wording for automated fraud checks. */}
+        Where online payments are enabled, an automated fraud assessment may be applied to a
+        transaction by our payment provider (eService / Global Payments) to protect against fraud;
+        you can contact us to ask about a decision.{' '}
+        {/* LAWYER: confirm Art. 22 wording for automated fraud checks. */}
       </p>
       <p>
         You can ask us to delete or anonymise your account. We retain only the records we are
@@ -649,13 +648,12 @@ export function PrivacyPL({ c }: { c: CompanyInfo }) {
           {/* LAWYER/OWNER: potwierdź region centrum danych + numer umowy powierzenia (DPA). */}
         </li>
         <li>
-          <strong>Stripe</strong> — obsługa płatności kartą/BLIK online oraz zapobieganie
-          nadużyciom, gdy płatności online są włączone. W części przetwarzania Stripe jest odrębnym
-          administratorem; zob.{' '}
-          <a href="https://stripe.com/privacy" target="_blank" rel="noreferrer">
-            politykę prywatności Stripe
-          </a>
-          .
+          <strong>eService</strong> (część Global Payments) — obsługa płatności kartą/BLIK online
+          oraz zapobieganie nadużyciom na hostowanej stronie płatności, gdy płatności online są
+          włączone. W części przetwarzania eService jest odrębnym administratorem zgodnie z własną
+          polityką prywatności.{' '}
+          {/* LAWYER: dodaj dokładny link do polityki prywatności eService / Global Payments i
+          potwierdź rolę administrator/podmiot przetwarzający. */}
         </li>
         <li>
           <strong>Dostawca e-mail</strong> — e-maile transakcyjne (potwierdzenia zamówień, paragony,
@@ -708,8 +706,8 @@ export function PrivacyPL({ c }: { c: CompanyInfo }) {
       </p>
       <p>
         Gdy płatności online są włączone, do transakcji może być stosowana automatyczna ocena ryzyka
-        nadużyć (Stripe Radar) w celu ochrony przed oszustwami; możesz skontaktować się z nami, aby
-        zapytać o decyzję.{' '}
+        nadużyć przez naszego dostawcę płatności (eService / Global Payments) w celu ochrony przed
+        oszustwami; możesz skontaktować się z nami, aby zapytać o decyzję.{' '}
         {/* LAWYER: potwierdź treść dot. art. 22 dla automatycznej oceny ryzyka. */}
       </p>
       <p>

@@ -3,6 +3,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
+// These run against the eService provider in STUB mode (CI sets no
+// ESERVICE_APP_ID), so:
+//  - createIntent returns a deterministic HPP redirect URL and a
+//    `ref_stub_<orderId>_<method>` reference,
+//  - webhook bodies are accepted verbatim (stub mode skips signature
+//    verification — the SHA512 signature check is covered in the
+//    eservice.provider unit spec, which is the only place real mode runs).
 describe('payments (e2e)', () => {
   let app: NestFastifyApplication;
   let ownerToken: string;
@@ -90,43 +97,52 @@ describe('payments (e2e)', () => {
     return res.json().accessToken;
   }
 
+  // The deterministic stub reference for the current order + method.
+  function stubRef(method: 'CARD' | 'BLIK'): string {
+    return `ref_stub_${orderId}_${method}`;
+  }
+
+  // A CAPTURED status notification for a card payment. `trn`/`act` distinguish
+  // deliveries so replay/out-of-order tests exercise the real guards (a shared
+  // action id would dedupe at the WebhookEvent layer and prove nothing).
+  function succeededEvent(opts: { trn: string; act: string; method?: 'CARD' | 'BLIK' }) {
+    return {
+      id: opts.trn,
+      status: 'CAPTURED',
+      reference: stubRef(opts.method ?? 'CARD'),
+      payment_method: { result: '00', message: 'AUTHORISED' },
+      link_data: { id: `lnk_stub_${orderId}_${opts.method ?? 'CARD'}` },
+      action: { id: opts.act, type: 'STATUS_NOTIFICATION' },
+    };
+  }
+
   // ---- Create intent ----
 
-  it('creates a Stripe intent and returns a clientSecret (stub mode)', async () => {
+  it('creates an eService intent and returns an HPP redirect URL (stub mode)', async () => {
     const res = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
     expect(res.statusCode).toBe(201);
     const body = res.json();
-    expect(body.provider).toBe('stripe');
-    expect(body.clientSecret).toMatch(/_secret/);
+    expect(body.provider).toBe('eservice');
+    expect(body.redirectUrl).toMatch(/^https:\/\/stub\.local\/hpp\//);
     expect(body.confirmed).toBe(false);
     paymentIntentRef = body.paymentId;
     expect(paymentIntentRef).toBeTypeOf('string');
   });
 
-  it('creates a P24 Stripe intent successfully', async () => {
+  it('creates a BLIK eService intent successfully', async () => {
     const res = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'P24' },
+      { orderId, provider: 'eservice', methodKind: 'BLIK' },
       userToken,
     );
     expect(res.statusCode).toBe(201);
-    expect(res.json().clientSecret).toMatch(/_secret/);
-  });
-
-  it('creates a BLIK Stripe intent successfully', async () => {
-    const res = await inject(
-      'POST',
-      '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'BLIK' },
-      userToken,
-    );
-    expect(res.statusCode).toBe(201);
+    expect(res.json().redirectUrl).toMatch(/^https:\/\/stub\.local\/hpp\//);
   });
 
   it('COD short-circuits — order transitions to CONFIRMED immediately', async () => {
@@ -138,6 +154,8 @@ describe('payments (e2e)', () => {
     );
     expect(res.statusCode).toBe(201);
     expect(res.json().confirmed).toBe(true);
+    // COD has no redirect.
+    expect(res.json().redirectUrl).toBeNull();
 
     const order = await inject('GET', `/api/v1/orders/${orderId}`, undefined, userToken);
     expect(order.json().status).toBe('CONFIRMED');
@@ -145,48 +163,49 @@ describe('payments (e2e)', () => {
 
   // ---- Webhook ----
 
-  it('processes Stripe payment_intent.succeeded webhook and confirms the order', async () => {
+  it('processes an eService payment.succeeded webhook and confirms the order', async () => {
     // Create the intent so the Payment row exists.
     const intent = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    const providerRef = `pi_stub_${orderId}_STRIPE_CARD`;
-    expect(intent.json().clientSecret).toContain(providerRef);
+    expect(intent.json().redirectUrl).toContain(orderId);
 
-    const event = {
-      id: 'evt_test_succeeded_1',
-      type: 'payment_intent.succeeded',
-      data: { object: { id: providerRef } },
-    };
-    const res = await inject('POST', '/api/v1/payments/webhooks/stripe', event);
+    const event = succeededEvent({ trn: 'TRN_succeeded_1', act: 'ACT_succeeded_1' });
+    const res = await inject('POST', '/api/v1/payments/webhooks/eservice', event);
     expect(res.statusCode).toBe(200);
 
     const order = await inject('GET', `/api/v1/orders/${orderId}`, undefined, userToken);
     expect(order.json().status).toBe('CONFIRMED');
 
-    // Replay the same event id — should be idempotent.
-    const replay = await inject('POST', '/api/v1/payments/webhooks/stripe', event);
-    expect(replay.statusCode).toBe(200);
+    // The TRN id is persisted so refunds have a transaction to target.
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('PAID');
+    expect(payment.providerTxnId).toBe('TRN_succeeded_1');
 
-    // Order should still be CONFIRMED (not double-processed).
+    // Replay the same action id — should be idempotent (dedupe at WebhookEvent).
+    const replay = await inject('POST', '/api/v1/payments/webhooks/eservice', event);
+    expect(replay.statusCode).toBe(200);
     const after = await inject('GET', `/api/v1/orders/${orderId}`, undefined, userToken);
     expect(after.json().status).toBe('CONFIRMED');
   });
 
-  it('payment_intent.payment_failed marks the payment FAILED', async () => {
+  it('a DECLINED notification marks the payment FAILED', async () => {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    const res = await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_failed_1',
-      type: 'payment_intent.payment_failed',
-      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
+    const res = await inject('POST', '/api/v1/payments/webhooks/eservice', {
+      id: 'TRN_failed_1',
+      status: 'DECLINED',
+      reference: stubRef('CARD'),
+      payment_method: { result: '05', message: 'DO_NOT_HONOUR' },
+      action: { id: 'ACT_failed_1', type: 'STATUS_NOTIFICATION' },
     });
     expect(res.statusCode).toBe(200);
     const prisma = app.get(PrismaService);
@@ -194,24 +213,26 @@ describe('payments (e2e)', () => {
     expect(payment.status).toBe('FAILED');
   });
 
-  it('an out-of-order payment_failed after succeeded does not clobber PAID (§F6)', async () => {
+  it('an out-of-order DECLINED after CAPTURED does not clobber PAID (§F6)', async () => {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    const ref = `pi_stub_${orderId}_STRIPE_CARD`;
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_ooo_succeeded',
-      type: 'payment_intent.succeeded',
-      data: { object: { id: ref } },
-    });
-    // A late failure for the same intent (distinct event id) must be ignored.
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_ooo_failed',
-      type: 'payment_intent.payment_failed',
-      data: { object: { id: ref } },
+    await inject(
+      'POST',
+      '/api/v1/payments/webhooks/eservice',
+      succeededEvent({ trn: 'TRN_ooo_1', act: 'ACT_ooo_succeeded' }),
+    );
+    // A late failure for the same reference (distinct action id → actually
+    // processed, not deduped) must be ignored.
+    await inject('POST', '/api/v1/payments/webhooks/eservice', {
+      id: 'TRN_ooo_1',
+      status: 'DECLINED',
+      reference: stubRef('CARD'),
+      payment_method: { result: '05' },
+      action: { id: 'ACT_ooo_failed', type: 'STATUS_NOTIFICATION' },
     });
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
@@ -221,18 +242,18 @@ describe('payments (e2e)', () => {
   // ---- Refund ----
 
   it('refunds a paid payment (full) and transitions order to REFUNDED', async () => {
-    // Get to PAID via webhook simulation.
+    // Get to PAID via webhook simulation (carries the TRN → providerTxnId).
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_refund_setup_1',
-      type: 'payment_intent.succeeded',
-      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
-    });
+    await inject(
+      'POST',
+      '/api/v1/payments/webhooks/eservice',
+      succeededEvent({ trn: 'TRN_refund_setup_1', act: 'ACT_refund_setup_1' }),
+    );
 
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
@@ -254,14 +275,14 @@ describe('payments (e2e)', () => {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_partial_setup_1',
-      type: 'payment_intent.succeeded',
-      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
-    });
+    await inject(
+      'POST',
+      '/api/v1/payments/webhooks/eservice',
+      succeededEvent({ trn: 'TRN_partial_setup_1', act: 'ACT_partial_setup_1' }),
+    );
 
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
@@ -283,12 +304,38 @@ describe('payments (e2e)', () => {
     expect(order.json().status).toBe('CONFIRMED');
   });
 
+  it('rejects a refund before the payment is captured (no providerTxnId yet)', async () => {
+    // Force a PAID row with no TRN — e.g. a status flip that never carried a
+    // transaction id. eService refunds have nothing to target, so 400.
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
+      userToken,
+    );
+    const prisma = app.get(PrismaService);
+    await prisma.payment.update({
+      where: { orderId },
+      data: { status: 'PAID', providerTxnId: null },
+    });
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    const res = await inject(
+      'POST',
+      `/api/v1/payments/${payment.id}/refunds`,
+      { reason: 'too soon' },
+      ownerToken,
+    );
+    expect(res.statusCode).toBe(400);
+    expect(res.json().message).toMatch(/captured/i);
+  });
+
   it('exposes the public config endpoint', async () => {
     const res = await inject('GET', '/api/v1/payments/config');
     expect(res.statusCode).toBe(200);
     expect(res.json()).toMatchObject({
       currency: 'PLN',
-      stripePublishableKey: expect.any(String),
+      // Stub mode → online payments disabled (COD only).
+      onlinePaymentsEnabled: false,
     });
   });
 
@@ -316,12 +363,12 @@ describe('payments (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId: guest.id, provider: 'eservice', methodKind: 'CARD' },
       undefined,
       { 'x-order-token': guest.token },
     );
     expect(res.statusCode).toBe(201);
-    expect(res.json().clientSecret).toMatch(/_secret/);
+    expect(res.json().redirectUrl).toMatch(/^https:\/\/stub\.local\/hpp\//);
   });
 
   it('rejects a guest intent with no token, an invalid token, or a wrong-order token', async () => {
@@ -330,15 +377,15 @@ describe('payments (e2e)', () => {
 
     const noToken = await inject('POST', '/api/v1/payments/intent', {
       orderId: guest.id,
-      provider: 'stripe',
-      methodKind: 'STRIPE_CARD',
+      provider: 'eservice',
+      methodKind: 'CARD',
     });
     expect(noToken.statusCode).toBe(403);
 
     const badToken = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId: guest.id, provider: 'eservice', methodKind: 'CARD' },
       undefined,
       { 'x-order-token': 'not.a.valid.token' },
     );
@@ -348,32 +395,34 @@ describe('payments (e2e)', () => {
     const wrongOrder = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId: guest.id, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId: guest.id, provider: 'eservice', methodKind: 'CARD' },
       undefined,
       { 'x-order-token': other.token },
     );
     expect(wrongOrder.statusCode).toBe(403);
   });
 
-  // ---- F2: idempotency / reuse / method switch ----
+  // ---- F2: reuse / method switch ----
 
-  it('reuses one Payment row across duplicate same-method intent calls', async () => {
+  it('reuses one Payment row + the same redirect URL across duplicate same-method calls', async () => {
     const a = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
     const b = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
     expect(a.statusCode).toBe(201);
     expect(b.statusCode).toBe(201);
-    // Same order → same single Payment row (unique on orderId).
+    // Same order → same single Payment row (unique on orderId) and the reuse
+    // short-circuit returns the identical HPP link (no new link minted).
     expect(a.json().paymentId).toBe(b.json().paymentId);
+    expect(b.json().redirectUrl).toBe(a.json().redirectUrl);
     const prisma = app.get(PrismaService);
     const payments = await prisma.payment.findMany({ where: { orderId } });
     expect(payments).toHaveLength(1);
@@ -383,13 +432,13 @@ describe('payments (e2e)', () => {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
     const blik = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'BLIK' },
+      { orderId, provider: 'eservice', methodKind: 'BLIK' },
       userToken,
     );
     expect(blik.statusCode).toBe(201);
@@ -404,72 +453,68 @@ describe('payments (e2e)', () => {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: 'evt_already_paid_1',
-      type: 'payment_intent.succeeded',
-      data: { object: { id: `pi_stub_${orderId}_STRIPE_CARD` } },
-    });
+    await inject(
+      'POST',
+      '/api/v1/payments/webhooks/eservice',
+      succeededEvent({ trn: 'TRN_already_paid_1', act: 'ACT_already_paid_1' }),
+    );
     const res = await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
     expect(res.statusCode).toBe(400);
     expect(res.json().message).toMatch(/paid/i);
   });
 
-  // ---- charge.refunded (dashboard sync) ----
+  // ---- payment.refunded (dashboard sync) ----
+  //
+  // NOTE: the eService refund-notification field shape is unverified against a
+  // live sample (see the TODO in eservice.provider.parseNotification). These
+  // tests pin the *conservative* sync behaviour our parser implements today
+  // (refunds[] with minor-unit amounts, matched by our `reference`). Revisit the
+  // body shape once a live refund notification is captured.
 
-  async function getOrderToPaid(): Promise<{ paymentId: string; intentRef: string }> {
+  async function getOrderToPaid(trnSuffix: string): Promise<{ paymentId: string; trn: string }> {
     await inject(
       'POST',
       '/api/v1/payments/intent',
-      { orderId, provider: 'stripe', methodKind: 'STRIPE_CARD' },
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
-    const intentRef = `pi_stub_${orderId}_STRIPE_CARD`;
-    await inject('POST', '/api/v1/payments/webhooks/stripe', {
-      id: `evt_succeed_${Math.random().toString(36).slice(2)}`,
-      type: 'payment_intent.succeeded',
-      data: { object: { id: intentRef } },
-    });
+    const trn = `TRN_paid_${trnSuffix}`;
+    await inject(
+      'POST',
+      '/api/v1/payments/webhooks/eservice',
+      succeededEvent({ trn, act: `ACT_paid_${trnSuffix}` }),
+    );
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
-    return { paymentId: payment.id, intentRef };
+    return { paymentId: payment.id, trn };
   }
 
-  it('charge.refunded with unknown refund id creates Refund row and transitions order to REFUNDED', async () => {
-    const { paymentId, intentRef } = await getOrderToPaid();
+  it('payment.refunded with unknown refund id creates a Refund row and transitions order to REFUNDED', async () => {
+    const { paymentId } = await getOrderToPaid('rf1');
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { id: paymentId } });
     const fullAmountMinor = Math.round(Number.parseFloat(payment.amount.toString()) * 100);
 
     const event = {
-      id: 'evt_charge_refunded_full_1',
-      type: 'charge.refunded',
-      data: {
-        object: {
-          id: 'ch_test_1',
-          payment_intent: intentRef,
-          currency: payment.currency.toLowerCase(),
-          amount_refunded: fullAmountMinor,
-          refunds: {
-            data: [
-              {
-                id: 're_dashboard_1',
-                amount: fullAmountMinor,
-                reason: 'requested_by_customer',
-              },
-            ],
-          },
-        },
-      },
+      id: 'TRN_refunded_full_1',
+      status: 'REFUNDED',
+      reference: stubRef('CARD'),
+      currency: payment.currency,
+      amount_refunded: String(fullAmountMinor),
+      refunds: [
+        { id: 're_dashboard_1', amount: String(fullAmountMinor), reason: 'requested_by_customer' },
+      ],
+      action: { id: 'ACT_refunded_full_1', type: 'STATUS_NOTIFICATION' },
     };
-    const res = await inject('POST', '/api/v1/payments/webhooks/stripe', event);
+    const res = await inject('POST', '/api/v1/payments/webhooks/eservice', event);
     expect(res.statusCode).toBe(200);
 
     const refunds = await prisma.refund.findMany({ where: { paymentId } });
@@ -480,42 +525,36 @@ describe('payments (e2e)', () => {
     expect(order.json().status).toBe('REFUNDED');
   });
 
-  it('charge.refunded is idempotent across replay', async () => {
-    const { paymentId, intentRef } = await getOrderToPaid();
+  it('payment.refunded is idempotent across replay', async () => {
+    const { paymentId } = await getOrderToPaid('rf2');
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { id: paymentId } });
     const fullAmountMinor = Math.round(Number.parseFloat(payment.amount.toString()) * 100);
 
     const event = {
-      id: 'evt_charge_refunded_idem_1',
-      type: 'charge.refunded',
-      data: {
-        object: {
-          id: 'ch_test_2',
-          payment_intent: intentRef,
-          currency: payment.currency.toLowerCase(),
-          amount_refunded: fullAmountMinor,
-          refunds: {
-            data: [{ id: 're_dashboard_idem_1', amount: fullAmountMinor }],
-          },
-        },
-      },
+      id: 'TRN_refunded_idem_1',
+      status: 'REFUNDED',
+      reference: stubRef('CARD'),
+      currency: payment.currency,
+      amount_refunded: String(fullAmountMinor),
+      refunds: [{ id: 're_dashboard_idem_1', amount: String(fullAmountMinor) }],
+      action: { id: 'ACT_refunded_idem_1', type: 'STATUS_NOTIFICATION' },
     };
-    await inject('POST', '/api/v1/payments/webhooks/stripe', event);
-    // Replay: same event id → dedupe at WebhookEvent layer.
-    await inject('POST', '/api/v1/payments/webhooks/stripe', event);
+    await inject('POST', '/api/v1/payments/webhooks/eservice', event);
+    // Replay: same action id → dedupe at WebhookEvent layer.
+    await inject('POST', '/api/v1/payments/webhooks/eservice', event);
 
     const refunds = await prisma.refund.findMany({ where: { paymentId } });
     expect(refunds).toHaveLength(1);
   });
 
-  it('charge.refunded whose refund id matches an existing Refund is a no-op', async () => {
-    const { paymentId, intentRef } = await getOrderToPaid();
+  it('payment.refunded whose refund id matches an existing Refund is a no-op', async () => {
+    const { paymentId, trn } = await getOrderToPaid('rf3');
     const prisma = app.get(PrismaService);
     const payment = await prisma.payment.findUniqueOrThrow({ where: { id: paymentId } });
 
-    // Admin-initiated partial refund first — Stripe stub returns
-    // `re_stub_<intent>` as providerRef.
+    // Admin-initiated partial refund first — the eService stub returns
+    // `re_stub_<TRN>` as the refund providerRef.
     await inject(
       'POST',
       `/api/v1/payments/${paymentId}/refunds`,
@@ -523,24 +562,18 @@ describe('payments (e2e)', () => {
       ownerToken,
     );
     const existing = await prisma.refund.findFirstOrThrow({ where: { paymentId } });
-    expect(existing.providerRef).toBe(`re_stub_${intentRef}`);
+    expect(existing.providerRef).toBe(`re_stub_${trn}`);
 
     const event = {
-      id: 'evt_charge_refunded_noop_1',
-      type: 'charge.refunded',
-      data: {
-        object: {
-          id: 'ch_test_3',
-          payment_intent: intentRef,
-          currency: payment.currency.toLowerCase(),
-          amount_refunded: 1000,
-          refunds: {
-            data: [{ id: existing.providerRef, amount: 1000 }],
-          },
-        },
-      },
+      id: 'TRN_refunded_noop_1',
+      status: 'REFUNDED',
+      reference: stubRef('CARD'),
+      currency: payment.currency,
+      amount_refunded: '1000',
+      refunds: [{ id: existing.providerRef, amount: '1000' }],
+      action: { id: 'ACT_refunded_noop_1', type: 'STATUS_NOTIFICATION' },
     };
-    const res = await inject('POST', '/api/v1/payments/webhooks/stripe', event);
+    const res = await inject('POST', '/api/v1/payments/webhooks/eservice', event);
     expect(res.statusCode).toBe(200);
 
     const refunds = await prisma.refund.findMany({ where: { paymentId } });

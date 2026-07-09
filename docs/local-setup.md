@@ -70,32 +70,37 @@ Every external integration ships a stub mode that fires when its env vars are
 empty. Setting real credentials flips the same code path to live mode — no app
 restart logic to track, just `.env` values.
 
-### Stripe — payments + webhooks
+### eService (Global Payments) — payments + webhooks
 
 Set:
 
 ```
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+ESERVICE_ENV=sandbox
+ESERVICE_APP_ID=...
+ESERVICE_APP_KEY=...
+ESERVICE_ACCOUNT_NAME=ECOMUAT...
+ESERVICE_WEBHOOK_URL=https://<public-api-host>
+ESERVICE_RETURN_URL=https://<public-web-host>/checkout/return
 ```
 
-Stub mode (default) returns deterministic `pi_stub_<orderId>` payment-intent
-refs and `<ref>_secret_stub` client secrets so the frontend SDK path can be
-exercised without a real Stripe account.
+Stub mode (default, when `ESERVICE_APP_ID` is empty) returns deterministic
+`ref_stub_<orderId>` references and `https://stub.local/hpp/...` redirect URLs so
+the checkout redirect flow can be exercised without a real eService account.
 
-To forward real webhooks to your local API while developing:
+Online payments use the **Hosted Payment Page**: the API creates a link
+(`POST /ucp/links`) and the browser is redirected to eService to pay (cards +
+BLIK + 3-D Secure). eService POSTs the final status to `status_url`
+(`/api/v1/payments/webhooks/eservice`), signed with
+`X-GP-Signature = SHA512(rawBody + app_key)` (verified constant-time).
 
-```bash
-stripe listen --forward-to localhost:4000/api/v1/payments/webhooks/stripe
-```
+Because eService posts the webhook server-to-server, it can't reach `localhost`.
+To exercise the full webhook path locally, expose the API with a tunnel
+(cloudflared/ngrok) and point `ESERVICE_WEBHOOK_URL` at the public URL. Without a
+tunnel the order still confirms on the next reconciliation pass (every 15 min),
+which queries `GET /ucp/transactions?reference=...`.
 
-For Polish payment methods, enable **P24** and **BLIK** in the Stripe Dashboard
-under *Settings → Payment methods* for the test mode account you're using.
-
-`charge.refunded` events fired from the Stripe Dashboard are picked up by the
-webhook handler and create the missing `Refund` rows automatically (logged
-with `[STRIPE_DASHBOARD_REFUND]`).
+Refund notifications from the eService portal are picked up by the webhook
+handler and create the missing `Refund` rows automatically.
 
 ### Local disk uploads — images
 

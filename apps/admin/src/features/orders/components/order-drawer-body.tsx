@@ -34,13 +34,9 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
   }, [tStatus]);
 
   const paymentMethodLabels: Record<string, string> = {
-    STRIPE_CARD: t('body.paymentMethods.STRIPE_CARD'),
-    APPLE_PAY: t('body.paymentMethods.APPLE_PAY'),
-    GOOGLE_PAY: t('body.paymentMethods.GOOGLE_PAY'),
-    COD: t('body.paymentMethods.COD'),
-    WALLET: t('body.paymentMethods.WALLET'),
-    P24: t('body.paymentMethods.P24'),
+    CARD: t('body.paymentMethods.CARD'),
     BLIK: t('body.paymentMethods.BLIK'),
+    COD: t('body.paymentMethods.COD'),
   };
 
   const typeLabels: Record<string, string> = {

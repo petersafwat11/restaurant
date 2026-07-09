@@ -256,10 +256,10 @@ model Restaurant {
 
   // --- Legal entity & customer-support data (payment-provider readiness) -----
   // All nullable/additive: populated by the owner in admin against an official
-  // current KRS extract before Stripe go-live. `name` stays the trade/brand
+  // current KRS extract before eService go-live. `name` stays the trade/brand
   // name and `address` stays the trading/fulfilment address — never overwrite
   // either with the legal name/registered address.
-  legalName                      String? // exact KRS/Stripe/bank entity name
+  legalName                      String? // exact KRS/bank entity name
   nip                            String? // Polish tax ID, 10 digits
   regon                          String? // REGON, 9 or 14 digits
   krs                            String? // KRS, normally 10 digits; null for non-KRS forms
@@ -441,20 +441,22 @@ enum PaymentStatus {
 }
 
 enum PaymentMethodKind {
-  STRIPE_CARD
-  APPLE_PAY
-  GOOGLE_PAY
-  PAYMOB
-  COD
-  WALLET
-  P24
+  CARD
   BLIK
+  COD
 }
 
 model Order {
   id                  String      @id @default(cuid())
   orderNumber         String      @unique // human-friendly: R-2026-000123
   userId              String?
+  // The cart this order was created from. Lets order confirmation clear that
+  // cart server-side — the single guarantee that a confirmed order empties the
+  // basket for every payment type and for guests (who can't be reached by the
+  // client success page: no realtime, and settle-on-return can outrun the page).
+  // A plain id, not a FK: a guest cart may be deleted on login-merge, and we only
+  // ever use it to locate cart items to delete.
+  cartId              String?
   type                OrderType
   status              OrderStatus @default(PENDING)
   subtotal            Decimal     @db.Decimal(10, 2)
@@ -543,17 +545,20 @@ enum OrderEventKind {
 // ---------------------------------------------------------------------------
 
 model Payment {
-  id          String            @id @default(cuid())
-  orderId     String            @unique
-  provider    String // stripe, paymob, cod
-  providerRef String? // payment_intent_id
-  method      PaymentMethodKind
-  amount      Decimal           @db.Decimal(10, 2)
-  currency    String
-  status      PaymentStatus     @default(PENDING)
-  rawWebhook  Json?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id             String            @id @default(cuid())
+  orderId        String            @unique
+  provider       String // eservice, cod
+  providerRef    String? // eservice: our unique transaction `reference` (stable join key); cod marker
+  providerLinkId String? // eservice HPP link id (LNK_…) — matches the incoming status_url notification
+  providerTxnId  String? // eservice transaction id (TRN_…) — set on capture; refund + reconcile target
+  providerRedirectUrl String? // eservice HPP redirect URL — reused on a same-method retry (no double link/charge)
+  method         PaymentMethodKind
+  amount         Decimal           @db.Decimal(10, 2)
+  currency       String
+  status         PaymentStatus     @default(PENDING)
+  rawWebhook     Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   refunds Refund[]
@@ -571,7 +576,7 @@ model Refund {
 }
 
 // Idempotency table for provider webhooks. `id` is the provider's event id
-// (e.g., `evt_xxx` from Stripe); inserting again is a unique-key violation,
+// (e.g., the eService notification `action.id`); inserting again is a unique-key violation,
 // which the service catches to short-circuit duplicate processing.
 model WebhookEvent {
   id          String    @id

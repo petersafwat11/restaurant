@@ -102,6 +102,7 @@
       "title": "Payment",
       "ariaLabel": "Payment method",
       "comingSoon": "Online card & BLIK payments are coming soon — pay cash on delivery for now.",
+      "redirectNotice": "You'll be redirected to our secure payment page to complete your payment.",
       "options": {
         "card": {
           "label": "Card",
@@ -181,19 +182,11 @@
     "minOrderInline": "Minimum order for delivery is {amount}. Add a little more to your cart.",
     "minOrderToast": "Minimum order for delivery is {amount} — add a bit more.",
     "confirmAddress": "Please confirm your delivery address on the map.",
-    "stripeNotInit": "Card form did not initialise. Please retry.",
+    "paymentInitFailed": "Could not start the payment. Please try again.",
     "createOrderFallback": "Could not place your order.",
     "legalVersionChanged": "Our Terms were updated while you were on this page. Please refresh the page to load the new version, then review and accept it to continue."
   },
   "return": {
     "confirming": "Confirming your payment…"
-  },
-  "stripe": {
-    "notConfigured": "Card payments are not configured.",
-    "willAppear": "Card details will appear after you click Place order.",
-    "preparing": "Preparing secure card form…",
-    "notReady": "Card form not ready.",
-    "declined": "Card was declined.",
-    "initFailed": "Could not initialise card payment."
   }
 }

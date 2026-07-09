@@ -11,8 +11,10 @@ Flags are evaluated server-side with precedence
 | `loyalty.redemption` | on | Redeem points at checkout |
 | `referral.program` | on | Referral capture + reward |
 | `marketing.new_landing` | off | New landing aggregation |
-| `payments.stripe_elements` | off | Live Stripe Elements checkout (kept off until §14 P0 gates pass) |
 | `soft_launch` | off | Master gate / kill switch |
+
+> Online card + BLIK payments (eService) are gated by whether `ESERVICE_APP_ID`
+> is configured — not by a feature flag. Empty ⇒ stub mode / COD-only.
 
 ## Rollout sequence
 

@@ -1,10 +1,13 @@
 import {
+  All,
   Body,
   Controller,
   type ExecutionContext,
   Get,
+  Header,
   Param,
   Post,
+  Query,
   createParamDecorator,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -54,6 +57,32 @@ export class PaymentsController {
   @Get('config')
   getConfig() {
     return this.payments.getConfig();
+  }
+
+  // eService HPP return landing (public, browser-facing). eService POSTs (verified
+  // in sandbox — a GET-only route 404s) the transaction result to `return_url` and
+  // renders the response in the browser; we return HTML that bounces the top window
+  // to the web confirmation flow. `@All` handles both verbs; orderId is on the query
+  // (we set it), status comes from eService's form body (fallback: query).
+  @Public()
+  @All('eservice/return')
+  @Header('Content-Type', 'text/html; charset=utf-8')
+  async eserviceReturn(
+    @Query('orderId') orderId?: string,
+    @Query('status') queryStatus?: string,
+    @Body() body?: Record<string, string>,
+  ): Promise<string> {
+    // Settle the order from eService's authoritative record now — instant confirm,
+    // independent of the status_url webhook. Never let a settle error block the
+    // redirect; the reconcile job is the backstop.
+    if (orderId) {
+      try {
+        await this.payments.settleEserviceOrderIfPaid(orderId);
+      } catch {
+        // swallow — redirect the customer regardless
+      }
+    }
+    return this.payments.buildReturnRedirectHtml(orderId, queryStatus ?? body?.status);
   }
 
   // Public so guests can pay; authorization is by the authed user OR a valid

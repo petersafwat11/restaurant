@@ -36,7 +36,7 @@ export const TimeSlotSchema = z.discriminatedUnion('kind', [
 ]);
 export type TimeSlotInput = z.infer<typeof TimeSlotSchema>;
 
-export const CHECKOUT_PAYMENT_METHODS = ['card', 'blik', 'applepay', 'googlepay', 'cod'] as const;
+export const CHECKOUT_PAYMENT_METHODS = ['card', 'blik', 'cod'] as const;
 export type CheckoutPaymentMethod = (typeof CHECKOUT_PAYMENT_METHODS)[number];
 
 export const CheckoutFormSchema = z

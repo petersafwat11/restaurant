@@ -102,6 +102,7 @@
       "title": "Płatność",
       "ariaLabel": "Sposób płatności",
       "comingSoon": "Płatności online kartą i BLIK będą dostępne wkrótce — na razie zapłać gotówką przy odbiorze.",
+      "redirectNotice": "Za chwilę przekierujemy Cię na naszą bezpieczną stronę płatności, aby dokończyć zapłatę.",
       "options": {
         "card": {
           "label": "Karta",
@@ -181,19 +182,11 @@
     "minOrderInline": "Minimalna wartość zamówienia z dostawą to {amount}. Dodaj coś jeszcze do koszyka.",
     "minOrderToast": "Minimalna wartość zamówienia z dostawą to {amount} — dodaj jeszcze coś.",
     "confirmAddress": "Potwierdź adres dostawy na mapie.",
-    "stripeNotInit": "Formularz karty nie został zainicjalizowany. Spróbuj ponownie.",
+    "paymentInitFailed": "Nie udało się rozpocząć płatności. Spróbuj ponownie.",
     "createOrderFallback": "Nie udało się złożyć zamówienia.",
     "legalVersionChanged": "Nasz Regulamin został zaktualizowany, gdy byłeś na tej stronie. Odśwież stronę, aby wczytać nową wersję, a następnie zapoznaj się z nią i zaakceptuj, aby kontynuować."
   },
   "return": {
     "confirming": "Potwierdzanie płatności…"
-  },
-  "stripe": {
-    "notConfigured": "Płatności kartą nie są skonfigurowane.",
-    "willAppear": "Pola karty pojawią się po kliknięciu „Złóż zamówienie\".",
-    "preparing": "Przygotowujemy bezpieczny formularz karty…",
-    "notReady": "Formularz karty nie jest gotowy.",
-    "declined": "Karta została odrzucona.",
-    "initFailed": "Nie udało się zainicjalizować płatności kartą."
   }
 }

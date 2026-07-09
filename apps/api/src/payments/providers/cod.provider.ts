@@ -15,11 +15,11 @@ export class CodProvider implements PaymentProvider {
   readonly supports: ReadonlyArray<PaymentMethodKind> = ['COD'];
 
   async createIntent(input: CreateIntentInput): Promise<CreateIntentResult> {
-    // COD short-circuits: no provider call, order is auto-confirmed by the
-    // payments service after we return.
+    // COD short-circuits: no provider call, no redirect, order is auto-confirmed
+    // by the payments service after we return.
     return {
       providerRef: `cod_${input.orderId}`,
-      clientSecret: null,
+      redirectUrl: null,
       confirmed: true,
     };
   }

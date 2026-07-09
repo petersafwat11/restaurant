@@ -63,13 +63,9 @@
       "DINE_IN": "Na miejscu"
     },
     "paymentMethods": {
-      "STRIPE_CARD": "Karta",
-      "APPLE_PAY": "Apple Pay",
-      "GOOGLE_PAY": "Google Pay",
-      "COD": "Płatność przy odbiorze",
-      "WALLET": "Portfel",
-      "P24": "Przelewy24",
-      "BLIK": "BLIK"
+      "CARD": "Karta",
+      "BLIK": "BLIK",
+      "COD": "Za pobraniem"
     }
   },
   "types": {

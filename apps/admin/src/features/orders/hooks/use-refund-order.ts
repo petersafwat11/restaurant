@@ -19,7 +19,7 @@ interface RefundVariables {
 /**
  * Issue a refund against an order's payment. The backend recomputes the
  * remaining-refundable amount; passing `amount` undefined refunds the full
- * remaining balance. Triggers a Stripe refund (or BullMQ enqueue if async).
+ * remaining balance. Triggers an eService refund (or BullMQ enqueue if async).
  */
 export function useRefundOrder() {
   const qc = useQueryClient();

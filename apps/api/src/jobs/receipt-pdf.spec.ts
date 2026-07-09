@@ -19,7 +19,7 @@ const baseInput: ReceiptInput = {
   deliveryFee: '0.00',
   tipAmount: '0.00',
   grandTotal: '127.44',
-  paymentMethod: 'STRIPE_CARD',
+  paymentMethod: 'CARD',
   refundedAmount: null,
 };
 
@@ -54,7 +54,7 @@ describe('receipt-pdf', () => {
     expect(joined).toContain('Subtotal');
     expect(joined).toContain('Tax');
     expect(joined).toContain('Total');
-    expect(joined).toContain('Paid with: STRIPE_CARD');
+    expect(joined).toContain('Paid with: CARD');
     // PLN currency formatting via the pinned pl-PL locale.
     expect(joined).toMatch(/zł/);
   });

@@ -45,7 +45,7 @@ export interface OrderTransitionDef {
 }
 
 export const ORDER_TRANSITIONS_GRAPH: readonly OrderTransitionDef[] = [
-  // Payment-confirmed — fired by the COD short-circuit + Stripe webhook only.
+  // Payment-confirmed — fired by the COD short-circuit + eService webhook only.
   { from: 'PENDING', to: 'CONFIRMED', systemOnly: true },
   // Pre-payment cancellation (customer or staff).
   { from: 'PENDING', to: 'CANCELLED' },
@@ -133,7 +133,7 @@ export const CreateOrderSchema = z
     // Chosen payment method. The server acts only on 'COD' — it records a COD
     // Payment row and confirms the order at creation time (guest-safe, since
     // /payments/intent requires an authed owner). Online methods (card/BLIK)
-    // leave the order PENDING for the Stripe Elements flow to finalize.
+    // leave the order PENDING for the eService redirect flow to finalize.
     paymentMethod: z.enum(PAYMENT_METHOD_KINDS).optional(),
     // Customer contact snapshot — snapshotted onto the order by the server.
     // Required for guest checkout (enforced server-side, where guest identity is

@@ -15,10 +15,12 @@ export interface CreateIntentInput {
 }
 
 export interface CreateIntentResult {
-  /** Provider's payment-intent ID (or COD short-circuit marker). */
+  /** Our unique transaction `reference` (eService) or COD short-circuit marker. Stored as Payment.providerRef. */
   providerRef: string;
-  /** Stripe-only: PaymentIntent client_secret. null for COD. */
-  clientSecret: string | null;
+  /** eService HPP link id (LNK_…) — stored as Payment.providerLinkId. undefined for COD. */
+  linkId?: string;
+  /** eService HPP redirect URL — send the browser here (cards/BLIK/3-DS). null for COD. */
+  redirectUrl: string | null;
   /** True when no further client action is needed (COD short-circuit). */
   confirmed: boolean;
 }
@@ -50,7 +52,7 @@ export type NormalizedIntentStatus =
   | 'unknown';
 
 export interface ParsedWebhookRefund {
-  /** Provider's refund id (e.g., Stripe `re_...`). */
+  /** Provider's refund id. */
   id: string;
   /** 2dp string. */
   amount: string;
@@ -59,13 +61,14 @@ export interface ParsedWebhookRefund {
 
 export interface ParsedWebhookEvent {
   id: string;
-  type: 'payment_intent.succeeded' | 'payment_intent.payment_failed' | 'charge.refunded' | string;
-  paymentIntentId?: string;
-  /** Refund-only: provider's charge id. */
-  chargeId?: string;
-  /** charge.refunded: list of refund objects on the charge. */
+  type: 'payment.succeeded' | 'payment.failed' | 'payment.refunded' | string;
+  /** Value to match against Payment.providerRef (eService: our unique transaction `reference`). */
+  providerRef?: string;
+  /** eService transaction id (TRN_…) — persisted as Payment.providerTxnId on capture/settle. */
+  transactionId?: string;
+  /** Refund events: list of refund objects. */
   refunds?: ParsedWebhookRefund[];
-  /** charge.refunded: aggregate refunded amount in major units (2dp string). */
+  /** Refund events: aggregate refunded amount in major units (2dp string). */
   amountRefunded?: string;
   raw: unknown;
 }
@@ -76,7 +79,7 @@ export interface ParsedWebhookEvent {
  */
 export interface PaymentProvider {
   /** Unique identifier (matches `Payment.provider` column). */
-  readonly id: 'stripe' | 'cod';
+  readonly id: 'eservice' | 'cod';
   /** Supported PaymentMethodKinds. */
   readonly supports: ReadonlyArray<PaymentMethodKind>;
 

@@ -8,8 +8,8 @@ import { Link } from '@/i18n/navigation';
  * D8 corrections applied here:
  *  - lists the EXACT first-party mechanisms actually used (verified by grepping
  *    the codebase): `web_at`, `web_rt`, `cart_session`, `NEXT_LOCALE`.
- *  - discloses CONDITIONAL Stripe cookies (set only during online payment) and
- *    links to Stripe's own cookie information.
+ *  - discloses that our payment provider (eService) may set cookies on its own
+ *    hosted payment page during an online payment, and links to its cookie info.
  *  - does NOT hardcode a consent-banner decision. The previous copy asserted
  *    "no cookie-consent banner is required"; that decision belongs to counsel
  *    under current Polish PKE + GDPR after a clean-browser audit. A clearly
@@ -20,8 +20,8 @@ export const COOKIES_SECTIONS: LegalSection[] = [
   { id: 'first-party', pl: 'Nasze pliki cookie (first-party)', en: 'Our cookies (first-party)' },
   {
     id: 'payment',
-    pl: 'Pliki cookie płatności (Stripe)',
-    en: 'Payment cookies (Stripe)',
+    pl: 'Pliki cookie płatności (eService)',
+    en: 'Payment cookies (eService)',
   },
   { id: 'analytics', pl: 'Analityka i marketing', en: 'Analytics & marketing' },
   { id: 'consent', pl: 'Zgoda na pliki cookie', en: 'Cookie consent' },
@@ -35,7 +35,7 @@ export function CookiesEN() {
       <p>
         Cookies (and similar technologies such as local storage) are small pieces of data stored on
         your device. This page lists the cookies we set ourselves and the cookies that our payment
-        provider may set during an online payment.
+        provider may set on its own secure payment page during an online payment.
       </p>
 
       <h2 id="first-party">Our cookies (first-party)</h2>
@@ -88,19 +88,14 @@ export function CookiesEN() {
         </tbody>
       </table>
 
-      <h2 id="payment">Payment cookies (Stripe)</h2>
+      <h2 id="payment">Payment cookies (eService)</h2>
       <p>
-        When you pay online, our payment provider <strong>Stripe</strong> may set its own cookies on
-        the payment form to process the payment securely and to prevent fraud (for example{' '}
-        <code>__stripe_mid</code> and <code>__stripe_sid</code>, and, if Stripe Link is enabled,
-        Link session cookies). These are set by Stripe, not by us, and only in connection with a
-        payment. For the current, authoritative list see Stripe’s{' '}
-        <a href="https://stripe.com/cookies-policy/legal" target="_blank" rel="noreferrer">
-          cookie information
-        </a>
-        .{' '}
-        {/* LAWYER: confirm exact Stripe cookie set + Link status after the sandbox/live audit
-        (plan §D8 step 1). */}
+        When you pay online, you are redirected to the secure hosted payment page of our payment
+        provider, <strong>eService</strong> (part of Global Payments). Any cookies needed to process
+        the payment and prevent fraud are set by eService on that page, under their own cookie
+        policy — not by us, and only in connection with a payment.{' '}
+        {/* LAWYER: confirm the eService / Global Payments cookie disclosure and link to their
+        cookie policy after the sandbox/live audit. */}
       </p>
 
       <h2 id="analytics">Analytics &amp; marketing</h2>
@@ -199,19 +194,15 @@ export function CookiesPL() {
         </tbody>
       </table>
 
-      <h2 id="payment">Pliki cookie płatności (Stripe)</h2>
+      <h2 id="payment">Pliki cookie płatności (eService)</h2>
       <p>
-        Podczas płatności online nasz dostawca płatności <strong>Stripe</strong> może ustawić własne
-        pliki cookie na formularzu płatności, aby bezpiecznie obsłużyć płatność i zapobiegać
-        nadużyciom (np. <code>__stripe_mid</code> i <code>__stripe_sid</code>, a jeśli włączony jest
-        Stripe Link — pliki cookie sesji Link). Są one ustawiane przez Stripe, a nie przez nas, i
-        wyłącznie w związku z płatnością. Aktualną, wiążącą listę znajdziesz w{' '}
-        <a href="https://stripe.com/cookies-policy/legal" target="_blank" rel="noreferrer">
-          informacji o plikach cookie Stripe
-        </a>
-        .{' '}
-        {/* LAWYER: potwierdź dokładny zestaw cookie Stripe + status Link po audycie sandbox/live
-        (plan §D8 krok 1). */}
+        Podczas płatności online zostajesz przekierowany na bezpieczną stronę płatności naszego
+        dostawcy płatności, <strong>eService</strong> (część Global Payments). Wszelkie pliki cookie
+        potrzebne do obsłużenia płatności i zapobiegania nadużyciom są ustawiane przez eService na
+        tej stronie, zgodnie z ich własną polityką cookie — a nie przez nas i wyłącznie w związku z
+        płatnością.{' '}
+        {/* LAWYER: potwierdź informację o cookie eService / Global Payments i link do ich polityki
+        cookie po audycie sandbox/live. */}
       </p>
 
       <h2 id="analytics">Analityka i marketing</h2>
