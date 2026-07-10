@@ -73,13 +73,17 @@ export class PaymentsController {
     @Body() body?: Record<string, string>,
   ): Promise<string> {
     // Settle the order from eService's authoritative record now — instant confirm,
-    // independent of the status_url webhook. Never let a settle error block the
-    // redirect; the reconcile job is the backstop.
+    // independent of the status_url webhook. One synchronous attempt catches a
+    // fast capture so the customer lands on a confirmed order; if the transaction
+    // isn't captured yet (eService can lag the return by tens of seconds), keep
+    // polling in the BACKGROUND so the order confirms + its cart clears within
+    // ~1 min — never blocking the redirect. The reconcile job is the final backstop.
     if (orderId) {
-      try {
-        await this.payments.settleEserviceOrderIfPaid(orderId);
-      } catch {
-        // swallow — redirect the customer regardless
+      const settled = await this.payments
+        .settleEserviceOrderIfPaid(orderId)
+        .catch(() => false);
+      if (!settled) {
+        void this.payments.retrySettleEserviceOrder(orderId).catch(() => undefined);
       }
     }
     return this.payments.buildReturnRedirectHtml(orderId, queryStatus ?? body?.status);

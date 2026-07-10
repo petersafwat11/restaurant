@@ -37,12 +37,15 @@
     encode zstd gzip
     import security_headers
     # CSP rolled out report-only first (plan §I3): collect violations, tune, then
-    # rename the header to `Content-Security-Policy` to enforce. Includes the
-    # Stripe.js / Elements / 3DS + OpenStreetMap directives the checkout needs.
+    # rename the header to `Content-Security-Policy` to enforce. eService uses a
+    # full-page redirect (Hosted Payment Page), NOT an embedded SDK/iframe, so the
+    # checkout needs no payment-processor script/frame directives — the redirect is
+    # a top-level navigation, which CSP doesn't restrict. Only OpenStreetMap
+    # (delivery map geocode) needs a connect-src allowance.
     # NOTE: report-only collects nothing until a collector is wired — add a
     # `report-to`/`Reporting-Endpoints` (or `report-uri`) directive pointing at
     # Sentry/Report-URI/etc. before relying on this phase to surface violations.
-    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://api.stripe.com https://nominatim.openstreetmap.org; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://nominatim.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     reverse_proxy web:3000
 }
 
@@ -55,6 +58,11 @@ admin.{$DOMAIN} {
 }
 
 # API + Socket.IO + uploads static. JSON API → lock CSP all the way down.
+# NOTE (eService go-live): when online payments are enabled, the HPP return route
+# `/api/v1/payments/eservice/return` serves HTML with an inline window.top bounce
+# script that `default-src 'none'` blocks. Before enabling eService, give that one
+# path a relaxed CSP (script-src 'unsafe-inline'), e.g. via a `handle @return {…}`
+# block — and `caddy validate` the file first (a Caddyfile error stops the proxy).
 api.{$DOMAIN} {
     encode zstd gzip
     import security_headers

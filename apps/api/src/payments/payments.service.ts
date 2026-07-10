@@ -92,17 +92,23 @@ export class PaymentsService {
    * status_url webhook (which can be delayed or, in some eService configs,
    * undelivered). Idempotent; the 15-min reconcile job is the backstop for
    * customers who never return.
+   *
+   * @returns true when the payment is settled (now or already), false when the
+   *   transaction isn't CAPTURED yet (caller may retry) or there's nothing to do.
    */
-  async settleEserviceOrderIfPaid(orderId: string): Promise<void> {
+  async settleEserviceOrderIfPaid(orderId: string): Promise<boolean> {
     const payment = await this.prisma.payment.findFirst({
       where: { orderId },
       include: { order: true },
     });
-    if (!payment || payment.provider !== 'eservice' || !payment.providerRef) return;
-    if (['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) return;
+    if (!payment || payment.provider !== 'eservice' || !payment.providerRef) return false;
+    // Already terminal — settled by an earlier attempt / reconcile; nothing to do.
+    if (['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) return true;
 
     const txn = await this.eserviceProvider.retrieveTransaction(payment.providerRef);
-    if (!txn || (txn.status ?? '').toUpperCase() !== 'CAPTURED') return;
+    // Not captured yet — eService can lag the browser return; report "not settled"
+    // so the caller keeps polling.
+    if (!txn || (txn.status ?? '').toUpperCase() !== 'CAPTURED') return false;
 
     // Settle the payment (never clobber an already-terminal row) and persist the
     // TRN id so refunds have a target, then confirm the order through the FSM.
@@ -113,6 +119,28 @@ export class PaymentsService {
     if (count > 0 && payment.order.status === 'PENDING') {
       await this.confirmOrderFromPayment(payment.order, payment.id);
       this.logger.log(`Order ${payment.order.orderNumber} settled on return (payment ${payment.id})`);
+    }
+    return true;
+  }
+
+  /**
+   * Background poll for the HPP return: eService CAPTURE can lag the browser
+   * return by tens of seconds, so if the synchronous settle finds the transaction
+   * not yet captured, keep trying for ~1 minute. That confirms the order (and
+   * clears its cart, via confirmPendingOrder) promptly instead of waiting for the
+   * 15-min reconcile. Called fire-and-forget; the reconcile job stays the final
+   * backstop. Never throws — every attempt is guarded.
+   */
+  async retrySettleEserviceOrder(orderId: string): Promise<void> {
+    for (let attempt = 0; attempt < 7; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 8_000));
+      try {
+        if (await this.settleEserviceOrderIfPaid(orderId)) return;
+      } catch (err) {
+        this.logger.warn(
+          `Background settle retry for order ${orderId} failed: ${(err as Error).message}`,
+        );
+      }
     }
   }
 

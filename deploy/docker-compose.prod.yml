@@ -92,9 +92,16 @@ services:
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
       TWILIO_FROM: ${TWILIO_FROM:-}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
-      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      # eService (Global Payments) online card/BLIK. All optional: with these
+      # empty the payments module runs in stub mode and checkout is COD-only, so
+      # the API boots fine on a prod host that has no eService creds yet. Set them
+      # in /opt/restaurant/.env to enable online payments.
+      ESERVICE_ENV: ${ESERVICE_ENV:-sandbox}
+      ESERVICE_APP_ID: ${ESERVICE_APP_ID:-}
+      ESERVICE_APP_KEY: ${ESERVICE_APP_KEY:-}
+      ESERVICE_ACCOUNT_NAME: ${ESERVICE_ACCOUNT_NAME:-}
+      ESERVICE_WEBHOOK_URL: ${ESERVICE_WEBHOOK_URL:-}
+      ESERVICE_RETURN_URL: ${ESERVICE_RETURN_URL:-}
       SENTRY_DSN: ${SENTRY_DSN:-}
       SENTRY_ENV: ${SENTRY_ENV:-production}
       POSTHOG_KEY: ${POSTHOG_KEY:-}
