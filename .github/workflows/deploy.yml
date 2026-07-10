@@ -68,12 +68,26 @@ jobs:
             chmod +x scripts/backup-db.sh
 
             export IMAGE_TAG="${{ steps.tag.outputs.tag }}"
+            # Persist the tag to .env so a manual `docker compose up` on the box
+            # uses the deployed image instead of falling back to a stale :latest.
+            if grep -q '^IMAGE_TAG=' .env 2>/dev/null; then
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
+            else
+              echo "IMAGE_TAG=$IMAGE_TAG" >> .env
+            fi
 
             echo "==> Pulling images @ $IMAGE_TAG"
             docker compose pull api web admin
 
             echo "==> Ensuring infra is up"
             docker compose up -d postgres redis caddy
+
+            # `up -d caddy` won't recreate the container for a Caddyfile-only
+            # change, so Caddy keeps its old in-memory config. Reload it
+            # gracefully (no downtime) so Caddyfile changes actually apply.
+            echo "==> Reloading Caddy config"
+            docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile \
+              || docker compose up -d --force-recreate caddy
 
             echo "==> Running migrations"
             # The api image runs as a non-root user that can't write to /app
