@@ -30,58 +30,68 @@ export function RecentOrdersFeed() {
           {t('viewAll')} <ArrowRight size={12} />
         </Link>
       </div>
-      <table className="w-full text-sm">
-        <thead className="text-left text-caption-admin text-fg-subtle">
-          <tr>
-            <th className="border-y-hairline px-4 py-2 font-medium">{t('colOrderNumber')}</th>
-            <th className="border-y-hairline px-4 py-2 font-medium">{t('colCustomer')}</th>
-            <th className="border-y-hairline px-4 py-2 font-medium">{t('colItems')}</th>
-            <th className="border-y-hairline px-4 py-2 font-medium">{t('colType')}</th>
-            <th className="border-y-hairline px-4 py-2 font-medium">{t('colStatus')}</th>
-            <th className="border-y-hairline px-4 py-2 text-right font-medium">{t('colTotal')}</th>
-            <th className="border-y-hairline px-4 py-2 text-right font-medium">{t('colPlaced')}</th>
-          </tr>
-        </thead>
-        <tbody className="text-fg">
-          {q.isLoading ? (
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[680px] text-sm">
+          <thead className="text-left text-caption-admin text-fg-subtle">
             <tr>
-              <td colSpan={7} className="px-4 py-10">
-                <div className="flex justify-center">
-                  <Spinner size="lg" />
-                </div>
-              </td>
+              <th className="border-y-hairline px-4 py-2 font-medium">{t('colOrderNumber')}</th>
+              <th className="border-y-hairline px-4 py-2 font-medium">{t('colCustomer')}</th>
+              <th className="border-y-hairline px-4 py-2 font-medium">{t('colItems')}</th>
+              <th className="border-y-hairline px-4 py-2 font-medium">{t('colType')}</th>
+              <th className="border-y-hairline px-4 py-2 font-medium">{t('colStatus')}</th>
+              <th className="border-y-hairline px-4 py-2 text-right font-medium">
+                {t('colTotal')}
+              </th>
+              <th className="border-y-hairline px-4 py-2 text-right font-medium">
+                {t('colPlaced')}
+              </th>
             </tr>
-          ) : (
-            rows.map((o) => {
-              const typeLabel = tType(o.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN');
-              return (
-                <tr key={o.id} tabIndex={0} className={cn('transition-colors hover:bg-surface-2')}>
-                  <td className="border-b-hairline px-4 py-2.5">
-                    <span className="tabular-nums text-fg">{o.orderNumber}</span>
-                  </td>
-                  <td className="border-b-hairline px-4 py-2.5">{o.customerName ?? '—'}</td>
-                  <td className="border-b-hairline px-4 py-2.5 text-fg-muted">
-                    <span className="text-fg-subtle">{o.itemCount} </span>
-                    {t('items', { count: o.itemCount })}
-                  </td>
-                  <td className="border-b-hairline px-4 py-2.5">
-                    <TypeBadge label={typeLabel.toUpperCase()} />
-                  </td>
-                  <td className="border-b-hairline px-4 py-2.5">
-                    <StatusPill status={o.status} tokens={STATUS_TOKENS} size="sm" />
-                  </td>
-                  <td className="border-b-hairline px-4 py-2.5 text-right tabular-nums">
-                    {formatMoney(o.grandTotal, o.currency)}
-                  </td>
-                  <td className="border-b-hairline px-4 py-2.5 text-right text-fg-subtle">
-                    <RelativeTime value={o.createdAt} />
-                  </td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-fg">
+            {q.isLoading ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-10">
+                  <div className="flex justify-center">
+                    <Spinner size="lg" />
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              rows.map((o) => {
+                const typeLabel = tType(o.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN');
+                return (
+                  <tr
+                    key={o.id}
+                    tabIndex={0}
+                    className={cn('transition-colors hover:bg-surface-2')}
+                  >
+                    <td className="border-b-hairline px-4 py-2.5">
+                      <span className="tabular-nums text-fg">{o.orderNumber}</span>
+                    </td>
+                    <td className="border-b-hairline px-4 py-2.5">{o.customerName ?? '—'}</td>
+                    <td className="border-b-hairline px-4 py-2.5 text-fg-muted">
+                      <span className="text-fg-subtle">{o.itemCount} </span>
+                      {t('items', { count: o.itemCount })}
+                    </td>
+                    <td className="border-b-hairline px-4 py-2.5">
+                      <TypeBadge label={typeLabel.toUpperCase()} />
+                    </td>
+                    <td className="border-b-hairline px-4 py-2.5">
+                      <StatusPill status={o.status} tokens={STATUS_TOKENS} size="sm" />
+                    </td>
+                    <td className="border-b-hairline px-4 py-2.5 text-right tabular-nums">
+                      {formatMoney(o.grandTotal, o.currency)}
+                    </td>
+                    <td className="border-b-hairline px-4 py-2.5 text-right text-fg-subtle">
+                      <RelativeTime value={o.createdAt} />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
       {!q.isLoading && rows.length === 0 && (
         <div className="px-4 py-10 text-center text-sm text-fg-subtle">{t('empty')}</div>
       )}

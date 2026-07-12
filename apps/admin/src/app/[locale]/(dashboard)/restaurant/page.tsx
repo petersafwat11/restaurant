@@ -522,9 +522,10 @@ export default function RestaurantProfilePage() {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[240px_1fr] pb-24">
-      <aside className="sticky top-20 self-start xl:block">
-        <SettingsAnchorNav items={NAV} />
+    <div className="grid grid-cols-1 gap-6 pb-24 xl:grid-cols-[240px_1fr]">
+      {/* Horizontal tab strip below xl; sticky vertical rail at xl+. */}
+      <aside className="self-start xl:sticky xl:top-20">
+        <SettingsAnchorNav items={NAV} responsive />
       </aside>
 
       <div className="space-y-6">
@@ -975,8 +976,8 @@ export default function RestaurantProfilePage() {
 
       {dirty && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/[var(--border-alpha)] bg-surface/95 backdrop-blur">
-          <div className="mx-auto flex max-w-page-max items-center justify-between gap-4 px-6 py-3">
-            <p className="text-small text-fg-muted">
+          <div className="mx-auto flex max-w-page-max items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <p className="hidden text-small text-fg-muted sm:block">
               {t.rich('saveBar.unsavedHint', {
                 shortcut: () => (
                   <kbd className="rounded border border-border/[var(--border-alpha)] px-1 text-caption">

@@ -56,6 +56,7 @@ export default function AuditLogPage() {
       {
         id: 'actor',
         header: t('columns.actor'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="font-mono text-xs text-fg-muted">{row.original.actorUserId}</span>
         ),
@@ -68,6 +69,7 @@ export default function AuditLogPage() {
       {
         id: 'resource',
         header: t('columns.resource'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-fg">{row.original.resourceType}</span>
@@ -78,6 +80,7 @@ export default function AuditLogPage() {
       {
         id: 'ip',
         header: t('columns.ip'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="tabular-nums text-xs text-fg-subtle">
             {row.original.ip ?? t('row.noIp')}
@@ -116,8 +119,12 @@ export default function AuditLogPage() {
         columns={columns}
         rowKey={(r) => r.id}
         loading={q.isLoading}
+        minWidth={520}
         onRowClick={(r) => setSelectedEntry(r)}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
       <AuditDiffDrawer entry={selectedEntry} onOpenChange={(o) => !o && setSelectedEntry(null)} />
     </RequirePermission>

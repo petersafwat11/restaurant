@@ -6,61 +6,49 @@ import { cn } from '../lib/cn';
 export interface TwoPaneLayoutProps {
   left: React.ReactNode;
   right: React.ReactNode;
-  /** Width of the left pane in px. */
+  /** Width of the left pane in px (applied at `lg`+). */
   leftWidth?: number;
-  /** Stack vertically when viewport drops below this px. */
+  /**
+   * @deprecated Stacking is now CSS-driven at the `lg` (1024px) breakpoint.
+   * Kept for API compatibility; the value is ignored.
+   */
   collapseBelow?: number;
   divider?: boolean;
   className?: string;
 }
 
 /**
- * Side-by-side layout used on Menu + Settings + Reports. Above
- * `collapseBelow` viewport width, lays out `[leftWidth] · divider · 1fr`.
- * Below, stacks vertically. Both panes scroll independently when their
- * content overflows.
+ * Side-by-side layout used on Menu + Settings. At `lg`+ it lays out
+ * `[leftWidth] · divider · 1fr`; below `lg` it stacks vertically. Both panes
+ * scroll independently at `lg`+.
+ *
+ * CSS-driven (no `window.innerWidth` listener) so there's no desktop-first
+ * SSR / hydration flash. The fixed left width is passed through a CSS variable
+ * so the breakpoint prefix can stay static for Tailwind.
  */
 export function TwoPaneLayout({
   left,
   right,
   leftWidth = 300,
-  collapseBelow = 1100,
   divider = true,
   className,
 }: TwoPaneLayoutProps) {
-  const [stacked, setStacked] = React.useState(false);
-
-  React.useEffect(() => {
-    function onResize() {
-      setStacked(window.innerWidth < collapseBelow);
-    }
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [collapseBelow]);
-
-  if (stacked) {
-    return (
-      <div className={cn('flex flex-col gap-4', className)}>
-        <div className="min-h-0">{left}</div>
-        {divider && <div className="h-px bg-border/[var(--border-strong-alpha)]" />}
-        <div className="min-h-0">{right}</div>
-      </div>
-    );
-  }
-
   return (
     <div
-      className={cn('grid min-h-0 gap-0', className)}
-      style={{
-        gridTemplateColumns: divider
-          ? `${leftWidth}px 1px 1fr`
-          : `${leftWidth}px 1fr`,
-      }}
+      className={cn(
+        'flex min-h-0 flex-col gap-4 lg:grid lg:gap-0',
+        divider
+          ? 'lg:grid-cols-[var(--tp-left)_1px_minmax(0,1fr)]'
+          : 'lg:grid-cols-[var(--tp-left)_minmax(0,1fr)]',
+        className,
+      )}
+      style={{ ['--tp-left' as string]: `${leftWidth}px` }}
     >
-      <div className="min-w-0 overflow-y-auto pr-4">{left}</div>
-      {divider && <div className="bg-border/[var(--border-strong-alpha)]" />}
-      <div className="min-w-0 overflow-y-auto pl-4">{right}</div>
+      <div className="min-h-0 min-w-0 lg:overflow-y-auto lg:pr-4">{left}</div>
+      {divider && (
+        <div className="h-px w-full bg-border/[var(--border-strong-alpha)] lg:h-auto lg:w-px" />
+      )}
+      <div className="min-h-0 min-w-0 lg:overflow-y-auto lg:pl-4">{right}</div>
     </div>
   );
 }

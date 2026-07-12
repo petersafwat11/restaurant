@@ -2,6 +2,7 @@
   "topbar": {
     "searchPlaceholder": "Szukaj zamówień, klientów, pozycji…",
     "searchAriaLabel": "Szukaj (Cmd+K)",
+    "openMenuAriaLabel": "Otwórz menu nawigacji",
     "accountAriaLabel": "Konto",
     "notificationsAriaLabel": "Powiadomienia",
     "profile": "Profil",

@@ -83,10 +83,17 @@ export function SectionedDrawerBody({
   }
 
   return (
-    <div className={cn('grid h-full min-h-0', className)} style={{ gridTemplateColumns: '1fr 56px' }}>
+    <div
+      className={cn(
+        // Single column on phones (the icon rail is dropped to reclaim ~56px);
+        // content · 56px rail from `sm` up.
+        'grid h-full min-h-0 grid-cols-1 sm:grid-cols-[minmax(0,1fr)_56px]',
+        className,
+      )}
+    >
       <div
         ref={scrollerRef}
-        className="min-w-0 overflow-y-auto px-6 py-4"
+        className="min-w-0 overflow-y-auto px-4 py-4 sm:px-6"
       >
         {sections.map((s) => (
           <section
@@ -104,7 +111,7 @@ export function SectionedDrawerBody({
       </div>
       <nav
         aria-label="Drawer sections"
-        className="sticky top-0 flex h-full flex-col items-center gap-1 border-l-hairline bg-surface-2 py-4"
+        className="sticky top-0 hidden h-full flex-col items-center gap-1 border-l-hairline bg-surface-2 py-4 sm:flex"
       >
         {sections.map((s) => {
           const Icon = s.icon;

@@ -2,6 +2,7 @@
   "title": "Staff",
   "invite": "Invite",
   "empty": "No staff members yet.",
+  "error": "Couldn't load staff. Check your connection and try again.",
   "columns": {
     "name": "Name",
     "phone": "Phone",

@@ -32,6 +32,7 @@
     "noReply": "—"
   },
   "empty": "Żadne recenzje nie pasują do filtrów.",
+  "error": "Nie udało się wczytać recenzji. Sprawdź połączenie i spróbuj ponownie.",
   "drawer": {
     "ariaLabel": "Recenzja",
     "anonymous": "Anonim",

@@ -111,6 +111,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       {
         id: 'phone',
         header: t('columns.phone'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{row.original.phone ?? '—'}</span>
         ),
@@ -118,7 +119,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       {
         id: 'orders',
         header: t('columns.orders'),
-        meta: { align: 'right' },
+        meta: { align: 'right', hideBelow: 'sm' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg">{row.original.lifetimeOrders}</span>
         ),
@@ -136,6 +137,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       {
         id: 'last',
         header: t('columns.last'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) =>
           row.original.lastOrderAt ? (
             <RelativeTime value={row.original.lastOrderAt} />
@@ -146,6 +148,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
       {
         id: 'segment',
         header: t('columns.segment'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) =>
           row.original.segment ? (
             <span className="inline-flex h-5 items-center rounded-full bg-accent/[0.10] px-2 text-[11px] text-accent">
@@ -188,7 +191,7 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
               placeholder={t('search.placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ml-auto h-8 w-72 text-sm"
+              className="h-8 w-full text-sm sm:ml-auto sm:w-64"
             />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -224,9 +227,13 @@ export function CustomersList({ initialCustomerId }: { initialCustomerId?: strin
         columns={columns}
         rowKey={(r) => r.id}
         loading={q.isLoading}
+        minWidth={560}
         onRowClick={(r) => setSelectedId(r.id)}
         selection={canTag || canEmail ? { selected, onChange: setSelected } : undefined}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
 
       {selected.size > 0 && (

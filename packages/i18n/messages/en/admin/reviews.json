@@ -32,6 +32,7 @@
     "noReply": "—"
   },
   "empty": "No reviews match these filters.",
+  "error": "Couldn't load reviews. Check your connection and try again.",
   "drawer": {
     "ariaLabel": "Review",
     "anonymous": "Anonymous",

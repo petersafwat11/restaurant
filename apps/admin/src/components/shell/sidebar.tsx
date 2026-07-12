@@ -13,6 +13,13 @@ import { NAV_GROUPS, NAV_OVERVIEW, type NavItem } from './nav-config';
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  /**
+   * `fixed` — the sticky desktop rail (collapsible 240↔64px).
+   * `drawer` — rendered inside the mobile off-canvas Sheet: always expanded,
+   * full-width, no sticky/border, and taps close the drawer via `onNavigate`.
+   */
+  variant?: 'fixed' | 'drawer';
+  onNavigate?: () => void;
 }
 
 function isItemActive(pathname: string, href: string): boolean {
@@ -33,11 +40,13 @@ function NavRow({
   active,
   collapsed,
   label,
+  onNavigate,
 }: {
   item: NavItem;
   active: boolean;
   collapsed: boolean;
   label: string;
+  onNavigate?: () => void;
 }) {
   const Icon = item.icon;
   return (
@@ -47,8 +56,11 @@ function NavRow({
       rel={item.external ? 'noopener noreferrer' : undefined}
       aria-current={active ? 'page' : undefined}
       title={collapsed ? label : undefined}
+      onClick={onNavigate}
       className={cn(
-        'group relative flex h-9 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-admin-fast',
+        'group relative flex items-center gap-3 rounded-md px-3 text-sm transition-colors duration-admin-fast',
+        // Taller touch targets in the mobile drawer; compact on the desktop rail.
+        collapsed ? 'h-9' : 'h-10 sm:h-9',
         active ? 'bg-accent/[0.10] text-fg' : 'text-fg-muted hover:bg-surface-2 hover:text-fg',
         collapsed && 'justify-center px-0',
       )}
@@ -65,7 +77,15 @@ function NavRow({
   );
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({
+  collapsed: collapsedProp,
+  onToggle,
+  variant = 'fixed',
+  onNavigate,
+}: SidebarProps) {
+  const isDrawer = variant === 'drawer';
+  // The drawer is always fully expanded — collapsing only applies to the rail.
+  const collapsed = isDrawer ? false : collapsedProp;
   const pathname = usePathname() ?? '/';
   const { has } = usePermissions();
   const user = useAuthStore((s) => s.user);
@@ -91,8 +111,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       aria-label={t('ariaLabel')}
       className={cn(
-        'sticky top-0 flex h-screen shrink-0 flex-col border-r-hairline bg-surface transition-[width] duration-admin-base ease-admin-out',
-        collapsed ? 'w-sidebar-collapsed' : 'w-sidebar',
+        'flex flex-col bg-surface',
+        // Inside the mobile Sheet: fill the drawer, no sticky/border.
+        isDrawer && 'h-full w-full',
+        // Desktop rail: sticky, collapsible, hairline divider.
+        !isDrawer &&
+          'sticky top-0 h-screen shrink-0 border-r-hairline transition-[width] duration-admin-base ease-admin-out',
+        !isDrawer && (collapsed ? 'w-sidebar-collapsed' : 'w-sidebar'),
       )}
     >
       {/* Brand */}
@@ -120,6 +145,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               active={isItemActive(pathname, NAV_OVERVIEW.href)}
               collapsed={collapsed}
               label={t(NAV_OVERVIEW.labelKey)}
+              onNavigate={onNavigate}
             />
           </div>
         )}
@@ -141,6 +167,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     active={isItemActive(pathname, it.href)}
                     collapsed={collapsed}
                     label={t(it.labelKey)}
+                    onNavigate={onNavigate}
                   />
                 ))}
               </div>
@@ -167,14 +194,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="truncate text-xs text-fg-subtle">{user?.roles?.[0] ?? '—'}</div>
           </div>
         )}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={collapsed ? t('expand') : t('collapse')}
-          className="grid h-7 w-7 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
-        >
-          {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
-        </button>
+        {!isDrawer && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={collapsed ? t('expand') : t('collapse')}
+            className="grid h-7 w-7 place-items-center rounded-md text-fg-subtle transition-colors hover:bg-surface-2 hover:text-fg"
+          >
+            {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+          </button>
+        )}
       </div>
     </aside>
   );

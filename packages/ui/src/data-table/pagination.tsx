@@ -48,13 +48,14 @@ export function Pagination({
   const pages = pageWindow(pageIndex, last);
 
   return (
-    <div className="flex items-center justify-between gap-3 border-t-hairline px-3 py-2 text-xs">
-      <span className="tabular-nums text-fg-subtle">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t-hairline px-3 py-2 text-xs">
+      {/* Range label hides on the smallest screens so the pager never overflows. */}
+      <span className="hidden tabular-nums text-fg-subtle sm:inline">
         {formatRange
           ? formatRange({ from: start, to: end, total })
           : `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()}`}
       </span>
-      <div className="flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2">
         {onPageSizeChange && (
           <>
             <span className="text-fg-subtle">{rowsPerPageLabel}</span>

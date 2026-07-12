@@ -18,6 +18,8 @@ interface ItemsListProps {
   onOpenItem: (item: MenuItemDto) => void;
   onCreateItem: () => void;
   currency?: string;
+  /** True while the menu tree is still loading (shows table skeletons). */
+  loading?: boolean;
 }
 
 /**
@@ -31,6 +33,7 @@ export function ItemsList({
   onOpenItem,
   onCreateItem,
   currency = 'USD',
+  loading = false,
 }: ItemsListProps) {
   const t = useTranslations('admin.menu.items');
   const toggleAvailability = useToggleItemAvailability();
@@ -138,6 +141,7 @@ export function ItemsList({
             </span>
           );
         },
+        meta: { hideBelow: 'md' as const },
         size: 140,
       },
       {
@@ -165,7 +169,7 @@ export function ItemsList({
     [currency, toggleAvailability, canWrite, t],
   );
 
-  if (!category) {
+  if (!category && !loading) {
     return (
       <div className="grid h-full place-items-center rounded-card border-hairline bg-surface p-12 text-sm text-fg-muted">
         {t('selectCategoryPrompt')}
@@ -175,7 +179,7 @@ export function ItemsList({
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <FilterPillGroup<ItemFilter>
           value={filter}
           onChange={onFilterChange}
@@ -204,11 +208,13 @@ export function ItemsList({
           data={rows}
           columns={columns}
           rowKey={(r) => r.id}
+          minWidth={480}
+          loading={loading}
           onRowClick={onOpenItem}
           emptyState={
             <div className="text-sm text-fg-muted">
               {filter === 'all'
-                ? t('emptyAll', { name: category.name })
+                ? t('emptyAll', { name: category?.name ?? '' })
                 : t('emptyFiltered', { filter: t(`filters.${filter}`) })}
             </div>
           }

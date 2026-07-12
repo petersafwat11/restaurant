@@ -99,9 +99,10 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
         onChange={(v) => set('status', v)}
         options={statusOptions}
         ariaLabel={t('filters.statusAriaLabel')}
+        className="min-w-0 max-w-full"
       />
 
-      <div className="flex flex-1 items-center gap-2">
+      <div className="flex flex-1 flex-wrap items-center gap-2">
         <MultiSelect
           label={t('filters.typeLabel')}
           options={['DELIVERY', 'PICKUP', 'DINE_IN']}
@@ -117,7 +118,7 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
           onChange={(v) => set('payments', v as PaymentStatus[])}
         />
 
-        <div className="relative ml-auto w-72">
+        <div className="relative w-full sm:ml-auto sm:w-60">
           <Search
             size={13}
             className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-fg-subtle"
@@ -135,7 +136,7 @@ export function OrdersFilters({ value, onChange, counts, searchRef }: OrdersFilt
         </div>
 
         <Select value={value.sort} onValueChange={(v) => set('sort', v as SortKey)}>
-          <SelectTrigger className="h-8 w-44 text-xs">
+          <SelectTrigger className="h-8 w-full text-xs sm:w-44">
             <SelectValue placeholder={t('filters.sortPlaceholder')}>
               {sortLabels[value.sort]}
             </SelectValue>

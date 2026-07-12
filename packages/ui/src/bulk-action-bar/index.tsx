@@ -49,7 +49,7 @@ export function BulkActionBar({
       role="region"
       aria-label={regionLabel}
       className={cn(
-        'flex h-11 items-center gap-4 rounded-md border-hairline-strong bg-surface-2 px-3',
+        'flex min-h-11 flex-wrap items-center gap-x-4 gap-y-2 rounded-md border-hairline-strong bg-surface-2 px-3 py-1.5',
         'animate-row-arrive',
         className,
       )}
@@ -67,7 +67,7 @@ export function BulkActionBar({
         </button>
       </div>
 
-      <div className="flex flex-1 items-center gap-1">
+      <div className="flex flex-1 flex-wrap items-center gap-1">
         {actions.map((a) => {
           const Icon = a.icon;
           return (
@@ -93,7 +93,7 @@ export function BulkActionBar({
       </div>
 
       {meta && (
-        <div className="text-xs tabular-nums text-fg-subtle">{meta}</div>
+        <div className="hidden text-xs tabular-nums text-fg-subtle sm:block">{meta}</div>
       )}
     </div>
   );

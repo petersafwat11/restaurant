@@ -279,7 +279,7 @@ export default function OrdersPage() {
     <>
       <PageHeader
         rows={[
-          <div key="row1" className="flex w-full items-center gap-3">
+          <div key="row1" className="flex w-full flex-wrap items-center gap-3">
             <LivePulseChip count={newCount} onClick={resetNewCount} />
             <OrdersFilters
               value={filters}
@@ -341,6 +341,7 @@ export default function OrdersPage() {
         rowDecorator={rowDecorator}
         focusedKey={focusedKey}
         onFocusChange={(k) => setFocusedKey(k)}
+        minWidth={640}
         loading={ordersQuery.isLoading}
         emptyState={
           <div>

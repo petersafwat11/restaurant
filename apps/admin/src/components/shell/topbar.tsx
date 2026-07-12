@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
   cn,
 } from '@repo/ui';
-import { Bell, Cog, LogOut, Search, User } from 'lucide-react';
+import { Bell, Cog, LogOut, Menu, Search, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { type DateRange, DateRangeSegmented } from './date-range-segmented';
@@ -28,6 +28,8 @@ export interface TopbarProps {
   onRangeChange?: (r: DateRange) => void;
   leftExtras?: React.ReactNode;
   rightExtras?: React.ReactNode;
+  /** Opens the mobile navigation drawer. When set, a hamburger shows below `lg`. */
+  onMenuClick?: () => void;
 }
 
 export function Topbar({
@@ -37,6 +39,7 @@ export function Topbar({
   onRangeChange,
   leftExtras,
   rightExtras,
+  onMenuClick,
 }: TopbarProps) {
   const t = useTranslations('admin.layout.topbar');
   const router = useRouter();
@@ -56,8 +59,24 @@ export function Topbar({
   }, [user]);
 
   return (
-    <header className="sticky top-0 z-40 flex h-topbar items-center gap-4 border-b-hairline bg-bg/80 px-6 backdrop-blur">
-      <h1 className="text-h1-admin text-fg">{title}</h1>
+    <header className="sticky top-0 z-40 flex h-topbar items-center gap-2 border-b-hairline bg-bg/80 px-4 backdrop-blur sm:gap-4 sm:px-6">
+      {onMenuClick && (
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label={t('openMenuAriaLabel')}
+          className="-ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg lg:hidden"
+        >
+          <Menu size={18} />
+        </button>
+      )}
+      {/* When the date-range shares the bar (Overview), drop the title on phones
+          so the range control isn't squeezed to a one-letter title. */}
+      <h1
+        className={cn('min-w-0 truncate text-h1-admin text-fg', showDateRange && 'hidden sm:block')}
+      >
+        {title}
+      </h1>
 
       {showDateRange && range && onRangeChange && (
         <DateRangeSegmented value={range} onChange={onRangeChange} />
@@ -69,10 +88,12 @@ export function Topbar({
 
       {rightExtras ?? (
         <>
+          {/* Search + language are secondary on phones — hidden below sm so the
+              topbar (which may also carry the date-range on Overview) fits. */}
           <button
             type="button"
             aria-label={t('searchAriaLabel')}
-            className="flex h-8 items-center gap-2 rounded-md border-hairline-strong bg-surface px-3 text-xs text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+            className="hidden h-8 items-center gap-2 rounded-md border-hairline-strong bg-surface px-3 text-xs text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg sm:flex"
           >
             <Search size={13} />
             <span className="hidden xl:inline">{t('searchPlaceholder')}</span>
@@ -83,7 +104,9 @@ export function Topbar({
 
           <RealtimeStatusBellButton />
 
-          <LanguageSwitcher />
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -30,6 +30,7 @@
     "noIp": "—"
   },
   "empty": "Żaden wpis dziennika nie pasuje do filtrów.",
+  "error": "Nie udało się wczytać dziennika. Sprawdź połączenie i spróbuj ponownie.",
   "drawer": {
     "ariaLabel": "Wpis audytu",
     "actor": "wykonawca {id}",

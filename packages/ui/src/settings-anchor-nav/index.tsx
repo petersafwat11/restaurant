@@ -16,6 +16,12 @@ export interface SettingsAnchorNavProps {
   activeId?: string;
   onActiveChange?: (id: string) => void;
   scrollContainer?: React.RefObject<HTMLElement | null>;
+  /**
+   * When true, renders as a horizontal scrollable tab strip below `xl` and a
+   * vertical rail at `xl`+ — so on tablet/phone it sits as a compact strip
+   * above the content instead of a full-width stacked button list.
+   */
+  responsive?: boolean;
   className?: string;
 }
 
@@ -30,6 +36,7 @@ export function SettingsAnchorNav({
   activeId: controlledActive,
   onActiveChange,
   scrollContainer,
+  responsive = false,
   className,
 }: SettingsAnchorNavProps) {
   const [internalActive, setInternalActive] = React.useState<string>(
@@ -70,7 +77,13 @@ export function SettingsAnchorNav({
   return (
     <nav
       aria-label="Settings sections"
-      className={cn('flex flex-col gap-1', className)}
+      className={cn(
+        'gap-1',
+        responsive
+          ? 'flex overflow-x-auto pb-1 xl:flex-col xl:overflow-visible xl:pb-0'
+          : 'flex flex-col',
+        className,
+      )}
     >
       {items.map((item) => {
         const isActive = item.id === active;
@@ -82,6 +95,9 @@ export function SettingsAnchorNav({
             onClick={() => jumpTo(item.id)}
             className={cn(
               'group flex items-center gap-3 rounded-button px-3 py-2 text-left text-small font-medium transition-colors',
+              // In responsive mode each item is a non-shrinking pill in the
+              // horizontal strip until `xl`, then a full-width rail row.
+              responsive && 'shrink-0 whitespace-nowrap xl:w-full',
               isActive
                 ? 'bg-accent-muted text-fg'
                 : 'text-fg-muted hover:bg-surface-warm/30 hover:text-fg',
@@ -94,7 +110,9 @@ export function SettingsAnchorNav({
                 {item.icon}
               </span>
             )}
-            <span className="flex-1 truncate">{item.label}</span>
+            <span className={cn('truncate', responsive ? 'xl:flex-1' : 'flex-1')}>
+              {item.label}
+            </span>
             {item.badge && <span className="shrink-0">{item.badge}</span>}
           </button>
         );

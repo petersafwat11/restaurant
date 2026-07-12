@@ -24,7 +24,9 @@ export function PageHeader({ title, rows = [], bulk, className }: PageHeaderProp
   return (
     <div
       className={cn(
-        'sticky top-topbar z-20 -mx-6 mb-4 border-b-hairline bg-bg/80 px-6 backdrop-blur',
+        // Full-bleed to the page gutter — mirrors the layout's `px-4 sm:px-6`
+        // main padding so the header lines up at every breakpoint.
+        'sticky top-topbar z-20 -mx-4 mb-4 border-b-hairline bg-bg/80 px-4 backdrop-blur sm:-mx-6 sm:px-6',
         className,
       )}
     >
@@ -36,8 +38,10 @@ export function PageHeader({ title, rows = [], bulk, className }: PageHeaderProp
       {bulk}
       <div className="flex flex-col gap-3 py-3">
         {rows.map((row, i) => (
+          // Rows wrap so dense filter/search/action toolbars reflow instead of
+          // overflowing horizontally on narrow screens.
           // biome-ignore lint/suspicious/noArrayIndexKey: row order is stable per page
-          <div key={i} className="flex items-center gap-3">
+          <div key={i} className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {row}
           </div>
         ))}

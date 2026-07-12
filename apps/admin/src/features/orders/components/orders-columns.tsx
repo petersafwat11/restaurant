@@ -76,6 +76,7 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
           const n = info.getValue<number>();
           return <span className="text-fg-muted">{t('columns.itemCount', { count: n })}</span>;
         },
+        meta: { hideBelow: 'md' as const },
         size: 110,
       },
       {
@@ -87,6 +88,7 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
             label={(typeLabels[info.getValue<string>()] ?? info.getValue<string>()).toUpperCase()}
           />
         ),
+        meta: { hideBelow: 'md' as const },
         size: 100,
       },
       {
@@ -133,7 +135,7 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
           </span>
         ),
         enableSorting: true,
-        meta: { align: 'right' as const },
+        meta: { align: 'right' as const, hideBelow: 'lg' as const },
         size: 110,
       },
       {
@@ -148,7 +150,7 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
           const cls = mins > 20 ? 'text-negative' : mins > 10 ? 'text-warning' : 'text-fg-muted';
           return <span className={cn('tabular-nums', cls)}>{fmtPrep(mins)}</span>;
         },
-        meta: { align: 'right' as const },
+        meta: { align: 'right' as const, hideBelow: 'md' as const },
         size: 80,
       },
     ];

@@ -61,6 +61,7 @@ export default function ContactPage() {
       {
         id: 'from',
         header: t('columns.from'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-fg">{row.original.name}</span>
@@ -84,6 +85,7 @@ export default function ContactPage() {
       {
         id: 'createdAt',
         header: t('columns.createdAt'),
+        meta: { hideBelow: 'sm' },
         cell: ({ row }) => <RelativeTime value={row.original.createdAt} />,
       },
     ],
@@ -122,7 +124,11 @@ export default function ContactPage() {
             ? { borderInsetClass: 'shadow-[inset_2px_0_0_rgb(var(--info))]' }
             : undefined
         }
+        minWidth={460}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
       <ContactDrawer message={selected} onOpenChange={(o) => !o && setSelected(null)} />
     </RequirePermission>

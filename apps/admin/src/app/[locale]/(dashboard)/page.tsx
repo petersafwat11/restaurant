@@ -28,15 +28,15 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-4">
       <KpiRow period={period} />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <RevenueChart period={period} />
         </div>
         <StatusDonut period={period} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <TopItemsCard period={period} />
         </div>
         <LivePanel period={period} />

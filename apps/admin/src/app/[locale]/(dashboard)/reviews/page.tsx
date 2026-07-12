@@ -42,6 +42,7 @@ export default function ReviewsPage() {
       {
         id: 'author',
         header: t('columns.author'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) => (
           <span className="text-fg">{row.original.authorName ?? t('row.anonymous')}</span>
         ),
@@ -76,6 +77,7 @@ export default function ReviewsPage() {
       {
         id: 'reply',
         header: t('columns.reply'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) =>
           row.original.ownerReply ? (
             <span className="text-xs text-positive">{t('row.replied')}</span>
@@ -86,6 +88,7 @@ export default function ReviewsPage() {
       {
         id: 'createdAt',
         header: t('columns.createdAt'),
+        meta: { hideBelow: 'sm' },
         cell: ({ row }) => <RelativeTime value={row.original.createdAt} />,
       },
     ],
@@ -107,7 +110,7 @@ export default function ReviewsPage() {
                 { id: 'FLAGGED', label: t('filters.status.FLAGGED') },
               ]}
             />
-            <div className="flex items-center gap-1 text-xs text-fg-subtle">
+            <div className="flex flex-wrap items-center gap-1 text-xs text-fg-subtle">
               <span>{t('filters.ratingLabel')}</span>
               {(['all', 5, 4, 3, 2, 1] as const).map((r) => (
                 <button
@@ -132,8 +135,12 @@ export default function ReviewsPage() {
         columns={columns}
         rowKey={(r) => r.id}
         loading={q.isLoading}
+        minWidth={520}
         onRowClick={(r) => setSelected(r)}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
       <ReviewDrawer review={selected} onOpenChange={(o) => !o && setSelected(null)} />
     </RequirePermission>

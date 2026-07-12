@@ -30,6 +30,7 @@
     "noIp": "—"
   },
   "empty": "No audit log entries match these filters.",
+  "error": "Couldn't load the audit log. Check your connection and try again.",
   "drawer": {
     "ariaLabel": "Audit entry",
     "actor": "actor {id}",

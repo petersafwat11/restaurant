@@ -41,7 +41,7 @@ export function AuditFilters({ value, onChange }: Props) {
         placeholder={t('filters.actorPlaceholder')}
         value={value.actorUserId}
         onChange={(e) => update('actorUserId', e.target.value)}
-        className="h-8 w-56 text-sm"
+        className="h-8 w-full text-sm sm:w-56"
       />
       <select
         value={value.action}

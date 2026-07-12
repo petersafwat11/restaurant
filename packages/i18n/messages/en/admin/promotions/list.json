@@ -3,6 +3,7 @@
   "newPromotion": "New promotion",
   "noPermission": "You don't have permission to view promotions.",
   "empty": "No promotions yet. Create one to start offering discounts.",
+  "error": "Couldn't load promotions. Check your connection and try again.",
   "columns": {
     "name": "Name",
     "code": "Code",

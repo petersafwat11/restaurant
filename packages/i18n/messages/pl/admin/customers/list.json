@@ -26,6 +26,7 @@
     "pdf": "Pobierz PDF"
   },
   "empty": "Żaden klient nie pasuje do filtrów.",
+  "error": "Nie udało się wczytać klientów. Sprawdź połączenie i spróbuj ponownie.",
   "permissionDenied": "Nie masz uprawnień do przeglądania klientów.",
   "bulk": {
     "clear": "Wyczyść",

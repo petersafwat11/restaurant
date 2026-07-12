@@ -50,7 +50,10 @@ export default function MenuPage() {
 
   return (
     <RequirePermission perm="menu:read">
-      <div className="h-[calc(100vh-theme(spacing.topbar)-3rem)]">
+      {/* Fixed viewport height only at lg+, where the two panes sit side-by-side
+          and scroll independently. Below lg the panes stack and the page scrolls,
+          so a fixed height would clip the lower pane. */}
+      <div className="lg:h-[calc(100vh-theme(spacing.topbar)-3rem)]">
         <TwoPaneLayout
           leftWidth={280}
           collapseBelow={1024}
@@ -70,6 +73,7 @@ export default function MenuPage() {
               onFilterChange={setFilter}
               onOpenItem={(item) => setDrawerState({ mode: 'edit', item })}
               onCreateItem={() => setDrawerState({ mode: 'create' })}
+              loading={tree.isLoading}
             />
           }
         />

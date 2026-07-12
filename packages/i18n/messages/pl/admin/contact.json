@@ -18,6 +18,7 @@
     "noSubject": "(bez tematu)"
   },
   "empty": "Brak wiadomości kontaktowych.",
+  "error": "Nie udało się wczytać wiadomości. Sprawdź połączenie i spróbuj ponownie.",
   "drawer": {
     "ariaLabel": "Wiadomość kontaktowa",
     "noSubject": "(bez tematu)",

@@ -163,10 +163,9 @@ export default function AdminReservationsPage() {
         </div>
       )}
 
-      <div
-        className="rounded-card border border-border/[var(--border-alpha)] bg-surface"
-        style={{ height: 640 }}
-      >
+      {/* Adaptive height: viewport-relative on smaller screens, fixed on desktop
+          (the calendar grid is tuned for a ~640px canvas). */}
+      <div className="h-[70vh] min-h-[460px] rounded-card border border-border/[var(--border-alpha)] bg-surface lg:h-[640px]">
         {list.isLoading || tables.isLoading ? (
           <div className="flex h-full items-center justify-center">
             <Spinner size="xl" />
@@ -245,7 +244,7 @@ function ViewTab({
       }`}
     >
       {icon}
-      {children}
+      <span className="hidden sm:inline">{children}</span>
     </button>
   );
 }
@@ -275,15 +274,15 @@ function ReservationsList({
   }
   return (
     <div className="h-full overflow-auto">
-      <table className="w-full text-small">
+      <table className="w-full min-w-[560px] text-small">
         <thead className="sticky top-0 bg-surface text-caption uppercase tracking-wider text-fg-subtle">
           <tr>
             <th className="px-4 py-3 text-left">{t('listTable.when')}</th>
             <th className="px-4 py-3 text-left">{t('listTable.guest')}</th>
             <th className="px-4 py-3 text-left">{t('listTable.party')}</th>
-            <th className="px-4 py-3 text-left">{t('listTable.table')}</th>
+            <th className="hidden px-4 py-3 text-left md:table-cell">{t('listTable.table')}</th>
             <th className="px-4 py-3 text-left">{t('listTable.status')}</th>
-            <th className="px-4 py-3 text-left">{t('listTable.notes')}</th>
+            <th className="hidden px-4 py-3 text-left lg:table-cell">{t('listTable.notes')}</th>
           </tr>
         </thead>
         <tbody>
@@ -311,13 +310,13 @@ function ReservationsList({
                 </div>
               </td>
               <td className="px-4 py-3 tabular-nums text-fg">{r.guestCount}</td>
-              <td className="px-4 py-3 text-fg-muted">
+              <td className="hidden px-4 py-3 text-fg-muted md:table-cell">
                 {r.tableId ? (tableNameById.get(r.tableId) ?? r.tableId) : t('listTable.unseated')}
               </td>
               <td className="px-4 py-3">
                 <ReservationStatusBadge status={r.status} />
               </td>
-              <td className="max-w-xs px-4 py-3 truncate text-fg-muted">
+              <td className="hidden max-w-xs truncate px-4 py-3 text-fg-muted lg:table-cell">
                 {r.notes ?? t('listTable.noNotes')}
               </td>
             </tr>

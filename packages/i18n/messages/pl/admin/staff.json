@@ -2,6 +2,7 @@
   "title": "Pracownicy",
   "invite": "Zaproś",
   "empty": "Brak pracowników.",
+  "error": "Nie udało się wczytać pracowników. Sprawdź połączenie i spróbuj ponownie.",
   "columns": {
     "name": "Imię i nazwisko",
     "phone": "Telefon",

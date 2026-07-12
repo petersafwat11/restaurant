@@ -62,6 +62,7 @@ export default function StaffPage() {
       {
         id: 'phone',
         header: t('columns.phone'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{row.original.phone ?? t('missing')}</span>
         ),
@@ -125,6 +126,7 @@ export default function StaffPage() {
       {
         id: 'createdAt',
         header: t('columns.added'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) => <RelativeTime value={row.original.createdAt} />,
       },
       {
@@ -187,7 +189,11 @@ export default function StaffPage() {
         columns={columns}
         rowKey={(r) => r.id}
         loading={q.isLoading}
+        minWidth={600}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
       <InviteStaffModal open={inviteOpen} onOpenChange={setInviteOpen} />
     </RequirePermission>

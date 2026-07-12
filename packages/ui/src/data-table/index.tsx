@@ -58,6 +58,13 @@ export interface DataTableProps<T, TKey extends string = string> {
   focusedKey?: TKey;
   onFocusChange?: (key: TKey) => void;
   stickyHeader?: boolean;
+  /**
+   * Minimum table width in px. When set, the table won't shrink below it and
+   * the wrapper scrolls horizontally instead of crushing columns on narrow
+   * screens. Pair with per-column `meta.hideBelow` to drop low-priority columns
+   * on small screens so the remaining set fits without much scrolling.
+   */
+  minWidth?: number;
   className?: string;
   /** Localizable labels. All optional with sensible English defaults. */
   labels?: {
@@ -71,6 +78,23 @@ export interface DataTableProps<T, TKey extends string = string> {
     selectAll?: string;
     /** Aria-label for individual row checkboxes. Defaults to "Select row". */
     selectRow?: string;
+  };
+}
+
+type ColumnMeta = { align?: 'right'; hideBelow?: 'sm' | 'md' | 'lg' };
+
+const HIDE_BELOW_CLASS = {
+  sm: 'hidden sm:table-cell',
+  md: 'hidden md:table-cell',
+  lg: 'hidden lg:table-cell',
+} as const;
+
+/** Reads the (optional) column `meta` for alignment + responsive-hide class. */
+function metaClasses(meta: unknown): { align?: 'right'; hidden?: string } {
+  const m = (meta ?? {}) as ColumnMeta;
+  return {
+    align: m.align,
+    hidden: m.hideBelow ? HIDE_BELOW_CLASS[m.hideBelow] : undefined,
   };
 }
 
@@ -99,6 +123,7 @@ export function DataTable<T, TKey extends string = string>({
   focusedKey,
   onFocusChange,
   stickyHeader = true,
+  minWidth,
   className,
   labels,
 }: DataTableProps<T, TKey>) {
@@ -180,7 +205,10 @@ export function DataTable<T, TKey extends string = string>({
       )}
     >
       <div className="relative overflow-x-auto">
-        <table className="w-full border-separate border-spacing-0 text-sm">
+        <table
+          className="w-full border-separate border-spacing-0 text-sm"
+          style={minWidth ? { minWidth } : undefined}
+        >
           <thead
             className={cn(
               stickyHeader && 'sticky top-0 z-[1] bg-surface',
@@ -202,7 +230,7 @@ export function DataTable<T, TKey extends string = string>({
                 {hg.headers.map((h) => {
                   const canSort = h.column.getCanSort();
                   const sortedDir = h.column.getIsSorted();
-                  const align = (h.column.columnDef.meta as { align?: 'right' } | undefined)?.align;
+                  const { align, hidden } = metaClasses(h.column.columnDef.meta);
                   return (
                     <th
                       key={h.id}
@@ -211,6 +239,7 @@ export function DataTable<T, TKey extends string = string>({
                         'border-b-hairline px-3 py-2 font-medium',
                         align === 'right' && 'text-right',
                         canSort && 'cursor-pointer select-none',
+                        hidden,
                       )}
                       onClick={canSort ? h.column.getToggleSortingHandler() : undefined}
                     >
@@ -242,8 +271,11 @@ export function DataTable<T, TKey extends string = string>({
                       </td>
                     )}
                     {columns.map((c, ci) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: skeleton cells
-                      <td key={ci} className="border-b-hairline px-3 py-3">
+                      <td
+                        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton cells
+                        key={ci}
+                        className={cn('border-b-hairline px-3 py-3', metaClasses(c.meta).hidden)}
+                      >
                         <div className="h-3 w-3/5 rounded bg-surface-2" />
                       </td>
                     ))}
@@ -289,15 +321,14 @@ export function DataTable<T, TKey extends string = string>({
                           </td>
                         )}
                         {row.getVisibleCells().map((cell) => {
-                          const align = (cell.column.columnDef.meta as
-                            | { align?: 'right' }
-                            | undefined)?.align;
+                          const { align, hidden } = metaClasses(cell.column.columnDef.meta);
                           return (
                             <td
                               key={cell.id}
                               className={cn(
                                 'border-b-hairline px-3 py-2.5',
                                 align === 'right' && 'text-right tabular-nums',
+                                hidden,
                               )}
                             >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}

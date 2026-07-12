@@ -144,7 +144,7 @@ export default function KdsPage() {
 
   return (
     <div className="flex h-screen flex-col">
-      <header className="flex shrink-0 items-center justify-between border-b border-border/[var(--border-alpha)] bg-surface/60 px-6 py-3 backdrop-blur">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border/[var(--border-alpha)] bg-surface/60 px-4 py-3 backdrop-blur sm:px-6">
         <div className="flex items-center gap-3 text-small">
           <Link href="/orders" className="text-fg-muted hover:text-fg" aria-label={t('backAria')}>
             {t('backToAdmin')}

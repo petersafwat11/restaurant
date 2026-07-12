@@ -26,6 +26,7 @@
     "pdf": "Download PDF"
   },
   "empty": "No customers match these filters.",
+  "error": "Couldn't load customers. Check your connection and try again.",
   "permissionDenied": "You don't have permission to view customers.",
   "bulk": {
     "clear": "Clear",

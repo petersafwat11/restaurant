@@ -5,25 +5,45 @@ import { Sidebar } from '@/components/shell/sidebar';
 import { Topbar } from '@/components/shell/topbar';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
-import { PageSpinner, TooltipProvider } from '@repo/ui';
+import { PageSpinner, Sheet, SheetContent, SheetTitle, TooltipProvider } from '@repo/ui';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 function Shell({ children }: { children: React.ReactNode }) {
+  // Desktop rail collapse (240↔64) — user preference, defaults expanded.
   const [collapsed, setCollapsed] = React.useState(false);
+  // Mobile off-canvas nav (below `lg`).
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const cfg = usePageHeaderConfig();
+  const pathname = usePathname();
+  const t = useTranslations('admin.layout.sidebar');
 
+  // Close the drawer whenever the route changes (tap-to-navigate dismisses it).
   React.useEffect(() => {
-    function onResize() {
-      setCollapsed(window.innerWidth < 1280);
-    }
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+    if (pathname) setMobileNavOpen(false);
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen bg-bg">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      {/* Desktop rail — CSS-hidden below `lg`, where the drawer takes over.
+          No window.innerWidth listener → no desktop-first hydration flash. */}
+      <div className="hidden lg:block">
+        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      </div>
+
+      {/* Mobile off-canvas drawer — same Sidebar, always expanded. */}
+      <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+        <SheetContent side="left" width={264} className="bg-surface p-0 lg:hidden">
+          <SheetTitle className="sr-only">{t('ariaLabel')}</SheetTitle>
+          <Sidebar
+            variant="drawer"
+            collapsed={false}
+            onToggle={() => undefined}
+            onNavigate={() => setMobileNavOpen(false)}
+          />
+        </SheetContent>
+      </Sheet>
+
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           title={cfg.title}
@@ -31,8 +51,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           range={cfg.rangeId ? { id: cfg.rangeId } : undefined}
           onRangeChange={cfg.onRangeChange ? (r) => cfg.onRangeChange?.({ id: r.id }) : undefined}
           rightExtras={cfg.rightExtras}
+          onMenuClick={() => setMobileNavOpen(true)}
         />
-        <main className="mx-auto w-full max-w-page-max flex-1 px-6 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-page-max flex-1 px-4 py-6 sm:px-6">{children}</main>
       </div>
     </div>
   );

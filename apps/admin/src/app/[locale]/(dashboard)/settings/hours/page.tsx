@@ -220,8 +220,8 @@ export default function AdminHoursPage() {
 
       {dirty && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/[var(--border-alpha)] bg-surface/95 backdrop-blur">
-          <div className="mx-auto flex max-w-page-max items-center justify-between gap-4 px-6 py-3">
-            <p className="text-small text-fg-muted">{t('unsaved.message')}</p>
+          <div className="mx-auto flex max-w-page-max items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <p className="hidden text-small text-fg-muted sm:block">{t('unsaved.message')}</p>
             <div className="flex items-center gap-2">
               <button
                 type="button"

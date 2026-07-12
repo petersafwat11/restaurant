@@ -131,7 +131,11 @@ function CategoryRow({
           type="button"
           {...handle.attributes}
           {...handle.listeners}
-          className={cn(handle.className, 'opacity-0 group-hover:opacity-100')}
+          className={cn(
+            handle.className,
+            // Always visible on touch (no hover); hover-reveal on pointer devices.
+            'opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100',
+          )}
           aria-label={dragLabel}
         >
           <GripVertical size={14} />
@@ -181,7 +185,7 @@ function CategoryRow({
           type="button"
           onClick={onDeleteRequest}
           aria-label={deleteLabel}
-          className="grid h-6 w-6 place-items-center rounded-md text-fg-subtle opacity-0 transition-opacity hover:bg-negative/15 hover:text-negative group-hover:opacity-100"
+          className="grid h-6 w-6 place-items-center rounded-md text-fg-subtle opacity-100 transition-opacity hover:bg-negative/15 hover:text-negative [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
         >
           <Trash2 size={13} />
         </button>

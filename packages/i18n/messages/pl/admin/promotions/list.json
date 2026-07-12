@@ -3,6 +3,7 @@
   "newPromotion": "Nowa promocja",
   "noPermission": "Nie masz uprawnień do wyświetlania promocji.",
   "empty": "Brak promocji. Utwórz pierwszą, aby zacząć oferować rabaty.",
+  "error": "Nie udało się wczytać promocji. Sprawdź połączenie i spróbuj ponownie.",
   "columns": {
     "name": "Nazwa",
     "code": "Kod",

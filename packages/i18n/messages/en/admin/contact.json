@@ -18,6 +18,7 @@
     "noSubject": "(no subject)"
   },
   "empty": "No contact messages.",
+  "error": "Couldn't load messages. Check your connection and try again.",
   "drawer": {
     "ariaLabel": "Contact message",
     "noSubject": "(no subject)",

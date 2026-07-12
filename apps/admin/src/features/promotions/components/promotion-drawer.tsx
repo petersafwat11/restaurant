@@ -344,7 +344,7 @@ export function PromotionDrawer({ promotion, creating, onOpenChange, onCreated }
                 label: t('sections.schedule'),
                 icon: CalendarRange,
                 children: (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="space-y-1">
                       <Label htmlFor="promo-starts">{t('fields.startsAt')}</Label>
                       <input
@@ -393,7 +393,7 @@ export function PromotionDrawer({ promotion, creating, onOpenChange, onCreated }
                       />
                       <p className="text-xs text-fg-subtle">{t('coupon.codeHint')}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div className="space-y-1">
                         <Label htmlFor="promo-max">{t('coupon.maxRedemptions')}</Label>
                         <Input

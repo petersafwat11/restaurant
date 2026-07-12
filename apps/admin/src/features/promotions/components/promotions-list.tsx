@@ -111,6 +111,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
       {
         id: 'code',
         header: t('columns.code'),
+        meta: { hideBelow: 'md' },
         cell: ({ row }) =>
           row.original.code ? (
             <span className="font-mono text-fg-muted">{row.original.code}</span>
@@ -121,6 +122,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
       {
         id: 'type',
         header: t('columns.type'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="inline-flex h-5 items-center rounded-full bg-accent/[0.10] px-2 text-[11px] text-accent">
             {t(`types.${row.original.type}`)}
@@ -135,6 +137,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
       {
         id: 'window',
         header: t('columns.window'),
+        meta: { hideBelow: 'lg' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{fmtWindow(row.original)}</span>
         ),
@@ -142,7 +145,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
       {
         id: 'used',
         header: t('columns.used'),
-        meta: { align: 'right' },
+        meta: { align: 'right', hideBelow: 'sm' },
         cell: ({ row }) => (
           <span className="tabular-nums text-fg-muted">{row.original.redemptionsCount}</span>
         ),
@@ -180,8 +183,12 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         columns={columns}
         rowKey={(r) => r.id}
         loading={q.isLoading}
+        minWidth={560}
         onRowClick={(r) => setSelectedId(r.id)}
         emptyState={<div className="text-sm text-fg-muted">{t('empty')}</div>}
+        errorState={
+          q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
+        }
       />
       <PromotionDrawer
         promotion={selected}
