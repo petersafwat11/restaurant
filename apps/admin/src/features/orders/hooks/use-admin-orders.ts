@@ -2,7 +2,7 @@
 
 import { getApiClient } from '@/lib/api-client';
 import type { OrderListDto, OrderListQuery } from '@repo/types';
-import { type UseQueryResult, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import { orderQueryKeys } from '../query-keys';
 
 /** Admin orders-list filters. `cursor` is managed by the infinite hook. */
@@ -17,16 +17,5 @@ export function useAdminOrders(filters: AdminOrderFilters): UseQueryResult<Order
   return useQuery<OrderListDto>({
     queryKey: orderQueryKeys.adminList(filters),
     queryFn: () => getApiClient().orders.list(filters),
-  });
-}
-
-/** Same filters, cursor-paginated for infinite scroll / "load more". */
-export function useAdminOrdersInfinite(filters: AdminOrderFilters) {
-  return useInfiniteQuery({
-    queryKey: orderQueryKeys.adminListInfinite(filters),
-    queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      getApiClient().orders.list({ ...filters, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last: OrderListDto) => last.nextCursor ?? undefined,
   });
 }

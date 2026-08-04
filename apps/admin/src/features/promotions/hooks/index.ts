@@ -4,4 +4,3 @@ export { useCreatePromotion } from './use-create-promotion';
 export { useUpdatePromotion } from './use-update-promotion';
 export { useDeletePromotion } from './use-delete-promotion';
 export { useArchivePromotion } from './use-archive-promotion';
-export { useValidateCoupon } from './use-validate-coupon';

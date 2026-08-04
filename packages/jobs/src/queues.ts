@@ -32,7 +32,6 @@ export const JOB_EMAIL_PROMO = 'email.promo';
 export const JOB_EMAIL_NEWSLETTER_CONFIRM = 'email.newsletter-confirm';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
-export const JOB_EMAIL_REFERRAL_INVITE = 'email.referral-invite';
 export const JOB_RECEIPT_GENERATE = 'receipt.generate';
 export const JOB_ANALYTICS_ROLLUP_DAILY = 'analytics.rollup-daily';
 export const JOB_ANALYTICS_ROLLUP_FINALIZE = 'analytics.rollup-finalize';

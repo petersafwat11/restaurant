@@ -10,7 +10,6 @@ import type {
   BulkTagCustomersDto,
   BulkTagCustomersResponseDto,
   CreateCustomerNoteDto,
-  CreateCustomerTagDto,
   CustomerDetailDto,
   CustomerExportQuery,
   CustomerListDto,
@@ -58,30 +57,6 @@ export function useCustomerTags() {
   return useQuery<CustomerTagDto[]>({
     queryKey: customerKeys.tags,
     queryFn: () => getApiClient().customers.listTags(),
-  });
-}
-
-export function useCreateCustomerTag() {
-  const qc = useQueryClient();
-  return useMutation<CustomerTagDto, ApiError, CreateCustomerTagDto>({
-    mutationFn: (input) => getApiClient().customers.createTag(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: customerKeys.tags });
-      notify('success', 'Tag created');
-    },
-    onError: (err) => notify('error', err.message),
-  });
-}
-
-export function useDeleteCustomerTag() {
-  const qc = useQueryClient();
-  return useMutation<{ success: true }, ApiError, { tagId: string }>({
-    mutationFn: ({ tagId }) => getApiClient().customers.deleteTag(tagId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: customerKeys.tags });
-      notify('success', 'Tag deleted');
-    },
-    onError: (err) => notify('error', err.message),
   });
 }
 

@@ -78,9 +78,3 @@ export function useCartSessionKey(): string | null {
   }
   return ctx.sessionKey;
 }
-
-/** Clear the local session-key state (used by the merge-on-login flow). */
-export function useClearCartSession(): () => void {
-  const ctx = useContext(CartSessionContext);
-  return ctx?.clear ?? (() => {});
-}

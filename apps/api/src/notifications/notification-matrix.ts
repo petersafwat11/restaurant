@@ -16,7 +16,7 @@ export interface ChannelSet {
 
 const NONE: ChannelSet = { email: false, sms: false, inApp: false };
 
-export const ORDER_STATUS_CHANNELS: Partial<Record<OrderStatus, ChannelSet>> = {
+const ORDER_STATUS_CHANNELS: Partial<Record<OrderStatus, ChannelSet>> = {
   PENDING: { email: true, sms: false, inApp: true },
   CONFIRMED: { email: false, sms: true, inApp: true },
   OUT_FOR_DELIVERY: { email: false, sms: true, inApp: true },

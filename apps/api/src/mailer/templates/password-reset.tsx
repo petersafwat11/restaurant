@@ -7,7 +7,7 @@ interface Props {
   firstName?: string | null;
 }
 
-export function PasswordResetTemplate({ resetUrl, firstName }: Props) {
+function PasswordResetTemplate({ resetUrl, firstName }: Props) {
   return (
     <Html>
       <Head />

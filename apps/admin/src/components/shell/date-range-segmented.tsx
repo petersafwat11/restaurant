@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger, cn } from '@repo/ui';
 import { Calendar } from 'lucide-react';
 import * as React from 'react';
 
-export type RangeId = 'today' | '7d' | '30d' | 'custom';
+type RangeId = 'today' | '7d' | '30d' | 'custom';
 
 export interface DateRange {
   id: RangeId;

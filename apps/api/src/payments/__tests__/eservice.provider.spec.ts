@@ -4,7 +4,12 @@ import './_env-setup';
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { ENV_TYPE } from '../../config/config.module';
-import { EserviceProvider, buildHppPayload, makeHppReference } from '../eservice.provider';
+import {
+  EserviceProvider,
+  buildHppPayload,
+  makeHppReference,
+} from '../eservice.provider';
+import { computeEserviceSignature, verifyEserviceSignedParameters } from '../eservice-signature';
 
 const APP_KEY = 'webhook_signing_key';
 
@@ -45,6 +50,12 @@ describe('buildHppPayload (F5 minor units + unique reference)', () => {
     const payload = buildHppPayload({ ...base, reference: 'ref_1' }) as {
       type: string;
       reference: string;
+      payer: {
+        name: string;
+        first_name: string;
+        last_name: string;
+        billing_address: { country: string };
+      };
       order: {
         amount: string;
         currency: string;
@@ -53,6 +64,12 @@ describe('buildHppPayload (F5 minor units + unique reference)', () => {
       notifications: { return_url: string; status_url: string };
     };
     expect(payload.type).toBe('HOSTED_PAYMENT_PAGE');
+    expect(payload.payer).toMatchObject({
+      name: 'Ann',
+      first_name: 'Ann',
+      last_name: 'Ann',
+      billing_address: { country: 'PL' },
+    });
     expect(payload.order.amount).toBe('4550'); // 45.50 PLN → 4550 minor units, as a string
     expect(payload.order.currency).toBe('PLN');
     expect(payload.order.transaction_configuration.capture_mode).toBe('AUTO');
@@ -60,11 +77,59 @@ describe('buildHppPayload (F5 minor units + unique reference)', () => {
     expect(payload.notifications.status_url).toBe(base.statusUrl);
   });
 
+  it('sends the separate payer identity fields required by BLIK', () => {
+    const payload = buildHppPayload({
+      ...base,
+      methodKind: 'BLIK',
+      payer: { ...base.payer, name: 'Anna Maria Kowalska' },
+      reference: 'ref_blik_payer',
+    }) as {
+      payer: {
+        first_name: string;
+        last_name: string;
+        billing_address: { country: string };
+      };
+    };
+
+    expect(payload.payer).toEqual(
+      expect.objectContaining({
+        first_name: 'Anna',
+        last_name: 'Maria Kowalska',
+        billing_address: { country: 'PL' },
+      }),
+    );
+  });
+
   it('maps BLIK to the BLIK allowed method', () => {
-    const payload = buildHppPayload({ ...base, methodKind: 'BLIK', reference: 'ref_2' }) as {
-      order: { transaction_configuration: { allowed_payment_methods: string[] } };
+    const payload = buildHppPayload({
+      ...base,
+      methodKind: 'BLIK',
+      reference: 'ref_2',
+    }) as {
+      order: {
+        transaction_configuration: { allowed_payment_methods: string[] };
+        payment_method_configuration: {
+          authentication: { preference: string };
+          apm: { shipping_address_enabled: string; address_override: string };
+          storage_mode: string;
+        };
+      };
     };
     expect(payload.order.transaction_configuration.allowed_payment_methods).toEqual(['BLIK']);
+    expect(payload.order.payment_method_configuration).toEqual({
+      authentication: { preference: 'NO_CHALLENGE_REQUESTED' },
+      apm: { shipping_address_enabled: 'NO', address_override: 'NO' },
+      storage_mode: 'OFF',
+    });
+  });
+
+  it('keeps card-specific authentication and omits BLIK configuration', () => {
+    const payload = buildHppPayload({ ...base, reference: 'ref_card' }) as {
+      order: { payment_method_configuration: Record<string, unknown> };
+    };
+    expect(payload.order.payment_method_configuration).toEqual({
+      authentication: { preference: 'CHALLENGE_PREFERRED' },
+    });
   });
 
   it('carries whatever unique reference it is given (per-attempt uniqueness)', () => {
@@ -126,9 +191,9 @@ describe('EserviceProvider.parseWebhook signature verification (real mode)', () 
     status: 'CAPTURED',
     amount: '4550',
     currency: 'PLN',
-    reference: 'ref_order_1_CARD',
+    reference: 'R-2026-000435',
     payment_method: { result: '00', message: 'AUTHORISED' },
-    link_data: { id: 'LNK_1' },
+    link_data: { id: 'LNK_1', reference: 'ref_order_1_CARD' },
     action: { id: 'ACT_1', type: 'STATUS_NOTIFICATION' },
   };
 
@@ -137,7 +202,7 @@ describe('EserviceProvider.parseWebhook signature verification (real mode)', () 
     const event = provider.parseWebhook(raw, sign(raw));
     expect(event).not.toBeNull();
     expect(event?.type).toBe('payment.succeeded');
-    expect(event?.providerRef).toBe('ref_order_1_CARD'); // match key = reference
+    expect(event?.providerRef).toBe('ref_order_1_CARD'); // live HPP match key = link_data.reference
     expect(event?.transactionId).toBe('TRN_1'); // TRN → providerTxnId
     expect(event?.id).toBe('ACT_1'); // idempotency = action id
   });
@@ -168,6 +233,68 @@ describe('EserviceProvider.parseWebhook signature verification (real mode)', () 
     const raw = Buffer.from(JSON.stringify(declined), 'utf8');
     const event = provider.parseWebhook(raw, sign(raw));
     expect(event?.type).toBe('payment.failed');
+  });
+
+  it('falls back to the top-level reference when link_data.reference is absent', () => {
+    const fallback = { ...notification, reference: 'legacy_ref', link_data: { id: 'LNK_1' } };
+    const raw = Buffer.from(JSON.stringify(fallback), 'utf8');
+    expect(provider.parseWebhook(raw, sign(raw))?.providerRef).toBe('legacy_ref');
+  });
+});
+
+describe('eService return_url signature verification (real mode)', () => {
+  const provider = new EserviceProvider(realEnv);
+  const signedParameters =
+    'id=TRN_1&status=PENDING&reference=ref_1&payment_method.result=01&action.type=RETURN_NOTIFICATION';
+  const signature = computeEserviceSignature(signedParameters, APP_KEY);
+
+  it('accepts a GET signature without re-encoding or reordering its query', () => {
+    const rawUrl =
+      `/api/v1/payments/eservice/return?orderId=order_1&X-GP-Signature=${signature}&` +
+      signedParameters;
+    expect(
+      provider.verifyReturnNotification({
+        method: 'GET',
+        rawUrl,
+        rawBody: Buffer.alloc(0),
+      }),
+    ).toBe(true);
+  });
+
+  it('accepts a form POST whose signature is the first signed form field', () => {
+    const rawBody = Buffer.from(`X-GP-Signature=${signature}&${signedParameters}`, 'utf8');
+    expect(
+      provider.verifyReturnNotification({
+        method: 'POST',
+        rawUrl: '/api/v1/payments/eservice/return?orderId=order_1',
+        rawBody,
+      }),
+    ).toBe(true);
+  });
+
+  it('accepts a header-signed POST over the exact body', () => {
+    const rawBody = Buffer.from(JSON.stringify({ id: 'TRN_1', status: 'CAPTURED' }), 'utf8');
+    expect(
+      provider.verifyReturnNotification({
+        method: 'POST',
+        rawUrl: '/api/v1/payments/eservice/return?orderId=order_1',
+        rawBody,
+        headerSignature: computeEserviceSignature(rawBody, APP_KEY),
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects missing, reordered, tampered, and malformed signed parameters', () => {
+    const good = `X-GP-Signature=${signature}&${signedParameters}`;
+    expect(verifyEserviceSignedParameters(good, APP_KEY).valid).toBe(true);
+    expect(verifyEserviceSignedParameters(signedParameters, APP_KEY).valid).toBe(false);
+    expect(
+      verifyEserviceSignedParameters(good.replace('status=PENDING', 'status=CAPTURED'), APP_KEY)
+        .valid,
+    ).toBe(false);
+    expect(verifyEserviceSignedParameters('X-GP-Signature=abcd&id=TRN_1', APP_KEY).valid).toBe(
+      false,
+    );
   });
 });
 

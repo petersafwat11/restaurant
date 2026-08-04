@@ -3,7 +3,7 @@ import nodemailer, { type Transporter } from 'nodemailer';
 import { Resend } from 'resend';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 
-export interface MailAttachment {
+interface MailAttachment {
   filename: string;
   /** Raw bytes or base64 string. */
   content: Buffer | string;

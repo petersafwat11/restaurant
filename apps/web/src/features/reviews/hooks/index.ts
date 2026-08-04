@@ -3,7 +3,7 @@
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
-import type { CreateReviewDto, ReviewDto, ReviewListDto, ReviewListQuery } from '@repo/types';
+import type { CreateReviewDto, ReviewDto, ReviewListDto } from '@repo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 
@@ -20,13 +20,6 @@ export function useMyReviews() {
   return useQuery<ReviewListDto>({
     queryKey: ['reviews', 'me'],
     queryFn: () => getApiClient().reviews.listMine(),
-  });
-}
-
-export function useReviews(q?: ReviewListQuery) {
-  return useQuery<ReviewListDto>({
-    queryKey: ['reviews', 'list', q ?? {}],
-    queryFn: () => getApiClient().reviews.list(q),
   });
 }
 

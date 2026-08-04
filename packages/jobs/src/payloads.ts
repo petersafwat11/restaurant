@@ -128,14 +128,6 @@ export const EmailNewsletterConfirmPayloadSchema = z.object({
 export type EmailNewsletterConfirmPayload = z.infer<typeof EmailNewsletterConfirmPayloadSchema>;
 
 // Sprint 11 — referral invite email.
-export const EmailReferralInvitePayloadSchema = z.object({
-  toEmail: z.string().email(),
-  inviterName: z.string().nullable(),
-  code: z.string(),
-  link: z.string().url(),
-});
-export type EmailReferralInvitePayload = z.infer<typeof EmailReferralInvitePayloadSchema>;
-
 // Sprint 8 — analytics + audit.
 export const AnalyticsRollupPayloadSchema = z.object({
   date: z.string().optional(),

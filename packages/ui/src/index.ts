@@ -131,7 +131,6 @@ export { SiteFooter, type SiteFooterProps, type SiteFooterColumn } from './site-
 export { SiteNav, type SiteNavProps, type SiteNavLink } from './site-nav';
 export { StarRatingInput, type StarRatingInputProps } from './star-rating-input';
 export { Stars, type StarsProps } from './stars';
-export { TestimonialCard, type TestimonialCardProps } from './testimonial-card';
 
 // ---- Customer web primitives (Phase 1 — menu) ----------------------------
 export { CartLineItem, type CartLineItemProps, type CartLineDisplay } from './cart-line-item';

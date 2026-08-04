@@ -169,26 +169,6 @@ export function buildReservationSchema(
 }
 
 /**
- * Build an `AggregateRating` JSON-LD node. Emit ONLY when the page renders
- * the rating value as visible content (Google's structured-data policy).
- */
-export function buildAggregateRatingSchema(
-  restaurant: RestaurantPublicDto,
-  agg: { ratingValue: number; reviewCount: number },
-  opts: BuildRestaurantSchemaOptions,
-): Record<string, unknown> {
-  const base = buildRestaurantSchema(restaurant, opts);
-  base.aggregateRating = {
-    '@type': 'AggregateRating',
-    ratingValue: agg.ratingValue,
-    reviewCount: agg.reviewCount,
-    bestRating: 5,
-    worstRating: 1,
-  };
-  return base;
-}
-
-/**
  * `BreadcrumbList` JSON-LD. Pass items in order: [{ name: 'Home', url: '/' }, …].
  * Schema.org still renders this as a rich result in 2026.
  */

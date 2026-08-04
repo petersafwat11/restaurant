@@ -56,7 +56,6 @@ export default function MenuPage() {
       <div className="lg:h-[calc(100vh-theme(spacing.topbar)-3rem)]">
         <TwoPaneLayout
           leftWidth={280}
-          collapseBelow={1024}
           left={
             <CategoriesPane
               categories={categories}

@@ -21,6 +21,11 @@ import {
 } from '@repo/types';
 import { CheckoutFormSchema, LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import {
+  PENDING_PAYMENT_KEY,
+  isMissingPendingOrderError,
+  parsePendingPayment,
+} from '../pending-payment';
+import {
   CheckoutSection,
   type CheckoutSectionStatus,
   Container,
@@ -105,6 +110,22 @@ export function CheckoutApp() {
   // Signed guest order token from the create response — lets a guest create the
   // eService payment (and recover status) without an auth session (plan §F1).
   const [createdOrderToken, setCreatedOrderToken] = React.useState<string | null>(null);
+
+  // A failed/abandoned HPP attempt returns with a full page navigation, which
+  // destroys the in-memory `createdOrderId`. Restore the signed pending-order
+  // record so a retry reuses that order instead of creating a duplicate from
+  // the still-visible cart. The successful return page removes this record.
+  React.useEffect(() => {
+    try {
+      const pending = parsePendingPayment(window.localStorage.getItem(PENDING_PAYMENT_KEY));
+      if (!pending) return;
+      setCreatedOrderId(pending.orderId);
+      setCreatedOrderToken(pending.token);
+    } catch {
+      // localStorage can be unavailable (private mode / browser policy). The
+      // existing guest token URL fallback remains the best available path.
+    }
+  }, []);
 
   // Whether the eService online processor is configured (cards/BLIK). Sourced
   // from a resilient React Query hook (retries + focus/reconnect refetch) rather
@@ -481,19 +502,21 @@ export function CheckoutApp() {
     orderId: string,
     token: string | null,
     method: 'card' | 'blik',
-  ): Promise<string | null> => {
+  ): Promise<{ message: string; missingOrder: boolean } | null> => {
     try {
       const apiClient = (await import('@/lib/api-client')).getApiClient();
       const res = await apiClient.payments.createIntent(
         { orderId, provider: 'eservice', methodKind: method === 'blik' ? 'BLIK' : 'CARD' },
         token,
       );
-      if (!res.redirectUrl) return t('errors.paymentInitFailed');
+      if (!res.redirectUrl) {
+        return { message: t('errors.paymentInitFailed'), missingOrder: false };
+      }
       // Guest-token continuity: the full-page redirect to eService wipes React
       // state, so stash the tracking token locally to restore the order on return
       // (the ?t= param on the return URL is the fallback).
       try {
-        window.localStorage.setItem('checkout:pending', JSON.stringify({ orderId, token }));
+        window.localStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({ orderId, token }));
       } catch {
         // localStorage unavailable (e.g. private mode) — rely on the ?t= fallback.
       }
@@ -501,7 +524,10 @@ export function CheckoutApp() {
       window.location.assign(res.redirectUrl);
       return null;
     } catch (err) {
-      return err instanceof Error ? err.message : t('errors.paymentInitFailed');
+      return {
+        message: err instanceof Error ? err.message : t('errors.paymentInitFailed'),
+        missingOrder: isMissingPendingOrderError(err),
+      };
     }
   };
 
@@ -531,12 +557,27 @@ export function CheckoutApp() {
           createdOrderToken,
           values.paymentMethod as 'card' | 'blik',
         );
-        if (retryErr) {
-          setSubmitError(retryErr);
-          setSubmitting(false);
+        if (retryErr?.missingOrder) {
+          // The browser outlived its server-side pending order. Remove only the
+          // stale reference and continue through the normal create-order path
+          // once; other failures keep the existing order for a safe retry.
+          try {
+            window.localStorage.removeItem(PENDING_PAYMENT_KEY);
+          } catch {
+            // localStorage unavailable — clearing React state is enough for
+            // this page load.
+          }
+          setCreatedOrderId(null);
+          setCreatedOrderToken(null);
+        } else {
+          if (retryErr) {
+            setSubmitError(retryErr.message);
+            setSubmitting(false);
+          }
+          // On success the browser is navigating to eService; on a non-404
+          // failure the existing pending order remains the retry target.
+          return;
         }
-        // On success the browser is navigating to eService; nothing more to do.
-        return;
       }
 
       // DELIVERY path:
@@ -621,7 +662,7 @@ export function CheckoutApp() {
         if (payErr) {
           // Keep the pending order recoverable — the next submit retries the
           // payment for it instead of creating a new order (guard above).
-          setSubmitError(payErr);
+          setSubmitError(payErr.message);
           setSubmitting(false);
         }
         // On success the browser is navigating to eService.

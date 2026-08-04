@@ -30,7 +30,7 @@ export interface OrdersFiltersState {
   sort: SortKey;
 }
 
-export type SortKey = 'newest' | 'oldest' | 'total-desc' | 'wait-desc';
+type SortKey = 'newest' | 'oldest' | 'total-desc' | 'wait-desc';
 
 interface OrdersFiltersProps {
   value: OrdersFiltersState;

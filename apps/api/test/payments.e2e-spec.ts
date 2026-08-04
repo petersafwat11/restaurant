@@ -1,6 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { EserviceProvider } from '../src/payments/eservice.provider';
 import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
 // These run against the eService provider in STUB mode (CI sets no
@@ -24,6 +25,10 @@ describe('payments (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   beforeEach(async () => {
@@ -109,9 +114,12 @@ describe('payments (e2e)', () => {
     return {
       id: opts.trn,
       status: 'CAPTURED',
-      reference: stubRef(opts.method ?? 'CARD'),
+      reference: 'R-SANDBOX-ORDER',
       payment_method: { result: '00', message: 'AUTHORISED' },
-      link_data: { id: `lnk_stub_${orderId}_${opts.method ?? 'CARD'}` },
+      link_data: {
+        id: `lnk_stub_${orderId}_${opts.method ?? 'CARD'}`,
+        reference: stubRef(opts.method ?? 'CARD'),
+      },
       action: { id: opts.act, type: 'STATUS_NOTIFICATION' },
     };
   }
@@ -159,6 +167,90 @@ describe('payments (e2e)', () => {
 
     const order = await inject('GET', `/api/v1/orders/${orderId}`, undefined, userToken);
     expect(order.json().status).toBe('CONFIRMED');
+  });
+
+  // ---- Signed HPP return ----
+
+  it('rejects an unauthenticated return without changing payment state', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
+      userToken,
+    );
+    const provider = app.get(EserviceProvider);
+    vi.spyOn(provider, 'verifyReturnNotification').mockReturnValue(false);
+
+    const res = await inject(
+      'GET',
+      `/api/v1/payments/eservice/return?orderId=${orderId}&status=CAPTURED`,
+    );
+    expect(res.statusCode).toBe(400);
+
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('PENDING');
+    expect((await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).status).toBe(
+      'PENDING',
+    );
+  });
+
+  it('authenticates a return, confirms CAPTURED from the provider, and redirects', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
+      userToken,
+    );
+    const provider = app.get(EserviceProvider);
+    vi.spyOn(provider, 'verifyReturnNotification').mockReturnValue(true);
+    vi.spyOn(provider, 'retrieveTransaction').mockResolvedValue({
+      id: 'TRN_return_captured',
+      status: 'CAPTURED',
+    });
+
+    const res = await inject(
+      'GET',
+      `/api/v1/payments/eservice/return?orderId=${orderId}&status=PENDING`,
+    );
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain(`/checkout/return?orderId=${orderId}`);
+
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('PAID');
+    expect(payment.providerTxnId).toBe('TRN_return_captured');
+    expect((await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).status).toBe(
+      'CONFIRMED',
+    );
+  });
+
+  it('authenticates a return and synchronizes a provider decline before redirecting', async () => {
+    await inject(
+      'POST',
+      '/api/v1/payments/intent',
+      { orderId, provider: 'eservice', methodKind: 'CARD' },
+      userToken,
+    );
+    const provider = app.get(EserviceProvider);
+    vi.spyOn(provider, 'verifyReturnNotification').mockReturnValue(true);
+    vi.spyOn(provider, 'retrieveTransaction').mockResolvedValue({
+      id: 'TRN_return_declined',
+      status: 'DECLINED',
+    });
+
+    const res = await inject(
+      'GET',
+      `/api/v1/payments/eservice/return?orderId=${orderId}&status=PENDING`,
+    );
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toContain('http://localhost:3000/checkout');
+    expect(res.body).not.toContain('/checkout/return');
+
+    const prisma = app.get(PrismaService);
+    const payment = await prisma.payment.findUniqueOrThrow({ where: { orderId } });
+    expect(payment.status).toBe('FAILED');
+    expect(payment.providerTxnId).toBe('TRN_return_declined');
   });
 
   // ---- Webhook ----
@@ -435,6 +527,13 @@ describe('payments (e2e)', () => {
       { orderId, provider: 'eservice', methodKind: 'CARD' },
       userToken,
     );
+    const prisma = app.get(PrismaService);
+    // Model a provider transaction discovered for the first attempt. A new
+    // method must not inherit this stale refund/reconciliation target.
+    await prisma.payment.update({
+      where: { orderId },
+      data: { providerTxnId: 'TRN_previous_card_attempt' },
+    });
     const blik = await inject(
       'POST',
       '/api/v1/payments/intent',
@@ -442,11 +541,11 @@ describe('payments (e2e)', () => {
       userToken,
     );
     expect(blik.statusCode).toBe(201);
-    const prisma = app.get(PrismaService);
     const payments = await prisma.payment.findMany({ where: { orderId } });
     expect(payments).toHaveLength(1);
     expect(payments[0].method).toBe('BLIK');
     expect(payments[0].providerRef).toContain('BLIK');
+    expect(payments[0].providerTxnId).toBeNull();
   });
 
   it('rejects an intent for an already-paid order', async () => {

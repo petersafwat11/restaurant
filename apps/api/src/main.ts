@@ -13,6 +13,11 @@ import { AppModule } from './app.module';
 import { env } from './config/env';
 
 const ESERVICE_WEBHOOK_PATH = '/api/v1/payments/webhooks/eservice';
+const ESERVICE_RETURN_PATH = '/api/v1/payments/eservice/return';
+
+function needsEserviceRawBody(url: string | undefined): boolean {
+  return !!url && (url.startsWith(ESERVICE_WEBHOOK_PATH) || url.startsWith(ESERVICE_RETURN_PATH));
+}
 
 async function bootstrap() {
   // Initialize Sentry before anything else so early errors are captured.
@@ -39,7 +44,7 @@ async function bootstrap() {
   instance.removeContentTypeParser('application/json');
   instance.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
     try {
-      if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
+      if (needsEserviceRawBody(req.url)) {
         (req as unknown as { rawBody: Buffer }).rawBody = body as Buffer;
       }
       const buf = body as Buffer;
@@ -60,7 +65,7 @@ async function bootstrap() {
     (req, body, done) => {
       try {
         const buf = body as Buffer;
-        if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
+        if (needsEserviceRawBody(req.url)) {
           (req as unknown as { rawBody: Buffer }).rawBody = buf;
         }
         const obj: Record<string, string> = {};

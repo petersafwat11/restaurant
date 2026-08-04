@@ -76,14 +76,6 @@
     "metroAnnotation": "Metro · 5 min pieszo",
     "hoursLabel": "Godziny"
   },
-  "testimonials": {
-    "eyebrow": "Opinie",
-    "title": "Co mówią nasi goście",
-    "description": "Najnowsze opinie gości w Kielcach.",
-    "readAllReviews": "Przeczytaj wszystkie opinie",
-    "starsAriaLabel": "{value} z 5 gwiazdek",
-    "anonymous": "Anonimowy"
-  },
   "newsletter": {
     "eyebrow": "Bądźmy w kontakcie",
     "title": "Świeżo z kuchni, prosto do Twojej skrzynki.",

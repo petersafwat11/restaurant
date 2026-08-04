@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { Sheet, SheetContent, SheetTitle, cn } from '@repo/ui';
 import * as React from 'react';
 
-export interface MobileNavLink {
+interface MobileNavLink {
   href: string;
   label: string;
   active?: boolean;

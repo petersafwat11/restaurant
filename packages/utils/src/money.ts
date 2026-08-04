@@ -23,10 +23,6 @@ export function addAll(values: readonly DecimalLike[]): Decimal {
   return round2(values.reduce<Decimal>((acc, v) => acc.plus(toDecimal(v)), new Decimal(0)));
 }
 
-export function sum(...values: DecimalLike[]): Decimal {
-  return addAll(values);
-}
-
 export function multiply(amount: DecimalLike, qty: DecimalLike): Decimal {
   return round2(toDecimal(amount).times(toDecimal(qty)));
 }
@@ -40,34 +36,12 @@ export function clampNonNegative(value: DecimalLike): Decimal {
 // the API server (often C/UTC) and a Polish browser produce the same string.
 // True per-user locale awareness lands in Sprint 11 — until then this is the
 // stable default.
-const CURRENCY_LOCALE: Record<string, string> = {
-  PLN: 'pl-PL',
-  EUR: 'de-DE',
-  GBP: 'en-GB',
-  USD: 'en-US',
-};
-
 /**
  * @deprecated Use `formatMoney` from `./format.ts` — same signature, but
  * browser-safe (doesn't pull `@prisma/client` into client bundles). Kept here
  * for binary-compatible server code; new client imports should reach for
  * the format.ts version which is re-exported from the barrel.
  */
-export function formatMoneyServer(value: DecimalLike, currency: string, locale?: string): string {
-  const num = toDecimal(value).toNumber();
-  const resolved = locale ?? CURRENCY_LOCALE[currency.toUpperCase()] ?? 'en-US';
-  return new Intl.NumberFormat(resolved, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(num);
-}
-
-export function isZero(value: DecimalLike): boolean {
-  return toDecimal(value).isZero();
-}
-
 export function decimalToString(value: DecimalLike): string {
   return round2(value).toFixed(2);
 }

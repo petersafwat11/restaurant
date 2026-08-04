@@ -1,9 +1,13 @@
-import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { PaymentMethodKind, PaymentStatus } from '@repo/types';
 import { fromMinorUnits, toMinorUnits } from '@repo/utils/money';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { EserviceClient } from './eservice-client';
+import {
+  verifyEservicePostSignature,
+  verifyEserviceSignedParameters,
+} from './eservice-signature';
 import { classifyWebhookType, mapTransactionStatus } from './eservice-status';
 import type {
   CreateIntentInput,
@@ -55,12 +59,29 @@ export interface BuildHppPayloadInput {
   description: string;
 }
 
+export interface EserviceReturnVerificationInput {
+  method: string;
+  rawUrl: string;
+  rawBody: Buffer;
+  headerSignature?: string;
+}
+
+function splitPayerName(name: string): { firstName: string; lastName: string } {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: 'Customer', lastName: 'Customer' };
+  if (parts.length === 1) return { firstName: parts[0]!, lastName: parts[0]! };
+  return { firstName: parts[0]!, lastName: parts.slice(1).join(' ') };
+}
+
 /**
  * Build the `POST /ucp/links` request body for a Hosted Payment Page link. Pure
  * + exported so the unit tests can assert the minor-units conversion and the
  * per-attempt unique `reference` without any network / Nest boot.
  */
 export function buildHppPayload(input: BuildHppPayloadInput): Record<string, unknown> {
+  const isBlik = input.methodKind === 'BLIK';
+  const { firstName, lastName } = splitPayerName(input.payer.name);
+
   return {
     account_name: input.accountName,
     type: 'HOSTED_PAYMENT_PAGE',
@@ -69,8 +90,13 @@ export function buildHppPayload(input: BuildHppPayloadInput): Record<string, unk
     reference: input.reference,
     payer: {
       name: input.payer.name,
+      first_name: firstName,
+      last_name: lastName,
       language: input.payer.language,
       email: input.payer.email,
+      billing_address: {
+        country: 'PL',
+      },
     },
     order: {
       amount: String(toMinorUnits(input.amount, input.currency)),
@@ -83,7 +109,18 @@ export function buildHppPayload(input: BuildHppPayloadInput): Record<string, unk
         allowed_payment_methods: allowedPaymentMethods(input.methodKind),
       },
       payment_method_configuration: {
-        authentication: { preference: 'CHALLENGE_PREFERRED' },
+        authentication: {
+          preference: isBlik ? 'NO_CHALLENGE_REQUESTED' : 'CHALLENGE_PREFERRED',
+        },
+        ...(isBlik
+          ? {
+              apm: {
+                shipping_address_enabled: 'NO',
+                address_override: 'NO',
+              },
+              storage_mode: 'OFF',
+            }
+          : {}),
       },
     },
     notifications: {
@@ -278,30 +315,37 @@ export class EserviceProvider implements PaymentProvider {
     }
   }
 
-  private verifySignature(rawBody: Buffer, signature: string | undefined): boolean {
-    if (!signature || !this.appKey) return false;
-    const expected = createHash('sha512')
-      .update(Buffer.concat([rawBody, Buffer.from(this.appKey, 'utf8')]))
-      .digest('hex');
-    try {
-      const a = Buffer.from(signature, 'hex');
-      const b = Buffer.from(expected, 'hex');
-      // timingSafeEqual throws on length mismatch — treat that as a failed
-      // verification rather than letting it bubble.
-      const ok = a.length === b.length && timingSafeEqual(a, b);
-      if (!ok) {
-        // If eService IS delivering webhooks but they 400, this distinguishes a
-        // signature-formula / raw-body bug from a genuine forgery. Prefixes only
-        // — never the full app_key-derived digest.
-        this.logger.warn(
-          `[ESERVICE_SIG_MISMATCH] received=${signature.slice(0, 12)}…(${signature.length}) ` +
-            `computed=${expected.slice(0, 12)}…(${expected.length}) rawBytes=${rawBody.length}`,
-        );
-      }
-      return ok;
-    } catch {
-      return false;
+  /** Authenticate a GET, form POST, or header-signed HPP return notification. */
+  verifyReturnNotification(input: EserviceReturnVerificationInput): boolean {
+    if (this.stubMode) return true;
+
+    let ok = false;
+    if (input.headerSignature) {
+      ok = verifyEservicePostSignature(input.rawBody, input.headerSignature, this.appKey);
+    } else if (input.method.toUpperCase() === 'GET') {
+      ok = verifyEserviceSignedParameters(input.rawUrl, this.appKey).valid;
+    } else if (input.rawBody.length > 0) {
+      ok = verifyEserviceSignedParameters(input.rawBody.toString('utf8'), this.appKey).valid;
     }
+
+    if (!ok) {
+      this.logger.warn(
+        `[ESERVICE_RETURN_SIG_MISMATCH] method=${input.method.toUpperCase()} ` +
+          `header=${input.headerSignature ? 'present' : 'missing'} rawBytes=${input.rawBody.length}`,
+      );
+    }
+    return ok;
+  }
+
+  private verifySignature(rawBody: Buffer, signature: string | undefined): boolean {
+    const ok = verifyEservicePostSignature(rawBody, signature, this.appKey);
+    if (!ok) {
+      this.logger.warn(
+        `[ESERVICE_SIG_MISMATCH] signature=${signature ? `present(${signature.length})` : 'missing'} ` +
+          `rawBytes=${rawBody.length}`,
+      );
+    }
+    return ok;
   }
 
   private statusUrl(): string {
@@ -320,7 +364,7 @@ interface EserviceNotification {
   currency?: string;
   reference?: string;
   payment_method?: { result?: string; message?: string };
-  link_data?: { id?: string };
+  link_data?: { id?: string; reference?: string };
   action?: { id?: string; type?: string };
   // Refund-notification fields — shape unverified against a live sample (see
   // TODO below). Kept optional so a real refund notification is parsed rather
@@ -351,7 +395,9 @@ function parseNotification(n: EserviceNotification): ParsedWebhookEvent {
     // to the TRN id if a notification ever omits the action envelope.
     id: n.action?.id ?? n.id ?? '',
     type: isRefund ? 'payment.refunded' : classifyWebhookType(status, resultCode),
-    providerRef: n.reference,
+    // Live HPP notifications put our payment reference in link_data; the
+    // top-level reference is the human-facing order number.
+    providerRef: n.link_data?.reference ?? n.reference,
     transactionId: n.id,
     raw: n,
   };

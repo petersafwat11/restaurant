@@ -42,7 +42,7 @@ export interface MinsRange {
   max: number | null;
 }
 
-export function fmtMinsRange(r: MinsRange): string {
+function fmtMinsRange(r: MinsRange): string {
   return r.max != null && r.max !== r.min ? `${r.min}–${r.max}` : `${r.min}`;
 }
 

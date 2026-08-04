@@ -5,6 +5,7 @@ import { Container, PageSpinner } from '@repo/ui';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
+import { PENDING_PAYMENT_KEY, parsePendingPayment } from '../pending-payment';
 
 /**
  * eService Hosted Payment Page return landing — `/checkout/return`.
@@ -20,8 +21,6 @@ import * as React from 'react';
  * eService wipes React state. We restore it here and forward the signed token to
  * the confirmation page so a guest (no auth session) can still track their order.
  */
-const PENDING_KEY = 'checkout:pending';
-
 export function CheckoutReturnApp() {
   const t = useTranslations('web.shop.checkout.return');
   const router = useRouter();
@@ -35,9 +34,8 @@ export function CheckoutReturnApp() {
   React.useEffect(() => {
     let pending: { orderId?: string; token?: string | null } = {};
     try {
-      const raw = window.localStorage.getItem(PENDING_KEY);
-      if (raw) pending = JSON.parse(raw) as { orderId?: string; token?: string | null };
-      window.localStorage.removeItem(PENDING_KEY);
+      pending = parsePendingPayment(window.localStorage.getItem(PENDING_PAYMENT_KEY)) ?? {};
+      window.localStorage.removeItem(PENDING_PAYMENT_KEY);
     } catch {
       // localStorage unavailable — fall back to the URL `orderId` param below.
     }

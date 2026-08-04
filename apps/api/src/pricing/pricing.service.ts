@@ -10,7 +10,7 @@ import {
 } from '@repo/utils/money';
 import { PrismaService } from '../prisma/prisma.service';
 
-export interface PricingLine {
+interface PricingLine {
   unitPrice: DecimalLike;
   quantity: number;
 }

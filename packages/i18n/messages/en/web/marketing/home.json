@@ -76,14 +76,6 @@
     "metroAnnotation": "Metro · 5 min walk",
     "hoursLabel": "Hours"
   },
-  "testimonials": {
-    "eyebrow": "Reviews",
-    "title": "What our guests say",
-    "description": "Recent reviews from guests in Kielce.",
-    "readAllReviews": "Read all reviews",
-    "starsAriaLabel": "{value} out of 5 stars",
-    "anonymous": "Anonymous"
-  },
   "newsletter": {
     "eyebrow": "Stay in touch",
     "title": "Fresh from the kitchen, straight to your inbox.",

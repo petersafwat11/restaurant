@@ -80,7 +80,7 @@ ESERVICE_APP_ID=...
 ESERVICE_APP_KEY=...
 ESERVICE_ACCOUNT_NAME=ECOMUAT...
 ESERVICE_WEBHOOK_URL=https://<public-api-host>
-ESERVICE_RETURN_URL=https://<public-web-host>/checkout/return
+ESERVICE_RETURN_URL=https://<public-api-host>/api/v1/payments/eservice/return
 ```
 
 Stub mode (default, when `ESERVICE_APP_ID` is empty) returns deterministic
@@ -96,8 +96,11 @@ BLIK + 3-D Secure). eService POSTs the final status to `status_url`
 Because eService posts the webhook server-to-server, it can't reach `localhost`.
 To exercise the full webhook path locally, expose the API with a tunnel
 (cloudflared/ngrok) and point `ESERVICE_WEBHOOK_URL` at the public URL. Without a
-tunnel the order still confirms on the next reconciliation pass (every 15 min),
-which queries `GET /ucp/transactions?reference=...`.
+tunnel the order can only recover through reconciliation. The browser return
+queries immediately and retries every 8 seconds for approximately 56 seconds;
+reconciliation then queries pending rows every 15 minutes. A final lookup occurs
+at/after the HPP link's 24-hour expiry, after which a non-successful row stops
+polling. A later authenticated `status_url` notification can still repair it.
 
 Refund notifications from the eService portal are picked up by the webhook
 handler and create the missing `Refund` rows automatically.

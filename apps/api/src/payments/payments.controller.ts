@@ -5,12 +5,16 @@ import {
   type ExecutionContext,
   Get,
   Header,
+  Headers,
   Param,
   Post,
   Query,
+  Req,
+  Res,
   createParamDecorator,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
   type CreatePaymentIntentDto,
   CreatePaymentIntentSchema,
@@ -68,25 +72,50 @@ export class PaymentsController {
   @All('eservice/return')
   @Header('Content-Type', 'text/html; charset=utf-8')
   async eserviceReturn(
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Headers('x-gp-signature') headerSignature: string | undefined,
     @Query('orderId') orderId?: string,
     @Query('status') queryStatus?: string,
     @Body() body?: Record<string, string>,
   ): Promise<string> {
+    const rawBody =
+      (req as unknown as { rawBody?: Buffer }).rawBody ??
+      Buffer.from(
+        req.method === 'POST' && body ? new URLSearchParams(body).toString() : '',
+        'utf8',
+      );
+    const rawUrl = req.raw.url ?? req.url;
+    if (
+      !this.payments.verifyEserviceReturnNotification({
+        method: req.method,
+        rawUrl,
+        rawBody,
+        headerSignature,
+      })
+    ) {
+      reply.status(400);
+      return '<!doctype html><html><body>Invalid payment return notification.</body></html>';
+    }
+
     // Settle the order from eService's authoritative record now — instant confirm,
     // independent of the status_url webhook. One synchronous attempt catches a
     // fast capture so the customer lands on a confirmed order; if the transaction
     // isn't captured yet (eService can lag the return by tens of seconds), keep
     // polling in the BACKGROUND so the order confirms + its cart clears within
     // ~1 min — never blocking the redirect. The reconcile job is the final backstop.
+    let resolvedStatus = queryStatus ?? body?.status;
     if (orderId) {
-      const settled = await this.payments
-        .settleEserviceOrderIfPaid(orderId)
-        .catch(() => false);
-      if (!settled) {
-        void this.payments.retrySettleEserviceOrder(orderId).catch(() => undefined);
+      const syncResult = await this.payments
+        .syncEserviceOrderFromProvider(orderId)
+        .catch(() => 'pending' as const);
+      if (syncResult === 'paid') resolvedStatus = 'CAPTURED';
+      if (syncResult === 'failed') resolvedStatus = 'DECLINED';
+      if (syncResult === 'pending') {
+        void this.payments.retrySyncEserviceOrder(orderId).catch(() => undefined);
       }
     }
-    return this.payments.buildReturnRedirectHtml(orderId, queryStatus ?? body?.status);
+    return this.payments.buildReturnRedirectHtml(orderId, resolvedStatus);
   }
 
   // Public so guests can pay; authorization is by the authed user OR a valid

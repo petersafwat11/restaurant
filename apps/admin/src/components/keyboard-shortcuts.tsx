@@ -4,7 +4,7 @@ import { ActionModal } from '@repo/ui';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
-export interface ShortcutBinding {
+interface ShortcutBinding {
   keys: string[];
   label: string;
 }

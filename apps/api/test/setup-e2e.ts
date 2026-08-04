@@ -7,6 +7,11 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { RedisService } from '../src/redis/redis.service';
 
 const ESERVICE_WEBHOOK_PATH = '/api/v1/payments/webhooks/eservice';
+const ESERVICE_RETURN_PATH = '/api/v1/payments/eservice/return';
+
+function needsEserviceRawBody(url: string | undefined): boolean {
+  return !!url && (url.startsWith(ESERVICE_WEBHOOK_PATH) || url.startsWith(ESERVICE_RETURN_PATH));
+}
 
 /**
  * Legal-acceptance fields every POST /orders payload must now carry (plan §C2).
@@ -34,7 +39,7 @@ export async function createTestApp(): Promise<NestFastifyApplication> {
   instance.removeContentTypeParser('application/json');
   instance.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
     try {
-      if (req.url?.startsWith(ESERVICE_WEBHOOK_PATH)) {
+      if (needsEserviceRawBody(req.url)) {
         (req as unknown as { rawBody: Buffer }).rawBody = body as Buffer;
       }
       const buf = body as Buffer;
@@ -44,6 +49,23 @@ export async function createTestApp(): Promise<NestFastifyApplication> {
       done(err as Error);
     }
   });
+  instance.addContentTypeParser(
+    'application/x-www-form-urlencoded',
+    { parseAs: 'buffer' },
+    (req, body, done) => {
+      try {
+        const buf = body as Buffer;
+        if (needsEserviceRawBody(req.url)) {
+          (req as unknown as { rawBody: Buffer }).rawBody = buf;
+        }
+        const parsed: Record<string, string> = {};
+        for (const [key, value] of new URLSearchParams(buf.toString('utf8'))) parsed[key] = value;
+        done(null, parsed);
+      } catch (err) {
+        done(err as Error);
+      }
+    },
+  );
 
   const app = moduleRef.createNestApplication<NestFastifyApplication>(adapter, {
     bodyParser: false,

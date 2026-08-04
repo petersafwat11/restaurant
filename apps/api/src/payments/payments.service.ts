@@ -27,7 +27,7 @@ import { ENV, type ENV_TYPE } from '../config/config.module';
 import { verifyOrderTrackingToken } from '../orders/order-tracking-token';
 import { OrdersService } from '../orders/orders.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { EserviceProvider } from './eservice.provider';
+import { EserviceProvider, type EserviceReturnVerificationInput } from './eservice.provider';
 import { mapTransactionStatus } from './eservice-status';
 import type { ParsedWebhookEvent, PaymentProvider } from './provider.interface';
 import { CodProvider } from './providers/cod.provider';
@@ -65,6 +65,10 @@ export class PaymentsService {
     };
   }
 
+  verifyEserviceReturnNotification(input: EserviceReturnVerificationInput): boolean {
+    return this.eserviceProvider.verifyReturnNotification(input);
+  }
+
   /**
    * HTML the eService HPP renders at `return_url` after payment. eService needs a
    * publicly reachable return URL that contains "basic HTML and JavaScript" — it
@@ -93,34 +97,44 @@ export class PaymentsService {
    * undelivered). Idempotent; the 15-min reconcile job is the backstop for
    * customers who never return.
    *
-   * @returns true when the payment is settled (now or already), false when the
-   *   transaction isn't CAPTURED yet (caller may retry) or there's nothing to do.
+   * @returns the authoritative local outcome: paid, failed, still pending, or
+   *   ignored when the order has no eService payment to synchronize.
    */
-  async settleEserviceOrderIfPaid(orderId: string): Promise<boolean> {
+  async syncEserviceOrderFromProvider(
+    orderId: string,
+  ): Promise<'paid' | 'failed' | 'pending' | 'ignored'> {
     const payment = await this.prisma.payment.findFirst({
       where: { orderId },
       include: { order: true },
     });
-    if (!payment || payment.provider !== 'eservice' || !payment.providerRef) return false;
-    // Already terminal — settled by an earlier attempt / reconcile; nothing to do.
-    if (['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) return true;
+    if (!payment || payment.provider !== 'eservice' || !payment.providerRef) return 'ignored';
+    if (['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) return 'paid';
 
     const txn = await this.eserviceProvider.retrieveTransaction(payment.providerRef);
-    // Not captured yet — eService can lag the browser return; report "not settled"
-    // so the caller keeps polling.
-    if (!txn || (txn.status ?? '').toUpperCase() !== 'CAPTURED') return false;
+    const providerStatus = mapTransactionStatus(txn?.status);
+    if (providerStatus === 'failed' || providerStatus === 'canceled') {
+      await this.prisma.payment.updateMany({
+        where: {
+          id: payment.id,
+          status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] },
+        },
+        data: { status: 'FAILED', ...(txn?.id ? { providerTxnId: txn.id } : {}) },
+      });
+      return 'failed';
+    }
+    if (providerStatus !== 'succeeded') return 'pending';
 
     // Settle the payment (never clobber an already-terminal row) and persist the
     // TRN id so refunds have a target, then confirm the order through the FSM.
     const { count } = await this.prisma.payment.updateMany({
       where: { id: payment.id, status: { notIn: ['PAID', 'REFUNDED', 'PARTIALLY_REFUNDED'] } },
-      data: { status: 'PAID', providerTxnId: txn.id ?? payment.providerTxnId },
+      data: { status: 'PAID', providerTxnId: txn?.id ?? payment.providerTxnId },
     });
     if (count > 0 && payment.order.status === 'PENDING') {
       await this.confirmOrderFromPayment(payment.order, payment.id);
       this.logger.log(`Order ${payment.order.orderNumber} settled on return (payment ${payment.id})`);
     }
-    return true;
+    return 'paid';
   }
 
   /**
@@ -131,11 +145,12 @@ export class PaymentsService {
    * 15-min reconcile. Called fire-and-forget; the reconcile job stays the final
    * backstop. Never throws — every attempt is guarded.
    */
-  async retrySettleEserviceOrder(orderId: string): Promise<void> {
+  async retrySyncEserviceOrder(orderId: string): Promise<void> {
     for (let attempt = 0; attempt < 7; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 8_000));
       try {
-        if (await this.settleEserviceOrderIfPaid(orderId)) return;
+        const result = await this.syncEserviceOrderFromProvider(orderId);
+        if (result !== 'pending') return;
       } catch (err) {
         this.logger.warn(
           `Background settle retry for order ${orderId} failed: ${(err as Error).message}`,
@@ -253,6 +268,9 @@ export class PaymentsService {
       providerRef: intent.providerRef,
       providerLinkId: intent.linkId ?? null,
       providerRedirectUrl: intent.redirectUrl,
+      // A fresh attempt must never inherit the transaction id of an earlier
+      // failed/expired method. eService refunds target this exact TRN id.
+      providerTxnId: null,
       method: dto.methodKind,
       amount: order.grandTotal,
       currency: order.currency,
@@ -556,7 +574,8 @@ export class PaymentsService {
       const txn = await this.eserviceProvider.retrieveTransaction(payment.providerRef);
       const status = mapTransactionStatus(txn?.status);
       checked += 1;
-      const action = reconcileAction(status, payment.status as PaymentStatus);
+      const expired = payment.updatedAt.getTime() <= Date.now() - 24 * 60 * 60_000;
+      const action = reconcileAction(status, payment.status as PaymentStatus, expired);
 
       if (action === 'mark_paid') {
         const { count } = await this.prisma.payment.updateMany({
@@ -577,7 +596,10 @@ export class PaymentsService {
         });
         if (count > 0) {
           repaired += 1;
-          this.logger.warn(`[RECONCILE] payment ${payment.id} → FAILED (eservice: ${status})`);
+          this.logger.warn(
+            `[RECONCILE] payment ${payment.id} → FAILED ` +
+              `(eservice: ${status}, finalAfterExpiry: ${expired})`,
+          );
         }
       } else if (action === 'attention') {
         attention += 1;

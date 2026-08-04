@@ -9,7 +9,6 @@ import type {
   ReviewListDto,
   ReviewListQuery,
   ReviewModerationStatus,
-  ReviewSummaryDto,
 } from '@repo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -22,21 +21,6 @@ export function useAdminReviews(q?: ReviewListQuery) {
   return useQuery<ReviewListDto>({
     queryKey: reviewKeys.admin(q),
     queryFn: () => getApiClient().reviews.listAdmin(q),
-  });
-}
-
-export function useToggleReviewVisibility() {
-  const qc = useQueryClient();
-  return useMutation<ReviewDto, ApiError, { id: string; isVisible: boolean }>({
-    mutationFn: ({ id, isVisible }) =>
-      getApiClient().reviews.moderate(id, {
-        moderationStatus: isVisible ? 'PUBLISHED' : 'HIDDEN',
-      }),
-    onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: reviewKeys.all });
-      notify('success', vars.isVisible ? 'Review shown' : 'Review hidden');
-    },
-    onError: (err) => notify('error', err.message),
   });
 }
 
@@ -75,12 +59,5 @@ export function useReplyToReview() {
       notify('success', 'Reply posted');
     },
     onError: (err) => notify('error', err.message),
-  });
-}
-
-export function useReviewSummary() {
-  return useQuery<ReviewSummaryDto>({
-    queryKey: ['reviews', 'summary'],
-    queryFn: () => getApiClient().reviews.summary(),
   });
 }

@@ -5,7 +5,4 @@ export { useMe } from './use-me';
 export { useForgotPassword } from './use-forgot-password';
 export { useResetPassword } from './use-reset-password';
 export { useVerifyEmail } from './use-verify-email';
-export { useRequestOtp } from './use-request-otp';
-export { useVerifyOtp } from './use-verify-otp';
 export { useUpdateProfile } from './use-update-profile';
-export { useChangePassword } from './use-change-password';

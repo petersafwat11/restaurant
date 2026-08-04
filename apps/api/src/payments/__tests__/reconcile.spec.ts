@@ -30,4 +30,10 @@ describe('reconcileAction (F6)', () => {
   it('leaves the row when the provider status is indeterminate (null)', () => {
     expect(reconcileAction(null, 'PENDING')).toBe('leave');
   });
+
+  it('performs a final decision at the 24-hour HPP expiry', () => {
+    expect(reconcileAction('succeeded', 'PENDING', true)).toBe('mark_paid');
+    expect(reconcileAction('requires_action', 'PENDING', true)).toBe('mark_failed');
+    expect(reconcileAction(null, 'PENDING', true)).toBe('mark_failed');
+  });
 });

@@ -31,8 +31,6 @@ export const FLAG_CATALOG = {
 
 export type FeatureFlagKey = keyof typeof FLAG_CATALOG;
 
-export const FEATURE_FLAG_KEYS = Object.keys(FLAG_CATALOG) as FeatureFlagKey[];
-
 export function isFeatureFlagKey(value: string): value is FeatureFlagKey {
   return value in FLAG_CATALOG;
 }

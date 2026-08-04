@@ -8,11 +8,6 @@ export interface TwoPaneLayoutProps {
   right: React.ReactNode;
   /** Width of the left pane in px (applied at `lg`+). */
   leftWidth?: number;
-  /**
-   * @deprecated Stacking is now CSS-driven at the `lg` (1024px) breakpoint.
-   * Kept for API compatibility; the value is ignored.
-   */
-  collapseBelow?: number;
   divider?: boolean;
   className?: string;
 }

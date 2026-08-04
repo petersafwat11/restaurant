@@ -7,7 +7,7 @@ interface Props {
   firstName?: string | null;
 }
 
-export function EmailVerificationTemplate({ verifyUrl, firstName }: Props) {
+function EmailVerificationTemplate({ verifyUrl, firstName }: Props) {
   return (
     <Html>
       <Head />

@@ -1,6 +1,4 @@
 export * from './slugify';
-export * from './phone';
-export * from './assert';
 // `format.ts` is browser-safe (no @prisma/client/runtime dependency).
 // Server-only Decimal helpers live in `./money` and `./loyalty` and are
 // reachable via the `@repo/utils/money` / `@repo/utils/loyalty` subpaths

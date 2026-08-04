@@ -23,11 +23,15 @@ const TERMINAL: ReadonlySet<PaymentStatus> = new Set<PaymentStatus>([
 export function reconcileAction(
   intentStatus: NormalizedIntentStatus | null,
   currentStatus: PaymentStatus,
+  expired = false,
 ): ReconcileAction {
   if (TERMINAL.has(currentStatus)) return 'leave';
+  if (intentStatus === 'succeeded') return 'mark_paid';
+  // HPP links expire after 24 hours. This is the final provider lookup; stop
+  // polling a non-successful row. A later authenticated status_url success can
+  // still repair FAILED -> PAID through the webhook path.
+  if (expired) return 'mark_failed';
   switch (intentStatus) {
-    case 'succeeded':
-      return 'mark_paid';
     case 'canceled':
     case 'failed':
       return 'mark_failed';

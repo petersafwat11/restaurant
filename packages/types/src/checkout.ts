@@ -30,6 +30,22 @@ export const CheckoutAddressSchema = z.object({
 });
 export type CheckoutAddressInput = z.infer<typeof CheckoutAddressSchema>;
 
+// The checkout initially renders the delivery controls before a customer may
+// switch to pickup or dine-in. React Hook Form can retain that untouched UI as
+// an object containing only blank strings. Treat that specific placeholder as
+// absent so a hidden delivery address cannot invalidate a non-delivery order.
+// Partially entered addresses are deliberately preserved and validated.
+const OptionalCheckoutAddressSchema = z.preprocess((value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+
+  const address = value as Record<string, unknown>;
+  const line1 = typeof address.line1 === 'string' ? address.line1.trim() : '';
+  const city = typeof address.city === 'string' ? address.city.trim() : '';
+  const geoPoint = address.geoPoint;
+
+  return !line1 && !city && !geoPoint ? undefined : value;
+}, CheckoutAddressSchema.optional());
+
 export const TimeSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('asap') }),
   z.object({ kind: z.literal('scheduled'), iso: z.string().datetime() }),
@@ -48,7 +64,7 @@ export const CheckoutFormSchema = z
       email: z.string().email('Enter a valid email address.'),
     }),
     saveInfo: z.boolean().default(false),
-    address: CheckoutAddressSchema.optional(),
+    address: OptionalCheckoutAddressSchema,
     tableNumber: z.string().max(20).optional(),
     timeSlot: TimeSlotSchema.default({ kind: 'asap' }),
     orderNotes: z.string().max(500).optional(),
