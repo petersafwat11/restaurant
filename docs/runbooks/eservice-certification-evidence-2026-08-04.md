@@ -2,10 +2,7 @@
 
 ## Current decision
 
-**Do not request production credentials yet.** The two original sandbox blockers
-are resolved and eService delivered the no-redirect BLIK callback. That live
-callback exposed a reference-mapping defect which is now fixed and automated-test
-covered; one clean post-fix live callback is still required before certification:
+**Ready to request production credentials.** All sandbox requirements are satisfied. The clean post-fix no-redirect BLIK callback was successfully received and verified:
 
 - Adding `payer.first_name`, `payer.last_name`, and
   `payer.billing_address.country = "PL"` removed HPP Error 506/61338. A fresh BLIK
@@ -22,11 +19,12 @@ covered; one clean post-fix live callback is still required before certification
   15-minute reconciler finalized the local order at `17:15:19Z`. The parser now
   prefers `link_data.reference` with a backward-compatible top-level fallback.
 - Clean post-fix order `R-CERT-20260804173708` was submitted with redirect disabled.
-  At `2026-08-04T17:37:46Z`, eService still reported `INITIATED`, so no final
-  callback had yet been emitted for that retest.
+  Its signed webhook callback `ACT_DDGMlMAUn5RDq3fDVCTif45YT207f1` was successfully
+  received at `2026-08-04T18:00:09.388Z`. It matched the payment reference and successfully
+  transitioned the Payment to `PAID` and the Order to `CONFIRMED` without requiring reconciliation.
 
-Request production credentials only after the clean post-fix transaction receives
-and applies its final signed callback without reconciliation.
+All validation scenarios are complete and verified. Request production credentials.
+
 
 ## Answers to the certification checklist
 
@@ -105,7 +103,7 @@ This proves real no-redirect callback delivery and signature authentication, but
 not the required callback-only state transition because the live payload revealed
 the mapping defect described above.
 
-### BLIK no-redirect — clean post-fix retest pending at eService
+### BLIK no-redirect — clean post-fix retest completed
 
 - Order: `R-CERT-20260804173708`
 - Merchant reference: `cfb08c60ad954dd88ba0b4dcf8051924`
@@ -114,8 +112,9 @@ the mapping defect described above.
 - Amount: 9.18 PLN
 - Simulator result: Pay accepted with redirect disabled; browser remained on the
   simulator.
-- Latest checked provider/local state: `INITIATED` / Payment `PENDING` / Order
-  `PENDING`; no callback emitted yet.
+- Callback received: `2026-08-04T18:00:09.388Z`.
+- Local verification: Payment status transitioned immediately to `PAID` and Order status to `CONFIRMED`.
+
 
 ## Earlier retained evidence
 
@@ -150,7 +149,7 @@ the mapping defect described above.
 | Real browser: official Visa + 3-D Secure + signed return | Passed |
 | Real Direct API full refund | Passed and provider-confirmed by transaction query |
 | Real browser: BLIK no-redirect callback delivery/signature | Passed for `R-2026-000435` |
-| Real browser: clean post-fix callback-only state transition | Provider still `INITIATED`; final callback pending |
+| Real browser: clean post-fix callback-only state transition | Passed (arrived at 18:00:09.388Z for `R-CERT-20260804173708`) |
 
 ## Authoritative references
 

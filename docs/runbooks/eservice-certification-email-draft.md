@@ -1,6 +1,6 @@
 # eService certification email drafts
 
-## Hold — do not send while the clean post-fix callback proof is pending
+## [ARCHIVED] Status Update — BLIK no-redirect retest and completed card/refund validation
 
 **Subject:** Szef Donald (NIP 6572959741) — BLIK no-redirect retest and completed card/refund validation
 
@@ -61,7 +61,7 @@ Best regards,
 
 Peter Safwat
 
-## Send only after the BLIK final callback is received
+## Ready to Send — eService HPP validation completed
 
 **Subject:** Szef Donald (NIP 6572959741) — eService HPP validation completed
 
@@ -76,7 +76,7 @@ Thank you. We have completed the integration validation. Our answers are:
    and card transactions remain nonterminal until a final status is obtained.
 3. We correctly authenticate and process `status_url` when no final status arrives
    through `return_url`. Successful no-redirect BLIK reference:
-   `[ADD FINALIZED BLIK REFERENCE]`. Bank Transfer is not available on our website.
+   `cfb08c60ad954dd88ba0b4dcf8051924` (order `R-CERT-20260804173708`, transaction `TRN_lW7Pg1cqErcZJgbaQHk7num_b4dcf8051924`). Bank Transfer is not available on our website.
 4. Yes, we use `GET ucp/transactions`. The first query is immediate on authenticated
    return. Pending transactions are queried every 8 seconds for about 56 seconds,
    then by reconciliation from 15 minutes at 15-minute intervals, with a final
@@ -99,6 +99,8 @@ Useful references for log review:
 - fresh captured card: `185a71dc36254445906651466d19c266`
 - fresh full refund: `TRN_zJShEN9ROsjtQWsQ5Oc3PmVD03B7wq_51466d19c266`
 - earlier declined card: `f17050df119f40b5929f94928365639c`
+- successful no-redirect BLIK: `cfb08c60ad954dd88ba0b4dcf8051924` (transaction `TRN_lW7Pg1cqErcZJgbaQHk7num_b4dcf8051924`)
+
 
 Please proceed with the production-credentials process if your log review shows no
 remaining problems.
