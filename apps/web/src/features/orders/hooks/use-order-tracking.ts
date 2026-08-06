@@ -25,7 +25,7 @@ export function useOrderTracking(orderId: string, token?: string | null) {
     (async () => {
       try {
         await client.connect();
-        await client.subscribe(ROOMS.order(orderId));
+        await client.subscribe(ROOMS.order(orderId), token);
         if (!mounted) return;
         unsubscribe = client.on('order.status_changed', (event: OrderStatusChangedEvent) => {
           if (event.orderId !== orderId) return;
@@ -44,9 +44,9 @@ export function useOrderTracking(orderId: string, token?: string | null) {
       mounted = false;
       unsubscribe?.();
       // Don't disconnect the singleton — other consumers may still need it.
-      client.unsubscribe(ROOMS.order(orderId)).catch(() => {});
+      client.unsubscribe(ROOMS.order(orderId), token).catch(() => {});
     };
-  }, [orderId, qc]);
+  }, [orderId, qc, token]);
 
   return query;
 }

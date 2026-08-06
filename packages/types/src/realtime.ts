@@ -77,6 +77,7 @@ export type NotificationCreatedEvent = z.infer<typeof NotificationCreatedEventSc
 
 export const SubscribeMessageSchema = z.object({
   room: z.string().min(1),
+  token: z.string().nullish(),
 });
 export type SubscribeMessage = z.infer<typeof SubscribeMessageSchema>;
 

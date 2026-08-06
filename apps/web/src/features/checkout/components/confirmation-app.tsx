@@ -19,7 +19,7 @@ import {
   SuccessHero,
   trackingStateFor,
 } from '@repo/ui';
-import { Check, Copy, HelpCircle, MapPin, Phone, Sparkles, Timer } from 'lucide-react';
+import { Check, Copy, HelpCircle, MapPin, Phone, Sparkles, Timer, XCircle } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -139,15 +139,45 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
     order.status === 'COMPLETED' ||
     order.status === 'CANCELLED' ||
     order.status === 'REFUNDED';
-  const stepLabels = ORDER_TRACKING_STEPS[order.type];
+  const translatedStepLabels = ORDER_TRACKING_STEPS[order.type].map((label) => {
+    const key = label.toUpperCase().replace(/\s+/g, '_');
+    return t(`steps.${key}`);
+  });
   const currentStageLabel =
-    trackingState.kind === 'step' ? stepLabels[trackingState.index] : t(`status.${order.status}`);
+    trackingState.kind === 'step'
+      ? translatedStepLabels[trackingState.index]
+      : t(`status.${order.status}`);
 
   const lines = order.items.map(orderItemToDisplay);
   const delivery: DeliveryRow =
     Number.parseFloat(order.deliveryFee) > 0
       ? { amount: order.deliveryFee }
       : { label: t('summary.free') };
+
+  const isCancelled = order.status === 'CANCELLED';
+  const isRefunded = order.status === 'REFUNDED';
+
+  let heroTitle = t('hero.title');
+  let heroDescription = t('hero.description');
+  let heroIcon: React.ReactNode | undefined = undefined;
+
+  if (isCancelled) {
+    heroTitle = t('hero.cancelledTitle');
+    heroDescription = t('hero.cancelledDescription');
+    heroIcon = (
+      <span className="grid h-16 w-16 place-items-center rounded-full bg-negative/10 text-negative">
+        <XCircle size={48} strokeWidth={2} />
+      </span>
+    );
+  } else if (isRefunded) {
+    heroTitle = t('hero.refundedTitle');
+    heroDescription = t('hero.refundedDescription');
+    heroIcon = (
+      <span className="grid h-16 w-16 place-items-center rounded-full bg-negative/10 text-negative">
+        <XCircle size={48} strokeWidth={2} />
+      </span>
+    );
+  }
 
   return (
     <div className="relative isolate">
@@ -159,8 +189,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
 
       <Container className="pb-24 pt-16">
         <SuccessHero
-          title={t('hero.title')}
-          description={t('hero.description')}
+          title={heroTitle}
+          description={heroDescription}
+          icon={heroIcon}
           meta={
             <div className="flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center gap-3 rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated px-4 py-3 shadow-sm">
@@ -195,7 +226,7 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
                 <span className="font-display text-h4 font-medium text-fg">
                   {currentStageLabel}
                 </span>
-                <span className="text-small text-fg-muted">{etaSub}</span>
+                {!isTerminal && <span className="text-small text-fg-muted">{etaSub}</span>}
               </div>
             </div>
 
@@ -215,7 +246,13 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
           </div>
 
           <div className="mt-6">
-            <OrderProgressStepper mode={order.type} status={order.status} />
+            <OrderProgressStepper
+              mode={order.type}
+              status={order.status}
+              cancelledLabel={t('status.CANCELLED')}
+              refundedLabel={t('status.REFUNDED')}
+              steps={translatedStepLabels}
+            />
           </div>
         </section>
 

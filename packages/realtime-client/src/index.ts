@@ -50,8 +50,8 @@ export interface CreateRealtimeClientOptions {
 export interface RealtimeClient {
   connect: () => Promise<void>;
   disconnect: () => void;
-  subscribe: (room: string) => Promise<SubscribeAck>;
-  unsubscribe: (room: string) => Promise<SubscribeAck>;
+  subscribe: (room: string, token?: string | null) => Promise<SubscribeAck>;
+  unsubscribe: (room: string, token?: string | null) => Promise<SubscribeAck>;
   on<E extends RealtimeEventName>(
     event: E,
     handler: (payload: RealtimeEventMap[E]) => void,
@@ -111,8 +111,8 @@ export function createRealtimeClient(opts: CreateRealtimeClientOptions): Realtim
   return {
     connect,
     disconnect,
-    subscribe: (room) => emitWithAck<SubscribeAck>('subscribe', { room }),
-    unsubscribe: (room) => emitWithAck<SubscribeAck>('unsubscribe', { room }),
+    subscribe: (room, token) => emitWithAck<SubscribeAck>('subscribe', { room, token }),
+    unsubscribe: (room, token) => emitWithAck<SubscribeAck>('unsubscribe', { room, token }),
     on(event, handler) {
       if (!socket) {
         return () => {};

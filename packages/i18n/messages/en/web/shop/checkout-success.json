@@ -8,6 +8,10 @@
   "hero": {
     "title": "Order confirmed",
     "description": "Thanks — we got it. A receipt has been sent to your inbox.",
+    "cancelledTitle": "Order cancelled",
+    "cancelledDescription": "This order has been cancelled and will not be prepared.",
+    "refundedTitle": "Order refunded",
+    "refundedDescription": "This order has been refunded. The funds will return to your account shortly.",
     "orderNumber": "Order number",
     "live": "Live updates active",
     "reconnecting": "Reconnecting…"
@@ -15,6 +19,15 @@
   "copy": {
     "ariaLabel": "Copy order number",
     "toast": "Order number copied."
+  },
+  "steps": {
+    "CONFIRMED": "Confirmed",
+    "PREPARING": "Preparing",
+    "ON_THE_WAY": "On the way",
+    "DELIVERED": "Delivered",
+    "READY_FOR_PICKUP": "Ready for pickup",
+    "PICKED_UP": "Picked up",
+    "SERVED": "Served"
   },
   "status": {
     "PENDING": "Awaiting confirmation",

@@ -25,6 +25,7 @@ import fastifyCookie from '@fastify/cookie';
 import type { Server, Socket } from 'socket.io';
 import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
+import { verifyOrderTrackingToken } from '../orders/order-tracking-token';
 
 interface SocketUser {
   id: string;
@@ -68,7 +69,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   async handleConnection(client: AuthedSocket): Promise<void> {
     const token = this.extractToken(client);
     if (!token) {
-      client.disconnect(true);
+      this.logger.log(`Socket ${client.id} connected anonymously`);
       return;
     }
 
@@ -88,11 +89,8 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       };
       this.logger.log(`Socket ${client.id} connected as ${claims.email}`);
     } catch (err) {
-      // Bad/expired token. We can't set a custom WS close code from a
-      // server-side disconnect; log so an auth/secret regression isn't silent
-      // (it would otherwise look like every client just dropping).
-      this.logger.debug(`Socket ${client.id} auth rejected: ${(err as Error).message}`);
-      client.disconnect(true);
+      // Bad/expired token. Allow connecting anonymously rather than dropping.
+      this.logger.debug(`Socket ${client.id} auth rejected, allowing anonymous: ${(err as Error).message}`);
     }
   }
 
@@ -112,17 +110,16 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       return { ok: false, reason: 'Invalid subscribe payload' };
     }
     const user = client.data.user;
-    if (!user) return { ok: false, reason: 'Unauthenticated' };
 
     // Sockets outlive the 15-min access token. Re-check expiry here so a
     // demoted/revoked user can't keep subscribing to sensitive feeds on a
     // long-lived connection using stale claims.
-    if (user.exp && Date.now() >= user.exp * 1000) {
+    if (user && user.exp && Date.now() >= user.exp * 1000) {
       client.disconnect(true);
       return { ok: false, reason: 'Token expired — reconnect' };
     }
 
-    const allowed = await this.canJoin(user, parsed.data.room);
+    const allowed = await this.canJoin(client, parsed.data.room, parsed.data.token);
     if (!allowed.ok) return allowed;
 
     await client.join(parsed.data.room);
@@ -196,11 +193,28 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   // ---- Permission checks ----------------------------------------------
 
-  private async canJoin(user: SocketUser, room: string): Promise<SubscribeAck> {
+  private async canJoin(
+    client: AuthedSocket,
+    room: string,
+    token?: string | null,
+  ): Promise<SubscribeAck> {
     const orderMatch = /^order:(.+)$/.exec(room);
     if (orderMatch) {
       const orderId = orderMatch[1];
       if (!orderId) return { ok: false, reason: 'Invalid order room' };
+
+      // Try tracking token verification first (allows guests to track their orders)
+      if (token) {
+        const verify = verifyOrderTrackingToken(token);
+        if (verify.ok && verify.orderId === orderId) {
+          return { ok: true, room };
+        }
+      }
+
+      // Fall back to authenticated user check
+      const user = client.data.user;
+      if (!user) return { ok: false, reason: 'Unauthenticated' };
+
       const order = await this.prisma.order.findUnique({
         where: { id: orderId },
         select: { userId: true },
@@ -211,6 +225,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       if (!isOwner && !canRead) return { ok: false, reason: 'Forbidden' };
       return { ok: true, room };
     }
+
+    // All other rooms require an authenticated user
+    const user = client.data.user;
+    if (!user) return { ok: false, reason: 'Unauthenticated' };
 
     if (room === ROOMS.orders) {
       if (!user.permissions.includes('order:read')) {

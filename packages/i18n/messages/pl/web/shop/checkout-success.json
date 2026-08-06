@@ -8,6 +8,10 @@
   "hero": {
     "title": "Zamówienie potwierdzone",
     "description": "Dzięki — odebraliśmy zamówienie. Potwierdzenie zostało wysłane na e-mail.",
+    "cancelledTitle": "Zamówienie anulowane",
+    "cancelledDescription": "To zamówienie zostało anulowane i nie zostanie przygotowane.",
+    "refundedTitle": "Zamówienie zwrócone",
+    "refundedDescription": "To zamówienie zostało zwrócone. Środki wkrótce wrócą na Twoje konto.",
     "orderNumber": "Numer zamówienia",
     "live": "Aktualizacje na żywo",
     "reconnecting": "Łączenie ponowne…"
@@ -15,6 +19,15 @@
   "copy": {
     "ariaLabel": "Skopiuj numer zamówienia",
     "toast": "Skopiowano numer zamówienia."
+  },
+  "steps": {
+    "CONFIRMED": "Potwierdzone",
+    "PREPARING": "W przygotowaniu",
+    "ON_THE_WAY": "W drodze",
+    "DELIVERED": "Dostarczone",
+    "READY_FOR_PICKUP": "Gotowe do odbioru",
+    "PICKED_UP": "Odebrane",
+    "SERVED": "Podane"
   },
   "status": {
     "PENDING": "Oczekuje na potwierdzenie",
