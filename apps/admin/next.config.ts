@@ -7,6 +7,28 @@ const prismaStub = path.resolve(__dirname, "src/lib/prisma-client-stub.ts");
 const config: NextConfig = {
 	reactStrictMode: true,
 	output: "standalone",
+	async headers() {
+		return [
+			{
+				source: "/sw.js",
+				headers: [
+					{
+						key: "Content-Type",
+						value: "application/javascript; charset=utf-8",
+					},
+					{
+						key: "Cache-Control",
+						value: "no-cache, no-store, must-revalidate",
+					},
+					{
+						key: "Content-Security-Policy",
+						value: "default-src 'self'; script-src 'self'",
+					},
+					{ key: "Service-Worker-Allowed", value: "/" },
+				],
+			},
+		];
+	},
 	// Don't advertise the framework (plan §I3). Caddy also strips this at the
 	// edge; disabling at the source is defense-in-depth.
 	poweredByHeader: false,

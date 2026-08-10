@@ -48,6 +48,35 @@
     "currency": "Currency",
     "editLink": "Edit timezone or currency in <link>Restaurant profile</link>."
   },
+  "pwa": {
+    "title": "Install admin app",
+    "description": "Run the dashboard in its own window for faster access during service.",
+    "install": "Install app",
+    "status": {
+      "installed": "The admin app is installed on this device.",
+      "ready": "This browser is ready to install the admin app.",
+      "ios": "Add the admin app from Safari's Share menu.",
+      "browserManaged": "Use your browser's install or add-to-home-screen menu.",
+      "unsupported": "This browser does not support app installation. The dashboard still works normally."
+    },
+    "iosHelp": "Tap Share, then Add to Home Screen.",
+    "connection": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "update": {
+      "description": "A dashboard update is ready. Reload when you are not editing an order.",
+      "action": "Reload update"
+    },
+    "privacy": "Orders, customer details, and sign-in data are never saved for offline use.",
+    "offline": {
+      "eyebrow": "Admin connection",
+      "title": "The dashboard is offline",
+      "description": "Reconnect to load live orders and restaurant data. Nothing entered here will be queued or sent later.",
+      "retry": "Try again",
+      "safety": "Protected restaurant data is not stored in the offline cache."
+    }
+  },
   "toasts": {
     "saved": "Settings saved"
   }

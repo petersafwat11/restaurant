@@ -1,5 +1,6 @@
 'use client';
 
+import { PwaSettingsCard } from '@/components/pwa/pwa-settings-card';
 import { usePageHeader } from '@/components/shell/page-title-context';
 import { useRestaurantSettings, useUpdateRestaurantSettings } from '@/features/settings/hooks';
 import { Link } from '@/i18n/navigation';
@@ -293,6 +294,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <PwaSettingsCard />
         <SettingsSectionCard
           id="financials"
           title={t('financials.title')}

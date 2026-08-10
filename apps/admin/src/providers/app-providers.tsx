@@ -1,5 +1,6 @@
 'use client';
 
+import { PwaProvider } from '@/components/pwa/pwa-provider';
 import { getApiClient } from '@/lib/api-client';
 import { makeQueryClient } from '@/lib/query-client';
 import { getRealtimeClient } from '@/lib/realtime-client';
@@ -37,9 +38,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-right" richColors closeButton toastOptions={{ duration: 4000 }} />
-    </QueryClientProvider>
+    <PwaProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster position="top-right" richColors closeButton toastOptions={{ duration: 4000 }} />
+      </QueryClientProvider>
+    </PwaProvider>
   );
 }
