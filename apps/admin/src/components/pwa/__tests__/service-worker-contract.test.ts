@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(process.cwd(), 'public/sw.js'), 'utf8');
+const dockerfile = readFileSync(resolve(process.cwd(), 'Dockerfile'), 'utf8');
 
 describe('admin service-worker cache contract', () => {
   it('keeps mutations and authenticated navigations out of persistent caches', () => {
@@ -27,5 +28,11 @@ describe('admin service-worker cache contract', () => {
     expect(source).toContain('openWindows.length > 0');
     expect(source).toContain('requestedUrl.origin === self.location.origin');
     expect(source).toContain('self.clients.openWindow(targetUrl)');
+  });
+
+  it('ships the public PWA assets in the standalone production image', () => {
+    expect(dockerfile).toContain(
+      'COPY --from=builder --chown=app:app /app/apps/admin/public ./apps/admin/public',
+    );
   });
 });

@@ -51,9 +51,14 @@ pnpm --filter @repo/api exec web-push generate-vapid-keys
 ```
 
 Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` in `/opt/restaurant/.env`. Also add
-the public key as the GitHub Actions repository secret `VAPID_PUBLIC_KEY`; Next.js must receive it as
-`NEXT_PUBLIC_VAPID_PUBLIC_KEY` while building the admin image. The private key is used only by the
-API container and must never be exposed to the browser.
+the pair as GitHub Actions repository secrets `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`; Next.js
+receives only the public key as `NEXT_PUBLIC_VAPID_PUBLIC_KEY` while building the admin image. The
+deployment workflow securely persists both keys to the VPS `.env`. The private key is used only by
+the API container and must never be exposed to the browser.
+
+The admin image build fails when the public key is missing. The production deployment smoke test
+also verifies the manifest, service worker, and required icons so a PWA cannot silently deploy with
+missing public assets.
 
 Expired browser subscriptions (push-service HTTP 404/410) are deleted automatically. To rotate the
 VAPID pair, update both deployment values and the GitHub secret, rebuild the admin image, and ask
