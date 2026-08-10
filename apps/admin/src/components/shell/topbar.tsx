@@ -2,7 +2,6 @@
 
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useLogout } from '@/features/auth/hooks';
-import { useRealtimeStatus } from '@/features/orders/hooks';
 import { useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import {
@@ -11,15 +10,13 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
   cn,
 } from '@repo/ui';
-import { Bell, Cog, LogOut, Menu, Search, User } from 'lucide-react';
+import { Cog, LogOut, Menu, Search, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { type DateRange, DateRangeSegmented } from './date-range-segmented';
+import { NotificationCenter } from './notification-center';
 
 export interface TopbarProps {
   title: string;
@@ -102,7 +99,7 @@ export function Topbar({
             </kbd>
           </button>
 
-          <RealtimeStatusBellButton />
+          <NotificationCenter userId={user?.id} />
 
           <div className="hidden sm:block">
             <LanguageSwitcher />
@@ -144,48 +141,5 @@ export function Topbar({
         </>
       )}
     </header>
-  );
-}
-
-function RealtimeStatusBellButton() {
-  const t = useTranslations('admin.layout.topbar.realtime');
-  const tNotifications = useTranslations('admin.layout.topbar');
-  const status = useRealtimeStatus();
-  const dotCls =
-    status === 'connected'
-      ? 'bg-positive'
-      : status === 'connecting' || status === 'idle'
-        ? 'bg-warning'
-        : status === 'disconnected'
-          ? 'bg-negative'
-          : 'bg-fg-subtle';
-  const labelKey =
-    status === 'connected' ||
-    status === 'connecting' ||
-    status === 'idle' ||
-    status === 'disconnected'
-      ? status
-      : 'unknown';
-  const label = t(labelKey);
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={`${tNotifications('notificationsAriaLabel')} · ${label}`}
-          className={cn(
-            'relative grid h-8 w-8 place-items-center rounded-md text-fg-muted transition-colors',
-            'hover:bg-surface-2 hover:text-fg',
-          )}
-        >
-          <Bell size={16} />
-          <span
-            aria-hidden
-            className={cn('absolute right-1 top-1 h-1.5 w-1.5 rounded-full ring-2 ring-bg', dotCls)}
-          />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom">{label}</TooltipContent>
-    </Tooltip>
   );
 }

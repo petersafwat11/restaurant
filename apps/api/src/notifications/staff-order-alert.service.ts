@@ -1,6 +1,6 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { JOB_WEBPUSH_NEW_ORDER, QUEUE_WEBPUSH } from '@repo/jobs';
 import type { OrderCreatedEvent } from '@repo/types';
 import type { Queue } from 'bullmq';
@@ -15,28 +15,64 @@ export class StaffOrderAlertService {
     private readonly prisma: PrismaService,
     @Inject(ENV) private readonly env: ENV_TYPE,
     @InjectQueue(QUEUE_WEBPUSH) private readonly webPushQueue: Queue,
+    private readonly events: EventEmitter2,
   ) {}
 
   @OnEvent('order.created')
   async onOrderCreated(event: OrderCreatedEvent): Promise<void> {
-    if (!this.env.VAPID_PUBLIC_KEY || !this.env.VAPID_PRIVATE_KEY) return;
-
-    const subscriptions = await this.prisma.webPushSubscription.findMany({
+    const staff = await this.prisma.user.findMany({
       where: {
-        user: {
-          isActive: true,
-          roles: {
-            some: {
-              role: {
-                permissions: { some: { permission: { key: 'order:read' } } },
-              },
+        isActive: true,
+        roles: {
+          some: {
+            role: {
+              permissions: { some: { permission: { key: 'order:read' } } },
             },
           },
         },
       },
-      select: { id: true },
+      select: {
+        id: true,
+        locale: true,
+        webPushSubscriptions: { select: { id: true } },
+      },
     });
 
+    await Promise.all(
+      staff.map(async (user) => {
+        const isEnglish = user.locale === 'en';
+        const notification = await this.prisma.notification.create({
+          data: {
+            userId: user.id,
+            type: 'new_order',
+            title: isEnglish
+              ? `New order ${event.orderNumber}`
+              : `Nowe zamówienie ${event.orderNumber}`,
+            body: newOrderBody(event, isEnglish ? 'en' : 'pl'),
+            data: {
+              orderId: event.orderId,
+              orderNumber: event.orderNumber,
+              orderType: event.type,
+            },
+          },
+        });
+
+        this.events.emit('notification.created', {
+          userId: user.id,
+          notification: {
+            id: notification.id,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            createdAt: notification.createdAt.toISOString(),
+          },
+        });
+      }),
+    );
+
+    if (!this.env.VAPID_PUBLIC_KEY || !this.env.VAPID_PRIVATE_KEY) return;
+
+    const subscriptions = staff.flatMap((user) => user.webPushSubscriptions);
     await Promise.all(
       subscriptions.map(({ id: subscriptionId }) =>
         this.webPushQueue.add(
@@ -69,4 +105,18 @@ export class StaffOrderAlertService {
       );
     }
   }
+}
+
+function newOrderBody(event: OrderCreatedEvent, locale: 'en' | 'pl'): string {
+  const isEnglish = locale === 'en';
+  const customer = event.customerName ?? (isEnglish ? 'Guest' : 'Gość');
+  const orderType = {
+    en: { DELIVERY: 'Delivery', PICKUP: 'Pickup', DINE_IN: 'Dine in' },
+    pl: { DELIVERY: 'Dostawa', PICKUP: 'Odbiór', DINE_IN: 'Na miejscu' },
+  }[locale][event.type];
+  const items = isEnglish
+    ? `${event.itemCount} item${event.itemCount === 1 ? '' : 's'}`
+    : `${event.itemCount} szt.`;
+
+  return `${customer} · ${orderType} · ${items} · ${event.grandTotal} ${event.currency}`;
 }
