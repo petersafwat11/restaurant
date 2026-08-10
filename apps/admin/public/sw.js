@@ -59,6 +59,51 @@ self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
+self.addEventListener('push', (event) => {
+  event.waitUntil(
+    (async () => {
+      // The running dashboard already handles realtime alerts and chimes. Only
+      // show the Web Push notification when every dashboard window is closed.
+      const openWindows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      if (openWindows.length > 0) return;
+
+      let payload = {};
+      try {
+        payload = event.data?.json() ?? {};
+      } catch {
+        payload = {};
+      }
+
+      await self.registration.showNotification(payload.title ?? 'New order', {
+        body: payload.body ?? 'Open the admin dashboard to review it.',
+        icon: payload.icon ?? '/icons/admin-192.png',
+        badge: payload.badge ?? '/icons/admin-192.png',
+        tag: payload.tag ?? 'new-order',
+        renotify: true,
+        data: { url: payload.url ?? '/' },
+      });
+    })(),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    (async () => {
+      const requestedUrl = new URL(event.notification.data?.url ?? '/', self.location.origin);
+      const targetUrl =
+        requestedUrl.origin === self.location.origin ? requestedUrl.href : self.location.origin;
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const existing = windows[0];
+      if (existing) {
+        await existing.navigate(targetUrl);
+        return existing.focus();
+      }
+      return self.clients.openWindow(targetUrl);
+    })(),
+  );
+});
+
 function offlineUrlFor(requestUrl) {
   const pathname = new URL(requestUrl).pathname;
   return pathname === '/en' || pathname.startsWith('/en/') ? '/en/offline' : '/offline';

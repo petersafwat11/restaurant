@@ -4,9 +4,15 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const prismaStub = path.resolve(__dirname, "src/lib/prisma-client-stub.ts");
 
+// Next's standalone trace-copy step creates symlinks for workspace packages.
+// Native Windows can reject that final copy with EPERM even after compilation
+// succeeds. Production images build on Linux, so retain standalone output there
+// while allowing Windows developers/CI to produce a normal `.next` build.
+const output = process.platform === "win32" ? undefined : "standalone";
+
 const config: NextConfig = {
 	reactStrictMode: true,
-	output: "standalone",
+	output,
 	async headers() {
 		return [
 			{

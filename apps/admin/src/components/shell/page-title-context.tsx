@@ -47,6 +47,8 @@ export function usePageHeader(config: PageHeaderConfig): void {
   const { setConfig } = ctx;
 
   // Stringify config for stable dep — avoids needing useCallback on caller
+  const configRef = React.useRef(config);
+  configRef.current = config;
   const serialized = JSON.stringify({
     title: config.title,
     showDateRange: config.showDateRange,
@@ -54,7 +56,6 @@ export function usePageHeader(config: PageHeaderConfig): void {
   });
 
   React.useEffect(() => {
-    setConfig(config);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (serialized) setConfig(configRef.current);
   }, [serialized, setConfig]);
 }

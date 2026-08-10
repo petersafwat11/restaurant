@@ -6,9 +6,14 @@ import createNextIntlPlugin from "next-intl/plugin";
 // prod it's https://api.{domain}. APP_URL_API is supplied at build time.
 const apiUrl = new URL(process.env.APP_URL_API ?? "http://localhost:4000");
 
+// Production images are built on Linux and still require standalone output.
+// Native Windows can reject Next's final workspace symlink-copy with EPERM,
+// so local Windows builds use the normal `.next` server output instead.
+const output = process.platform === "win32" ? undefined : "standalone";
+
 const config: NextConfig = {
 	reactStrictMode: true,
-	output: "standalone",
+	output,
 	// Don't advertise the framework (plan §I3). Caddy also strips this at the
 	// edge; disabling at the source is defense-in-depth.
 	poweredByHeader: false,

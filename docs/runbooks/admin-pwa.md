@@ -37,6 +37,31 @@ unexpected reload during order handling.
 Cache names start with `szef-donald-admin-pwa-` and contain a version suffix. Activation removes
 older caches owned by the admin PWA.
 
+## Background new-order alerts
+
+The Settings PWA card lets staff with `order:read` enable Web Push separately on each browser or
+installed device. Permission is requested only after **Enable alerts** is selected. A new order is
+queued through BullMQ and delivered by the API's Web Push processor; if the dashboard is open, its
+existing Socket.IO alert/chime handles the event instead so the operator does not receive duplicates.
+
+Generate one VAPID key pair and keep it stable across deployments:
+
+```bash
+pnpm --filter @repo/api exec web-push generate-vapid-keys
+```
+
+Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` in `/opt/restaurant/.env`. Also add
+the public key as the GitHub Actions repository secret `VAPID_PUBLIC_KEY`; Next.js must receive it as
+`NEXT_PUBLIC_VAPID_PUBLIC_KEY` while building the admin image. The private key is used only by the
+API container and must never be exposed to the browser.
+
+Expired browser subscriptions (push-service HTTP 404/410) are deleted automatically. To rotate the
+VAPID pair, update both deployment values and the GitHub secret, rebuild the admin image, and ask
+staff to enable alerts again on each device.
+
+Native Windows builds intentionally use normal Next.js output because Windows can reject the final
+standalone symlink-copy step with `EPERM`. Linux/Docker builds retain standalone output.
+
 ## Troubleshooting
 
 1. Confirm the site is using HTTPS (localhost is the only development exception).
@@ -47,6 +72,3 @@ older caches owned by the admin PWA.
 4. In browser developer tools, inspect **Application → Service workers / Manifest / Cache storage**.
 5. To force a clean reinstall, unregister the worker, delete caches beginning with
    `szef-donald-admin-pwa-`, clear site data, reload once online, and install again.
-
-The PWA does not add background web-push delivery. Existing in-app/realtime order alerts work while
-the dashboard is running; email and Twilio SMS remain the supported background channels.

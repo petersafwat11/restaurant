@@ -44,3 +44,22 @@ export type NotificationPreferenceDto = z.infer<typeof NotificationPreferenceSch
 
 export const UpdateNotificationPreferenceSchema = NotificationPreferenceSchema.partial();
 export type UpdateNotificationPreferenceDto = z.infer<typeof UpdateNotificationPreferenceSchema>;
+
+export const WebPushSubscriptionInputSchema = z.object({
+  endpoint: z.string().url().max(2048),
+  expirationTime: z.number().int().nonnegative().nullable().optional(),
+  keys: z.object({
+    p256dh: z.string().min(1).max(512),
+    auth: z.string().min(1).max(512),
+  }),
+  userAgent: z.string().max(512).optional(),
+});
+export type WebPushSubscriptionInputDto = z.infer<typeof WebPushSubscriptionInputSchema>;
+
+export const WebPushUnsubscribeSchema = z.object({
+  endpoint: z.string().url().max(2048),
+});
+export type WebPushUnsubscribeDto = z.infer<typeof WebPushUnsubscribeSchema>;
+
+export const WebPushSubscriptionResultSchema = z.object({ success: z.literal(true) });
+export type WebPushSubscriptionResultDto = z.infer<typeof WebPushSubscriptionResultSchema>;

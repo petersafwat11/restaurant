@@ -173,6 +173,10 @@ import {
   NotificationListSchema,
   type NotificationPreferenceDto,
   NotificationPreferenceSchema,
+  type WebPushSubscriptionInputDto,
+  WebPushSubscriptionInputSchema,
+  WebPushSubscriptionResultSchema,
+  WebPushUnsubscribeSchema,
   type OperatingHoursDto,
   OperatingHoursListSchema,
   type OrderDto,
@@ -1305,6 +1309,18 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
     markAllRead: (): Promise<{ success: true; count: number }> =>
       request('/notifications/read-all', { method: 'POST' }),
+    subscribeWebPush: (input: WebPushSubscriptionInputDto): Promise<{ success: true }> =>
+      request('/notifications/web-push', {
+        method: 'POST',
+        body: WebPushSubscriptionInputSchema.parse(input),
+        responseSchema: WebPushSubscriptionResultSchema,
+      }),
+    unsubscribeWebPush: (endpoint: string): Promise<{ success: true }> =>
+      request('/notifications/web-push/unsubscribe', {
+        method: 'POST',
+        body: WebPushUnsubscribeSchema.parse({ endpoint }),
+        responseSchema: WebPushSubscriptionResultSchema,
+      }),
     getPreferences: (): Promise<NotificationPreferenceDto> =>
       request('/notifications/preferences', {
         method: 'GET',

@@ -7,6 +7,7 @@ describe('notifications (e2e)', () => {
   let app: NestFastifyApplication;
   let userToken: string;
   let userId: string;
+  let ownerToken: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -19,7 +20,7 @@ describe('notifications (e2e)', () => {
   beforeEach(async () => {
     await resetMenuDb(app);
     await resetDb(app);
-    await ensureOwnerToken(app);
+    ownerToken = await ensureOwnerToken(app);
     const reg = await inject('POST', '/api/v1/auth/register', {
       email: 'notif.e2e@test.local',
       password: 'Password123!',
@@ -102,5 +103,48 @@ describe('notifications (e2e)', () => {
   it('requires auth', async () => {
     const res = await inject('GET', '/api/v1/notifications');
     expect(res.statusCode).toBe(401);
+  });
+
+  it('registers and removes an owner Web Push subscription', async () => {
+    const prisma = app.get(PrismaService);
+    const subscription = {
+      endpoint: 'https://push.example.test/subscription/owner-device',
+      expirationTime: null,
+      keys: { p256dh: 'public-encryption-key', auth: 'auth-secret' },
+      userAgent: 'Vitest browser',
+    };
+
+    const forbidden = await inject(
+      'POST',
+      '/api/v1/notifications/web-push',
+      subscription,
+      userToken,
+    );
+    expect(forbidden.statusCode).toBe(403);
+
+    const subscribed = await inject(
+      'POST',
+      '/api/v1/notifications/web-push',
+      subscription,
+      ownerToken,
+    );
+    expect(subscribed.statusCode).toBe(200);
+    expect(subscribed.json()).toEqual({ success: true });
+
+    const stored = await prisma.webPushSubscription.findUnique({
+      where: { endpoint: subscription.endpoint },
+      include: { user: { select: { email: true } } },
+    });
+    expect(stored?.user.email).toBe('owner.e2e@test.local');
+    expect(stored?.p256dh).toBe(subscription.keys.p256dh);
+
+    const unsubscribed = await inject(
+      'POST',
+      '/api/v1/notifications/web-push/unsubscribe',
+      { endpoint: subscription.endpoint },
+      ownerToken,
+    );
+    expect(unsubscribed.statusCode).toBe(200);
+    expect(await prisma.webPushSubscription.count()).toBe(0);
   });
 });

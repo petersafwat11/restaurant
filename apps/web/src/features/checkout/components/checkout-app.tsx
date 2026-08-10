@@ -21,11 +21,6 @@ import {
 } from '@repo/types';
 import { CheckoutFormSchema, LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
 import {
-  PENDING_PAYMENT_KEY,
-  isMissingPendingOrderError,
-  parsePendingPayment,
-} from '../pending-payment';
-import {
   CheckoutSection,
   type CheckoutSectionStatus,
   Container,
@@ -44,6 +39,11 @@ import {
   TipPicker,
 } from '@repo/ui';
 import dynamic from 'next/dynamic';
+import {
+  PENDING_PAYMENT_KEY,
+  isMissingPendingOrderError,
+  parsePendingPayment,
+} from '../pending-payment';
 
 // Leaflet hard-requires `window` — load on the client only.
 const DeliveryLocationPicker = dynamic(

@@ -17,4 +17,15 @@ describe('admin service-worker cache contract', () => {
     expect(source).toContain("const CACHE_PREFIX = 'szef-donald-admin-pwa-'");
     expect(source).toContain('key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME');
   });
+
+  it('handles closed-app Web Push and opens only same-origin order links', () => {
+    expect(source).toContain("self.addEventListener('push'");
+    expect(source).toContain("self.addEventListener('notificationclick'");
+    expect(source).toContain(
+      "self.clients.matchAll({ type: 'window', includeUncontrolled: true })",
+    );
+    expect(source).toContain('openWindows.length > 0');
+    expect(source).toContain('requestedUrl.origin === self.location.origin');
+    expect(source).toContain('self.clients.openWindow(targetUrl)');
+  });
 });

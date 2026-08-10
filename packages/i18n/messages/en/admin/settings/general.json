@@ -49,6 +49,25 @@
     "editLink": "Edit timezone or currency in <link>Restaurant profile</link>."
   },
   "pwa": {
+    "notifications": {
+      "title": "Background order alerts",
+      "enable": "Enable alerts",
+      "disable": "Disable alerts",
+      "status": {
+        "unsupported": "This browser does not support background notifications.",
+        "unconfigured": "Web Push is not configured for this deployment.",
+        "idle": "Alert this device when a new order arrives, even after the dashboard is closed.",
+        "working": "Updating this device…",
+        "enabled": "New-order alerts are enabled on this device.",
+        "denied": "Notifications are blocked. Allow them in your browser settings to continue.",
+        "error": "The alert setting could not be updated. Check your connection and try again."
+      },
+      "toast": {
+        "enabled": "Background order alerts enabled.",
+        "disabled": "Background order alerts disabled.",
+        "error": "Background order alerts could not be updated."
+      }
+    },
     "title": "Install admin app",
     "description": "Run the dashboard in its own window for faster access during service.",
     "install": "Install app",

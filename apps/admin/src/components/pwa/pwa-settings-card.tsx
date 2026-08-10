@@ -1,12 +1,27 @@
 'use client';
 
 import { usePwa } from '@/components/pwa/pwa-provider';
+import { useWebPush } from '@/components/pwa/use-web-push';
+import { usePermissions } from '@/features/auth/hooks/use-permissions';
+import { notify } from '@/lib/notify';
 import { Button, SettingsSectionCard } from '@repo/ui';
-import { CheckCircle2, Download, RefreshCw, Share2, Wifi, WifiOff } from 'lucide-react';
+import {
+  BellRing,
+  CheckCircle2,
+  Download,
+  LoaderCircle,
+  RefreshCw,
+  Share2,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function PwaSettingsCard() {
   const t = useTranslations('admin.settings.general.pwa');
+  const { has } = usePermissions();
+  const canReadOrders = has('order:read');
+  const webPush = useWebPush();
   const {
     supported,
     online,
@@ -27,6 +42,21 @@ export function PwaSettingsCard() {
         : supported
           ? t('status.browserManaged')
           : t('status.unsupported');
+
+  const pushStatus = t(`notifications.status.${webPush.state}`);
+
+  const toggleWebPush = async () => {
+    const enabling = !webPush.enabled;
+    const succeeded = enabling ? await webPush.enable() : await webPush.disable();
+    if (succeeded) {
+      notify(
+        'success',
+        t(enabling ? 'notifications.toast.enabled' : 'notifications.toast.disabled'),
+      );
+    } else if (Notification.permission !== 'denied') {
+      notify('error', t('notifications.toast.error'));
+    }
+  };
 
   return (
     <SettingsSectionCard
@@ -78,6 +108,36 @@ export function PwaSettingsCard() {
           <Button type="button" variant="secondary" onClick={applyUpdate}>
             <RefreshCw className="h-4 w-4" />
             {t('update.action')}
+          </Button>
+        </div>
+      )}
+
+      {canReadOrders && (
+        <div className="flex flex-col gap-3 border-t border-border/[var(--border-alpha)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-button bg-accent-muted text-accent">
+              <BellRing className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-small font-medium text-fg">{t('notifications.title')}</p>
+              <p className="mt-1 text-caption-admin text-fg-subtle" aria-live="polite">
+                {pushStatus}
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant={webPush.enabled ? 'secondary' : 'primary'}
+            disabled={
+              webPush.busy ||
+              webPush.state === 'unsupported' ||
+              webPush.state === 'unconfigured' ||
+              webPush.state === 'denied'
+            }
+            onClick={() => void toggleWebPush()}
+          >
+            {webPush.busy && <LoaderCircle className="h-4 w-4 animate-spin" />}
+            {t(webPush.enabled ? 'notifications.disable' : 'notifications.enable')}
           </Button>
         </div>
       )}

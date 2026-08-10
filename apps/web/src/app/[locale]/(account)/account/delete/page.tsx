@@ -20,6 +20,7 @@ export default function DeleteAccountPage() {
   const statusQuery = useAccountDeletionStatus();
   const requestMutation = useRequestAccountDeletion();
   const confirmMutation = useConfirmAccountDeletion();
+  const confirmDeletion = confirmMutation.mutate;
   const cancelMutation = useCancelAccountDeletion();
   const restaurant = useRestaurant();
 
@@ -32,10 +33,9 @@ export default function DeleteAccountPage() {
   React.useEffect(() => {
     if (token && !confirmedRef.current) {
       confirmedRef.current = true;
-      confirmMutation.mutate({ token });
+      confirmDeletion({ token });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, confirmDeletion]);
 
   const status = statusQuery.data;
   const graceDays = status?.graceDays ?? 7;

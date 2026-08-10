@@ -154,5 +154,5 @@ export function useOrderColumns({ onAdvance }: BuildColumnsArgs): ColumnDef<Orde
         size: 80,
       },
     ];
-  }, [t, tStatus, translatedTokens, onAdvance]);
+  }, [t, translatedTokens, onAdvance]);
 }

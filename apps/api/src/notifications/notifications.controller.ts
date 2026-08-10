@@ -5,8 +5,13 @@ import {
   NotificationListQuerySchema,
   type UpdateNotificationPreferenceDto,
   UpdateNotificationPreferenceSchema,
+  type WebPushSubscriptionInputDto,
+  WebPushSubscriptionInputSchema,
+  type WebPushUnsubscribeDto,
+  WebPushUnsubscribeSchema,
 } from '@repo/types';
 import { CurrentUser, type RequestUser } from '../common/decorators/current-user.decorator';
+import { Permissions } from '../common/decorators/permissions.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { NotificationsService } from './notifications.service';
 
@@ -38,6 +43,27 @@ export class NotificationsController {
   @HttpCode(200)
   markAllRead(@CurrentUser() user: RequestUser) {
     return this.notifications.markAllRead(user.id);
+  }
+
+  @Post('web-push')
+  @Permissions('order:read')
+  @HttpCode(200)
+  subscribeWebPush(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(WebPushSubscriptionInputSchema))
+    dto: WebPushSubscriptionInputDto,
+  ) {
+    return this.notifications.subscribeWebPush(user.id, dto);
+  }
+
+  @Post('web-push/unsubscribe')
+  @Permissions('order:read')
+  @HttpCode(200)
+  unsubscribeWebPush(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(WebPushUnsubscribeSchema)) dto: WebPushUnsubscribeDto,
+  ) {
+    return this.notifications.unsubscribeWebPush(user.id, dto.endpoint);
   }
 
   @Get('preferences')

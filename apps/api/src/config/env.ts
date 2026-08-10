@@ -22,6 +22,10 @@ const EnvSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().optional().default(''),
   TWILIO_FROM: z.string().optional().default(''),
 
+  VAPID_PUBLIC_KEY: z.string().optional().default(''),
+  VAPID_PRIVATE_KEY: z.string().optional().default(''),
+  VAPID_SUBJECT: z.string().default('mailto:admin@restaurant.local'),
+
   APP_URL_WEB: z.string().url().default('http://localhost:3000'),
   APP_URL_ADMIN: z.string().url().default('http://localhost:3001'),
   APP_URL_API: z.string().url().default('http://localhost:4000'),
