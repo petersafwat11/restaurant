@@ -224,13 +224,16 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
  * Staff-set per-order ETA: total minutes from order placement. Commits on blur
  * / Enter; clearing the field reverts to the automatic estimate.
  */
+function toEtaDraft(value: number | null): string {
+  return value != null ? String(value) : '';
+}
+
 function EtaControl({ order }: { order: OrderDto }) {
   const t = useTranslations('admin.orders.detail');
   const setEta = useSetOrderEta(order.id);
-  const toDraft = (v: number | null) => (v != null ? String(v) : '');
-  const [draft, setDraft] = React.useState(toDraft(order.prepMinutesOverride));
+  const [draft, setDraft] = React.useState(toEtaDraft(order.prepMinutesOverride));
   React.useEffect(() => {
-    setDraft(toDraft(order.prepMinutesOverride));
+    setDraft(toEtaDraft(order.prepMinutesOverride));
   }, [order.prepMinutesOverride]);
 
   function commit() {
@@ -243,7 +246,7 @@ function EtaControl({ order }: { order: OrderDto }) {
     if (Number.isFinite(n) && n >= 1 && n <= 600) {
       if (n !== order.prepMinutesOverride) setEta.mutate({ prepMinutesOverride: n });
     } else {
-      setDraft(toDraft(order.prepMinutesOverride));
+      setDraft(toEtaDraft(order.prepMinutesOverride));
     }
   }
 
@@ -261,7 +264,7 @@ function EtaControl({ order }: { order: OrderDto }) {
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-          if (e.key === 'Escape') setDraft(toDraft(order.prepMinutesOverride));
+          if (e.key === 'Escape') setDraft(toEtaDraft(order.prepMinutesOverride));
         }}
         className="pr-10 tabular-nums"
       />

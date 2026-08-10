@@ -48,6 +48,54 @@
     "currency": "Waluta",
     "editLink": "Edytuj strefę czasową lub walutę w <link>Profil restauracji</link>."
   },
+  "pwa": {
+    "notifications": {
+      "title": "Powiadomienia o nowych zamówieniach",
+      "enable": "Włącz powiadomienia",
+      "disable": "Wyłącz powiadomienia",
+      "status": {
+        "unsupported": "Ta przeglądarka nie obsługuje powiadomień w tle.",
+        "unconfigured": "Powiadomienia Web Push nie są skonfigurowane w tym wdrożeniu.",
+        "idle": "Otrzymuj alerty o nowych zamówieniach na tym urządzeniu, nawet po zamknięciu panelu.",
+        "working": "Aktualizowanie ustawienia urządzenia…",
+        "enabled": "Alerty o nowych zamówieniach są włączone na tym urządzeniu.",
+        "denied": "Powiadomienia są zablokowane. Zezwól na nie w ustawieniach przeglądarki.",
+        "error": "Nie udało się zmienić ustawienia alertów. Sprawdź połączenie i spróbuj ponownie."
+      },
+      "toast": {
+        "enabled": "Włączono powiadomienia o nowych zamówieniach.",
+        "disabled": "Wyłączono powiadomienia o nowych zamówieniach.",
+        "error": "Nie udało się zaktualizować powiadomień o nowych zamówieniach."
+      }
+    },
+    "title": "Zainstaluj panel administracyjny",
+    "description": "Uruchamiaj panel w osobnym oknie, aby szybciej korzystać z niego podczas obsługi.",
+    "install": "Zainstaluj aplikację",
+    "status": {
+      "installed": "Panel administracyjny jest zainstalowany na tym urządzeniu.",
+      "ready": "Ta przeglądarka może zainstalować panel administracyjny.",
+      "ios": "Dodaj panel z menu Udostępnij w Safari.",
+      "browserManaged": "Użyj opcji instalacji lub dodania do ekranu głównego w przeglądarce.",
+      "unsupported": "Ta przeglądarka nie obsługuje instalacji. Panel nadal działa w zwykły sposób."
+    },
+    "iosHelp": "Stuknij Udostępnij, a następnie Dodaj do ekranu głównego.",
+    "connection": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "update": {
+      "description": "Aktualizacja panelu jest gotowa. Odśwież, gdy nie edytujesz zamówienia.",
+      "action": "Wczytaj aktualizację"
+    },
+    "privacy": "Zamówienia, dane klientów i dane logowania nigdy nie są zapisywane do pracy offline.",
+    "offline": {
+      "eyebrow": "Połączenie panelu",
+      "title": "Panel jest offline",
+      "description": "Połącz się z internetem, aby wczytać bieżące zamówienia i dane restauracji. Wprowadzone tu dane nie zostaną zapisane ani wysłane później.",
+      "retry": "Spróbuj ponownie",
+      "safety": "Chronione dane restauracji nie są przechowywane w pamięci offline."
+    }
+  },
   "toasts": {
     "saved": "Zapisano ustawienia"
   }

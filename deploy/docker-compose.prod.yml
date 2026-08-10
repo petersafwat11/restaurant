@@ -92,6 +92,9 @@ services:
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
       TWILIO_FROM: ${TWILIO_FROM:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@example.com}
       # eService (Global Payments) online card/BLIK. All optional: with these
       # empty the payments module runs in stub mode and checkout is COD-only, so
       # the API boots fine on a prod host that has no eService creds yet. Set them
@@ -149,6 +152,7 @@ services:
       PORT: 3001
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_URL: ${APP_URL_API}/api/v1
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       APP_URL_API: ${APP_URL_API}
     networks: [app-net]
     healthcheck:

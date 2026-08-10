@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import { CheckoutFormSchema } from '@repo/types';
+import { describe, expect, it } from 'vitest';
 
 const baseCheckout = {
   contact: {

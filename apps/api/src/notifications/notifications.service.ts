@@ -5,6 +5,7 @@ import type {
   NotificationListQuery,
   NotificationPreferenceDto,
   UpdateNotificationPreferenceDto,
+  WebPushSubscriptionInputDto,
 } from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -61,6 +62,36 @@ export class NotificationsService {
       data: { readAt: new Date() },
     });
     return { success: true, count: res.count };
+  }
+
+  async subscribeWebPush(
+    userId: string,
+    dto: WebPushSubscriptionInputDto,
+  ): Promise<{ success: true }> {
+    await this.prisma.webPushSubscription.upsert({
+      where: { endpoint: dto.endpoint },
+      create: {
+        userId,
+        endpoint: dto.endpoint,
+        p256dh: dto.keys.p256dh,
+        auth: dto.keys.auth,
+        expirationTime: dto.expirationTime == null ? null : new Date(dto.expirationTime),
+        userAgent: dto.userAgent,
+      },
+      update: {
+        userId,
+        p256dh: dto.keys.p256dh,
+        auth: dto.keys.auth,
+        expirationTime: dto.expirationTime == null ? null : new Date(dto.expirationTime),
+        userAgent: dto.userAgent,
+      },
+    });
+    return { success: true };
+  }
+
+  async unsubscribeWebPush(userId: string, endpoint: string): Promise<{ success: true }> {
+    await this.prisma.webPushSubscription.deleteMany({ where: { userId, endpoint } });
+    return { success: true };
   }
 
   // ---- Preferences ------------------------------------------------------

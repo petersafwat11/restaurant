@@ -22,6 +22,7 @@ function VerifyEmailPageInner() {
   const params = useSearchParams();
   const token = params.get('token') ?? '';
   const verify = useVerifyEmail();
+  const verifyEmail = verify.mutateAsync;
   const [status, setStatus] = React.useState<'pending' | 'ok' | 'error'>('pending');
 
   React.useEffect(() => {
@@ -29,12 +30,10 @@ function VerifyEmailPageInner() {
       setStatus('error');
       return;
     }
-    verify
-      .mutateAsync({ token })
+    verifyEmail({ token })
       .then(() => setStatus('ok'))
       .catch(() => setStatus('error'));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, verifyEmail]);
 
   if (status === 'pending') {
     return (

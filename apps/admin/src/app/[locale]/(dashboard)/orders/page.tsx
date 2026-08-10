@@ -87,9 +87,18 @@ export default function OrdersPage() {
 
   const searchRef = React.useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  const updateFilters = React.useCallback<React.Dispatch<React.SetStateAction<OrdersFiltersState>>>(
+    (next) => {
+      setFilters(next);
+      setPageIndex(0);
+    },
+    [],
+  );
+
+  const resetFilters = React.useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
     setPageIndex(0);
-  }, [filters.status, filters.types, filters.payments, debouncedSearch, filters.sort]);
+  }, []);
 
   const queryFilters: AdminOrderFilters = React.useMemo(
     () => ({
@@ -235,7 +244,7 @@ export default function OrdersPage() {
           'CANCELLED',
         ] as const;
         const next = map[Number(e.key) - 1];
-        if (next) setFilters((f) => ({ ...f, status: next }));
+        if (next) updateFilters((f) => ({ ...f, status: next }));
         return;
       }
       if (!inField && (e.metaKey || e.ctrlKey) && e.key === 'a') {
@@ -273,7 +282,7 @@ export default function OrdersPage() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [filteredRows, focusedKey, selected]);
+  }, [filteredRows, focusedKey, selected, updateFilters]);
 
   return (
     <>
@@ -283,7 +292,7 @@ export default function OrdersPage() {
             <LivePulseChip count={newCount} onClick={resetNewCount} />
             <OrdersFilters
               value={filters}
-              onChange={setFilters}
+              onChange={updateFilters}
               counts={counts}
               searchRef={searchRef}
             />
@@ -353,7 +362,7 @@ export default function OrdersPage() {
             {(filters.status !== 'all' || debouncedSearch || filters.types.length > 0) && (
               <button
                 type="button"
-                onClick={() => setFilters(DEFAULT_FILTERS)}
+                onClick={resetFilters}
                 className="mt-3 inline-flex items-center rounded-md bg-surface-2 px-3 py-1.5 text-xs text-fg-muted hover:text-fg"
               >
                 {t('empty.clearFilters')}

@@ -17,17 +17,17 @@ export default function ProfilePage() {
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: { firstName: '', lastName: '', phone: '' },
   });
+  const { reset } = form;
 
   React.useEffect(() => {
     if (meQuery.data) {
-      form.reset({
+      reset({
         firstName: meQuery.data.firstName ?? '',
         lastName: meQuery.data.lastName ?? '',
         phone: meQuery.data.phone ?? '',
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meQuery.data]);
+  }, [meQuery.data, reset]);
 
   const onSubmit = form.handleSubmit((values) => update.mutate(values));
 

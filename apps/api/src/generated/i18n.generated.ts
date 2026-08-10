@@ -102,6 +102,7 @@ export type I18nTranslations = {
                 "noIp": string;
             };
             "empty": string;
+            "error": string;
             "drawer": {
                 "ariaLabel": string;
                 "actor": string;
@@ -131,6 +132,7 @@ export type I18nTranslations = {
                 "noSubject": string;
             };
             "empty": string;
+            "error": string;
             "drawer": {
                 "ariaLabel": string;
                 "noSubject": string;
@@ -301,6 +303,7 @@ export type I18nTranslations = {
             "topbar": {
                 "searchPlaceholder": string;
                 "searchAriaLabel": string;
+                "openMenuAriaLabel": string;
                 "accountAriaLabel": string;
                 "notificationsAriaLabel": string;
                 "profile": string;
@@ -672,6 +675,7 @@ export type I18nTranslations = {
                 "noReply": string;
             };
             "empty": string;
+            "error": string;
             "drawer": {
                 "ariaLabel": string;
                 "anonymous": string;
@@ -698,6 +702,7 @@ export type I18nTranslations = {
             "title": string;
             "invite": string;
             "empty": string;
+            "error": string;
             "columns": {
                 "name": string;
                 "phone": string;
@@ -954,6 +959,7 @@ export type I18nTranslations = {
                     "pdf": string;
                 };
                 "empty": string;
+                "error": string;
                 "permissionDenied": string;
                 "bulk": {
                     "clear": string;
@@ -1238,6 +1244,7 @@ export type I18nTranslations = {
                 "newPromotion": string;
                 "noPermission": string;
                 "empty": string;
+                "error": string;
                 "columns": {
                     "name": string;
                     "code": string;
@@ -1452,6 +1459,54 @@ export type I18nTranslations = {
                     "timezone": string;
                     "currency": string;
                     "editLink": string;
+                };
+                "pwa": {
+                    "notifications": {
+                        "title": string;
+                        "enable": string;
+                        "disable": string;
+                        "status": {
+                            "unsupported": string;
+                            "unconfigured": string;
+                            "idle": string;
+                            "working": string;
+                            "enabled": string;
+                            "denied": string;
+                            "error": string;
+                        };
+                        "toast": {
+                            "enabled": string;
+                            "disabled": string;
+                            "error": string;
+                        };
+                    };
+                    "title": string;
+                    "description": string;
+                    "install": string;
+                    "status": {
+                        "installed": string;
+                        "ready": string;
+                        "ios": string;
+                        "browserManaged": string;
+                        "unsupported": string;
+                    };
+                    "iosHelp": string;
+                    "connection": {
+                        "online": string;
+                        "offline": string;
+                    };
+                    "update": {
+                        "description": string;
+                        "action": string;
+                    };
+                    "privacy": string;
+                    "offline": {
+                        "eyebrow": string;
+                        "title": string;
+                        "description": string;
+                        "retry": string;
+                        "safety": string;
+                    };
                 };
                 "toasts": {
                     "saved": string;
@@ -2193,14 +2248,6 @@ export type I18nTranslations = {
                     "metroAnnotation": string;
                     "hoursLabel": string;
                 };
-                "testimonials": {
-                    "eyebrow": string;
-                    "title": string;
-                    "description": string;
-                    "readAllReviews": string;
-                    "starsAriaLabel": string;
-                    "anonymous": string;
-                };
                 "newsletter": {
                     "eyebrow": string;
                     "title": string;
@@ -2356,6 +2403,10 @@ export type I18nTranslations = {
                 "hero": {
                     "title": string;
                     "description": string;
+                    "cancelledTitle": string;
+                    "cancelledDescription": string;
+                    "refundedTitle": string;
+                    "refundedDescription": string;
                     "orderNumber": string;
                     "live": string;
                     "reconnecting": string;
@@ -2363,6 +2414,15 @@ export type I18nTranslations = {
                 "copy": {
                     "ariaLabel": string;
                     "toast": string;
+                };
+                "steps": {
+                    "CONFIRMED": string;
+                    "PREPARING": string;
+                    "ON_THE_WAY": string;
+                    "DELIVERED": string;
+                    "READY_FOR_PICKUP": string;
+                    "PICKED_UP": string;
+                    "SERVED": string;
                 };
                 "status": {
                     "PENDING": string;

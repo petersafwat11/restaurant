@@ -6,6 +6,7 @@ export const QUEUE_AUDIT = 'audit';
 export const QUEUE_RECONCILIATION = 'reconciliation';
 export const QUEUE_ACCOUNT_DELETION = 'account-deletion';
 export const QUEUE_ORDERS = 'orders';
+export const QUEUE_WEBPUSH = 'webpush';
 
 export const QUEUE_NAMES = {
   email: QUEUE_EMAIL,
@@ -16,6 +17,7 @@ export const QUEUE_NAMES = {
   reconciliation: QUEUE_RECONCILIATION,
   accountDeletion: QUEUE_ACCOUNT_DELETION,
   orders: QUEUE_ORDERS,
+  webpush: QUEUE_WEBPUSH,
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -49,3 +51,4 @@ export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-emai
 // grace window elapses. Enqueued (delayed) when an order is marked DELIVERED; the
 // processor re-reads the order and no-ops unless it is still DELIVERED.
 export const JOB_ORDER_AUTO_COMPLETE = 'order.auto-complete';
+export const JOB_WEBPUSH_NEW_ORDER = 'webpush.new-order';

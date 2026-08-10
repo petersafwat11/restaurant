@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import {
   isMissingPendingOrderError,
   parsePendingPayment,
 } from '@/features/checkout/pending-payment';
+import { describe, expect, it } from 'vitest';
 
 describe('parsePendingPayment', () => {
   it('restores a signed guest payment retry', () => {
@@ -33,7 +33,9 @@ describe('isMissingPendingOrderError', () => {
     expect(isMissingPendingOrderError({ status: 403, message: 'Not your order' })).toBe(true);
     expect(isMissingPendingOrderError({ code: 'FORBIDDEN', message: 'Forbidden' })).toBe(true);
     expect(isMissingPendingOrderError(new Error('Not your order'))).toBe(true);
-    expect(isMissingPendingOrderError({ status: 400, message: 'Order is already paid' })).toBe(true);
+    expect(isMissingPendingOrderError({ status: 400, message: 'Order is already paid' })).toBe(
+      true,
+    );
     expect(isMissingPendingOrderError(new Error('Order payment is already paid'))).toBe(true);
     expect(isMissingPendingOrderError({ status: 400, message: 'Invalid payment method' })).toBe(
       false,

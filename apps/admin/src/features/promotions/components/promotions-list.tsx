@@ -34,6 +34,12 @@ const STATUS_CLS: Record<PromotionStatusKey, string> = {
   PAUSED: 'bg-warning/[0.12] text-warning',
 };
 
+const PROMOTION_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+};
+
 export function PromotionsList({ initialPromotionId }: { initialPromotionId?: string }) {
   const t = useTranslations('admin.promotions.list');
   const { has } = usePermissions();
@@ -66,31 +72,38 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
     ) : null,
   });
 
-  function fmtValue(p: PromotionDto): string {
-    switch (p.type) {
-      case 'PERCENT':
-        return p.value ? t('value.percentOff', { value: p.value }) : t('value.none');
-      case 'FIXED':
-        return p.value
-          ? t('value.fixedOff', { amount: formatMoney(p.value, 'USD') })
-          : t('value.none');
-      case 'BOGO':
-        return t('value.bogo');
-      case 'FREE_DELIVERY':
-        return t('value.freeDelivery');
-    }
-  }
+  const fmtValue = React.useCallback(
+    (promotion: PromotionDto): string => {
+      switch (promotion.type) {
+        case 'PERCENT':
+          return promotion.value
+            ? t('value.percentOff', { value: promotion.value })
+            : t('value.none');
+        case 'FIXED':
+          return promotion.value
+            ? t('value.fixedOff', { amount: formatMoney(promotion.value, 'USD') })
+            : t('value.none');
+        case 'BOGO':
+          return t('value.bogo');
+        case 'FREE_DELIVERY':
+          return t('value.freeDelivery');
+      }
+    },
+    [t],
+  );
 
-  const dateOpts: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  };
-  function fmtWindow(p: PromotionDto): string {
-    const s = p.startsAt ? formatRestaurantDateTime(p.startsAt, tz, dateOpts) : t('window.none');
-    const e = p.endsAt ? formatRestaurantDateTime(p.endsAt, tz, dateOpts) : t('window.none');
-    return t('window.range', { start: s, end: e });
-  }
+  const fmtWindow = React.useCallback(
+    (promotion: PromotionDto): string => {
+      const start = promotion.startsAt
+        ? formatRestaurantDateTime(promotion.startsAt, tz, PROMOTION_DATE_OPTIONS)
+        : t('window.none');
+      const end = promotion.endsAt
+        ? formatRestaurantDateTime(promotion.endsAt, tz, PROMOTION_DATE_OPTIONS)
+        : t('window.none');
+      return t('window.range', { start, end });
+    },
+    [t, tz],
+  );
 
   const columns = React.useMemo<ColumnDef<PromotionDto>[]>(
     () => [
@@ -165,7 +178,7 @@ export function PromotionsList({ initialPromotionId }: { initialPromotionId?: st
         },
       },
     ],
-    [t],
+    [t, fmtValue, fmtWindow],
   );
 
   if (!has('promotion:read') && !canWrite) {
