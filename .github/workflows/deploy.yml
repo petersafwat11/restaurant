@@ -51,15 +51,39 @@ jobs:
 
       - name: Pull, migrate, restart
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: mailto:admin@szefdonald.pl
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          envs: TAG
+          envs: TAG,VAPID_PUBLIC_KEY,VAPID_PRIVATE_KEY,VAPID_SUBJECT
           script: |
             set -euo pipefail
             cd /opt/restaurant
+
+            if [[ -z "$VAPID_PUBLIC_KEY" || -z "$VAPID_PRIVATE_KEY" ]]; then
+              echo "VAPID keys are required for production Web Push" >&2
+              exit 1
+            fi
+
+            upsert_env() {
+              local key="$1"
+              local value="$2"
+              if grep -q "^${key}=" .env 2>/dev/null; then
+                sed -i "s|^${key}=.*|${key}=${value}|" .env
+              else
+                printf '%s=%s\n' "$key" "$value" >> .env
+              fi
+            }
+
+            upsert_env VAPID_PUBLIC_KEY "$VAPID_PUBLIC_KEY"
+            upsert_env VAPID_PRIVATE_KEY "$VAPID_PRIVATE_KEY"
+            upsert_env VAPID_SUBJECT "$VAPID_SUBJECT"
 
             # Move the compose file to the canonical path Compose looks for.
             if [[ -f docker-compose.prod.yml ]]; then
@@ -135,4 +159,17 @@ jobs:
               fi
               sleep 5
             done
+          done
+
+          echo "→ checking admin PWA assets"
+          pwa_paths=(
+            "/manifest.webmanifest"
+            "/sw.js"
+            "/icons/admin-192.png"
+            "/icons/admin-512.png"
+            "/icons/admin-maskable-512.png"
+          )
+          for path in "${pwa_paths[@]}"; do
+            curl -fsS "https://admin.$DOMAIN$path" -o /dev/null
+            echo "   ok $path"
           done

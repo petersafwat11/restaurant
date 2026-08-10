@@ -56,9 +56,11 @@ jobs:
         run: |
           SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           REPO="${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.image }}"
-          echo "tags=${REPO}:latest,${REPO}:sha-${SHA_SHORT}" >> "$GITHUB_OUTPUT"
-          echo "image=${REPO}" >> "$GITHUB_OUTPUT"
-          echo "sha_short=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          {
+            echo "tags=${REPO}:latest,${REPO}:sha-${SHA_SHORT}"
+            echo "image=${REPO}"
+            echo "sha_short=${SHA_SHORT}"
+          } >> "$GITHUB_OUTPUT"
 
       # Build args for web/admin so the production API URL is baked into the
       # Next.js bundle (NEXT_PUBLIC_* is inlined at build time). PROD_DOMAIN
@@ -67,6 +69,11 @@ jobs:
         id: nextargs
         run: |
           DOMAIN="${{ secrets.PROD_DOMAIN }}"
+          VAPID_PUBLIC_KEY="${{ secrets.VAPID_PUBLIC_KEY }}"
+          if [ "${{ matrix.app }}" = "admin" ] && [ -z "$VAPID_PUBLIC_KEY" ]; then
+            echo "::error::VAPID_PUBLIC_KEY must be configured before building the admin image"
+            exit 1
+          fi
           if [ -z "$DOMAIN" ]; then
             echo "build_args=" >> "$GITHUB_OUTPUT"
           else
@@ -75,7 +82,7 @@ jobs:
               echo "APP_URL_API=https://api.${DOMAIN}"
               echo "NEXT_PUBLIC_API_URL=https://api.${DOMAIN}/api/v1"
               echo "NEXT_PUBLIC_APP_URL=https://${DOMAIN}"
-              echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.VAPID_PUBLIC_KEY }}"
+              echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}"
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
           fi
