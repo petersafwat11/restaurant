@@ -316,10 +316,21 @@ export type I18nTranslations = {
                     "disconnected": string;
                     "unknown": string;
                 };
+                "notifications": {
+                    "ariaLabel": string;
+                    "title": string;
+                    "markAllRead": string;
+                    "loading": string;
+                    "error": string;
+                    "retry": string;
+                    "emptyTitle": string;
+                    "emptyDescription": string;
+                    "settings": string;
+                };
             };
             "sidebar": {
                 "ariaLabel": string;
-                "brandName": string;
+                "brandFallback": string;
                 "expand": string;
                 "collapse": string;
                 "overview": string;

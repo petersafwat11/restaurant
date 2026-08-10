@@ -14,11 +14,22 @@
       "idle": "Live bezczynne",
       "disconnected": "Live rozłączone",
       "unknown": "Status live nieznany"
+    },
+    "notifications": {
+      "ariaLabel": "Powiadomienia, nieprzeczytane: {count}",
+      "title": "Powiadomienia",
+      "markAllRead": "Oznacz wszystkie jako przeczytane",
+      "loading": "Ładowanie powiadomień",
+      "error": "Nie udało się wczytać powiadomień.",
+      "retry": "Spróbuj ponownie",
+      "emptyTitle": "Wszystko przeczytane",
+      "emptyDescription": "Nowe zamówienia i ważne informacje z panelu pojawią się tutaj.",
+      "settings": "Ustawienia powiadomień"
     }
   },
   "sidebar": {
     "ariaLabel": "Główne",
-    "brandName": "Test Kitchen",
+    "brandFallback": "Panel restauracji",
     "expand": "Rozwiń panel boczny",
     "collapse": "Zwiń panel boczny",
     "overview": "Przegląd",

@@ -2,12 +2,13 @@
 
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { Link, usePathname } from '@/i18n/navigation';
+import { getApiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth-store';
-import type { PermissionKey } from '@repo/types';
+import { type PermissionKey, type RestaurantPublicDto, STAFF_ROLE_KEYS } from '@repo/types';
 import { cn } from '@repo/ui';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import * as React from 'react';
 import { NAV_GROUPS, NAV_OVERVIEW, type NavItem } from './nav-config';
 
 interface SidebarProps {
@@ -90,22 +91,26 @@ export function Sidebar({
   const { has } = usePermissions();
   const user = useAuthStore((s) => s.user);
   const t = useTranslations('admin.layout.sidebar');
-
-  const initials = React.useMemo(() => {
-    if (!user) return '?';
-    const f = user.firstName?.[0] ?? '';
-    const l = user.lastName?.[0] ?? '';
-    return (f + l).toUpperCase() || user.email.slice(0, 2).toUpperCase();
-  }, [user]);
+  const tRoles = useTranslations('admin.staff.roles');
+  const restaurantQuery = useQuery<RestaurantPublicDto>({
+    queryKey: ['restaurant', 'public'],
+    queryFn: () => getApiClient().restaurant.get(),
+    staleTime: 5 * 60_000,
+  });
 
   const overviewVisible = !NAV_OVERVIEW.permission || has(NAV_OVERVIEW.permission as PermissionKey);
-  const brandName = t('brandName');
+  const brandName = restaurantQuery.data?.name.trim() || t('brandFallback');
   const brandInitials = brandName
     .split(/\s+/)
     .map((word) => word[0] ?? '')
     .join('')
     .slice(0, 2)
     .toUpperCase();
+  const role = user?.roles?.[0];
+  const roleLabel =
+    role && STAFF_ROLE_KEYS.includes(role as (typeof STAFF_ROLE_KEYS)[number])
+      ? tRoles(role as (typeof STAFF_ROLE_KEYS)[number])
+      : (role ?? '—');
 
   return (
     <aside
@@ -176,22 +181,16 @@ export function Sidebar({
         })}
       </nav>
 
-      {/* Footer: user identity + collapse toggle */}
+      {/* Footer: role + collapse toggle. Personal identity stays in the account menu. */}
       <div
         className={cn(
           'flex items-center gap-3 border-t-hairline px-3 py-3',
-          collapsed && 'flex-col gap-2 px-0',
+          collapsed && 'justify-center px-0',
         )}
       >
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-2 text-xs font-semibold text-fg">
-          {initials}
-        </div>
         {!collapsed && (
-          <div className="min-w-0 flex-1 leading-tight">
-            <div className="truncate text-sm text-fg">
-              {user?.firstName} {user?.lastName}
-            </div>
-            <div className="truncate text-xs text-fg-subtle">{user?.roles?.[0] ?? '—'}</div>
+          <div className="min-w-0 flex-1 truncate text-xs font-medium text-fg-muted">
+            {roleLabel}
           </div>
         )}
         {!isDrawer && (

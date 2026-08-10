@@ -14,11 +14,22 @@
       "idle": "Realtime idle",
       "disconnected": "Realtime disconnected",
       "unknown": "Realtime status unknown"
+    },
+    "notifications": {
+      "ariaLabel": "Notifications, {count} unread",
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "loading": "Loading notifications",
+      "error": "Notifications couldn't be loaded.",
+      "retry": "Try again",
+      "emptyTitle": "You're all caught up",
+      "emptyDescription": "New orders and important dashboard updates will appear here.",
+      "settings": "Notification settings"
     }
   },
   "sidebar": {
     "ariaLabel": "Primary",
-    "brandName": "Test Kitchen",
+    "brandFallback": "Restaurant admin",
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar",
     "overview": "Overview",

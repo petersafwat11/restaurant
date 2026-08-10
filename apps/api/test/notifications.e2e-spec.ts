@@ -1,5 +1,7 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { OrderCreatedEvent } from '@repo/types';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { StaffOrderAlertService } from '../src/notifications/staff-order-alert.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { createTestApp, ensureOwnerToken, resetDb, resetMenuDb } from './setup-e2e';
 
@@ -146,5 +148,34 @@ describe('notifications (e2e)', () => {
     );
     expect(unsubscribed.statusCode).toBe(200);
     expect(await prisma.webPushSubscription.count()).toBe(0);
+  });
+
+  it('creates an order-linked in-app notification for authorized staff', async () => {
+    const event: OrderCreatedEvent = {
+      orderId: 'order-notification-e2e',
+      orderNumber: 'R-2026-000099',
+      userId: null,
+      status: 'PENDING',
+      type: 'PICKUP',
+      grandTotal: '32.50',
+      currency: 'PLN',
+      itemCount: 2,
+      customerName: 'Ada',
+      createdAt: new Date().toISOString(),
+    };
+
+    await app.get(StaffOrderAlertService).onOrderCreated(event);
+
+    const list = await inject('GET', '/api/v1/notifications', undefined, ownerToken);
+    expect(list.statusCode).toBe(200);
+    expect(list.json().unreadCount).toBe(1);
+    expect(list.json().items[0]).toEqual(
+      expect.objectContaining({
+        type: 'new_order',
+        title: expect.stringContaining(event.orderNumber),
+        data: expect.objectContaining({ orderId: event.orderId }),
+        readAt: null,
+      }),
+    );
   });
 });
