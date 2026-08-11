@@ -41,8 +41,13 @@ older caches owned by the admin PWA.
 
 The Settings PWA card lets staff with `order:read` enable Web Push separately on each browser or
 installed device. Permission is requested only after **Enable alerts** is selected. A new order is
-queued through BullMQ and delivered by the API's Web Push processor; if the dashboard is open, its
-existing Socket.IO alert/chime handles the event instead so the operator does not receive duplicates.
+queued through BullMQ and delivered by the API's Web Push processor in every app state: foreground,
+background, minimized, or closed. The foreground dashboard also records the alert in its notification
+center, so system-level delivery remains visible and auditable even while staff are using the app.
+
+Service-worker releases call `skipWaiting()` after their offline assets are cached. Because protected
+pages and API data are never cached, the corrected worker can safely activate immediately without
+interrupting an order form or forcing a page reload.
 
 Generate one VAPID key pair and keep it stable across deployments:
 

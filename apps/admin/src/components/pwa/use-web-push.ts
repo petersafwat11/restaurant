@@ -25,6 +25,20 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return bytes;
 }
 
+async function persistWebPushSubscription(subscription: PushSubscription): Promise<void> {
+  const json = subscription.toJSON();
+  if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
+    throw new Error('Incomplete Web Push subscription');
+  }
+
+  await getApiClient().notifications.subscribeWebPush({
+    endpoint: json.endpoint,
+    expirationTime: json.expirationTime,
+    keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
+    userAgent: navigator.userAgent,
+  });
+}
+
 export function useWebPush() {
   const supported =
     typeof window !== 'undefined' &&
@@ -51,7 +65,16 @@ export function useWebPush() {
     try {
       const registration = await navigator.serviceWorker.getRegistration('/');
       const subscription = await registration?.pushManager.getSubscription();
-      setState(subscription ? 'enabled' : 'idle');
+      if (!subscription) {
+        setState('idle');
+        return;
+      }
+
+      // Reconcile the browser with the API on every settings visit. This
+      // repairs server-side subscription loss without asking staff to toggle
+      // alerts off and on again.
+      await persistWebPushSubscription(subscription);
+      setState('enabled');
     } catch {
       setState('error');
     }
@@ -75,25 +98,18 @@ export function useWebPush() {
         return false;
       }
 
-      let subscription = await registration.pushManager.getSubscription();
+      const activeRegistration = registration.active
+        ? registration
+        : await navigator.serviceWorker.ready;
+      let subscription = await activeRegistration.pushManager.getSubscription();
       if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
+        subscription = await activeRegistration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
         });
       }
 
-      const json = subscription.toJSON();
-      if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
-        throw new Error('Incomplete Web Push subscription');
-      }
-
-      await getApiClient().notifications.subscribeWebPush({
-        endpoint: json.endpoint,
-        expirationTime: json.expirationTime,
-        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-        userAgent: navigator.userAgent,
-      });
+      await persistWebPushSubscription(subscription);
       setState('enabled');
       return true;
     } catch {

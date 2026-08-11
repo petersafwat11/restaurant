@@ -6,7 +6,7 @@
  */
 
 const CACHE_PREFIX = 'szef-donald-admin-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const OFFLINE_URLS = ['/offline', '/en/offline'];
 const PUBLIC_ASSETS = [
   '/manifest.webmanifest',
@@ -36,7 +36,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then(async (cache) => {
       await cache.addAll(PUBLIC_ASSETS);
       await Promise.all(OFFLINE_URLS.map((url) => cacheOfflinePage(cache, url)));
-    }),
+    }).then(() => self.skipWaiting()),
   );
 });
 
@@ -62,11 +62,6 @@ self.addEventListener('message', (event) => {
 self.addEventListener('push', (event) => {
   event.waitUntil(
     (async () => {
-      // The running dashboard already handles realtime alerts and chimes. Only
-      // show the Web Push notification when every dashboard window is closed.
-      const openWindows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-      if (openWindows.length > 0) return;
-
       let payload = {};
       try {
         payload = event.data?.json() ?? {};
