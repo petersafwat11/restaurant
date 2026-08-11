@@ -168,10 +168,11 @@ describe('realtime (e2e)', () => {
 
   // ---- Scenarios -----------------------------------------------------------
 
-  it('rejects unauthenticated socket connections', async () => {
+  it('allows guest sockets but rejects unauthenticated staff-room subscriptions', async () => {
     const socket = connect(); // no token
-    await waitForDisconnect(socket);
-    expect(socket.connected).toBe(false);
+    await waitForConnect(socket);
+    const ack = await subscribe(socket, ROOMS.orders);
+    expect(ack).toEqual({ ok: false, reason: 'Unauthenticated' });
     socket.close();
   });
 

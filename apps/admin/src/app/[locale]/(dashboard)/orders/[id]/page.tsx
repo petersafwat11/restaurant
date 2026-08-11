@@ -118,8 +118,8 @@ export default function AdminOrderDetailPage() {
 
   return (
     <div className="space-y-6 pb-6" data-print="surface">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Link
             href="/orders"
             data-print="hide"
@@ -128,13 +128,13 @@ export default function AdminOrderDetailPage() {
             <ArrowLeft className="h-4 w-4" /> {t('back')}
           </Link>
           <span className="text-fg-subtle">/</span>
-          <h1 className="font-mono text-h1 tracking-wide text-fg">{order.orderNumber}</h1>
+          <h1 className="font-mono text-xl sm:text-h1 tracking-wide text-fg whitespace-nowrap">{order.orderNumber}</h1>
           <TypeBadge
             label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()}
           />
           <StatusPill status={order.status} tokens={translatedTokens} />
         </div>
-        <div className="flex items-center gap-2" data-print="hide">
+        <div className="flex flex-wrap items-center gap-2" data-print="hide">
           <span className="text-small text-fg-muted">
             <RelativeTime value={order.createdAt} /> ·{' '}
             {formatMoney(order.grandTotal, order.currency)}
@@ -214,7 +214,7 @@ export default function AdminOrderDetailPage() {
                 className="w-full resize-y rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-3 py-2 text-small text-fg outline-none focus:border-accent disabled:opacity-60"
               />
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-caption uppercase tracking-wider text-fg-subtle">
+                <span className="hidden sm:inline text-caption uppercase tracking-wider text-fg-subtle">
                   <Kbd>N</Kbd> {t('addNote.focusHint')}
                 </span>
                 <Button
@@ -233,7 +233,7 @@ export default function AdminOrderDetailPage() {
             </section>
           )}
 
-          <section className="rounded-card border border-border/[var(--border-alpha)] bg-surface p-5 text-small">
+          <section className="hidden md:block rounded-card border border-border/[var(--border-alpha)] bg-surface p-5 text-small">
             <h3 className="mb-3 text-h2 font-semibold text-fg">{t('keyboard.heading')}</h3>
             <ul className="space-y-1.5 text-fg-muted">
               <li>

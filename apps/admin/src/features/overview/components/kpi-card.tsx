@@ -46,13 +46,15 @@ export function KpiCard({
         </div>
         <div
           className={cn(
-            'mt-1 inline-flex items-center gap-1 text-xs tabular-nums',
+            'mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs tabular-nums',
             up ? 'text-positive' : 'text-negative',
           )}
         >
-          {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-          <span>{fmtPct(Math.abs(deltaPercent), { digits: 1 })}</span>
-          <span className="text-fg-subtle">{t('vsPrevPeriod')}</span>
+          <div className="inline-flex items-center gap-1">
+            {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+            <span>{fmtPct(Math.abs(deltaPercent), { digits: 1 })}</span>
+          </div>
+          <span className="text-fg-subtle whitespace-nowrap">{t('vsPrevPeriod')}</span>
         </div>
       </div>
       {points.length > 0 && (

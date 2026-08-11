@@ -1,6 +1,7 @@
 {
   "title": "Pracownicy",
   "invite": "Zaproś",
+  "createAccount": "Utwórz konto",
   "empty": "Brak pracowników.",
   "error": "Nie udało się wczytać pracowników. Sprawdź połączenie i spróbuj ponownie.",
   "columns": {
@@ -64,5 +65,20 @@
     "email": "E-mail",
     "emailPlaceholder": "osoba@example.com",
     "role": "Rola"
+  },
+  "createModal": {
+    "title": "Utwórz konto pracownika",
+    "description": "Ustaw dane i dostęp pracownika. Konto będzie aktywne od razu.",
+    "create": "Utwórz konto",
+    "creating": "Tworzenie…",
+    "cancel": "Anuluj",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "email": "E-mail",
+    "phone": "Telefon",
+    "password": "Hasło tymczasowe",
+    "passwordHelper": "Użyj co najmniej 8 znaków, w tym wielkiej i małej litery oraz cyfry.",
+    "role": "Rola",
+    "emailNotice": "Wyślemy link logowania, nigdy hasło."
   }
 }

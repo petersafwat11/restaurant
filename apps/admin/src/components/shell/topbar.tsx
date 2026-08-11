@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
   cn,
 } from '@repo/ui';
-import { Cog, LogOut, Menu, Search, User } from 'lucide-react';
+import { Cog, LogOut, Menu, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { type DateRange, DateRangeSegmented } from './date-range-segmented';
@@ -83,63 +83,47 @@ export function Topbar({
 
       <div className="flex-1" />
 
-      {rightExtras ?? (
-        <>
-          {/* Search + language are secondary on phones — hidden below sm so the
-              topbar (which may also carry the date-range on Overview) fits. */}
+      {rightExtras}
+
+      <NotificationCenter userId={user?.id} />
+
+      <div className="hidden sm:block">
+        <LanguageSwitcher />
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
-            aria-label={t('searchAriaLabel')}
-            className="hidden h-8 items-center gap-2 rounded-md border-hairline-strong bg-surface px-3 text-xs text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg sm:flex"
+            aria-label={t('accountAriaLabel')}
+            className="grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-[11px] font-semibold text-fg transition-colors hover:bg-surface"
           >
-            <Search size={13} />
-            <span className="hidden xl:inline">{t('searchPlaceholder')}</span>
-            <kbd className="ml-2 hidden rounded border-hairline-strong bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle xl:inline">
-              ⌘K
-            </kbd>
+            {initials}
           </button>
-
-          <NotificationCenter userId={user?.id} />
-
-          <div className="hidden sm:block">
-            <LanguageSwitcher />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <div className="px-2 py-1.5 text-xs">
+            <div className="truncate text-fg">
+              {user?.firstName} {user?.lastName}
+            </div>
+            <div className="truncate text-fg-subtle">{user?.email}</div>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label={t('accountAriaLabel')}
-                className="grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-[11px] font-semibold text-fg transition-colors hover:bg-surface"
-              >
-                {initials}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5 text-xs">
-                <div className="truncate text-fg">
-                  {user?.firstName} {user?.lastName}
-                </div>
-                <div className="truncate text-fg-subtle">{user?.email}</div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => router.push('/settings/hours')}>
-                <User size={14} className="text-fg-subtle" />
-                {t('profile')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => router.push('/settings')}>
-                <Cog size={14} className="text-fg-subtle" />
-                {t('settings')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onLogout} className="text-negative focus:text-negative">
-                <LogOut size={14} />
-                {t('logout')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </>
-      )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => router.push('/settings/hours')}>
+            <User size={14} className="text-fg-subtle" />
+            {t('profile')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => router.push('/settings')}>
+            <Cog size={14} className="text-fg-subtle" />
+            {t('settings')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={onLogout} className="text-negative focus:text-negative">
+            <LogOut size={14} />
+            {t('logout')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }

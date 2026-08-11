@@ -3,7 +3,7 @@
 import { usePageHeader } from '@/components/shell/page-title-context';
 import { RequirePermission } from '@/features/auth/components';
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
-import { InviteStaffModal } from '@/features/staff/components';
+import { CreateStaffAccountModal } from '@/features/staff/components';
 import {
   useDeactivateStaff,
   useReactivateStaff,
@@ -19,16 +19,17 @@ import * as React from 'react';
 export default function StaffPage() {
   const t = useTranslations('admin.staff');
   const { has, user } = usePermissions();
-  const [inviteOpen, setInviteOpen] = React.useState(false);
+  const [createOpen, setCreateOpen] = React.useState(false);
 
   const canWrite = has('staff:write');
+  const canCreate = canWrite && Boolean(user?.roles.includes('owner'));
   const currentUserId = user?.id;
 
   usePageHeader({
     title: t('title'),
-    rightExtras: canWrite ? (
-      <Button variant="primary" onClick={() => setInviteOpen(true)}>
-        <Plus size={14} /> {t('invite')}
+    rightExtras: canCreate ? (
+      <Button variant="primary" onClick={() => setCreateOpen(true)}>
+        <Plus size={14} /> {t('createAccount')}
       </Button>
     ) : null,
   });
@@ -195,7 +196,7 @@ export default function StaffPage() {
           q.isError ? { message: t('error'), onRetry: () => void q.refetch() } : undefined
         }
       />
-      <InviteStaffModal open={inviteOpen} onOpenChange={setInviteOpen} />
+      <CreateStaffAccountModal open={createOpen} onOpenChange={setCreateOpen} />
     </RequirePermission>
   );
 }

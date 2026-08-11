@@ -13,6 +13,7 @@
 		"migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
 		"migrate:reset": "dotenv -e ../../.env -- prisma migrate reset --force",
 		"seed": "dotenv -e ../../.env -- tsx seed.ts",
+		"reset:launch-data": "dotenv -e ../../.env -- tsx reset-launch-data.ts",
 		"studio": "dotenv -e ../../.env -- prisma studio",
 		"typecheck": "tsc --noEmit",
 		"format": "prisma format"

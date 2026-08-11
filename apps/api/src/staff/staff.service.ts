@@ -1,20 +1,27 @@
 import { randomBytes, createHash } from 'node:crypto';
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@repo/db';
 import { hashPassword } from '@repo/auth-core';
+import { JOB_EMAIL_STAFF_ACCOUNT_CREATED, QUEUE_EMAIL } from '@repo/jobs';
 import type {
   AcceptStaffInviteDto,
+  CreateStaffAccountDto,
   InviteStaffDto,
   StaffListQuery,
   StaffMemberDto,
   StaffRoleKey,
   UpdateStaffRoleDto,
 } from '@repo/types';
+import type { Queue } from 'bullmq';
+import { ENV, type ENV_TYPE } from '../config/config.module';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface Actor {
@@ -31,7 +38,13 @@ const ROLE_HIERARCHY: Record<StaffRoleKey, StaffRoleKey[]> = {
 
 @Injectable()
 export class StaffService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(StaffService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(ENV) private readonly env: ENV_TYPE,
+    @InjectQueue(QUEUE_EMAIL) private readonly emailQueue: Queue,
+  ) {}
 
   async list(query: StaffListQuery): Promise<StaffMemberDto[]> {
     const where: Prisma.UserWhereInput = {
@@ -58,6 +71,54 @@ export class StaffService {
       emailVerifiedAt: u.emailVerifiedAt?.toISOString() ?? null,
       createdAt: u.createdAt.toISOString(),
     }));
+  }
+
+  async create(actor: Actor, dto: CreateStaffAccountDto): Promise<StaffMemberDto> {
+    if (!actor.roleKeys.includes('owner')) {
+      throw new ForbiddenException('Only an owner can create staff accounts');
+    }
+
+    const existing = await this.prisma.user.findFirst({
+      where: { OR: [{ email: dto.email }, { phone: dto.phone }] },
+      select: { email: true, phone: true },
+    });
+    if (existing?.email === dto.email) {
+      throw new BadRequestException('A user with that email already exists');
+    }
+    if (existing?.phone === dto.phone) {
+      throw new BadRequestException('A user with that phone already exists');
+    }
+
+    const [role, passwordHash] = await Promise.all([
+      this.prisma.role.findUniqueOrThrow({ where: { key: dto.roleKey } }),
+      hashPassword(dto.password),
+    ]);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        phone: dto.phone,
+        passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        emailVerifiedAt: new Date(),
+        roles: { create: { roleId: role.id } },
+      },
+      include: { roles: { include: { role: { select: { key: true } } } } },
+    });
+
+    void this.emailQueue
+      .add(JOB_EMAIL_STAFF_ACCOUNT_CREATED, {
+        email: user.email,
+        firstName: user.firstName,
+        roleKey: dto.roleKey,
+        loginUrl: this.env.APP_URL_ADMIN,
+      })
+      .catch((error: unknown) => {
+        this.logger.error(`Could not queue staff account email for ${user.id}`, error);
+      });
+
+    return this.toDto(user);
   }
 
   async invite(
@@ -202,6 +263,30 @@ export class StaffService {
     if (!canManage) {
       throw new ForbiddenException(`Cannot manage role ${targetRole}`);
     }
+  }
+
+  private toDto(user: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+    isActive: boolean;
+    emailVerifiedAt: Date | null;
+    createdAt: Date;
+    roles: { role: { key: string } }[];
+  }): StaffMemberDto {
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      roleKeys: user.roles.map(({ role }) => role.key),
+      isActive: user.isActive,
+      emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
+      createdAt: user.createdAt.toISOString(),
+    };
   }
 }
 

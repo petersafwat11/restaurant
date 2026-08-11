@@ -12,6 +12,7 @@ export const AUDIT_ACTIONS = [
   'promotion:write',
   'promotion:delete',
   'staff:invite',
+  'staff:create',
   'staff:role_change',
   'staff:deactivate',
   'staff:reactivate',

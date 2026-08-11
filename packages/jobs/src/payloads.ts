@@ -8,6 +8,14 @@ export const EmailVerificationPayloadSchema = z.object({
 });
 export type EmailVerificationPayload = z.infer<typeof EmailVerificationPayloadSchema>;
 
+export const EmailStaffAccountCreatedPayloadSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  roleKey: z.enum(['manager', 'kitchen', 'cashier']),
+  loginUrl: z.string().url(),
+});
+export type EmailStaffAccountCreatedPayload = z.infer<typeof EmailStaffAccountCreatedPayloadSchema>;
+
 export const PasswordResetPayloadSchema = z.object({
   userId: z.string(),
   email: z.string().email(),

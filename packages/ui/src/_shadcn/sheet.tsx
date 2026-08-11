@@ -33,9 +33,9 @@ const sheetVariants = cva(
     variants: {
       side: {
         right:
-          'right-0 top-0 h-full w-[480px] max-w-[100vw] border-l-hairline data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+          'right-0 top-0 h-full w-[480px] max-w-[calc(100vw-1.5rem)] sm:max-w-[100vw] border-l-hairline data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         left:
-          'left-0 top-0 h-full w-[480px] max-w-[100vw] border-r-hairline data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+          'left-0 top-0 h-full w-[480px] max-w-[calc(100vw-1.5rem)] sm:max-w-[100vw] border-r-hairline data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
         top:
           'inset-x-0 top-0 border-b-hairline data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
         bottom:

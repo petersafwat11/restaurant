@@ -8,6 +8,7 @@ import {
   EmailPromoPayloadSchema,
   EmailReceiptPayloadSchema,
   EmailRefundPayloadSchema,
+  EmailStaffAccountCreatedPayloadSchema,
   EmailVerificationPayloadSchema,
   JOB_EMAIL_CONTACT,
   JOB_EMAIL_CONTACT_REPLY,
@@ -17,6 +18,7 @@ import {
   JOB_EMAIL_PROMO,
   JOB_EMAIL_RECEIPT,
   JOB_EMAIL_REFUND,
+  JOB_EMAIL_STAFF_ACCOUNT_CREATED,
   JOB_EMAIL_VERIFICATION,
   PasswordResetPayloadSchema,
   QUEUE_EMAIL,
@@ -25,6 +27,7 @@ import type { Job } from 'bullmq';
 import { MailerService } from '../mailer/mailer.service';
 import { renderEmailVerification } from '../mailer/templates/email-verification';
 import { renderPasswordReset } from '../mailer/templates/password-reset';
+import { renderStaffAccountCreated } from '../mailer/templates/staff-account-created';
 import { signOrderTrackingToken } from '../orders/order-tracking-token';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -76,6 +79,17 @@ export class EmailProcessor extends WorkerHost {
         await this.mailer.send({
           to: payload.email,
           subject: 'Reset your password',
+          html,
+          text,
+        });
+        return;
+      }
+      case JOB_EMAIL_STAFF_ACCOUNT_CREATED: {
+        const payload = EmailStaffAccountCreatedPayloadSchema.parse(job.data);
+        const { html, text } = renderStaffAccountCreated(payload);
+        await this.mailer.send({
+          to: payload.email,
+          subject: 'Your Szef Donald staff account is ready',
           html,
           text,
         });
@@ -147,9 +161,7 @@ export class EmailProcessor extends WorkerHost {
               text: `${greeting},\n\n${payload.body}`,
             });
           } catch (err) {
-            this.logger.warn(
-              `promo email to ${rec.email} failed: ${(err as Error).message}`,
-            );
+            this.logger.warn(`promo email to ${rec.email} failed: ${(err as Error).message}`);
           }
         }
         return;

@@ -1,7 +1,10 @@
 import { z } from 'zod';
+import { EmailSchema, PasswordSchema, PhoneSchema } from './auth';
 
 export const STAFF_ROLE_KEYS = ['owner', 'manager', 'kitchen', 'cashier'] as const;
 export type StaffRoleKey = (typeof STAFF_ROLE_KEYS)[number];
+export const CREATABLE_STAFF_ROLE_KEYS = ['manager', 'kitchen', 'cashier'] as const;
+export type CreatableStaffRoleKey = (typeof CREATABLE_STAFF_ROLE_KEYS)[number];
 
 export const StaffMemberSchema = z.object({
   id: z.string(),
@@ -17,6 +20,16 @@ export const StaffMemberSchema = z.object({
 export type StaffMemberDto = z.infer<typeof StaffMemberSchema>;
 
 export const StaffListSchema = z.array(StaffMemberSchema);
+
+export const CreateStaffAccountSchema = z.object({
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
+  email: EmailSchema,
+  phone: PhoneSchema,
+  password: PasswordSchema,
+  roleKey: z.enum(CREATABLE_STAFF_ROLE_KEYS),
+});
+export type CreateStaffAccountDto = z.infer<typeof CreateStaffAccountSchema>;
 
 export const InviteStaffSchema = z.object({
   email: z.string().email(),

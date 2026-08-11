@@ -1,1 +1,1 @@
-export { InviteStaffModal } from './invite-staff-modal';
+export { CreateStaffAccountModal } from './create-staff-account-modal';

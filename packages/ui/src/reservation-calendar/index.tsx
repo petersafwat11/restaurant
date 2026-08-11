@@ -227,8 +227,8 @@ function CalendarHeader({
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-      <h3 className="text-h2 font-semibold tabular-nums text-fg">{label}</h3>
-      <div className="w-[120px]" aria-hidden />
+      <h3 className="text-[15px] sm:text-h2 font-semibold tabular-nums text-fg text-center sm:text-left">{label}</h3>
+      <div className="hidden sm:block sm:w-[120px]" aria-hidden />
     </div>
   );
 }

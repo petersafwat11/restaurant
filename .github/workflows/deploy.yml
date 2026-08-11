@@ -168,6 +168,7 @@ jobs:
             "/icons/admin-192.png"
             "/icons/admin-512.png"
             "/icons/admin-maskable-512.png"
+            "/icons/admin-notification-badge.png"
           )
           for path in "${pwa_paths[@]}"; do
             curl -fsS "https://admin.$DOMAIN$path" -o /dev/null

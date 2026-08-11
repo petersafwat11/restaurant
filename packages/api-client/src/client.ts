@@ -94,6 +94,8 @@ import {
   CreateReservationSchema,
   type CreateReviewDto,
   CreateReviewSchema,
+  type CreateStaffAccountDto,
+  CreateStaffAccountSchema,
   type CreateTableDto,
   CreateTableSchema,
   type CustomerDetailDto,
@@ -173,10 +175,6 @@ import {
   NotificationListSchema,
   type NotificationPreferenceDto,
   NotificationPreferenceSchema,
-  type WebPushSubscriptionInputDto,
-  WebPushSubscriptionInputSchema,
-  WebPushSubscriptionResultSchema,
-  WebPushUnsubscribeSchema,
   type OperatingHoursDto,
   OperatingHoursListSchema,
   type OrderDto,
@@ -331,6 +329,10 @@ import {
   VerifyEmailSchema,
   type VerifyOtpDto,
   VerifyOtpSchema,
+  type WebPushSubscriptionInputDto,
+  WebPushSubscriptionInputSchema,
+  WebPushSubscriptionResultSchema,
+  WebPushUnsubscribeSchema,
 } from '@repo/types';
 import { z } from 'zod';
 import { ApiError } from './errors';
@@ -1593,6 +1595,12 @@ export function createApiClient(opts: ApiClientOptions) {
           ? (StaffListQuerySchema.parse(q) as Record<string, string | number | boolean | undefined>)
           : undefined,
         responseSchema: StaffListSchema,
+      }),
+    create: (input: CreateStaffAccountDto): Promise<StaffMemberDto> =>
+      request('/admin/staff', {
+        method: 'POST',
+        body: CreateStaffAccountSchema.parse(input),
+        responseSchema: StaffMemberSchema,
       }),
     invite: (input: InviteStaffDto): Promise<{ token: string; expiresAt: string }> =>
       request('/admin/staff/invite', {

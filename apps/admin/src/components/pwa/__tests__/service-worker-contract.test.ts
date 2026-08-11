@@ -17,7 +17,7 @@ describe('admin service-worker cache contract', () => {
   it('provides localized offline fallbacks and versioned cache cleanup', () => {
     expect(source).toContain("const OFFLINE_URLS = ['/offline', '/en/offline']");
     expect(source).toContain("const CACHE_PREFIX = 'szef-donald-admin-pwa-'");
-    expect(source).toContain('const CACHE_NAME = `${CACHE_PREFIX}v2`');
+    expect(source).toContain('const CACHE_NAME = `${CACHE_PREFIX}v3`');
     expect(source).toContain('key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME');
     expect(source).toContain('.then(() => self.skipWaiting())');
   });
@@ -25,6 +25,7 @@ describe('admin service-worker cache contract', () => {
   it('displays every received Web Push and opens only same-origin order links', () => {
     expect(source).toContain("self.addEventListener('push'");
     expect(source).toContain('self.registration.showNotification');
+    expect(source).toContain("badge: payload.badge ?? '/icons/admin-notification-badge.png'");
     expect(source).toContain("self.addEventListener('notificationclick'");
     expect(source).not.toContain('openWindows.length > 0');
     expect(source).toContain('requestedUrl.origin === self.location.origin');

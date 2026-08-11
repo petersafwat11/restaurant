@@ -6,7 +6,7 @@
  */
 
 const CACHE_PREFIX = 'szef-donald-admin-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
 const OFFLINE_URLS = ['/offline', '/en/offline'];
 const PUBLIC_ASSETS = [
   '/manifest.webmanifest',
@@ -14,6 +14,7 @@ const PUBLIC_ASSETS = [
   '/icons/admin-512.png',
   '/icons/admin-maskable-512.png',
   '/icons/admin-apple-touch.png',
+  '/icons/admin-notification-badge.png',
 ];
 
 async function cacheOfflinePage(cache, url) {
@@ -23,8 +24,10 @@ async function cacheOfflinePage(cache, url) {
   await cache.put(url, response.clone());
 
   const html = await response.text();
-  const assetPaths = Array.from(html.matchAll(/(?:src|href)="([^"]+)"/g), (match) => match[1])
-    .filter((path) => path.startsWith('/_next/static/'));
+  const assetPaths = Array.from(
+    html.matchAll(/(?:src|href)="([^"]+)"/g),
+    (match) => match[1],
+  ).filter((path) => path.startsWith('/_next/static/'));
 
   await Promise.allSettled(
     [...new Set(assetPaths)].map((path) => cache.add(new Request(path, { cache: 'reload' }))),
@@ -33,10 +36,13 @@ async function cacheOfflinePage(cache, url) {
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      await cache.addAll(PUBLIC_ASSETS);
-      await Promise.all(OFFLINE_URLS.map((url) => cacheOfflinePage(cache, url)));
-    }).then(() => self.skipWaiting()),
+    caches
+      .open(CACHE_NAME)
+      .then(async (cache) => {
+        await cache.addAll(PUBLIC_ASSETS);
+        await Promise.all(OFFLINE_URLS.map((url) => cacheOfflinePage(cache, url)));
+      })
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -72,7 +78,7 @@ self.addEventListener('push', (event) => {
       await self.registration.showNotification(payload.title ?? 'New order', {
         body: payload.body ?? 'Open the admin dashboard to review it.',
         icon: payload.icon ?? '/icons/admin-192.png',
-        badge: payload.badge ?? '/icons/admin-192.png',
+        badge: payload.badge ?? '/icons/admin-notification-badge.png',
         tag: payload.tag ?? 'new-order',
         renotify: true,
         data: { url: payload.url ?? '/' },

@@ -1,6 +1,7 @@
 {
   "title": "Staff",
   "invite": "Invite",
+  "createAccount": "Create account",
   "empty": "No staff members yet.",
   "error": "Couldn't load staff. Check your connection and try again.",
   "columns": {
@@ -64,5 +65,20 @@
     "email": "Email",
     "emailPlaceholder": "person@example.com",
     "role": "Role"
+  },
+  "createModal": {
+    "title": "Create staff account",
+    "description": "Set the staff member's details and access. Their account is ready immediately.",
+    "create": "Create account",
+    "creating": "Creating…",
+    "cancel": "Cancel",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Temporary password",
+    "passwordHelper": "Use at least 8 characters with uppercase, lowercase, and a number.",
+    "role": "Role",
+    "emailNotice": "We’ll email the login link, never the password."
   }
 }

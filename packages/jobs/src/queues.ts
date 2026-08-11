@@ -32,6 +32,7 @@ export const JOB_EMAIL_CONTACT = 'email.contact';
 export const JOB_EMAIL_CONTACT_REPLY = 'email.contact-reply';
 export const JOB_EMAIL_PROMO = 'email.promo';
 export const JOB_EMAIL_NEWSLETTER_CONFIRM = 'email.newsletter-confirm';
+export const JOB_EMAIL_STAFF_ACCOUNT_CREATED = 'email.staff-account-created';
 export const JOB_SMS_OTP = 'sms.otp';
 export const JOB_SMS_ORDER_STATUS = 'sms.order-status';
 export const JOB_RECEIPT_GENERATE = 'receipt.generate';

@@ -98,5 +98,18 @@
   },
   "toasts": {
     "saved": "Settings saved"
+  },
+  "actions": {
+    "save": "Save changes",
+    "saving": "Saving…",
+    "discard": "Discard"
+  },
+  "errors": {
+    "taxRate": "Tax rate must be between 0% and 100%",
+    "deliveryFee": "Delivery fee must be a valid non-negative amount",
+    "minOrder": "Minimum order must be a valid non-negative amount",
+    "radius": "Delivery radius must be between 0.1 and 100 km",
+    "slotLength": "Slot length must be between 15 and 360 minutes",
+    "buffer": "Buffer time must be between 0 and 120 minutes"
   }
 }

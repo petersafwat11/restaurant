@@ -1,0 +1,65 @@
+name: reset-launch-data
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type DELETE_ALL_OPERATIONAL_DATA"
+        required: true
+      owner_first_name:
+        description: "Owner first name"
+        required: true
+      owner_last_name:
+        description: "Owner last name"
+        required: true
+      owner_email:
+        description: "Owner email"
+        required: true
+      owner_phone:
+        description: "Owner phone"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reset-launch-data-prod
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    if: ${{ inputs.confirmation == 'DELETE_ALL_OPERATIONAL_DATA' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Back up and reset operational data
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          LAUNCH_RESET_CONFIRM: ${{ inputs.confirmation }}
+          OWNER_FIRST_NAME: ${{ inputs.owner_first_name }}
+          OWNER_LAST_NAME: ${{ inputs.owner_last_name }}
+          OWNER_EMAIL: ${{ inputs.owner_email }}
+          OWNER_PHONE: ${{ inputs.owner_phone }}
+          OWNER_PASSWORD: ${{ secrets.OWNER_BOOTSTRAP_PASSWORD }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: LAUNCH_RESET_CONFIRM,OWNER_FIRST_NAME,OWNER_LAST_NAME,OWNER_EMAIL,OWNER_PHONE,OWNER_PASSWORD
+          script: |
+            set -euo pipefail
+            cd /opt/restaurant
+            test -n "$OWNER_PASSWORD"
+            ./scripts/backup-db.sh
+            docker compose exec -T \
+              -e LAUNCH_RESET_CONFIRM="$LAUNCH_RESET_CONFIRM" \
+              -e OWNER_FIRST_NAME="$OWNER_FIRST_NAME" \
+              -e OWNER_LAST_NAME="$OWNER_LAST_NAME" \
+              -e OWNER_EMAIL="$OWNER_EMAIL" \
+              -e OWNER_PHONE="$OWNER_PHONE" \
+              -e OWNER_PASSWORD="$OWNER_PASSWORD" \
+              api /app/apps/api/node_modules/.bin/tsx /app/packages/db/reset-launch-data.ts --execute
+            docker compose exec -T redis redis-cli FLUSHDB >/dev/null
+            docker compose restart api
+            echo "Launch reset complete; backup retained under /opt/restaurant/backups"

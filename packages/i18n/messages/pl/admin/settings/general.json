@@ -98,5 +98,18 @@
   },
   "toasts": {
     "saved": "Zapisano ustawienia"
+  },
+  "actions": {
+    "save": "Zapisz zmiany",
+    "saving": "Zapisywanie…",
+    "discard": "Odrzuć"
+  },
+  "errors": {
+    "taxRate": "Stawka podatku musi wynosić od 0% do 100%",
+    "deliveryFee": "Opłata za dostawę musi być prawidłową kwotą nieujemną",
+    "minOrder": "Minimalna kwota zamówienia musi być prawidłową kwotą nieujemną",
+    "radius": "Promień dostawy musi wynosić od 0,1 do 100 km",
+    "slotLength": "Długość slotu musi wynosić od 15 do 360 minut",
+    "buffer": "Czas buforowy musi wynosić od 0 do 120 minut"
   }
 }

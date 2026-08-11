@@ -712,6 +712,7 @@ export type I18nTranslations = {
         "staff": {
             "title": string;
             "invite": string;
+            "createAccount": string;
             "empty": string;
             "error": string;
             "columns": {
@@ -775,6 +776,21 @@ export type I18nTranslations = {
                 "email": string;
                 "emailPlaceholder": string;
                 "role": string;
+            };
+            "createModal": {
+                "title": string;
+                "description": string;
+                "create": string;
+                "creating": string;
+                "cancel": string;
+                "firstName": string;
+                "lastName": string;
+                "email": string;
+                "phone": string;
+                "password": string;
+                "passwordHelper": string;
+                "role": string;
+                "emailNotice": string;
             };
         };
         "auth": {
@@ -1521,6 +1537,19 @@ export type I18nTranslations = {
                 };
                 "toasts": {
                     "saved": string;
+                };
+                "actions": {
+                    "save": string;
+                    "saving": string;
+                    "discard": string;
+                };
+                "errors": {
+                    "taxRate": string;
+                    "deliveryFee": string;
+                    "minOrder": string;
+                    "radius": string;
+                    "slotLength": string;
+                    "buffer": string;
                 };
             };
             "holidays": {

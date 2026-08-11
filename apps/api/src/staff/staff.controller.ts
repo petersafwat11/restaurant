@@ -2,12 +2,14 @@ import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common
 import { ApiTags } from '@nestjs/swagger';
 import {
   AcceptStaffInviteSchema,
+  CreateStaffAccountSchema,
   InviteStaffSchema,
   StaffListQuerySchema,
   UpdateStaffRoleSchema,
 } from '@repo/types';
 import type {
   AcceptStaffInviteDto,
+  CreateStaffAccountDto,
   InviteStaffDto,
   StaffListQuery,
   UpdateStaffRoleDto,
@@ -28,6 +30,16 @@ export class StaffController {
   @Get('admin/staff')
   list(@Query(new ZodValidationPipe(StaffListQuerySchema)) q: StaffListQuery) {
     return this.staff.list(q);
+  }
+
+  @Permissions('staff:write')
+  @Post('admin/staff')
+  @AuditAction('staff:create', 'staff')
+  create(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodValidationPipe(CreateStaffAccountSchema)) dto: CreateStaffAccountDto,
+  ) {
+    return this.staff.create({ userId: user.id, roleKeys: user.roles }, dto);
   }
 
   @Permissions('staff:write')

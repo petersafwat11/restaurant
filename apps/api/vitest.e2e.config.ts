@@ -21,10 +21,14 @@ export default defineConfig({
 	],
 	test: {
 		environment: "node",
+		env: { NODE_ENV: "test" },
 		include: ["test/**/*.e2e-spec.ts"],
 		globals: false,
 		testTimeout: 30_000,
 		hookTimeout: 30_000,
+		// E2E files share one database and reset it between tests. Running files
+		// concurrently makes one suite delete another suite's fixtures.
+		fileParallelism: false,
 		pool: "forks",
 		poolOptions: { forks: { singleFork: true } },
 	},

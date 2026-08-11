@@ -4,6 +4,7 @@ import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import type { ApiError } from '@repo/api-client';
 import type {
+  CreateStaffAccountDto,
   InviteStaffDto,
   StaffListQuery,
   StaffMemberDto,
@@ -20,6 +21,18 @@ export function useStaff(q?: StaffListQuery) {
   return useQuery<StaffMemberDto[]>({
     queryKey: staffKeys.list(q),
     queryFn: () => getApiClient().staff.list(q),
+  });
+}
+
+export function useCreateStaffAccount() {
+  const qc = useQueryClient();
+  return useMutation<StaffMemberDto, ApiError, CreateStaffAccountDto>({
+    mutationFn: (input) => getApiClient().staff.create(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: staffKeys.all });
+      notify('success', 'Staff account created');
+    },
+    onError: (err) => notify('error', err.message),
   });
 }
 

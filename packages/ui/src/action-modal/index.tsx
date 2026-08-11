@@ -62,8 +62,8 @@ export function ActionModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn(width && 'max-w-none')}
-        style={width ? { width } : undefined}
+        className={cn(width && 'sm:max-w-none', 'max-w-[calc(100vw-2rem)]')}
+        style={width ? { width: `min(${width}px, calc(100vw - 2rem))` } : undefined}
       >
         <DialogHeader>
           <DialogTitle

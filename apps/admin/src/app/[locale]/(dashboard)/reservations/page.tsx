@@ -109,7 +109,7 @@ export default function AdminReservationsPage() {
             {t('inViewCount', { count: list.data?.items.length ?? 0 })}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex overflow-hidden rounded-button border border-border/[var(--border-strong-alpha)]">
             <ViewTab
               id="day"
@@ -165,7 +165,7 @@ export default function AdminReservationsPage() {
 
       {/* Adaptive height: viewport-relative on smaller screens, fixed on desktop
           (the calendar grid is tuned for a ~640px canvas). */}
-      <div className="h-[70vh] min-h-[460px] rounded-card border border-border/[var(--border-alpha)] bg-surface lg:h-[640px]">
+      <div className="h-[70vh] min-h-[460px] rounded-card border border-border/[var(--border-alpha)] bg-surface lg:h-[640px] overflow-hidden">
         {list.isLoading || tables.isLoading ? (
           <div className="flex h-full items-center justify-center">
             <Spinner size="xl" />
