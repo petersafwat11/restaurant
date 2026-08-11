@@ -128,7 +128,9 @@ export default function AdminOrderDetailPage() {
             <ArrowLeft className="h-4 w-4" /> {t('back')}
           </Link>
           <span className="text-fg-subtle">/</span>
-          <h1 className="font-mono text-xl sm:text-h1 tracking-wide text-fg whitespace-nowrap">{order.orderNumber}</h1>
+          <h1 className="font-mono text-xl sm:text-h1 tracking-wide text-fg whitespace-nowrap">
+            {order.orderNumber}
+          </h1>
           <TypeBadge
             label={tTypes(order.type as 'DELIVERY' | 'PICKUP' | 'DINE_IN').toUpperCase()}
           />
