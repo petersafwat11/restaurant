@@ -53,7 +53,10 @@ describe('useWebPush', () => {
     registerAdminServiceWorker.mockResolvedValue(registration);
     Object.defineProperty(navigator, 'serviceWorker', {
       configurable: true,
-      value: { getRegistration: vi.fn().mockResolvedValue(null) },
+      value: {
+        getRegistration: vi.fn().mockResolvedValue(null),
+        ready: Promise.resolve(registration),
+      },
     });
 
     const { result } = renderHook(() => useWebPush());
@@ -74,5 +77,38 @@ describe('useWebPush', () => {
       userAgent: navigator.userAgent,
     });
     expect(result.current.state).toBe('enabled');
+  });
+
+  it('reconciles an existing browser subscription with the API on refresh', async () => {
+    const subscription = {
+      endpoint: 'https://push.example.test/device-existing',
+      toJSON: () => ({
+        endpoint: 'https://push.example.test/device-existing',
+        expirationTime: null,
+        keys: { p256dh: 'existing-p256dh', auth: 'existing-auth' },
+      }),
+      unsubscribe: vi.fn().mockResolvedValue(true),
+    };
+    const registration = {
+      active: {} as ServiceWorker,
+      pushManager: { getSubscription: vi.fn().mockResolvedValue(subscription) },
+    } as unknown as ServiceWorkerRegistration;
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        getRegistration: vi.fn().mockResolvedValue(registration),
+        ready: Promise.resolve(registration),
+      },
+    });
+
+    const { result } = renderHook(() => useWebPush());
+
+    await waitFor(() => expect(result.current.state).toBe('enabled'));
+    expect(subscribeWebPush).toHaveBeenCalledWith({
+      endpoint: subscription.endpoint,
+      expirationTime: null,
+      keys: { p256dh: 'existing-p256dh', auth: 'existing-auth' },
+      userAgent: navigator.userAgent,
+    });
   });
 });
