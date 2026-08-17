@@ -35,7 +35,7 @@ const config: NextConfig = {
 			},
 		];
 	},
-	// Don't advertise the framework (plan §I3). Caddy also strips this at the
+	// Don't advertise the framework (plan ??I3). Caddy also strips this at the
 	// edge; disabling at the source is defense-in-depth.
 	poweredByHeader: false,
 	// Trace workspace files from the repo root so the standalone build pulls
@@ -74,7 +74,7 @@ const config: NextConfig = {
 				stream: false,
 				tls: false,
 				net: false,
-				child_process: false,
+				// node fallbacks
 				async_hooks: false,
 			};
 		}
@@ -85,3 +85,4 @@ const config: NextConfig = {
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 export default withNextIntl(config);
+
