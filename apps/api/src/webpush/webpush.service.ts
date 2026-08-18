@@ -46,7 +46,10 @@ export class WebPushService {
     };
 
     try {
-      await webpush.sendNotification(subscription, JSON.stringify(notification));
+      await webpush.sendNotification(subscription, JSON.stringify(notification), {
+        urgency: 'high',
+        TTL: 60 * 60 * 24,
+      });
       return 'sent';
     } catch (error) {
       const statusCode = (error as { statusCode?: number }).statusCode;

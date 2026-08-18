@@ -1,6 +1,7 @@
 'use client';
 
 import { OrderAlarmBanner } from '@/components/orders/order-alarm-banner';
+import { PushPermissionPrompt } from '@/components/pwa/push-permission-prompt';
 import { PageHeaderProvider, usePageHeaderConfig } from '@/components/shell/page-title-context';
 import { Sidebar } from '@/components/shell/sidebar';
 import { Topbar } from '@/components/shell/topbar';
@@ -55,6 +56,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           rightExtras={cfg.rightExtras}
           onMenuClick={() => setMobileNavOpen(true)}
         />
+        <PushPermissionPrompt />
         <OrderAlarmBanner />
         <main className="mx-auto w-full max-w-page-max flex-1 px-4 py-6 sm:px-6">{children}</main>
       </div>

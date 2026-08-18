@@ -64,15 +64,31 @@ export function useWebPush() {
 
     try {
       const registration = await navigator.serviceWorker.getRegistration('/');
-      const subscription = await registration?.pushManager.getSubscription();
+      if (!registration) {
+        setState('idle');
+        return;
+      }
+
+      const activeRegistration = registration.active
+        ? registration
+        : await navigator.serviceWorker.ready;
+      let subscription = await activeRegistration.pushManager.getSubscription();
+
+      // If notification permission was already granted on this device, auto-subscribe and sync
+      if (!subscription && Notification.permission === 'granted') {
+        subscription = await activeRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+        });
+      }
+
       if (!subscription) {
         setState('idle');
         return;
       }
 
-      // Reconcile the browser with the API on every settings visit. This
-      // repairs server-side subscription loss without asking staff to toggle
-      // alerts off and on again.
+      // Reconcile the browser with the API on every mount. This repairs server-side
+      // subscription loss without asking staff to toggle alerts off and on again.
       await persistWebPushSubscription(subscription);
       setState('enabled');
     } catch {

@@ -96,7 +96,19 @@ export class StaffOrderAlertService {
             removeOnComplete: 500,
             removeOnFail: 1_000,
           }),
-          // 2. 5-minute delayed reminder if order remains pending
+          // 2. 2-minute delayed reminder if order remains pending
+          this.webPushQueue.add(
+            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
+            { ...basePayload, minutesPending: 2 },
+            {
+              jobId: `${event.orderId}-reminder-2m-${subscriptionId}`,
+              delay: 2 * 60_000,
+              attempts: 2,
+              removeOnComplete: 500,
+              removeOnFail: 1_000,
+            },
+          ),
+          // 3. 5-minute delayed reminder if order remains pending
           this.webPushQueue.add(
             JOB_WEBPUSH_PENDING_ORDER_REMINDER,
             { ...basePayload, minutesPending: 5 },
@@ -108,7 +120,7 @@ export class StaffOrderAlertService {
               removeOnFail: 1_000,
             },
           ),
-          // 3. 10-minute delayed reminder if order remains pending
+          // 4. 10-minute delayed reminder if order remains pending
           this.webPushQueue.add(
             JOB_WEBPUSH_PENDING_ORDER_REMINDER,
             { ...basePayload, minutesPending: 10 },
