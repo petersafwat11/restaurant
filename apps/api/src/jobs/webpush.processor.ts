@@ -103,7 +103,7 @@ export class WebPushProcessor extends WorkerHost {
         title,
         body,
         url,
-        tag: `order-${payload.orderId}`,
+        tag: isReminder ? `order-${payload.orderId}-rem-${minutesPending}` : `order-${payload.orderId}`,
         icon: '/icons/admin-192.png',
         badge: '/icons/admin-notification-badge.png',
       },
