@@ -253,10 +253,20 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
     return () => clearInterval(timer);
   }, []);
 
-  // Compute active ringing orders: pending orders whose ID is NOT in snoozedOrders
+  // Filter pending orders to only include active orders placed within the last 4 hours
+  // to avoid ringing alarms for old abandoned/unpaid historical orders
+  const activePendingOrders = useMemo(() => {
+    const cutoff = now - 4 * 60 * 60 * 1000;
+    return pendingOrders.filter((order) => {
+      const createdTime = new Date(order.createdAt).getTime();
+      return Number.isFinite(createdTime) && createdTime >= cutoff;
+    });
+  }, [pendingOrders, now]);
+
+  // Compute active ringing orders: recent pending orders whose ID is NOT in snoozedOrders
   const activeRingingOrders = useMemo(() => {
-    return pendingOrders.filter((order) => !snoozedOrders[order.id]);
-  }, [pendingOrders, snoozedOrders]);
+    return activePendingOrders.filter((order) => !snoozedOrders[order.id]);
+  }, [activePendingOrders, snoozedOrders]);
 
   const shouldRing = activeRingingOrders.length > 0 && !isMuted;
 
@@ -390,7 +400,7 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
 
   const value = useMemo<OrderAlarmContextValue>(
     () => ({
-      pendingOrders,
+      pendingOrders: activePendingOrders,
       activeRingingOrders,
       snoozedOrders,
       isMuted,
@@ -403,7 +413,7 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
       unlockAudio,
     }),
     [
-      pendingOrders,
+      activePendingOrders,
       activeRingingOrders,
       snoozedOrders,
       isMuted,

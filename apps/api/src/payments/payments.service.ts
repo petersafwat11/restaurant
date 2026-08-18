@@ -600,6 +600,18 @@ export class PaymentsService {
             `[RECONCILE] payment ${payment.id} → FAILED ` +
               `(eservice: ${status}, finalAfterExpiry: ${expired})`,
           );
+          if (payment.order.status === 'PENDING') {
+            try {
+              await this.orders.forceTransition(
+                payment.order.id,
+                'CANCELLED',
+                null,
+                'Online payment expired or failed',
+              );
+            } catch (err) {
+              this.logger.warn(`Could not cancel unpaid order ${payment.order.id}: ${(err as Error).message}`);
+            }
+          }
         }
       } else if (action === 'attention') {
         attention += 1;
