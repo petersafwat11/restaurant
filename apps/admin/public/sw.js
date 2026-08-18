@@ -6,7 +6,7 @@
  */
 
 const CACHE_PREFIX = 'szef-donald-admin-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v3`;
+const CACHE_NAME = `${CACHE_PREFIX}v4`;
 const OFFLINE_URLS = ['/offline', '/en/offline'];
 const PUBLIC_ASSETS = [
   '/manifest.webmanifest',
@@ -15,6 +15,7 @@ const PUBLIC_ASSETS = [
   '/icons/admin-maskable-512.png',
   '/icons/admin-apple-touch.png',
   '/icons/admin-notification-badge.png',
+  '/sounds/order-alarm.wav',
 ];
 
 async function cacheOfflinePage(cache, url) {
@@ -80,6 +81,7 @@ self.addEventListener('push', (event) => {
           body: payload.body ?? 'Open the admin dashboard to review it.',
           icon: payload.icon ?? '/icons/admin-192.png',
           badge: payload.badge ?? '/icons/admin-notification-badge.png',
+          sound: '/sounds/order-alarm.wav',
           tag: payload.tag ?? 'new-order',
           renotify: true,
           requireInteraction: true,
@@ -95,11 +97,15 @@ self.addEventListener('push', (event) => {
             body: payload.body ?? 'Open the admin dashboard to review it.',
             icon: payload.icon ?? '/icons/admin-192.png',
             tag: payload.tag ?? 'new-order',
+            renotify: true,
+            silent: false,
+            vibrate: [500, 200, 500, 200, 500, 200, 1000],
             data: { url: payload.url ?? '/' },
           });
         } catch {
           await self.registration.showNotification(payload.title ?? 'New order', {
             body: payload.body ?? 'Open the admin dashboard to review it.',
+            silent: false,
           });
         }
       }
