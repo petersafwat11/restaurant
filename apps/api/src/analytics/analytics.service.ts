@@ -70,8 +70,18 @@ export class AnalyticsService {
 
     const newCustomerDeltaPercent =
       prevNewCustomers === 0
-        ? 0
+        ? newCustomerCount > 0
+          ? 100
+          : 0
         : round2(((newCustomerCount - prevNewCustomers) / prevNewCustomers) * 100);
+
+    const completionRateDelta = round2(cur.completionRate - prev.completionRate);
+    const completionRateDeltaPercent =
+      prev.completionRate === 0
+        ? cur.completionRate > 0
+          ? 100
+          : 0
+        : round2(((cur.completionRate - prev.completionRate) / prev.completionRate) * 100);
 
     const result: AnalyticsOverviewDto = {
       revenue: moneyDelta(cur.revenue, prev.revenue),
@@ -79,7 +89,8 @@ export class AnalyticsService {
       aov: moneyDelta(cur.aov, prev.aov),
       completionRate: {
         value: cur.completionRate,
-        delta: round2(cur.completionRate - prev.completionRate),
+        delta: completionRateDelta,
+        deltaPercent: completionRateDeltaPercent,
       },
       newCustomers: {
         value: newCustomerCount,
@@ -106,13 +117,22 @@ export class AnalyticsService {
     const orders = await this.prisma.order.findMany({
       where: {
         createdAt: { gte: range.from, lt: range.to },
-        status: { in: COMPLETED_STATUSES },
       },
       select: {
         createdAt: true,
         grandTotal: true,
+        status: true,
       },
     });
+
+    const firstOrders = await this.prisma.$queryRaw<{ first_at: Date }[]>`
+      SELECT MIN("createdAt") AS first_at
+      FROM "Order"
+      WHERE "userId" IS NOT NULL
+      GROUP BY "userId"
+      HAVING MIN("createdAt") >= ${range.from} AND MIN("createdAt") < ${range.to}
+    `;
+    const newCustomerTimes = firstOrders.map((f) => new Date(f.first_at).getTime());
 
     const stepMs =
       granularity === 'hour'
@@ -121,9 +141,23 @@ export class AnalyticsService {
           ? 7 * 24 * 60 * 60_000
           : 24 * 60 * 60_000;
 
-    const buckets: { time: number; revenue: Prisma.Decimal; orders: number }[] = [];
+    const buckets: {
+      time: number;
+      revenue: Prisma.Decimal;
+      orders: number;
+      completedOrders: number;
+      cancelledOrders: number;
+      newCustomers: number;
+    }[] = [];
     for (let time = range.from.getTime(); time < range.to.getTime(); time += stepMs) {
-      buckets.push({ time, revenue: new Prisma.Decimal(0), orders: 0 });
+      buckets.push({
+        time,
+        revenue: new Prisma.Decimal(0),
+        orders: 0,
+        completedOrders: 0,
+        cancelledOrders: 0,
+        newCustomers: 0,
+      });
     }
 
     if (buckets.length > 0) {
@@ -134,16 +168,37 @@ export class AnalyticsService {
           buckets.length - 1,
           Math.max(0, Math.floor((orderTime - range.from.getTime()) / stepMs)),
         );
-        buckets[bucketIndex].revenue = buckets[bucketIndex].revenue.add(order.grandTotal);
-        buckets[bucketIndex].orders += 1;
+        const isCompleted = COMPLETED_STATUSES.includes(order.status);
+        if (isCompleted) {
+          buckets[bucketIndex].revenue = buckets[bucketIndex].revenue.add(order.grandTotal);
+          buckets[bucketIndex].completedOrders += 1;
+          buckets[bucketIndex].orders += 1;
+        } else if (order.status === 'CANCELLED') {
+          buckets[bucketIndex].cancelledOrders += 1;
+        }
+      }
+
+      for (const firstTime of newCustomerTimes) {
+        if (firstTime < range.from.getTime() || firstTime >= range.to.getTime()) continue;
+        const bucketIndex = Math.min(
+          buckets.length - 1,
+          Math.max(0, Math.floor((firstTime - range.from.getTime()) / stepMs)),
+        );
+        buckets[bucketIndex].newCustomers += 1;
       }
     }
 
-    return buckets.map((b) => ({
-      bucket: new Date(b.time).toISOString(),
-      revenue: b.revenue.toFixed(2),
-      orders: b.orders,
-    }));
+    return buckets.map((b) => {
+      const denom = b.completedOrders + b.cancelledOrders;
+      const rate = denom > 0 ? b.completedOrders / denom : 1.0;
+      return {
+        bucket: new Date(b.time).toISOString(),
+        revenue: b.revenue.toFixed(2),
+        orders: b.orders,
+        completionRate: round4(rate),
+        newCustomers: b.newCustomers,
+      };
+    });
   }
 
   async topItems(q: TopItemsQuery): Promise<TopItemDto[]> {

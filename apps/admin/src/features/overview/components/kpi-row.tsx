@@ -35,6 +35,21 @@ export function KpiRow({ period, from, to, currency = 'USD' }: KpiRowProps) {
     [series.data],
   );
   const sparkOrders = React.useMemo(() => (series.data ?? []).map((p) => p.orders), [series.data]);
+  const sparkAov = React.useMemo(
+    () =>
+      (series.data ?? []).map((p) =>
+        p.orders > 0 ? Number(p.revenue) / p.orders : 0,
+      ),
+    [series.data],
+  );
+  const sparkCompletionRate = React.useMemo(
+    () => (series.data ?? []).map((p) => (p.completionRate ?? 1) * 100),
+    [series.data],
+  );
+  const sparkNewCustomers = React.useMemo(
+    () => (series.data ?? []).map((p) => p.newCustomers ?? 0),
+    [series.data],
+  );
 
   if (overview.isLoading || !overview.data) {
     return (
@@ -69,19 +84,23 @@ export function KpiRow({ period, from, to, currency = 'USD' }: KpiRowProps) {
         label={t('aov')}
         value={formatMoney(o.aov.value, currency)}
         deltaPercent={o.aov.deltaPercent}
-        sparkData={sparkRevenue.map((rev, i) => rev / Math.max(1, sparkOrders[i] ?? 1))}
+        sparkData={sparkAov}
         sparkColor="rgb(var(--chart-3))"
       />
       <KpiCard
         label={t('completionRate')}
         value={fmtPct(completionPct, { digits: 1 })}
         valueClassName={completionClass}
-        deltaPercent={o.completionRate.delta * 100}
+        deltaPercent={o.completionRate.deltaPercent ?? o.completionRate.delta * 100}
+        sparkData={sparkCompletionRate}
+        sparkColor="rgb(var(--chart-4))"
       />
       <KpiCard
         label={t('newCustomers')}
         value={fmtInt(o.newCustomers.value)}
-        deltaPercent={o.newCustomers.deltaPercent ?? o.newCustomers.delta}
+        deltaPercent={o.newCustomers.deltaPercent ?? (o.newCustomers.delta > 0 ? 100 : 0)}
+        sparkData={sparkNewCustomers}
+        sparkColor="rgb(var(--chart-5))"
       />
     </div>
   );

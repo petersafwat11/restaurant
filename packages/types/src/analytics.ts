@@ -24,7 +24,11 @@ export const AnalyticsOverviewSchema = z.object({
   revenue: MoneyDeltaSchema,
   orders: NumericDeltaSchema,
   aov: MoneyDeltaSchema,
-  completionRate: z.object({ value: z.number(), delta: z.number() }),
+  completionRate: z.object({
+    value: z.number(),
+    delta: z.number(),
+    deltaPercent: z.number().optional(),
+  }),
   newCustomers: z.object({
     value: z.number(),
     delta: z.number(),
@@ -40,6 +44,7 @@ export const AnalyticsBaseQuerySchema = z.object({
   period: z.enum(ANALYTICS_PERIODS).default('today'),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
+  timezone: z.string().optional(),
 });
 export type AnalyticsBaseQuery = z.infer<typeof AnalyticsBaseQuerySchema>;
 
@@ -52,6 +57,8 @@ export const RevenueTimeseriesPointSchema = z.object({
   bucket: z.string(),
   revenue: MoneyStringSchema,
   orders: z.number().int().min(0),
+  completionRate: z.number().min(0).max(1).optional(),
+  newCustomers: z.number().int().min(0).optional(),
 });
 export type RevenueTimeseriesPointDto = z.infer<typeof RevenueTimeseriesPointSchema>;
 

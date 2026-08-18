@@ -134,7 +134,10 @@ export default function RevenueAreaChart({
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={points} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
+      <AreaChart
+        data={points}
+        margin={{ top: 8, right: showOrders ? 32 : 16, left: 4, bottom: 4 }}
+      >
         <defs>
           <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
             <stop
@@ -148,6 +151,18 @@ export default function RevenueAreaChart({
               stopOpacity={ACCENT_GRADIENT.bottomOpacity}
             />
           </linearGradient>
+          <linearGradient id="ordersGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="0%"
+              stopColor="rgb(var(--chart-2))"
+              stopOpacity={0.25}
+            />
+            <stop
+              offset="100%"
+              stopColor="rgb(var(--chart-2))"
+              stopOpacity={0.0}
+            />
+          </linearGradient>
         </defs>
         <CartesianGrid stroke={CHART_GRID_COLOR} vertical={false} />
         <XAxis
@@ -159,12 +174,25 @@ export default function RevenueAreaChart({
           interval={xInterval}
         />
         <YAxis
+          yAxisId="revenue"
           axisLine={false}
           tickLine={false}
           tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
           tickFormatter={(v: number) => formatAxisMoney(v, currency, locale)}
           width={56}
         />
+        {showOrders && (
+          <YAxis
+            yAxisId="orders"
+            orientation="right"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
+            tickFormatter={(v: number) => fmtInt(v, locale)}
+            allowDecimals={false}
+            width={32}
+          />
+        )}
         <Tooltip
           content={
             <ChartTooltip
@@ -178,6 +206,7 @@ export default function RevenueAreaChart({
           cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeDasharray: '3 3' }}
         />
         <Area
+          yAxisId="revenue"
           type="monotone"
           dataKey="revenue"
           stroke="rgb(var(--chart-1))"
@@ -188,12 +217,14 @@ export default function RevenueAreaChart({
         />
         {showOrders && (
           <Area
+            yAxisId="orders"
             type="monotone"
             dataKey="orders"
             stroke="rgb(var(--chart-2))"
-            strokeWidth={1.5}
-            fill="transparent"
+            strokeWidth={2}
+            fill="url(#ordersGrad)"
             isAnimationActive
+            animationDuration={400}
           />
         )}
       </AreaChart>
