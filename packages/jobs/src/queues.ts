@@ -53,3 +53,4 @@ export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-emai
 // processor re-reads the order and no-ops unless it is still DELIVERED.
 export const JOB_ORDER_AUTO_COMPLETE = 'order.auto-complete';
 export const JOB_WEBPUSH_NEW_ORDER = 'webpush.new-order';
+export const JOB_WEBPUSH_PENDING_ORDER_REMINDER = 'webpush.pending-order-reminder';

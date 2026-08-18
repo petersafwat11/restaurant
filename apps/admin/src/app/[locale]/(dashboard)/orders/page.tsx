@@ -19,9 +19,9 @@ import {
   useAdvanceOrder,
   useExportOrders,
   useLiveAdminOrders,
-  useOrderChime,
   useOrderNotifications,
 } from '@/features/orders/hooks';
+import { useOrderAlarm } from '@/providers/order-alarm-provider';
 import { getApiClient } from '@/lib/api-client';
 import { useDebouncedValue } from '@/lib/use-debounced-value';
 import type { OrderListItemDto, OrderStatus, OrderType, RestaurantPublicDto } from '@repo/types';
@@ -112,7 +112,7 @@ export default function OrdersPage() {
 
   const ordersQuery = useAdminOrders(queryFilters);
   const { newCount, resetNewCount } = useLiveAdminOrders(queryFilters);
-  const { muted, setMuted } = useOrderChime(newCount);
+  const { isMuted: muted, setMuted } = useOrderAlarm();
   useOrderNotifications({ trigger: newCount, restaurantName });
   const advance = useAdvanceOrder();
   const exportOrders = useExportOrders();

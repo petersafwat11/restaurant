@@ -101,6 +101,22 @@ export const WebPushNewOrderPayloadSchema = z.object({
 });
 export type WebPushNewOrderPayload = z.infer<typeof WebPushNewOrderPayloadSchema>;
 
+export const WebPushPendingOrderReminderPayloadSchema = z.object({
+  subscriptionId: z.string(),
+  orderId: z.string(),
+  orderNumber: z.string(),
+  orderType: z.enum(['DELIVERY', 'PICKUP', 'DINE_IN']),
+  itemCount: z.number().int().nonnegative(),
+  currency: z.string(),
+  grandTotal: z.string(),
+  customerName: z.string().nullable(),
+  adminBaseUrl: z.string().url(),
+  minutesPending: z.number().int().positive(),
+});
+export type WebPushPendingOrderReminderPayload = z.infer<
+  typeof WebPushPendingOrderReminderPayloadSchema
+>;
+
 // Sprint 10 — contact-form: notify the restaurant + auto-reply the sender.
 export const EmailContactPayloadSchema = z.object({
   contactMessageId: z.string(),

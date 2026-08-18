@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { JOB_WEBPUSH_NEW_ORDER, QUEUE_WEBPUSH } from '@repo/jobs';
+import { JOB_WEBPUSH_NEW_ORDER, JOB_WEBPUSH_PENDING_ORDER_REMINDER, QUEUE_WEBPUSH } from '@repo/jobs';
 import type { OrderCreatedEvent } from '@repo/types';
 import type { Queue } from 'bullmq';
 import { ENV, type ENV_TYPE } from '../config/config.module';
@@ -74,34 +74,59 @@ export class StaffOrderAlertService {
 
     const subscriptions = staff.flatMap((user) => user.webPushSubscriptions);
     await Promise.all(
-      subscriptions.map(({ id: subscriptionId }) =>
-        this.webPushQueue.add(
-          JOB_WEBPUSH_NEW_ORDER,
-          {
-            subscriptionId,
-            orderId: event.orderId,
-            orderNumber: event.orderNumber,
-            orderType: event.type,
-            itemCount: event.itemCount,
-            currency: event.currency,
-            grandTotal: event.grandTotal,
-            customerName: event.customerName,
-            adminBaseUrl: this.env.APP_URL_ADMIN,
-          },
-          {
+      subscriptions.flatMap(({ id: subscriptionId }) => {
+        const basePayload = {
+          subscriptionId,
+          orderId: event.orderId,
+          orderNumber: event.orderNumber,
+          orderType: event.type,
+          itemCount: event.itemCount,
+          currency: event.currency,
+          grandTotal: event.grandTotal,
+          customerName: event.customerName,
+          adminBaseUrl: this.env.APP_URL_ADMIN,
+        };
+
+        return [
+          // 1. Immediate Web Push alert
+          this.webPushQueue.add(JOB_WEBPUSH_NEW_ORDER, basePayload, {
             jobId: `${event.orderId}-${subscriptionId}`,
             attempts: 3,
             backoff: { type: 'exponential', delay: 2_000 },
             removeOnComplete: 500,
             removeOnFail: 1_000,
-          },
-        ),
-      ),
+          }),
+          // 2. 5-minute delayed reminder if order remains pending
+          this.webPushQueue.add(
+            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
+            { ...basePayload, minutesPending: 5 },
+            {
+              jobId: `${event.orderId}-reminder-5m-${subscriptionId}`,
+              delay: 5 * 60_000,
+              attempts: 2,
+              removeOnComplete: 500,
+              removeOnFail: 1_000,
+            },
+          ),
+          // 3. 10-minute delayed reminder if order remains pending
+          this.webPushQueue.add(
+            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
+            { ...basePayload, minutesPending: 10 },
+            {
+              jobId: `${event.orderId}-reminder-10m-${subscriptionId}`,
+              delay: 10 * 60_000,
+              attempts: 2,
+              removeOnComplete: 500,
+              removeOnFail: 1_000,
+            },
+          ),
+        ];
+      }),
     );
 
     if (subscriptions.length > 0) {
       this.logger.log(
-        `Queued ${subscriptions.length} staff Web Push alert(s) for ${event.orderNumber}`,
+        `Queued ${subscriptions.length} staff Web Push alert(s) and reminders for ${event.orderNumber}`,
       );
     }
   }

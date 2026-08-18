@@ -1,6 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { JOB_WEBPUSH_NEW_ORDER, QUEUE_WEBPUSH, WebPushNewOrderPayloadSchema } from '@repo/jobs';
+import {
+  JOB_WEBPUSH_NEW_ORDER,
+  JOB_WEBPUSH_PENDING_ORDER_REMINDER,
+  QUEUE_WEBPUSH,
+  WebPushNewOrderPayloadSchema,
+  WebPushPendingOrderReminderPayloadSchema,
+} from '@repo/jobs';
 import type { Job } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebPushService } from '../webpush/webpush.service';
@@ -17,12 +23,33 @@ export class WebPushProcessor extends WorkerHost {
   }
 
   override async process(job: Job): Promise<void> {
-    if (job.name !== JOB_WEBPUSH_NEW_ORDER) {
+    if (
+      job.name !== JOB_WEBPUSH_NEW_ORDER &&
+      job.name !== JOB_WEBPUSH_PENDING_ORDER_REMINDER
+    ) {
       this.logger.warn(`Unknown webpush job: ${job.name}`);
       return;
     }
 
-    const payload = WebPushNewOrderPayloadSchema.parse(job.data);
+    const isReminder = job.name === JOB_WEBPUSH_PENDING_ORDER_REMINDER;
+    const payload = isReminder
+      ? WebPushPendingOrderReminderPayloadSchema.parse(job.data)
+      : WebPushNewOrderPayloadSchema.parse(job.data);
+
+    // If it's a reminder, verify that the order is still PENDING before sending!
+    if (isReminder) {
+      const order = await this.prisma.order.findUnique({
+        where: { id: payload.orderId },
+        select: { status: true },
+      });
+      if (!order || order.status !== 'PENDING') {
+        this.logger.debug(
+          `Skipping webpush reminder for order ${payload.orderNumber}: status is ${order?.status ?? 'missing'}`,
+        );
+        return;
+      }
+    }
+
     const subscription = await this.prisma.webPushSubscription.findFirst({
       where: {
         id: payload.subscriptionId,
@@ -51,6 +78,21 @@ export class WebPushProcessor extends WorkerHost {
     const localePrefix = isEnglish ? '/en' : '';
     const url = `${payload.adminBaseUrl.replace(/\/$/, '')}${localePrefix}/orders/${encodeURIComponent(payload.orderId)}`;
 
+    const minutesPending = 'minutesPending' in payload ? payload.minutesPending : 5;
+    const title = isReminder
+      ? isEnglish
+        ? `⚠️ URGENT: Order ${payload.orderNumber} still pending (${minutesPending}m)`
+        : `⚠️ PILNE: Zamówienie ${payload.orderNumber} nadal oczekuje (${minutesPending} min)`
+      : isEnglish
+        ? `New order ${payload.orderNumber}`
+        : `Nowe zamówienie ${payload.orderNumber}`;
+
+    const body = isReminder
+      ? isEnglish
+        ? `${customer} · ${orderType} · ${itemLabel} · Action required on admin dashboard`
+        : `${customer} · ${orderType} · ${itemLabel} · Wymagana reakcja w panelu`
+      : `${customer} · ${orderType} · ${itemLabel} · ${payload.grandTotal} ${payload.currency}`;
+
     const result = await this.webPush.send(
       {
         endpoint: subscription.endpoint,
@@ -58,14 +100,12 @@ export class WebPushProcessor extends WorkerHost {
         auth: subscription.auth,
       },
       {
-        title: isEnglish
-          ? `New order ${payload.orderNumber}`
-          : `Nowe zamówienie ${payload.orderNumber}`,
-        body: `${customer} · ${orderType} · ${itemLabel} · ${payload.grandTotal} ${payload.currency}`,
+        title,
+        body,
         url,
         tag: `order-${payload.orderId}`,
         icon: '/icons/admin-192.png',
-        badge: '/icons/admin-192.png',
+        badge: '/icons/admin-notification-badge.png',
       },
     );
 

@@ -37,6 +37,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // Register customer Web PWA service worker
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}

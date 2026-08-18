@@ -74,7 +74,7 @@ describe('StaffOrderAlertService', () => {
     );
   });
 
-  it('queues one retryable job per eligible device', async () => {
+  it('queues immediate and delayed reminder jobs per eligible device', async () => {
     const findMany = vi.fn().mockResolvedValue([
       {
         id: 'user-1',
@@ -108,11 +108,17 @@ describe('StaffOrderAlertService', () => {
     await service.onOrderCreated(EVENT);
 
     expect(findMany).toHaveBeenCalledOnce();
-    expect(add).toHaveBeenCalledTimes(2);
+    // 2 subscriptions * (1 immediate + 2 delayed reminders) = 6 jobs
+    expect(add).toHaveBeenCalledTimes(6);
     expect(add).toHaveBeenCalledWith(
       'webpush.new-order',
       expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId }),
       expect.objectContaining({ jobId: 'order-1-sub-1', attempts: 3 }),
+    );
+    expect(add).toHaveBeenCalledWith(
+      'webpush.pending-order-reminder',
+      expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId, minutesPending: 5 }),
+      expect.objectContaining({ jobId: 'order-1-reminder-5m-sub-1', delay: 300_000 }),
     );
   });
 

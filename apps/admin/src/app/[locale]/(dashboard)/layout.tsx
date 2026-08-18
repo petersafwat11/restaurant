@@ -1,9 +1,11 @@
 'use client';
 
+import { OrderAlarmBanner } from '@/components/orders/order-alarm-banner';
 import { PageHeaderProvider, usePageHeaderConfig } from '@/components/shell/page-title-context';
 import { Sidebar } from '@/components/shell/sidebar';
 import { Topbar } from '@/components/shell/topbar';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { OrderAlarmProvider } from '@/providers/order-alarm-provider';
 import { useAuthStore } from '@/stores/auth-store';
 import { PageSpinner, Sheet, SheetContent, SheetTitle, TooltipProvider } from '@repo/ui';
 import { useTranslations } from 'next-intl';
@@ -53,6 +55,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           rightExtras={cfg.rightExtras}
           onMenuClick={() => setMobileNavOpen(true)}
         />
+        <OrderAlarmBanner />
         <main className="mx-auto w-full max-w-page-max flex-1 px-4 py-6 sm:px-6">{children}</main>
       </div>
     </div>
@@ -87,7 +90,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <TooltipProvider delayDuration={300}>
       <PageHeaderProvider>
         <AuthGate>
-          <Shell>{children}</Shell>
+          <OrderAlarmProvider>
+            <Shell>{children}</Shell>
+          </OrderAlarmProvider>
         </AuthGate>
       </PageHeaderProvider>
     </TooltipProvider>

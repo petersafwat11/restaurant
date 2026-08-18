@@ -81,7 +81,10 @@ self.addEventListener('push', (event) => {
         badge: payload.badge ?? '/icons/admin-notification-badge.png',
         tag: payload.tag ?? 'new-order',
         renotify: true,
+        requireInteraction: true,
+        vibrate: [300, 100, 300, 100, 300, 100, 600],
         data: { url: payload.url ?? '/' },
+        actions: [{ action: 'open', title: 'Open Order' }],
       });
     })(),
   );

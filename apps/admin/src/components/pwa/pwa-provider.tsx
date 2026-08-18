@@ -113,7 +113,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       });
     };
 
-    if (supported && process.env.NODE_ENV !== 'development') {
+    if (supported) {
       registerAdminServiceWorker()
         .then((nextRegistration) => {
           if (!active || !nextRegistration) return;

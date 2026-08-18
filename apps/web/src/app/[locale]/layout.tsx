@@ -54,6 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       icon: '/icon.png',
       apple: '/apple-icon.png',
     },
+    manifest: '/manifest.webmanifest',
     title: {
       default: baseTitle,
       // `%s` is replaced by per-route titles via Next's title template merge.

@@ -32,6 +32,7 @@ export function useOrderTracking(orderId: string, token?: string | null) {
           qc.setQueryData<OrderDto>(orderQueryKeys.detail(orderId), (prev) =>
             prev ? { ...prev, status: event.to } : prev,
           );
+          playStatusChime();
         });
       } catch {
         // Guest orders + auth-less sessions can't authenticate the socket; the
@@ -49,4 +50,36 @@ export function useOrderTracking(orderId: string, token?: string | null) {
   }, [orderId, qc, token]);
 
   return query;
+}
+
+function playStatusChime(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    // Two pleasant upward tones: C5 (523Hz) -> G5 (784Hz)
+    [
+      { freq: 523.25, time: now },
+      { freq: 783.99, time: now + 0.15 },
+    ].forEach(({ freq, time }) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0.001, time);
+      gain.gain.linearRampToValueAtTime(0.18, time + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(time);
+      osc.stop(time + 0.38);
+    });
+  } catch {
+    // Autoplay or browser restriction — ignore gracefully
+  }
 }
