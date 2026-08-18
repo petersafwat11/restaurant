@@ -2,9 +2,11 @@
 
 import { getRealtimeClient } from '@/lib/realtime-client';
 import type {
+  OrderCancelledEvent,
   OrderCreatedEvent,
   OrderListDto,
   OrderListItemDto,
+  OrderRefundedEvent,
   OrderStatusChangedEvent,
 } from '@repo/types';
 import { ROOMS } from '@repo/types';
@@ -37,6 +39,8 @@ export function useLiveAdminOrders(filters: AdminOrderFilters): LiveAdminOrdersR
     let mounted = true;
     let unsubCreated: (() => void) | undefined;
     let unsubStatus: (() => void) | undefined;
+    let unsubCancelled: (() => void) | undefined;
+    let unsubRefunded: (() => void) | undefined;
 
     (async () => {
       await client.connect();
@@ -57,9 +61,15 @@ export function useLiveAdminOrders(filters: AdminOrderFilters): LiveAdminOrdersR
             customerName: event.customerName,
             createdAt: event.createdAt,
           };
-          return { ...prev, items: [item, ...prev.items] };
+          const nextItems = [item, ...prev.items];
+          return {
+            ...prev,
+            items: filters.limit ? nextItems.slice(0, filters.limit) : nextItems,
+          };
         });
         setNewCount((c) => c + 1);
+        qc.invalidateQueries({ queryKey: ['analytics'] });
+
         // decay one count after 5 minutes
         const t = setTimeout(() => {
           setNewCount((c) => Math.max(0, c - 1));
@@ -78,6 +88,33 @@ export function useLiveAdminOrders(filters: AdminOrderFilters): LiveAdminOrdersR
             ),
           };
         });
+        qc.invalidateQueries({ queryKey: ['analytics'] });
+      });
+
+      unsubCancelled = client.on('order.cancelled', (event: OrderCancelledEvent) => {
+        qc.setQueryData<OrderListDto>(orderQueryKeys.adminList(filters), (prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            items: prev.items.map((it) =>
+              it.id === event.orderId ? { ...it, status: 'CANCELLED' } : it,
+            ),
+          };
+        });
+        qc.invalidateQueries({ queryKey: ['analytics'] });
+      });
+
+      unsubRefunded = client.on('order.refunded', (event: OrderRefundedEvent) => {
+        qc.setQueryData<OrderListDto>(orderQueryKeys.adminList(filters), (prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            items: prev.items.map((it) =>
+              it.id === event.orderId ? { ...it, status: 'REFUNDED' } : it,
+            ),
+          };
+        });
+        qc.invalidateQueries({ queryKey: ['analytics'] });
       });
     })();
 
@@ -85,6 +122,8 @@ export function useLiveAdminOrders(filters: AdminOrderFilters): LiveAdminOrdersR
       mounted = false;
       unsubCreated?.();
       unsubStatus?.();
+      unsubCancelled?.();
+      unsubRefunded?.();
       // biome-ignore lint/complexity/noForEach: Set iteration
       arrivalTimers.current.forEach((t) => clearTimeout(t));
       arrivalTimers.current.clear();

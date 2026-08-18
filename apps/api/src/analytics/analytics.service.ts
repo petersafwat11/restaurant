@@ -68,6 +68,11 @@ export class AnalyticsService {
       },
     });
 
+    const newCustomerDeltaPercent =
+      prevNewCustomers === 0
+        ? 0
+        : round2(((newCustomerCount - prevNewCustomers) / prevNewCustomers) * 100);
+
     const result: AnalyticsOverviewDto = {
       revenue: moneyDelta(cur.revenue, prev.revenue),
       orders: numericDelta(cur.orderCount, prev.orderCount),
@@ -79,6 +84,7 @@ export class AnalyticsService {
       newCustomers: {
         value: newCustomerCount,
         delta: newCustomerCount - prevNewCustomers,
+        deltaPercent: newCustomerDeltaPercent,
       },
       repeatRate: { value: cur.repeatRate },
       avgPrepMinutes: { value: cur.avgPrepMinutes },
@@ -97,17 +103,13 @@ export class AnalyticsService {
     const granularity =
       q.granularity ?? (q.period === 'today' ? 'hour' : q.period === '7d' ? 'day' : 'day');
 
-    // Bucket unit is a hardcoded literal chosen by the validated granularity
-    // (no string interpolation of input → no injection), and bucketing is done
-    // in the restaurant timezone so buckets align with the tz-local window
-    // edges (consistent with salesByHour/salesByDayOfWeek).
     const tz = restaurant.timezone;
     const truncSql =
       granularity === 'hour'
-        ? Prisma.sql`date_trunc('hour', "createdAt" AT TIME ZONE ${tz})`
+        ? Prisma.sql`(date_trunc('hour', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`
         : granularity === 'week'
-          ? Prisma.sql`date_trunc('week', "createdAt" AT TIME ZONE ${tz})`
-          : Prisma.sql`date_trunc('day', "createdAt" AT TIME ZONE ${tz})`;
+          ? Prisma.sql`(date_trunc('week', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`
+          : Prisma.sql`(date_trunc('day', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`;
     const rows = await this.prisma.$queryRaw<
       { bucket: Date; revenue: Prisma.Decimal; orders: bigint }[]
     >`
@@ -121,17 +123,40 @@ export class AnalyticsService {
       GROUP BY 1
       ORDER BY 1 ASC
     `;
-    return rows.map((r) => ({
-      bucket: r.bucket.toISOString(),
-      revenue: r.revenue?.toFixed(2) ?? '0.00',
-      orders: Number(r.orders ?? 0),
-    }));
+
+    const rowMap = new Map<number, { revenue: string; orders: number }>();
+    for (const r of rows) {
+      rowMap.set(new Date(r.bucket).getTime(), {
+        revenue: r.revenue?.toFixed(2) ?? '0.00',
+        orders: Number(r.orders ?? 0),
+      });
+    }
+
+    const points: RevenueTimeseriesPointDto[] = [];
+    const stepMs =
+      granularity === 'hour'
+        ? 60 * 60_000
+        : granularity === 'week'
+          ? 7 * 24 * 60 * 60_000
+          : 24 * 60 * 60_000;
+
+    for (let time = range.from.getTime(); time < range.to.getTime(); time += stepMs) {
+      const existing = rowMap.get(time);
+      points.push({
+        bucket: new Date(time).toISOString(),
+        revenue: existing?.revenue ?? '0.00',
+        orders: existing?.orders ?? 0,
+      });
+    }
+
+    return points;
   }
 
   async topItems(q: TopItemsQuery): Promise<TopItemDto[]> {
     const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
 
+    const sortBy = q.sortBy ?? 'revenue';
     const grouped = await this.prisma.orderItem.groupBy({
       by: ['menuItemId'],
       where: {
@@ -141,7 +166,10 @@ export class AnalyticsService {
         },
       },
       _sum: { quantity: true, lineTotal: true },
-      orderBy: { _sum: { lineTotal: 'desc' } },
+      orderBy:
+        sortBy === 'quantity'
+          ? { _sum: { quantity: 'desc' } }
+          : { _sum: { lineTotal: 'desc' } },
       take: q.limit,
     });
 
@@ -425,7 +453,7 @@ function moneyDelta(curStr: string, prevStr: string) {
   return {
     value: curStr,
     delta: (cur - prev).toFixed(2),
-    deltaPercent: prev === 0 ? 0 : round2((cur - prev) / prev),
+    deltaPercent: prev === 0 ? 0 : round2(((cur - prev) / prev) * 100),
   };
 }
 
@@ -433,7 +461,7 @@ function numericDelta(cur: number, prev: number) {
   return {
     value: cur,
     delta: cur - prev,
-    deltaPercent: prev === 0 ? 0 : round2((cur - prev) / prev),
+    deltaPercent: prev === 0 ? 0 : round2(((cur - prev) / prev) * 100),
   };
 }
 

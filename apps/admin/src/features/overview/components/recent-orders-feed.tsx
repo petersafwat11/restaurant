@@ -1,6 +1,6 @@
 'use client';
 
-import { useAdminOrders } from '@/features/orders/hooks';
+import { useAdminOrders, useLiveAdminOrders } from '@/features/orders/hooks';
 import { Link } from '@/i18n/navigation';
 import { RelativeTime, STATUS_TOKENS, Spinner, StatusPill, TypeBadge, cn } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
@@ -9,14 +9,13 @@ import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 /**
- * Compact feed of the 8 most-recent orders. Phase 2.2 will hook this up to
- * the realtime socket so new orders fade-in at the top; for Overview we read
- * the static snapshot.
+ * Compact feed of the 8 most-recent orders, kept live via realtime WebSocket.
  */
 export function RecentOrdersFeed() {
   const t = useTranslations('admin.dashboard.recentOrders');
   const tType = useTranslations('admin.dashboard.orderType');
   const q = useAdminOrders({ limit: 8 });
+  useLiveAdminOrders({ limit: 8 });
   const rows = q.data?.items ?? [];
 
   return (

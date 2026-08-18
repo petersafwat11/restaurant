@@ -10,6 +10,8 @@ import { KpiCard } from './kpi-card';
 
 interface KpiRowProps {
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
   currency?: string;
 }
 
@@ -18,11 +20,13 @@ interface KpiRowProps {
  * derive from `analytics.revenueTimeseries` so every card's trend reconciles
  * to the same underlying series (README §6 carry-over #2).
  */
-export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
+export function KpiRow({ period, from, to, currency = 'USD' }: KpiRowProps) {
   const t = useTranslations('admin.dashboard.kpi');
-  const overview = useAnalyticsOverview({ period });
+  const overview = useAnalyticsOverview({ period, from, to });
   const series = useRevenueTimeseries({
     period,
+    from,
+    to,
     granularity: period === 'today' ? 'hour' : 'day',
   });
 
@@ -41,9 +45,9 @@ export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
   }
 
   const o = overview.data;
-  const completionRate = o.completionRate.value;
+  const completionPct = o.completionRate.value * 100;
   const completionClass =
-    completionRate >= 95 ? 'text-positive' : completionRate < 90 ? 'text-negative' : 'text-fg';
+    completionPct >= 95 ? 'text-positive' : completionPct < 90 ? 'text-negative' : 'text-fg';
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
@@ -70,18 +74,14 @@ export function KpiRow({ period, currency = 'USD' }: KpiRowProps) {
       />
       <KpiCard
         label={t('completionRate')}
-        value={fmtPct(completionRate, { digits: 1 })}
+        value={fmtPct(completionPct, { digits: 1 })}
         valueClassName={completionClass}
-        deltaPercent={o.completionRate.delta}
-        sparkData={sparkRevenue.slice(0, Math.floor(sparkRevenue.length / 2))}
-        sparkColor="rgb(var(--chart-4))"
+        deltaPercent={o.completionRate.delta * 100}
       />
       <KpiCard
         label={t('newCustomers')}
         value={fmtInt(o.newCustomers.value)}
-        deltaPercent={o.newCustomers.delta}
-        sparkData={sparkOrders}
-        sparkColor="rgb(var(--chart-5))"
+        deltaPercent={o.newCustomers.deltaPercent ?? o.newCustomers.delta}
       />
     </div>
   );

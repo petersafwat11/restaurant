@@ -21,6 +21,19 @@ afterEach(() => resetTestState());
 describe('DashboardPage (Overview)', () => {
   it('renders KPI cards backed by the analytics overview endpoint', async () => {
     server.use(
+      http.get(/\/admin\/restaurant\/settings/, () =>
+        HttpResponse.json({
+          taxRate: '0.08',
+          defaultDeliveryFee: '5.00',
+          minOrderAmount: '15.00',
+          deliveryRadiusKm: 10,
+          holidayDates: [],
+          reservationSlotMinutes: 30,
+          reservationBufferMinutes: 15,
+          timezone: 'America/New_York',
+          currency: 'USD',
+        }),
+      ),
       http.get(/\/analytics\/overview/, () => HttpResponse.json(overview)),
       http.get(/\/analytics\/revenue-timeseries/, () => HttpResponse.json([])),
       http.get(/\/analytics\/top-items/, () => HttpResponse.json([])),
@@ -38,5 +51,7 @@ describe('DashboardPage (Overview)', () => {
     const text = container.textContent ?? '';
     expect(text).toContain('42');
     expect(text).toMatch(/29\.77|29,77/);
+    expect(text).toContain('92.0%');
+    expect(text).toContain('38.0%');
   });
 });

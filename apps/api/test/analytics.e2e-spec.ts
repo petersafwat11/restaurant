@@ -126,4 +126,98 @@ describe('analytics (e2e)', () => {
     const body = res.json();
     expect(body.find((s: { status: string; count: number }) => s.status === 'COMPLETED')?.count).toBe(3);
   });
+
+  it('returns zero-filled revenue timeseries for today', async () => {
+    const res = await inject(
+      'GET',
+      `/api/v1/analytics/revenue-timeseries?period=today`,
+      undefined,
+      ownerToken,
+    );
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    // 24 hourly buckets for today
+    expect(body.length).toBe(24);
+    const totalRev = body.reduce((sum: number, pt: { revenue: string }) => sum + Number(pt.revenue), 0);
+    expect(totalRev).toBeCloseTo(324, 1);
+  });
+
+  it('supports top-items with sortBy revenue and quantity', async () => {
+    const prisma = app.get(PrismaService);
+    const category = await prisma.menuCategory.create({
+      data: { name: 'Pizzas', slug: 'pizzas-test', position: 1 },
+    });
+    const item1 = await prisma.menuItem.create({
+      data: {
+        name: 'Margherita',
+        slug: 'margherita-test',
+        basePrice: new Prisma.Decimal('30.00'),
+        categoryId: category.id,
+      },
+    });
+    const item2 = await prisma.menuItem.create({
+      data: {
+        name: 'Truffle Special',
+        slug: 'truffle-test',
+        basePrice: new Prisma.Decimal('100.00'),
+        categoryId: category.id,
+      },
+    });
+
+    const order = await prisma.order.create({
+      data: {
+        orderNumber: `R-AE-TOP`,
+        userId,
+        type: 'DINE_IN',
+        status: 'COMPLETED',
+        subtotal: new Prisma.Decimal('260.00'),
+        taxTotal: new Prisma.Decimal('20.80'),
+        grandTotal: new Prisma.Decimal('280.80'),
+        currency: 'PLN',
+        items: {
+          create: [
+            {
+              menuItemId: item1.id,
+              nameSnapshot: item1.name,
+              unitPrice: item1.basePrice,
+              quantity: 5,
+              modifierSnapshot: [],
+              lineTotal: new Prisma.Decimal('150.00'),
+            },
+            {
+              menuItemId: item2.id,
+              nameSnapshot: item2.name,
+              unitPrice: item2.basePrice,
+              quantity: 2,
+              modifierSnapshot: [],
+              lineTotal: new Prisma.Decimal('200.00'),
+            },
+          ],
+        },
+      },
+    });
+    expect(order.id).toBeDefined();
+
+    // Top items by revenue: Truffle Special (200.00) > Margherita (150.00)
+    const resRev = await inject(
+      'GET',
+      `/api/v1/analytics/top-items?period=today&sortBy=revenue`,
+      undefined,
+      ownerToken,
+    );
+    expect(resRev.statusCode).toBe(200);
+    const bodyRev = resRev.json();
+    expect(bodyRev[0]?.name).toBe('Truffle Special');
+
+    // Top items by quantity: Margherita (5) > Truffle Special (2)
+    const resQty = await inject(
+      'GET',
+      `/api/v1/analytics/top-items?period=today&sortBy=quantity`,
+      undefined,
+      ownerToken,
+    );
+    expect(resQty.statusCode).toBe(200);
+    const bodyQty = resQty.json();
+    expect(bodyQty[0]?.name).toBe('Margherita');
+  });
 });

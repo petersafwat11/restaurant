@@ -9,23 +9,25 @@ import * as React from 'react';
 
 interface TopItemsCardProps {
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
   currency?: string;
 }
 
 type Tab = 'revenue' | 'qty';
 
-export function TopItemsCard({ period, currency = 'USD' }: TopItemsCardProps) {
+export function TopItemsCard({ period, from, to, currency = 'USD' }: TopItemsCardProps) {
   const t = useTranslations('admin.dashboard.topItems');
   const [tab, setTab] = React.useState<Tab>('revenue');
-  const q = useTopItems({ period, limit: 5 });
+  const q = useTopItems({
+    period,
+    from,
+    to,
+    limit: 5,
+    sortBy: tab === 'revenue' ? 'revenue' : 'quantity',
+  });
 
-  const items = React.useMemo(() => {
-    const arr = [...(q.data ?? [])];
-    arr.sort((a, b) =>
-      tab === 'revenue' ? Number(b.revenue) - Number(a.revenue) : b.quantity - a.quantity,
-    );
-    return arr;
-  }, [q.data, tab]);
+  const items = q.data ?? [];
 
   return (
     <div className="flex h-[320px] flex-col rounded-card border-hairline bg-surface p-4">
@@ -65,6 +67,12 @@ export function TopItemsCard({ period, currency = 'USD' }: TopItemsCardProps) {
                   <div className="flex justify-center">
                     <Spinner size="lg" />
                   </div>
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="py-8 text-center text-xs text-fg-subtle">
+                  {t('empty')}
                 </td>
               </tr>
             ) : (

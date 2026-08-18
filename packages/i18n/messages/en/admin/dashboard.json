@@ -30,7 +30,8 @@
     "tableAriaLabel": "Orders by status",
     "tableStatus": "Status",
     "tableCount": "Count",
-    "tablePercent": "Percent"
+    "tablePercent": "Percent",
+    "empty": "No orders in this period."
   },
   "topItems": {
     "title": "Top items",
@@ -38,7 +39,8 @@
     "byQuantity": "By quantity",
     "colItem": "Item",
     "colQty": "Qty",
-    "colRevenue": "Revenue"
+    "colRevenue": "Revenue",
+    "empty": "No items sold in this period."
   },
   "livePanel": {
     "title": "Live",

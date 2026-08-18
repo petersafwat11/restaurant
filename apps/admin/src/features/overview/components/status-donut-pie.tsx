@@ -7,6 +7,7 @@ interface DonutItem {
   status: string;
   count: number;
   varRef: string;
+  label?: string;
 }
 
 interface StatusDonutPieProps {
@@ -18,6 +19,7 @@ interface DonutTooltipDatum {
   status: string;
   count: number;
   fill?: string;
+  label?: string;
 }
 
 function humanize(status: string): string {
@@ -45,7 +47,7 @@ function DonutTooltip({
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-1.5 text-fg-subtle">
           <span className="h-2 w-2 rounded-full" style={{ background: datum.fill }} />
-          {humanize(datum.status)}
+          {datum.label ?? humanize(datum.status)}
         </span>
         <span className="ml-auto font-medium tabular-nums text-fg">
           {p.value} · {pct.toFixed(1)}%

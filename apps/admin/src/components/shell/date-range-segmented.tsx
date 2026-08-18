@@ -32,6 +32,13 @@ interface DateRangeSegmentedProps {
 export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps) {
   const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const [customOpen, setCustomOpen] = React.useState(false);
+  const [draftFrom, setDraftFrom] = React.useState(value.from ?? '');
+  const [draftTo, setDraftTo] = React.useState(value.to ?? '');
+
+  React.useEffect(() => {
+    if (value.from) setDraftFrom(value.from);
+    if (value.to) setDraftTo(value.to);
+  }, [value.from, value.to]);
 
   function onKey(e: React.KeyboardEvent<HTMLButtonElement>, i: number) {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -41,6 +48,13 @@ export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps)
     refs.current[next]?.focus();
     const seg = SEGMENTS[next];
     if (seg && seg.id !== 'custom') onChange({ id: seg.id });
+  }
+
+  function handleApply() {
+    if (draftFrom && draftTo) {
+      onChange({ id: 'custom', from: draftFrom, to: draftTo });
+      setCustomOpen(false);
+    }
   }
 
   return (
@@ -83,23 +97,22 @@ export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps)
                 <div className="flex gap-2">
                   <input
                     type="date"
-                    defaultValue={value.from}
-                    onChange={(e) => onChange({ id: 'custom', from: e.target.value, to: value.to })}
+                    value={draftFrom}
+                    onChange={(e) => setDraftFrom(e.target.value)}
                     className="flex-1 rounded-md border-hairline-strong bg-surface px-2 py-1.5 text-xs text-fg outline-none focus:border-accent"
                   />
                   <input
                     type="date"
-                    defaultValue={value.to}
-                    onChange={(e) =>
-                      onChange({ id: 'custom', from: value.from, to: e.target.value })
-                    }
+                    value={draftTo}
+                    onChange={(e) => setDraftTo(e.target.value)}
                     className="flex-1 rounded-md border-hairline-strong bg-surface px-2 py-1.5 text-xs text-fg outline-none focus:border-accent"
                   />
                 </div>
                 <button
                   type="button"
-                  onClick={() => setCustomOpen(false)}
-                  className="mt-3 w-full rounded-md py-1.5 text-center text-xs text-accent hover:bg-accent/10"
+                  disabled={!draftFrom || !draftTo}
+                  onClick={handleApply}
+                  className="mt-3 w-full rounded-md py-1.5 text-center text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
                 >
                   Apply
                 </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import type { DateRange } from './date-range-segmented';
 
 /**
  * Per-page Topbar configuration. Pages call `usePageTitle({ title, … })` to
@@ -13,7 +14,8 @@ export interface PageHeaderConfig {
   showDateRange?: boolean;
   /** When provided, the Topbar renders a DateRangeSegmented bound to this. */
   rangeId?: 'today' | '7d' | '30d' | 'custom';
-  onRangeChange?: (r: { id: 'today' | '7d' | '30d' | 'custom' }) => void;
+  range?: DateRange;
+  onRangeChange?: (r: DateRange) => void;
   rightExtras?: React.ReactNode;
 }
 
@@ -53,6 +55,7 @@ export function usePageHeader(config: PageHeaderConfig): void {
     title: config.title,
     showDateRange: config.showDateRange,
     rangeId: config.rangeId,
+    range: config.range,
   });
 
   React.useEffect(() => {

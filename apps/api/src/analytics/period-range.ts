@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import type { AnalyticsPeriod } from '@repo/types';
 
 export interface PeriodRange {
@@ -19,9 +20,17 @@ export function resolvePeriod(
   now: Date = new Date(),
 ): PeriodRange {
   if (period === 'custom') {
-    if (!custom?.from || !custom?.to) throw new Error('Custom period requires from/to');
+    if (!custom?.from || !custom?.to) {
+      throw new BadRequestException('Custom period requires from and to parameters');
+    }
     const from = new Date(custom.from);
     const to = new Date(custom.to);
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      throw new BadRequestException('Invalid date format for custom period');
+    }
+    if (to.getTime() <= from.getTime()) {
+      throw new BadRequestException('Custom period "to" date must be after "from" date');
+    }
     const span = to.getTime() - from.getTime();
     return { from, to, prevFrom: new Date(from.getTime() - span), prevTo: from };
   }

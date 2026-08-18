@@ -3,7 +3,7 @@
 import { useAnalyticsOverview } from '@/features/analytics/hooks';
 import { Link } from '@/i18n/navigation';
 import type { AnalyticsPeriod } from '@repo/types';
-import { fmtPrep } from '@repo/utils';
+import { fmtPct, fmtPrep } from '@repo/utils';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -11,6 +11,8 @@ import * as React from 'react';
 interface LivePanelProps {
   /** Period is forwarded to overview to keep numbers aligned with KPIs. */
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
 }
 
 /**
@@ -19,10 +21,10 @@ interface LivePanelProps {
  * PREPARING bucket — keeps the live panel's numbers reconciling with the
  * donut (README §6 carry-over #2).
  */
-export function LivePanel({ period }: LivePanelProps) {
+export function LivePanel({ period, from, to }: LivePanelProps) {
   const t = useTranslations('admin.dashboard.livePanel');
   const tPeriod = useTranslations('admin.dashboard.period');
-  const overview = useAnalyticsOverview({ period });
+  const overview = useAnalyticsOverview({ period, from, to });
   const live = overview.data;
 
   return (
@@ -52,7 +54,7 @@ export function LivePanel({ period }: LivePanelProps) {
         <Stat
           label={t('repeatRate')}
           sub={t('repeatRateSub', { period: tPeriod(period) })}
-          value={live?.repeatRate.value != null ? `${live.repeatRate.value.toFixed(1)}%` : '—'}
+          value={live?.repeatRate.value != null ? fmtPct(live.repeatRate.value * 100, { digits: 1 }) : '—'}
         />
       </div>
 

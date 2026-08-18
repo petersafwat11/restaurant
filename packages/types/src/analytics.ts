@@ -25,7 +25,11 @@ export const AnalyticsOverviewSchema = z.object({
   orders: NumericDeltaSchema,
   aov: MoneyDeltaSchema,
   completionRate: z.object({ value: z.number(), delta: z.number() }),
-  newCustomers: z.object({ value: z.number(), delta: z.number() }),
+  newCustomers: z.object({
+    value: z.number(),
+    delta: z.number(),
+    deltaPercent: z.number().optional(),
+  }),
   repeatRate: z.object({ value: z.number() }),
   avgPrepMinutes: z.object({ value: z.number().nullable() }),
   liveOrdersCount: z.number(),
@@ -55,6 +59,7 @@ export const RevenueTimeseriesSchema = z.array(RevenueTimeseriesPointSchema);
 
 export const TopItemsQuerySchema = AnalyticsBaseQuerySchema.extend({
   limit: z.coerce.number().int().min(1).max(100).default(10),
+  sortBy: z.enum(['revenue', 'quantity']).optional().default('revenue'),
 });
 export type TopItemsQuery = z.infer<typeof TopItemsQuerySchema>;
 

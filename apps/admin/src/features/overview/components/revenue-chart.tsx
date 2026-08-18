@@ -2,7 +2,7 @@
 
 import { useRevenueTimeseries } from '@/features/analytics/hooks';
 import type { AnalyticsPeriod } from '@repo/types';
-import { cn } from '@repo/ui';
+import { Spinner, cn } from '@repo/ui';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
@@ -11,6 +11,8 @@ const RevenueAreaChart = dynamic(() => import('./revenue-area-chart'), { ssr: fa
 
 interface RevenueChartProps {
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
   currency?: string;
 }
 
@@ -20,11 +22,13 @@ interface ChartPoint {
   orders: number;
 }
 
-export function RevenueChart({ period, currency = 'USD' }: RevenueChartProps) {
+export function RevenueChart({ period, from, to, currency = 'USD' }: RevenueChartProps) {
   const t = useTranslations('admin.dashboard.revenue');
   const [showOrders, setShowOrders] = React.useState(false);
   const series = useRevenueTimeseries({
     period,
+    from,
+    to,
     granularity: period === 'today' ? 'hour' : 'day',
   });
 
@@ -72,12 +76,19 @@ export function RevenueChart({ period, currency = 'USD' }: RevenueChartProps) {
       </div>
 
       <div className="min-h-0 flex-1">
-        <RevenueAreaChart
-          points={points}
-          showOrders={showOrders}
-          xInterval={xInterval}
-          currency={currency}
-        />
+        {series.isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        ) : (
+          <RevenueAreaChart
+            points={points}
+            showOrders={showOrders}
+            xInterval={xInterval}
+            currency={currency}
+            period={period}
+          />
+        )}
       </div>
 
       {/* a11y summary — README §5 a11y audit */}

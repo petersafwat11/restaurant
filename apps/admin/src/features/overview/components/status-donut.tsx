@@ -2,7 +2,7 @@
 
 import { useOrdersByStatus } from '@/features/analytics/hooks';
 import type { AnalyticsPeriod, OrderStatus } from '@repo/types';
-import { STATUS_TOKENS } from '@repo/ui';
+import { Spinner, STATUS_TOKENS } from '@repo/ui';
 import { fmtInt } from '@repo/utils';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -12,20 +12,26 @@ const StatusDonutPie = dynamic(() => import('./status-donut-pie'), { ssr: false 
 
 interface StatusDonutProps {
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
 }
 
-export function StatusDonut({ period }: StatusDonutProps) {
+export function StatusDonut({ period, from, to }: StatusDonutProps) {
   const t = useTranslations('admin.dashboard.statusDonut');
   const tPeriod = useTranslations('admin.dashboard.period');
   const tStatus = useTranslations('shared.orderStatus');
-  const q = useOrdersByStatus({ period });
+  const q = useOrdersByStatus({ period, from, to });
   const items = React.useMemo(
     () =>
       (q.data ?? []).map((row) => {
         const tok = STATUS_TOKENS[row.status as OrderStatus];
-        return { ...row, varRef: tok?.varRef ?? 'rgb(var(--fg-subtle))' };
+        return {
+          ...row,
+          label: tStatus(row.status as OrderStatus),
+          varRef: tok?.varRef ?? 'rgb(var(--fg-subtle))',
+        };
       }),
-    [q.data],
+    [q.data, tStatus],
   );
   const total = items.reduce((s, r) => s + r.count, 0);
   const periodLabel = tPeriod(period);
@@ -37,38 +43,51 @@ export function StatusDonut({ period }: StatusDonutProps) {
         <span className="text-caption-admin text-fg-subtle">{periodLabel}</span>
       </div>
 
-      <div className="relative h-[180px]">
-        <StatusDonutPie items={items} total={total} />
-        <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-          <div>
-            <div className="text-h1-admin tabular-nums text-fg">{fmtInt(total)}</div>
-            <div className="text-xs text-fg-subtle">
-              {t('centerLabel', { period: periodLabel })}
+      {q.isLoading ? (
+        <div className="flex flex-1 items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      ) : total === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="text-h2-admin tabular-nums text-fg">0</div>
+          <div className="mt-1 text-xs text-fg-subtle">{t('empty')}</div>
+        </div>
+      ) : (
+        <>
+          <div className="relative h-[180px]">
+            <StatusDonutPie items={items} total={total} />
+            <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
+              <div>
+                <div className="text-h1-admin tabular-nums text-fg">{fmtInt(total)}</div>
+                <div className="text-xs text-fg-subtle">
+                  {t('centerLabel', { period: periodLabel })}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="mt-2 flex flex-col gap-1.5 overflow-y-auto">
-        {items.map((it) => {
-          const pct = total > 0 ? (it.count / total) * 100 : 0;
-          return (
-            <div
-              key={it.status}
-              className="grid grid-cols-[auto_1fr_auto_3rem] items-center gap-2 text-xs"
-            >
-              <span
-                aria-hidden
-                className="h-2 w-2 rounded-full"
-                style={{ background: it.varRef }}
-              />
-              <span className="text-fg-muted">{tStatus(it.status as OrderStatus)}</span>
-              <span className="text-right tabular-nums text-fg">{fmtInt(it.count)}</span>
-              <span className="text-right tabular-nums text-fg-subtle">{pct.toFixed(1)}%</span>
-            </div>
-          );
-        })}
-      </div>
+          <div className="mt-2 flex flex-col gap-1.5 overflow-y-auto">
+            {items.map((it) => {
+              const pct = total > 0 ? (it.count / total) * 100 : 0;
+              return (
+                <div
+                  key={it.status}
+                  className="grid grid-cols-[auto_1fr_auto_3rem] items-center gap-2 text-xs"
+                >
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: it.varRef }}
+                  />
+                  <span className="text-fg-muted">{it.label}</span>
+                  <span className="text-right tabular-nums text-fg">{fmtInt(it.count)}</span>
+                  <span className="text-right tabular-nums text-fg-subtle">{pct.toFixed(1)}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <table className="sr-only" aria-label={t('tableAriaLabel')}>
         <thead>
@@ -83,7 +102,7 @@ export function StatusDonut({ period }: StatusDonutProps) {
             const pct = total > 0 ? (it.count / total) * 100 : 0;
             return (
               <tr key={it.status}>
-                <td>{tStatus(it.status as OrderStatus)}</td>
+                <td>{it.label}</td>
                 <td>{it.count}</td>
                 <td>{pct.toFixed(1)}%</td>
               </tr>

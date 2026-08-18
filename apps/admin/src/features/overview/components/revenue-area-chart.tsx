@@ -30,6 +30,44 @@ interface RevenueAreaChartProps {
   showOrders: boolean;
   xInterval: number;
   currency: string;
+  period?: string;
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  PLN: 'zł',
+};
+
+function formatAxisTime(iso: string, period?: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    if (period === 'today') {
+      const h = String(d.getUTCHours()).padStart(2, '0');
+      const m = String(d.getUTCMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
+  } catch {
+    return iso;
+  }
+}
+
+function formatTooltipLabel(iso: string, period?: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    if (period === 'today') {
+      const h = String(d.getUTCHours()).padStart(2, '0');
+      const m = String(d.getUTCMinutes()).padStart(2, '0');
+      return `Today ${h}:${m}`;
+    }
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(d);
+  } catch {
+    return iso;
+  }
 }
 
 function ChartTooltip({
@@ -37,14 +75,17 @@ function ChartTooltip({
   payload,
   label,
   currency,
-}: TooltipProps<number, string> & { currency: string }) {
+  period,
+}: TooltipProps<number, string> & { currency: string; period?: string }) {
   if (!active || !payload?.length) return null;
+  const formattedLabel = typeof label === 'string' ? formatTooltipLabel(label, period) : label;
+
   return (
     <div
       className="rounded-md px-3 py-2 text-xs shadow-card"
       style={{ background: CHART_TOOLTIP_BG, border: `1px solid ${CHART_TOOLTIP_BORDER}` }}
     >
-      <div className="mb-1 font-medium text-fg">{label}</div>
+      <div className="mb-1 font-medium text-fg">{formattedLabel}</div>
       {payload.map((p) => (
         <div key={p.dataKey as string} className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-fg-subtle">
@@ -67,7 +108,10 @@ export default function RevenueAreaChart({
   showOrders,
   xInterval,
   currency,
+  period = 'today',
 }: RevenueAreaChartProps) {
+  const currencySymbol = CURRENCY_SYMBOLS[currency.toUpperCase()] ?? '$';
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={points} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -91,17 +135,18 @@ export default function RevenueAreaChart({
           axisLine={false}
           tickLine={false}
           tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
+          tickFormatter={(v: string) => formatAxisTime(v, period)}
           interval={xInterval}
         />
         <YAxis
           axisLine={false}
           tickLine={false}
           tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
-          tickFormatter={(v: number) => fmtAxisCurrency(v)}
+          tickFormatter={(v: number) => fmtAxisCurrency(v, currencySymbol)}
           width={56}
         />
         <Tooltip
-          content={<ChartTooltip currency={currency} />}
+          content={<ChartTooltip currency={currency} period={period} />}
           cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeDasharray: '3 3' }}
         />
         <Area

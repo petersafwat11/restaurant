@@ -51,8 +51,8 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Topbar
           title={cfg.title}
           showDateRange={cfg.showDateRange}
-          range={cfg.rangeId ? { id: cfg.rangeId } : undefined}
-          onRangeChange={cfg.onRangeChange ? (r) => cfg.onRangeChange?.({ id: r.id }) : undefined}
+          range={cfg.range ?? (cfg.rangeId ? { id: cfg.rangeId } : undefined)}
+          onRangeChange={cfg.onRangeChange}
           rightExtras={cfg.rightExtras}
           onMenuClick={() => setMobileNavOpen(true)}
         />

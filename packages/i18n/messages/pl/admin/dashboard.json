@@ -30,7 +30,8 @@
     "tableAriaLabel": "Zamówienia wg statusu",
     "tableStatus": "Status",
     "tableCount": "Liczba",
-    "tablePercent": "Procent"
+    "tablePercent": "Procent",
+    "empty": "Brak zamówień w tym okresie."
   },
   "topItems": {
     "title": "Najlepsze pozycje",
@@ -38,7 +39,8 @@
     "byQuantity": "Wg ilości",
     "colItem": "Pozycja",
     "colQty": "Ilość",
-    "colRevenue": "Przychód"
+    "colRevenue": "Przychód",
+    "empty": "Brak sprzedanych pozycji w tym okresie."
   },
   "livePanel": {
     "title": "Na żywo",
