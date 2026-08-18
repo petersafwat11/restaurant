@@ -54,3 +54,11 @@ export const JOB_ACCOUNT_DELETION_CONFIRM_EMAIL = 'account.deletion-confirm-emai
 export const JOB_ORDER_AUTO_COMPLETE = 'order.auto-complete';
 export const JOB_WEBPUSH_NEW_ORDER = 'webpush.new-order';
 export const JOB_WEBPUSH_PENDING_ORDER_REMINDER = 'webpush.pending-order-reminder';
+// Ring burst — repeats the new-order notification (same tag + renotify) so the
+// device re-sounds its notification channel every RING_INTERVAL_MS while the
+// order is still unacknowledged and the PWA is closed.
+export const JOB_WEBPUSH_ORDER_RING = 'webpush.order-ring';
+
+// Ring burst tuning shared by producer and processor.
+export const WEBPUSH_RING_INTERVAL_MS = 30_000;
+export const WEBPUSH_RING_MAX_STEPS = 6;

@@ -101,6 +101,14 @@ export const WebPushNewOrderPayloadSchema = z.object({
 });
 export type WebPushNewOrderPayload = z.infer<typeof WebPushNewOrderPayloadSchema>;
 
+// Ring burst step (1..RING_MAX_STEPS). Same fields as the initial new-order
+// push so the service worker can reuse the identical notification tag and
+// re-alert (renotify) the still-pending order.
+export const WebPushOrderRingPayloadSchema = WebPushNewOrderPayloadSchema.extend({
+  ringStep: z.number().int().positive(),
+});
+export type WebPushOrderRingPayload = z.infer<typeof WebPushOrderRingPayloadSchema>;
+
 export const WebPushPendingOrderReminderPayloadSchema = z.object({
   subscriptionId: z.string(),
   orderId: z.string(),

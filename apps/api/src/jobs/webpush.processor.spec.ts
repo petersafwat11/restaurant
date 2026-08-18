@@ -53,10 +53,13 @@ describe('WebPushProcessor', () => {
         tag: 'order-order-1',
       }),
     );
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'sub-1' } }),
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'sub-1' } }));
+    // Ring burst starts: first re-alert scheduled 30s later with the same tag
+    expect(queue.add).toHaveBeenCalledWith(
+      'webpush.order-ring',
+      expect.objectContaining({ ringStep: 1 }),
+      expect.objectContaining({ delay: 30_000, jobId: 'order-1-ring-1-sub-1' }),
     );
-    expect(queue.add).not.toHaveBeenCalled();
   });
 
   it('prunes a subscription rejected as expired by the push service', async () => {
@@ -171,6 +174,93 @@ describe('WebPushProcessor', () => {
     } as never);
 
     expect(send).not.toHaveBeenCalled();
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('re-rings a still-pending order with the same tag and chains the next ring step', async () => {
+    const send = vi.fn().mockResolvedValue('sent');
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const processor = new WebPushProcessor(
+      {
+        order: {
+          findUnique: vi.fn().mockResolvedValue({ status: 'PENDING' }),
+        },
+        webPushSubscription: {
+          findFirst: vi.fn().mockResolvedValue(subscription('en')),
+          update: vi.fn().mockResolvedValue(undefined),
+          delete: vi.fn(),
+        },
+      } as never,
+      { send } as never,
+      queue as never,
+    );
+
+    await processor.process({
+      name: 'webpush.order-ring',
+      data: { ...JOB.data, ringStep: 1 },
+    } as never);
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: 'https://push.example.test/1' }),
+      expect.objectContaining({
+        // Same tag as the initial alert so renotify re-sounds the channel
+        tag: 'order-order-1',
+      }),
+    );
+    expect(queue.add).toHaveBeenCalledTimes(1);
+    expect(queue.add).toHaveBeenCalledWith(
+      'webpush.order-ring',
+      expect.objectContaining({ ringStep: 2 }),
+      expect.objectContaining({ delay: 30_000, jobId: 'order-1-ring-2-sub-1' }),
+    );
+  });
+
+  it('stops the ring burst once the order is acknowledged (not PENDING/CONFIRMED)', async () => {
+    const send = vi.fn();
+    const queue = { add: vi.fn() };
+    const processor = new WebPushProcessor(
+      {
+        order: {
+          findUnique: vi.fn().mockResolvedValue({ status: 'PREPARING' }),
+        },
+      } as never,
+      { send } as never,
+      queue as never,
+    );
+
+    await processor.process({
+      name: 'webpush.order-ring',
+      data: { ...JOB.data, ringStep: 2 },
+    } as never);
+
+    expect(send).not.toHaveBeenCalled();
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('ends the ring burst after the maximum number of steps', async () => {
+    const send = vi.fn().mockResolvedValue('sent');
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const processor = new WebPushProcessor(
+      {
+        order: {
+          findUnique: vi.fn().mockResolvedValue({ status: 'PENDING' }),
+        },
+        webPushSubscription: {
+          findFirst: vi.fn().mockResolvedValue(subscription('en')),
+          update: vi.fn().mockResolvedValue(undefined),
+          delete: vi.fn(),
+        },
+      } as never,
+      { send } as never,
+      queue as never,
+    );
+
+    await processor.process({
+      name: 'webpush.order-ring',
+      data: { ...JOB.data, ringStep: 6 },
+    } as never);
+
+    expect(send).toHaveBeenCalledOnce();
     expect(queue.add).not.toHaveBeenCalled();
   });
 });

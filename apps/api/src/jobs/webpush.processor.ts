@@ -2,9 +2,13 @@ import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
   JOB_WEBPUSH_NEW_ORDER,
+  JOB_WEBPUSH_ORDER_RING,
   JOB_WEBPUSH_PENDING_ORDER_REMINDER,
   QUEUE_WEBPUSH,
+  WEBPUSH_RING_INTERVAL_MS,
+  WEBPUSH_RING_MAX_STEPS,
   WebPushNewOrderPayloadSchema,
+  WebPushOrderRingPayloadSchema,
   WebPushPendingOrderReminderPayloadSchema,
 } from '@repo/jobs';
 import type { Job, Queue } from 'bullmq';
@@ -26,19 +30,23 @@ export class WebPushProcessor extends WorkerHost {
   override async process(job: Job): Promise<void> {
     if (
       job.name !== JOB_WEBPUSH_NEW_ORDER &&
-      job.name !== JOB_WEBPUSH_PENDING_ORDER_REMINDER
+      job.name !== JOB_WEBPUSH_PENDING_ORDER_REMINDER &&
+      job.name !== JOB_WEBPUSH_ORDER_RING
     ) {
       this.logger.warn(`Unknown webpush job: ${job.name}`);
       return;
     }
 
     const isReminder = job.name === JOB_WEBPUSH_PENDING_ORDER_REMINDER;
+    const isRing = job.name === JOB_WEBPUSH_ORDER_RING;
     const payload = isReminder
       ? WebPushPendingOrderReminderPayloadSchema.parse(job.data)
-      : WebPushNewOrderPayloadSchema.parse(job.data);
+      : isRing
+        ? WebPushOrderRingPayloadSchema.parse(job.data)
+        : WebPushNewOrderPayloadSchema.parse(job.data);
 
-    // If it's a reminder, verify that the order is still unacknowledged (PENDING or CONFIRMED) before sending!
-    if (isReminder) {
+    // If it's a reminder or ring, verify that the order is still unacknowledged (PENDING or CONFIRMED) before sending!
+    if (isReminder || isRing) {
       const order = await this.prisma.order.findUnique({
         where: { id: payload.orderId },
         select: { status: true },
@@ -87,9 +95,13 @@ export class WebPushProcessor extends WorkerHost {
       ? isEnglish
         ? `⚠️ URGENT: Order ${payload.orderNumber} still pending (${minutesPending}m)`
         : `⚠️ PILNE: Zamówienie ${payload.orderNumber} nadal oczekuje (${minutesPending} min)`
-      : isEnglish
-        ? `New order ${payload.orderNumber}`
-        : `Nowe zamówienie ${payload.orderNumber}`;
+      : isRing
+        ? isEnglish
+          ? `🔔 Order ${payload.orderNumber} is waiting for you!`
+          : `🔔 Zamówienie ${payload.orderNumber} czeka na Ciebie!`
+        : isEnglish
+          ? `New order ${payload.orderNumber}`
+          : `Nowe zamówienie ${payload.orderNumber}`;
 
     const body = isReminder
       ? isEnglish
@@ -123,6 +135,27 @@ export class WebPushProcessor extends WorkerHost {
         where: { id: subscription.id },
         data: { lastUsedAt: new Date() },
       });
+    }
+
+    // Ring burst: after the initial alert reaches the device, re-alert the same
+    // notification (same tag + renotify in the SW) every 30s while the order is
+    // still unacknowledged, so a closed PWA keeps ringing until staff respond.
+    const currentStep: number =
+      'ringStep' in payload && typeof payload.ringStep === 'number' ? payload.ringStep : 0;
+    const shouldChainRing =
+      result === 'sent' && (isRing || !isReminder) && currentStep < WEBPUSH_RING_MAX_STEPS;
+    if (shouldChainRing) {
+      await this.webPushQueue.add(
+        JOB_WEBPUSH_ORDER_RING,
+        { ...payload, ringStep: currentStep + 1 },
+        {
+          jobId: `${payload.orderId}-ring-${currentStep + 1}-${payload.subscriptionId}`,
+          delay: WEBPUSH_RING_INTERVAL_MS,
+          attempts: 2,
+          removeOnComplete: 500,
+          removeOnFail: 1_000,
+        },
+      );
     }
 
     // Schedule the next 5-minute recurring reminder if order is still unacknowledged (up to 2 hours)

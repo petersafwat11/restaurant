@@ -45,6 +45,37 @@ queued through BullMQ and delivered by the API's Web Push processor in every app
 background, minimized, or closed. The foreground dashboard also records the alert in its notification
 center, so system-level delivery remains visible and auditable even while staff are using the app.
 
+### Ring burst (closed-app "ringing")
+
+The in-app Web Audio alarm can only play while a dashboard window is alive — service workers cannot
+play audio, and Chrome never implemented the `showNotification({ sound })` option, so no web code can
+play a custom ringtone while the PWA is closed. Instead, the API emulates ringing: after the initial
+new-order push, the `webpush.order-ring` BullMQ job re-sends the **same-tag** notification every
+30 seconds for up to ~3 minutes while the order is still `PENDING`/`CONFIRMED`. The service worker
+shows each repeat with `renotify: true`, so Android re-plays the notification-channel sound and
+vibration pattern every time — the device effectively rings until a staff member responds. Ring
+pushes also wake open-but-backgrounded windows (via an `ORDER_PUSH` postMessage) so the in-page
+alarm joins in. After the burst, the pre-existing 5-minute reminder chain continues for up to
+2 hours.
+
+### One-time Android setup for the custom alarm sound (Samsung A55 example)
+
+The channel sound is chosen on the device, not by the app:
+
+1. Copy the alarm file to the phone: download `/sounds/order-alarm.wav` from the admin host (or copy
+   `apps/admin/public/sounds/order-alarm.wav` via USB) into the phone's **Notifications** folder.
+2. Enable per-app categories: **Settings → Notifications → Advanced settings → Manage notification
+   categories for each app**.
+3. **Settings → Apps** → open the installed admin PWA (or Chrome, if running from the browser) →
+   **Notifications** → open the notification category that carries order pushes.
+4. Set it to **Alert** (not Silent), then tap **Sound** and pick the copied alarm file.
+5. Verify **Settings → Sounds and vibration → Volume → Notifications** is up, and that Do Not
+   Disturb and any "mute all sounds" hearing enhancement are off.
+
+With the ring burst, a fully closed PWA then rings with the restaurant alarm every ~30 seconds until
+someone acts on the order. A continuous, never-stopping custom ringtone while closed is not
+achievable in a pure PWA; that requires a native wrapper (e.g. Capacitor) if ever needed.
+
 Service-worker releases call `skipWaiting()` after their offline assets are cached. Because protected
 pages and API data are never cached, the corrected worker can safely activate immediately without
 interrupting an order form or forcing a page reload.

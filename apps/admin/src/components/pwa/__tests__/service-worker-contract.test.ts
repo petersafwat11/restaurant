@@ -17,7 +17,7 @@ describe('admin service-worker cache contract', () => {
   it('provides localized offline fallbacks and versioned cache cleanup', () => {
     expect(source).toContain("const OFFLINE_URLS = ['/offline', '/en/offline']");
     expect(source).toContain("const CACHE_PREFIX = 'szef-donald-admin-pwa-'");
-    expect(source).toContain('const CACHE_NAME = `${CACHE_PREFIX}v3`');
+    expect(source).toContain('const CACHE_NAME = `${CACHE_PREFIX}v5`');
     expect(source).toContain('key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME');
     expect(source).toContain('.then(() => self.skipWaiting())');
   });
@@ -26,6 +26,14 @@ describe('admin service-worker cache contract', () => {
     expect(source).toContain("self.addEventListener('push'");
     expect(source).toContain('self.registration.showNotification');
     expect(source).toContain("badge: payload.badge ?? '/icons/admin-notification-badge.png'");
+    // Chrome never implemented the `sound` notification option; Android sound is
+    // owned by the OS notification channel. It must not be shipped as dead code.
+    expect(source).not.toContain('sound:');
+    // Ring-burst pushes re-alert via a stable tag + renotify so the device
+    // re-sounds the channel; a Date.now() tag would defeat that.
+    expect(source).not.toMatch(/tag: `order-\$\{Date\.now\(\)\}`/);
+    expect(source).toContain("const tag = payload.tag || 'admin-order-alert'");
+    expect(source).toContain('renotify: true');
     expect(source).toContain("self.addEventListener('notificationclick'");
     expect(source).not.toContain('openWindows.length > 0');
     expect(source).toContain('requestedUrl.origin === self.location.origin');
@@ -33,8 +41,8 @@ describe('admin service-worker cache contract', () => {
   });
 
   it.each([
-    ['foreground', [{ visibilityState: 'visible' }]],
-    ['background', [{ visibilityState: 'hidden' }]],
+    ['foreground', [{ visibilityState: 'visible', postMessage: vi.fn() }]],
+    ['background', [{ visibilityState: 'hidden', postMessage: vi.fn() }]],
     ['closed', []],
   ])('shows the system notification while the app is %s', async (_state, windows) => {
     const handlers = new Map<
@@ -69,7 +77,16 @@ describe('admin service-worker cache contract', () => {
     await pending;
 
     expect(showNotification).toHaveBeenCalledOnce();
-    expect(matchAll).not.toHaveBeenCalled();
+    // Pushes also wake open windows so the in-page Web Audio alarm can ring.
+    expect(matchAll).toHaveBeenCalledWith({
+      type: 'window',
+      includeUncontrolled: true,
+    });
+    for (const client of windows) {
+      expect(client.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'ORDER_PUSH' }),
+      );
+    }
   });
 
   it('ships the public PWA assets in the standalone production image', () => {

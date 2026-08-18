@@ -6,7 +6,7 @@
  */
 
 const CACHE_PREFIX = 'szef-donald-admin-pwa-';
-const CACHE_NAME = `${CACHE_PREFIX}v4`;
+const CACHE_NAME = `${CACHE_PREFIX}v5`;
 const OFFLINE_URLS = ['/offline', '/en/offline'];
 const PUBLIC_ASSETS = [
   '/manifest.webmanifest',
@@ -15,7 +15,6 @@ const PUBLIC_ASSETS = [
   '/icons/admin-maskable-512.png',
   '/icons/admin-apple-touch.png',
   '/icons/admin-notification-badge.png',
-  '/sounds/order-alarm.wav',
 ];
 
 async function cacheOfflinePage(cache, url) {
@@ -76,13 +75,27 @@ self.addEventListener('push', (event) => {
         payload = {};
       }
 
+      // Wake any open (possibly backgrounded) admin window so the in-page Web
+      // Audio alarm rings too. Service workers cannot play audio themselves.
+      try {
+        const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of windows) {
+          client.postMessage({ type: 'ORDER_PUSH', url: payload.url ?? '/' });
+        }
+      } catch {
+        // Client wake is best-effort; the notification below still fires.
+      }
+
+      // A stable tag + renotify is what makes repeated ring pushes re-sound the
+      // device's notification channel instead of silently replacing each other.
+      const tag = payload.tag || 'admin-order-alert';
+
       try {
         await self.registration.showNotification(payload.title ?? 'New order', {
           body: payload.body ?? 'Open the admin dashboard to review it.',
           icon: payload.icon ?? '/icons/admin-192.png',
           badge: payload.badge ?? '/icons/admin-notification-badge.png',
-          sound: '/sounds/order-alarm.wav',
-          tag: payload.tag || `order-${Date.now()}`,
+          tag,
           renotify: true,
           requireInteraction: true,
           silent: false,
@@ -96,7 +109,7 @@ self.addEventListener('push', (event) => {
           await self.registration.showNotification(payload.title ?? 'New order', {
             body: payload.body ?? 'Open the admin dashboard to review it.',
             icon: payload.icon ?? '/icons/admin-192.png',
-            tag: payload.tag || `order-${Date.now()}`,
+            tag,
             renotify: true,
             silent: false,
             vibrate: [500, 200, 500, 200, 500, 200, 1000],
@@ -105,6 +118,7 @@ self.addEventListener('push', (event) => {
         } catch {
           await self.registration.showNotification(payload.title ?? 'New order', {
             body: payload.body ?? 'Open the admin dashboard to review it.',
+            tag,
             silent: false,
           });
         }

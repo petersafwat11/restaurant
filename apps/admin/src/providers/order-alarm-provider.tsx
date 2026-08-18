@@ -246,6 +246,22 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
     };
   }, [canReadOrders]);
 
+  // Ring-burst pushes post ORDER_PUSH from the service worker: refetch the
+  // alarm list immediately so a backgrounded window starts ringing right away
+  // instead of waiting for the 25s poll (Web Audio runs in background tabs).
+  useEffect(() => {
+    if (!canReadOrders || typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+      return;
+    }
+    const onMessage = (event: MessageEvent) => {
+      if ((event.data as { type?: string } | null)?.type === 'ORDER_PUSH') {
+        qc.invalidateQueries({ queryKey: ['orders', 'alarm-action-list'] });
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+  }, [canReadOrders, qc]);
+
   // Clock tick every second to check snooze expiration and re-alarm
   useEffect(() => {
     const timer = setInterval(() => {
