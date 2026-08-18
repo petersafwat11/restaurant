@@ -212,7 +212,7 @@ export function OrderAlarmBanner() {
             onClick={() => void confirmOrder(primaryOrder)}
           >
             <Check className="mr-1.5 h-3.5 w-3.5" />
-            Confirm Order
+            {primaryOrder.status === 'PENDING' ? 'Confirm Order' : 'Start Preparing'}
           </Button>
         </div>
       </div>

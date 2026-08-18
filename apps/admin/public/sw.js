@@ -83,7 +83,8 @@ self.addEventListener('push', (event) => {
           tag: payload.tag ?? 'new-order',
           renotify: true,
           requireInteraction: true,
-          vibrate: [300, 100, 300, 100, 300, 100, 600],
+          silent: false,
+          vibrate: [500, 200, 500, 200, 500, 200, 1000],
           data: { url: payload.url ?? '/' },
           actions: [{ action: 'open', title: 'Open Order' }],
         });

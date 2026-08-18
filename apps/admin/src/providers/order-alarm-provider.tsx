@@ -4,7 +4,12 @@ import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import { getRealtimeClient } from '@/lib/realtime-client';
 import { useAuthStore } from '@/stores/auth-store';
-import type { OrderCreatedEvent, OrderListItemDto, OrderStatusChangedEvent } from '@repo/types';
+import type {
+  OrderCreatedEvent,
+  OrderListItemDto,
+  OrderStatus,
+  OrderStatusChangedEvent,
+} from '@repo/types';
 import { ROOMS } from '@repo/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
@@ -136,12 +141,20 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // Poll pending orders every 30 seconds as fallback to realtime socket
-  const { data: pendingData } = useQuery({
-    queryKey: ['orders', 'pending-alarm-list'],
+  // Poll pending and confirmed unacknowledged orders every 25 seconds as fallback to realtime socket
+  const { data: activeActionData } = useQuery({
+    queryKey: ['orders', 'alarm-action-list'],
     queryFn: async () => {
       if (!canReadOrders) return { items: [], total: 0 };
-      return getApiClient().orders.list({ status: 'PENDING', limit: 50 });
+      const [pendingRes, confirmedRes] = await Promise.all([
+        getApiClient().orders.list({ status: 'PENDING', limit: 50 }),
+        getApiClient().orders.list({ status: 'CONFIRMED', limit: 50 }),
+      ]);
+      const map = new Map<string, OrderListItemDto>();
+      for (const item of [...pendingRes.items, ...confirmedRes.items]) {
+        map.set(item.id, item);
+      }
+      return { items: Array.from(map.values()), total: map.size };
     },
     enabled: canReadOrders,
     refetchInterval: 25_000,
@@ -149,12 +162,12 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
 
   const [pendingOrders, setPendingOrders] = useState<OrderListItemDto[]>([]);
 
-  // Sync query data with pending state
+  // Sync query data with state
   useEffect(() => {
-    if (pendingData?.items) {
-      setPendingOrders(pendingData.items);
+    if (activeActionData?.items) {
+      setPendingOrders(activeActionData.items);
     }
-  }, [pendingData]);
+  }, [activeActionData]);
 
   // Listen to realtime socket events for instantaneous order creation / status changes
   useEffect(() => {
@@ -170,7 +183,7 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
       if (!mounted) return;
 
       unsubCreated = client.on('order.created', (event: OrderCreatedEvent) => {
-        if (event.status === 'PENDING') {
+        if (event.status === 'PENDING' || event.status === 'CONFIRMED') {
           const newItem: OrderListItemDto = {
             id: event.orderId,
             orderNumber: event.orderNumber,
@@ -190,8 +203,8 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
       });
 
       unsubStatus = client.on('order.status_changed', (event: OrderStatusChangedEvent) => {
-        if (event.to !== 'PENDING') {
-          // Order left PENDING state -> remove from pending and snoozed
+        if (event.to !== 'PENDING' && event.to !== 'CONFIRMED') {
+          // Order entered preparation or terminal state -> remove from pending and snoozed
           setPendingOrders((prev) => prev.filter((o) => o.id !== event.orderId));
           setSnoozedOrders((prev) => {
             if (!prev[event.orderId]) return prev;
@@ -201,9 +214,12 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
             return next;
           });
         } else {
-          // If status transitioned back to PENDING (rare)
+          // Status changed within PENDING / CONFIRMED
           setPendingOrders((prev) => {
-            if (prev.some((o) => o.id === event.orderId)) return prev;
+            const exists = prev.some((o) => o.id === event.orderId);
+            if (exists) {
+              return prev.map((o) => (o.id === event.orderId ? { ...o, status: event.to } : o));
+            }
             return [
               {
                 id: event.orderId,
@@ -376,14 +392,17 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
   const confirmOrder = useCallback(
     async (order: OrderListItemDto) => {
       try {
+        const nextStatus = order.status === 'PENDING' ? 'CONFIRMED' : 'PREPARING';
         await advanceMutation.mutateAsync({
           orderId: order.id,
-          currentStatus: 'PENDING',
+          currentStatus: order.status as OrderStatus,
           type: order.type,
-          to: 'CONFIRMED',
+          to: nextStatus,
         });
-        // Remove immediately from state
-        setPendingOrders((prev) => prev.filter((o) => o.id !== order.id));
+        // Remove immediately from active list if moved to PREPARING
+        if (nextStatus === 'PREPARING') {
+          setPendingOrders((prev) => prev.filter((o) => o.id !== order.id));
+        }
         setSnoozedOrders((prev) => {
           if (!prev[order.id]) return prev;
           const next = { ...prev };

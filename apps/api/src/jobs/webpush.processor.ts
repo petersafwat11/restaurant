@@ -36,13 +36,13 @@ export class WebPushProcessor extends WorkerHost {
       ? WebPushPendingOrderReminderPayloadSchema.parse(job.data)
       : WebPushNewOrderPayloadSchema.parse(job.data);
 
-    // If it's a reminder, verify that the order is still PENDING before sending!
+    // If it's a reminder, verify that the order is still unacknowledged (PENDING or CONFIRMED) before sending!
     if (isReminder) {
       const order = await this.prisma.order.findUnique({
         where: { id: payload.orderId },
         select: { status: true },
       });
-      if (!order || order.status !== 'PENDING') {
+      if (!order || (order.status !== 'PENDING' && order.status !== 'CONFIRMED')) {
         this.logger.debug(
           `Skipping webpush reminder for order ${payload.orderNumber}: status is ${order?.status ?? 'missing'}`,
         );

@@ -103,12 +103,41 @@ describe('WebPushProcessor', () => {
     );
   });
 
-  it('skips sending reminder if order is no longer PENDING', async () => {
-    const send = vi.fn();
+  it('sends an urgent reminder if order is still CONFIRMED (unacknowledged)', async () => {
+    const send = vi.fn().mockResolvedValue('sent');
     const processor = new WebPushProcessor(
       {
         order: {
           findUnique: vi.fn().mockResolvedValue({ status: 'CONFIRMED' }),
+        },
+        webPushSubscription: {
+          findFirst: vi.fn().mockResolvedValue(subscription('en')),
+          update: vi.fn().mockResolvedValue(undefined),
+          delete: vi.fn(),
+        },
+      } as never,
+      { send } as never,
+    );
+
+    await processor.process({
+      name: 'webpush.pending-order-reminder',
+      data: { ...JOB.data, minutesPending: 5 },
+    } as never);
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: 'https://push.example.test/1' }),
+      expect.objectContaining({
+        title: '⚠️ URGENT: Order R-2026-000001 still pending (5m)',
+      }),
+    );
+  });
+
+  it('skips sending reminder if order is already being prepared', async () => {
+    const send = vi.fn();
+    const processor = new WebPushProcessor(
+      {
+        order: {
+          findUnique: vi.fn().mockResolvedValue({ status: 'PREPARING' }),
         },
       } as never,
       { send } as never,
