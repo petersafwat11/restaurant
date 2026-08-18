@@ -96,61 +96,13 @@ export class StaffOrderAlertService {
             removeOnComplete: 500,
             removeOnFail: 1_000,
           }),
-          // 2. 1-minute delayed reminder if order remains unacknowledged
-          this.webPushQueue.add(
-            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
-            { ...basePayload, minutesPending: 1 },
-            {
-              jobId: `${event.orderId}-reminder-1m-${subscriptionId}`,
-              delay: 1 * 60_000,
-              attempts: 2,
-              removeOnComplete: 500,
-              removeOnFail: 1_000,
-            },
-          ),
-          // 3. 2-minute delayed reminder if order remains unacknowledged
-          this.webPushQueue.add(
-            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
-            { ...basePayload, minutesPending: 2 },
-            {
-              jobId: `${event.orderId}-reminder-2m-${subscriptionId}`,
-              delay: 2 * 60_000,
-              attempts: 2,
-              removeOnComplete: 500,
-              removeOnFail: 1_000,
-            },
-          ),
-          // 4. 3-minute delayed reminder if order remains unacknowledged
-          this.webPushQueue.add(
-            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
-            { ...basePayload, minutesPending: 3 },
-            {
-              jobId: `${event.orderId}-reminder-3m-${subscriptionId}`,
-              delay: 3 * 60_000,
-              attempts: 2,
-              removeOnComplete: 500,
-              removeOnFail: 1_000,
-            },
-          ),
-          // 5. 5-minute delayed reminder if order remains unacknowledged
+          // 2. Initial 5-minute delayed reminder (chains automatically every 5m until order is accepted)
           this.webPushQueue.add(
             JOB_WEBPUSH_PENDING_ORDER_REMINDER,
             { ...basePayload, minutesPending: 5 },
             {
-              jobId: `${event.orderId}-reminder-5m-${subscriptionId}`,
+              jobId: `${event.orderId}-rem-5m-${subscriptionId}`,
               delay: 5 * 60_000,
-              attempts: 2,
-              removeOnComplete: 500,
-              removeOnFail: 1_000,
-            },
-          ),
-          // 6. 10-minute delayed reminder if order remains unacknowledged
-          this.webPushQueue.add(
-            JOB_WEBPUSH_PENDING_ORDER_REMINDER,
-            { ...basePayload, minutesPending: 10 },
-            {
-              jobId: `${event.orderId}-reminder-10m-${subscriptionId}`,
-              delay: 10 * 60_000,
               attempts: 2,
               removeOnComplete: 500,
               removeOnFail: 1_000,

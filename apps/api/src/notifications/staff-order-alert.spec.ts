@@ -108,8 +108,8 @@ describe('StaffOrderAlertService', () => {
     await service.onOrderCreated(EVENT);
 
     expect(findMany).toHaveBeenCalledOnce();
-    // 2 subscriptions * (1 immediate + 5 delayed reminders: 1m, 2m, 3m, 5m, 10m) = 12 jobs
-    expect(add).toHaveBeenCalledTimes(12);
+    // 2 subscriptions * (1 immediate + 1 delayed 5m reminder) = 4 jobs
+    expect(add).toHaveBeenCalledTimes(4);
     expect(add).toHaveBeenCalledWith(
       'webpush.new-order',
       expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId }),
@@ -117,18 +117,8 @@ describe('StaffOrderAlertService', () => {
     );
     expect(add).toHaveBeenCalledWith(
       'webpush.pending-order-reminder',
-      expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId, minutesPending: 1 }),
-      expect.objectContaining({ jobId: 'order-1-reminder-1m-sub-1', delay: 60_000 }),
-    );
-    expect(add).toHaveBeenCalledWith(
-      'webpush.pending-order-reminder',
-      expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId, minutesPending: 2 }),
-      expect.objectContaining({ jobId: 'order-1-reminder-2m-sub-1', delay: 120_000 }),
-    );
-    expect(add).toHaveBeenCalledWith(
-      'webpush.pending-order-reminder',
       expect.objectContaining({ subscriptionId: 'sub-1', orderId: EVENT.orderId, minutesPending: 5 }),
-      expect.objectContaining({ jobId: 'order-1-reminder-5m-sub-1', delay: 300_000 }),
+      expect.objectContaining({ jobId: 'order-1-rem-5m-sub-1', delay: 300_000 }),
     );
   });
 

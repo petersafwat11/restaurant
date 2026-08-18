@@ -1,4 +1,4 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import {
   JOB_WEBPUSH_NEW_ORDER,
@@ -7,7 +7,7 @@ import {
   WebPushNewOrderPayloadSchema,
   WebPushPendingOrderReminderPayloadSchema,
 } from '@repo/jobs';
-import type { Job } from 'bullmq';
+import type { Job, Queue } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebPushService } from '../webpush/webpush.service';
 
@@ -18,6 +18,7 @@ export class WebPushProcessor extends WorkerHost {
   constructor(
     private readonly prisma: PrismaService,
     private readonly webPush: WebPushService,
+    @InjectQueue(QUEUE_WEBPUSH) private readonly webPushQueue: Queue,
   ) {
     super();
   }
@@ -78,7 +79,10 @@ export class WebPushProcessor extends WorkerHost {
     const localePrefix = isEnglish ? '/en' : '';
     const url = `${payload.adminBaseUrl.replace(/\/$/, '')}${localePrefix}/orders/${encodeURIComponent(payload.orderId)}`;
 
-    const minutesPending = 'minutesPending' in payload ? payload.minutesPending : 5;
+    const minutesPending: number =
+      'minutesPending' in payload && typeof payload.minutesPending === 'number'
+        ? payload.minutesPending
+        : 5;
     const title = isReminder
       ? isEnglish
         ? `⚠️ URGENT: Order ${payload.orderNumber} still pending (${minutesPending}m)`
@@ -111,11 +115,35 @@ export class WebPushProcessor extends WorkerHost {
 
     if (result === 'expired') {
       await this.prisma.webPushSubscription.delete({ where: { id: subscription.id } });
-    } else if (result === 'sent') {
+      return;
+    }
+
+    if (result === 'sent') {
       await this.prisma.webPushSubscription.update({
         where: { id: subscription.id },
         data: { lastUsedAt: new Date() },
       });
+    }
+
+    // Schedule the next 5-minute recurring reminder if order is still unacknowledged (up to 2 hours)
+    if (isReminder) {
+      const nextMinutes = minutesPending + 5;
+      if (nextMinutes <= 120) {
+        await this.webPushQueue.add(
+          JOB_WEBPUSH_PENDING_ORDER_REMINDER,
+          {
+            ...payload,
+            minutesPending: nextMinutes,
+          },
+          {
+            jobId: `${payload.orderId}-rem-${nextMinutes}m-${payload.subscriptionId}`,
+            delay: 5 * 60_000,
+            attempts: 2,
+            removeOnComplete: 500,
+            removeOnFail: 1_000,
+          },
+        );
+      }
     }
   }
 }
