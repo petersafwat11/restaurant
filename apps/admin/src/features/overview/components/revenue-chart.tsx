@@ -87,6 +87,8 @@ export function RevenueChart({ period, from, to, currency = 'USD' }: RevenueChar
             xInterval={xInterval}
             currency={currency}
             period={period}
+            labelRevenue={t('seriesRevenue')}
+            labelOrders={t('seriesOrders')}
           />
         )}
       </div>

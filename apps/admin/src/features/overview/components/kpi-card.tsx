@@ -13,7 +13,7 @@ export interface KpiCardProps {
   label: string;
   value: React.ReactNode;
   /** Percent change vs previous period. Sign drives color + arrow. */
-  deltaPercent: number;
+  deltaPercent?: number | null;
   /** Optional numeric color override (e.g. tint completion rate by threshold). */
   valueClassName?: string;
   sparkData?: number[];
@@ -34,8 +34,12 @@ export function KpiCard({
   sparkColor = 'rgb(var(--chart-1))',
 }: KpiCardProps) {
   const t = useTranslations('admin.dashboard.kpi');
-  const up = deltaPercent >= 0;
   const points = React.useMemo(() => (sparkData ?? []).map((v) => ({ v })), [sparkData]);
+
+  const hasDelta = deltaPercent != null && Number.isFinite(deltaPercent);
+  const isPositive = hasDelta && deltaPercent > 0;
+  const isNegative = hasDelta && deltaPercent < 0;
+  const isNeutral = hasDelta && deltaPercent === 0;
 
   return (
     <div className="grid grid-rows-[auto_auto_2.5rem] gap-2 rounded-card border-hairline bg-surface p-4">
@@ -44,17 +48,26 @@ export function KpiCard({
         <div className={cn('text-display-admin tabular-nums', valueClassName ?? 'text-fg')}>
           {value}
         </div>
-        <div
-          className={cn(
-            'mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs tabular-nums',
-            up ? 'text-positive' : 'text-negative',
+        <div className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs tabular-nums">
+          {hasDelta ? (
+            <>
+              <div
+                className={cn(
+                  'inline-flex items-center gap-1',
+                  isPositive && 'text-positive',
+                  isNegative && 'text-negative',
+                  isNeutral && 'text-fg-subtle',
+                )}
+              >
+                {isPositive && <ArrowUp size={12} />}
+                {isNegative && <ArrowDown size={12} />}
+                <span>{fmtPct(Math.abs(deltaPercent), { digits: 1 })}</span>
+              </div>
+              <span className="text-fg-subtle whitespace-nowrap">{t('vsPrevPeriod')}</span>
+            </>
+          ) : (
+            <span className="text-fg-subtle">—</span>
           )}
-        >
-          <div className="inline-flex items-center gap-1">
-            {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-            <span>{fmtPct(Math.abs(deltaPercent), { digits: 1 })}</span>
-          </div>
-          <span className="text-fg-subtle whitespace-nowrap">{t('vsPrevPeriod')}</span>
         </div>
       </div>
       {points.length > 0 && (

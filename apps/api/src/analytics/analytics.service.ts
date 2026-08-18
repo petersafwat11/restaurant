@@ -101,38 +101,19 @@ export class AnalyticsService {
     const restaurant = await this.requireRestaurant();
     const range = resolvePeriod(q.period, restaurant.timezone, { from: q.from, to: q.to });
     const granularity =
-      q.granularity ?? (q.period === 'today' ? 'hour' : q.period === '7d' ? 'day' : 'day');
+      q.granularity ?? (q.period === 'today' ? 'hour' : 'day');
 
-    const tz = restaurant.timezone;
-    const truncSql =
-      granularity === 'hour'
-        ? Prisma.sql`(date_trunc('hour', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`
-        : granularity === 'week'
-          ? Prisma.sql`(date_trunc('week', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`
-          : Prisma.sql`(date_trunc('day', "createdAt" AT TIME ZONE ${tz})) AT TIME ZONE ${tz}`;
-    const rows = await this.prisma.$queryRaw<
-      { bucket: Date; revenue: Prisma.Decimal; orders: bigint }[]
-    >`
-      SELECT ${truncSql} AS bucket,
-             SUM("grandTotal") AS revenue,
-             COUNT(*)::bigint AS orders
-      FROM "Order"
-      WHERE "createdAt" >= ${range.from}
-        AND "createdAt" < ${range.to}
-        AND "status" = ANY(${COMPLETED_STATUSES}::text[]::"OrderStatus"[])
-      GROUP BY 1
-      ORDER BY 1 ASC
-    `;
+    const orders = await this.prisma.order.findMany({
+      where: {
+        createdAt: { gte: range.from, lt: range.to },
+        status: { in: COMPLETED_STATUSES },
+      },
+      select: {
+        createdAt: true,
+        grandTotal: true,
+      },
+    });
 
-    const rowMap = new Map<number, { revenue: string; orders: number }>();
-    for (const r of rows) {
-      rowMap.set(new Date(r.bucket).getTime(), {
-        revenue: r.revenue?.toFixed(2) ?? '0.00',
-        orders: Number(r.orders ?? 0),
-      });
-    }
-
-    const points: RevenueTimeseriesPointDto[] = [];
     const stepMs =
       granularity === 'hour'
         ? 60 * 60_000
@@ -140,16 +121,29 @@ export class AnalyticsService {
           ? 7 * 24 * 60 * 60_000
           : 24 * 60 * 60_000;
 
+    const buckets: { time: number; revenue: Prisma.Decimal; orders: number }[] = [];
     for (let time = range.from.getTime(); time < range.to.getTime(); time += stepMs) {
-      const existing = rowMap.get(time);
-      points.push({
-        bucket: new Date(time).toISOString(),
-        revenue: existing?.revenue ?? '0.00',
-        orders: existing?.orders ?? 0,
-      });
+      buckets.push({ time, revenue: new Prisma.Decimal(0), orders: 0 });
     }
 
-    return points;
+    if (buckets.length > 0) {
+      for (const order of orders) {
+        const orderTime = order.createdAt.getTime();
+        if (orderTime < range.from.getTime() || orderTime >= range.to.getTime()) continue;
+        const bucketIndex = Math.min(
+          buckets.length - 1,
+          Math.max(0, Math.floor((orderTime - range.from.getTime()) / stepMs)),
+        );
+        buckets[bucketIndex].revenue = buckets[bucketIndex].revenue.add(order.grandTotal);
+        buckets[bucketIndex].orders += 1;
+      }
+    }
+
+    return buckets.map((b) => ({
+      bucket: new Date(b.time).toISOString(),
+      revenue: b.revenue.toFixed(2),
+      orders: b.orders,
+    }));
   }
 
   async topItems(q: TopItemsQuery): Promise<TopItemDto[]> {
@@ -355,6 +349,7 @@ export class AnalyticsService {
     const repeatRate = uniqueUsers > 0 ? repeatUsers / uniqueUsers : 0;
 
     // Avg prep minutes: time from CONFIRMED to READY in OrderStatusEvent.
+    // Filter to valid kitchen times (1 to 180 min) so test/overnight orders don't skew the metric.
     const prep = await this.prisma.$queryRaw<{ avg_minutes: number | null }[]>`
       SELECT AVG(EXTRACT(EPOCH FROM (r."createdAt" - c."createdAt"))/60.0)::float AS avg_minutes
       FROM "OrderStatusEvent" c
@@ -362,6 +357,8 @@ export class AnalyticsService {
       WHERE c.status = 'CONFIRMED'
         AND c."createdAt" >= ${from}
         AND c."createdAt" < ${to}
+        AND r."createdAt" > c."createdAt"
+        AND (EXTRACT(EPOCH FROM (r."createdAt" - c."createdAt"))/60.0) BETWEEN 1 AND 180
     `;
     const avgPrepMinutes = prep[0]?.avg_minutes ?? null;
 
@@ -453,7 +450,7 @@ function moneyDelta(curStr: string, prevStr: string) {
   return {
     value: curStr,
     delta: (cur - prev).toFixed(2),
-    deltaPercent: prev === 0 ? 0 : round2(((cur - prev) / prev) * 100),
+    deltaPercent: prev === 0 ? (cur > 0 ? 100 : 0) : round2(((cur - prev) / prev) * 100),
   };
 }
 
@@ -461,7 +458,7 @@ function numericDelta(cur: number, prev: number) {
   return {
     value: cur,
     delta: cur - prev,
-    deltaPercent: prev === 0 ? 0 : round2(((cur - prev) / prev) * 100),
+    deltaPercent: prev === 0 ? (cur > 0 ? 100 : 0) : round2(((cur - prev) / prev) * 100),
   };
 }
 

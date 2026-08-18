@@ -8,6 +8,7 @@ import {
   CHART_TOOLTIP_BORDER,
 } from '@repo/ui';
 import { fmtAxisCurrency, fmtInt, formatMoney } from '@repo/utils';
+import { useLocale } from 'next-intl';
 import {
   Area,
   AreaChart,
@@ -31,16 +32,11 @@ interface RevenueAreaChartProps {
   xInterval: number;
   currency: string;
   period?: string;
+  labelRevenue?: string;
+  labelOrders?: string;
 }
 
-const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  PLN: 'zł',
-};
-
-function formatAxisTime(iso: string, period?: string): string {
+function formatAxisTime(iso: string, period?: string, locale = 'en-US'): string {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
@@ -49,13 +45,13 @@ function formatAxisTime(iso: string, period?: string): string {
       const m = String(d.getUTCMinutes()).padStart(2, '0');
       return `${h}:${m}`;
     }
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(d);
   } catch {
     return iso;
   }
 }
 
-function formatTooltipLabel(iso: string, period?: string): string {
+function formatTooltipLabel(iso: string, period?: string, locale = 'en-US'): string {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
@@ -64,9 +60,22 @@ function formatTooltipLabel(iso: string, period?: string): string {
       const m = String(d.getUTCMinutes()).padStart(2, '0');
       return `Today ${h}:${m}`;
     }
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(d);
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d);
   } catch {
     return iso;
+  }
+}
+
+function formatAxisMoney(value: number, currency: string, locale = 'en-US'): string {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      notation: Math.abs(value) >= 1000 ? 'compact' : 'standard',
+      maximumFractionDigits: Math.abs(value) >= 1000 ? 1 : 0,
+    }).format(value);
+  } catch {
+    return `${value}`;
   }
 }
 
@@ -76,9 +85,18 @@ function ChartTooltip({
   label,
   currency,
   period,
-}: TooltipProps<number, string> & { currency: string; period?: string }) {
+  locale = 'en-US',
+  labelRevenue = 'Revenue',
+  labelOrders = 'Orders',
+}: TooltipProps<number, string> & {
+  currency: string;
+  period?: string;
+  locale?: string;
+  labelRevenue?: string;
+  labelOrders?: string;
+}) {
   if (!active || !payload?.length) return null;
-  const formattedLabel = typeof label === 'string' ? formatTooltipLabel(label, period) : label;
+  const formattedLabel = typeof label === 'string' ? formatTooltipLabel(label, period, locale) : label;
 
   return (
     <div
@@ -90,12 +108,12 @@ function ChartTooltip({
         <div key={p.dataKey as string} className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-fg-subtle">
             <span className="h-2 w-2 rounded-full" style={{ background: p.stroke as string }} />
-            {p.dataKey === 'revenue' ? 'Revenue' : 'Orders'}
+            {p.dataKey === 'revenue' ? labelRevenue : labelOrders}
           </span>
           <span className="ml-auto font-medium tabular-nums text-fg">
             {p.dataKey === 'revenue'
-              ? formatMoney(Number(p.value), currency)
-              : fmtInt(Number(p.value))}
+              ? formatMoney(Number(p.value), currency, locale)
+              : fmtInt(Number(p.value), locale)}
           </span>
         </div>
       ))}
@@ -109,12 +127,14 @@ export default function RevenueAreaChart({
   xInterval,
   currency,
   period = 'today',
+  labelRevenue = 'Revenue',
+  labelOrders = 'Orders',
 }: RevenueAreaChartProps) {
-  const currencySymbol = CURRENCY_SYMBOLS[currency.toUpperCase()] ?? '$';
+  const locale = useLocale();
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={points} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+      <AreaChart data={points} margin={{ top: 8, right: 16, left: 4, bottom: 4 }}>
         <defs>
           <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
             <stop
@@ -135,18 +155,26 @@ export default function RevenueAreaChart({
           axisLine={false}
           tickLine={false}
           tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
-          tickFormatter={(v: string) => formatAxisTime(v, period)}
+          tickFormatter={(v: string) => formatAxisTime(v, period, locale)}
           interval={xInterval}
         />
         <YAxis
           axisLine={false}
           tickLine={false}
           tick={{ fill: CHART_AXIS_COLOR, fontSize: 11 }}
-          tickFormatter={(v: number) => fmtAxisCurrency(v, currencySymbol)}
+          tickFormatter={(v: number) => formatAxisMoney(v, currency, locale)}
           width={56}
         />
         <Tooltip
-          content={<ChartTooltip currency={currency} period={period} />}
+          content={
+            <ChartTooltip
+              currency={currency}
+              period={period}
+              locale={locale}
+              labelRevenue={labelRevenue}
+              labelOrders={labelOrders}
+            />
+          }
           cursor={{ stroke: 'rgba(255,255,255,0.12)', strokeDasharray: '3 3' }}
         />
         <Area

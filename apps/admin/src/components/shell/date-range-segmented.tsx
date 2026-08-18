@@ -2,6 +2,7 @@
 
 import { Popover, PopoverContent, PopoverTrigger, cn } from '@repo/ui';
 import { Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 type RangeId = 'today' | '7d' | '30d' | 'custom';
@@ -11,13 +12,6 @@ export interface DateRange {
   from?: string;
   to?: string;
 }
-
-const SEGMENTS: { id: RangeId; label: string }[] = [
-  { id: 'today', label: 'Today' },
-  { id: '7d', label: '7 days' },
-  { id: '30d', label: '30 days' },
-  { id: 'custom', label: 'Custom' },
-];
 
 interface DateRangeSegmentedProps {
   value: DateRange;
@@ -30,6 +24,17 @@ interface DateRangeSegmentedProps {
  * opens a popover with from/to inputs.
  */
 export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps) {
+  const tPeriod = useTranslations('admin.dashboard.period');
+  const segments: { id: RangeId; label: string }[] = React.useMemo(
+    () => [
+      { id: 'today', label: tPeriod('today') },
+      { id: '7d', label: tPeriod('7d') },
+      { id: '30d', label: tPeriod('30d') },
+      { id: 'custom', label: tPeriod('custom') },
+    ],
+    [tPeriod],
+  );
+
   const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const [customOpen, setCustomOpen] = React.useState(false);
   const [draftFrom, setDraftFrom] = React.useState(value.from ?? '');
@@ -44,9 +49,9 @@ export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps)
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     e.preventDefault();
     const dir = e.key === 'ArrowRight' ? 1 : -1;
-    const next = (i + dir + SEGMENTS.length) % SEGMENTS.length;
+    const next = (i + dir + segments.length) % segments.length;
     refs.current[next]?.focus();
-    const seg = SEGMENTS[next];
+    const seg = segments[next];
     if (seg && seg.id !== 'custom') onChange({ id: seg.id });
   }
 
@@ -59,7 +64,7 @@ export function DateRangeSegmented({ value, onChange }: DateRangeSegmentedProps)
 
   return (
     <div className="relative flex h-8 items-center gap-0.5 rounded-md border-hairline-strong bg-surface p-0.5">
-      {SEGMENTS.map((seg, i) => {
+      {segments.map((seg, i) => {
         const isActive = value.id === seg.id;
         return (
           <Popover
