@@ -82,7 +82,7 @@ self.addEventListener('push', (event) => {
           icon: payload.icon ?? '/icons/admin-192.png',
           badge: payload.badge ?? '/icons/admin-notification-badge.png',
           sound: '/sounds/order-alarm.wav',
-          tag: payload.tag ?? 'new-order',
+          tag: payload.tag || `order-${Date.now()}`,
           renotify: true,
           requireInteraction: true,
           silent: false,
@@ -96,7 +96,7 @@ self.addEventListener('push', (event) => {
           await self.registration.showNotification(payload.title ?? 'New order', {
             body: payload.body ?? 'Open the admin dashboard to review it.',
             icon: payload.icon ?? '/icons/admin-192.png',
-            tag: payload.tag ?? 'new-order',
+            tag: payload.tag || `order-${Date.now()}`,
             renotify: true,
             silent: false,
             vibrate: [500, 200, 500, 200, 500, 200, 1000],
