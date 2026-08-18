@@ -44,15 +44,34 @@ self.addEventListener('push', (event) => {
         payload = {};
       }
 
-      await self.registration.showNotification(payload.title ?? 'Order update', {
-        body: payload.body ?? 'Your order status has been updated.',
-        icon: payload.icon ?? '/icon.png',
-        badge: payload.badge ?? '/icon.png',
-        tag: payload.tag ?? 'order-update',
-        renotify: true,
-        vibrate: [200, 100, 200],
-        data: { url: payload.url ?? '/' },
-      });
+      const title = payload.title ?? 'Order update';
+      const body = payload.body ?? 'Your order status has been updated.';
+      const icon = payload.icon ?? '/icon.png';
+      const tag = payload.tag ?? 'order-update';
+      const url = payload.url ?? '/';
+
+      try {
+        await self.registration.showNotification(title, {
+          body,
+          icon,
+          badge: icon,
+          tag,
+          renotify: true,
+          vibrate: [200, 100, 200],
+          data: { url },
+        });
+      } catch {
+        try {
+          await self.registration.showNotification(title, {
+            body,
+            icon,
+            tag,
+            data: { url },
+          });
+        } catch {
+          await self.registration.showNotification(title, { body });
+        }
+      }
     })(),
   );
 });

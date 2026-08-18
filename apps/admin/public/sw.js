@@ -75,17 +75,33 @@ self.addEventListener('push', (event) => {
         payload = {};
       }
 
-      await self.registration.showNotification(payload.title ?? 'New order', {
-        body: payload.body ?? 'Open the admin dashboard to review it.',
-        icon: payload.icon ?? '/icons/admin-192.png',
-        badge: payload.badge ?? '/icons/admin-notification-badge.png',
-        tag: payload.tag ?? 'new-order',
-        renotify: true,
-        requireInteraction: true,
-        vibrate: [300, 100, 300, 100, 300, 100, 600],
-        data: { url: payload.url ?? '/' },
-        actions: [{ action: 'open', title: 'Open Order' }],
-      });
+      try {
+        await self.registration.showNotification(payload.title ?? 'New order', {
+          body: payload.body ?? 'Open the admin dashboard to review it.',
+          icon: payload.icon ?? '/icons/admin-192.png',
+          badge: payload.badge ?? '/icons/admin-notification-badge.png',
+          tag: payload.tag ?? 'new-order',
+          renotify: true,
+          requireInteraction: true,
+          vibrate: [300, 100, 300, 100, 300, 100, 600],
+          data: { url: payload.url ?? '/' },
+          actions: [{ action: 'open', title: 'Open Order' }],
+        });
+      } catch {
+        // Fallback for platforms (e.g. iOS WebKit / Safari) that reject actions or badge options
+        try {
+          await self.registration.showNotification(payload.title ?? 'New order', {
+            body: payload.body ?? 'Open the admin dashboard to review it.',
+            icon: payload.icon ?? '/icons/admin-192.png',
+            tag: payload.tag ?? 'new-order',
+            data: { url: payload.url ?? '/' },
+          });
+        } catch {
+          await self.registration.showNotification(payload.title ?? 'New order', {
+            body: payload.body ?? 'Open the admin dashboard to review it.',
+          });
+        }
+      }
     })(),
   );
 });
