@@ -49,7 +49,10 @@ export function OrderAlarmBanner() {
         <div className="flex items-center justify-between gap-3 bg-accent/15 px-4 py-2 text-xs font-medium text-accent border-b border-accent/20">
           <div className="flex items-center gap-2">
             <Volume2 className="h-4 w-4 animate-bounce" />
-            <span>Audio alerts are muted by browser autoplay policy. Click to enable live order sound ringing.</span>
+            <span>
+              Audio alerts are muted by browser autoplay policy. Click to enable live order sound
+              ringing.
+            </span>
           </div>
           <Button
             size="sm"
@@ -71,7 +74,10 @@ export function OrderAlarmBanner() {
         <div className="flex items-center justify-between gap-3 bg-accent/15 px-4 py-2 text-xs font-medium text-accent border-b border-accent/20">
           <div className="flex items-center gap-2">
             <Volume2 className="h-4 w-4 animate-bounce" />
-            <span>Audio alerts are muted by browser autoplay policy. Click to enable live order sound ringing.</span>
+            <span>
+              Audio alerts are muted by browser autoplay policy. Click to enable live order sound
+              ringing.
+            </span>
           </div>
           <Button
             size="sm"
@@ -121,7 +127,11 @@ export function OrderAlarmBanner() {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-fg">
-                {isUrgent ? '⚠️ URGENT ACTION REQUIRED:' : isRinging ? '🔔 NEW ORDER ALERT:' : '⏳ SNOOZED ORDER:'}
+                {isUrgent
+                  ? '⚠️ URGENT ACTION REQUIRED:'
+                  : isRinging
+                    ? '🔔 NEW ORDER ALERT:'
+                    : '⏳ SNOOZED ORDER:'}
               </span>
               <span className="font-mono text-xs font-semibold text-fg">
                 #{primaryOrder.orderNumber}
@@ -134,7 +144,8 @@ export function OrderAlarmBanner() {
             </div>
             <div className="flex items-center gap-2 text-[11px] text-fg-subtle">
               <span>
-                {primaryOrder.customerName ?? 'Guest'} · {primaryOrder.grandTotal} {primaryOrder.currency}
+                {primaryOrder.customerName ?? 'Guest'} · {primaryOrder.grandTotal}{' '}
+                {primaryOrder.currency}
               </span>
               <span>•</span>
               <span className={cn(isUrgent && 'font-semibold text-negative')}>
@@ -194,7 +205,9 @@ export function OrderAlarmBanner() {
             variant="primary"
             className={cn(
               'h-8 text-xs font-semibold shadow-sm',
-              isUrgent ? 'bg-negative hover:bg-negative/90' : 'bg-positive hover:bg-positive/90 text-white',
+              isUrgent
+                ? 'bg-negative hover:bg-negative/90'
+                : 'bg-positive hover:bg-positive/90 text-white',
             )}
             onClick={() => void confirmOrder(primaryOrder)}
           >

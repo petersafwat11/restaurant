@@ -49,9 +49,7 @@ export function PushPermissionPrompt() {
               <Share2 className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-small font-semibold text-fg">
-                iPhone / iPad Alert Notice
-              </p>
+              <p className="text-small font-semibold text-fg">iPhone / iPad Alert Notice</p>
               <p className="text-caption-admin text-fg-muted">
                 To receive order sound and push alerts when Donald Admin is closed, tap{' '}
                 <span className="font-semibold text-fg">Share (⎋)</span> in Safari and choose{' '}
@@ -90,7 +88,8 @@ export function PushPermissionPrompt() {
                 Enable Order Push Notifications &amp; Sound
               </p>
               <p className="text-caption-admin text-fg-muted">
-                Receive instant ring chimes and push alerts when new orders arrive, even when this app is closed.
+                Receive instant ring chimes and push alerts when new orders arrive, even when this
+                app is closed.
               </p>
             </div>
           </div>
@@ -139,7 +138,8 @@ export function PushPermissionPrompt() {
           <div className="flex items-center gap-2.5 min-w-0">
             <Info className="h-4 w-4 text-negative shrink-0" />
             <p className="text-caption-admin text-fg-muted">
-              Notifications are blocked in your browser. Allow notifications in site settings to receive order alerts.
+              Notifications are blocked in your browser. Allow notifications in site settings to
+              receive order alerts.
             </p>
           </div>
           <button

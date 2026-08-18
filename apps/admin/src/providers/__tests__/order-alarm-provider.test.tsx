@@ -20,8 +20,12 @@ vi.mock('@/lib/api-client', () => ({
 }));
 
 vi.mock('@/stores/auth-store', () => ({
-  useAuthStore: (selector: (s: { user: { id: string } | null; hasPermission: (k: string) => boolean }) => unknown) =>
-    selector({ user: { id: 'user-1' }, hasPermission: () => true }),
+  useAuthStore: (
+    selector: (s: {
+      user: { id: string } | null;
+      hasPermission: (k: string) => boolean;
+    }) => unknown,
+  ) => selector({ user: { id: 'user-1' }, hasPermission: () => true }),
 }));
 
 vi.mock('@/i18n/navigation', () => ({

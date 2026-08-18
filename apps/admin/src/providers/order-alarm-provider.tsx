@@ -7,7 +7,15 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { OrderCreatedEvent, OrderListItemDto, OrderStatusChangedEvent } from '@repo/types';
 import { ROOMS } from '@repo/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useAdvanceOrder } from '../features/orders/hooks/use-advance-order';
 import { orderAlarmAudio } from '../features/orders/lib/web-audio-alarm';
 import { orderQueryKeys } from '../features/orders/query-keys';
@@ -95,12 +103,15 @@ function writeStorageSnoozed(value: Record<string, SnoozeRecord>): void {
 export function OrderAlarmProvider({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const hasPermission = useAuthStore((s) => s.hasPermission);
-  const canReadOrders = Boolean(user && (typeof hasPermission === 'function' ? hasPermission('order:read') : true));
+  const canReadOrders = Boolean(
+    user && (typeof hasPermission === 'function' ? hasPermission('order:read') : true),
+  );
   const qc = useQueryClient();
   const advanceMutation = useAdvanceOrder();
 
   const [isMuted, setIsMutedState] = useState<boolean>(readStorageMuted);
-  const [snoozedOrders, setSnoozedOrders] = useState<Record<string, SnoozeRecord>>(readStorageSnoozed);
+  const [snoozedOrders, setSnoozedOrders] =
+    useState<Record<string, SnoozeRecord>>(readStorageSnoozed);
   const [isAudioBlocked, setIsAudioBlocked] = useState<boolean>(false);
   const [now, setNow] = useState<number>(Date.now());
 
@@ -299,74 +310,83 @@ export function OrderAlarmProvider({ children }: { children: React.ReactNode }) 
     }
   }, [shouldRing]);
 
-  const snoozeOrder = useCallback((orderId: string, minutes = 5) => {
-    const target = pendingOrders.find((o) => o.id === orderId);
-    const orderNumber = target?.orderNumber ?? orderId;
-    const createdAtMs = target ? new Date(target.createdAt).getTime() : Date.now();
-    const minutesPending = Math.max(1, Math.round((Date.now() - createdAtMs) / 60_000));
+  const snoozeOrder = useCallback(
+    (orderId: string, minutes = 5) => {
+      const target = pendingOrders.find((o) => o.id === orderId);
+      const orderNumber = target?.orderNumber ?? orderId;
+      const createdAtMs = target ? new Date(target.createdAt).getTime() : Date.now();
+      const minutesPending = Math.max(1, Math.round((Date.now() - createdAtMs) / 60_000));
 
-    setSnoozedOrders((prev) => {
-      const next = {
-        ...prev,
-        [orderId]: {
-          orderId,
-          orderNumber,
-          snoozedAt: Date.now(),
-          reAlarmAt: Date.now() + minutes * 60_000,
-          minutesPending,
-        },
-      };
-      writeStorageSnoozed(next);
-      return next;
-    });
-
-    notify('info', `Order #${orderNumber} snoozed for ${minutes} min`);
-  }, [pendingOrders]);
-
-  const snoozeAll = useCallback((minutes = 5) => {
-    const current = Date.now();
-    const newSnoozes: Record<string, SnoozeRecord> = {};
-    for (const order of activeRingingOrders) {
-      const createdAtMs = new Date(order.createdAt).getTime();
-      const minutesPending = Math.max(1, Math.round((current - createdAtMs) / 60_000));
-      newSnoozes[order.id] = {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        snoozedAt: current,
-        reAlarmAt: current + minutes * 60_000,
-        minutesPending,
-      };
-    }
-    setSnoozedOrders((prev) => {
-      const next = { ...prev, ...newSnoozes };
-      writeStorageSnoozed(next);
-      return next;
-    });
-    orderAlarmAudio.stop();
-    notify('info', `All pending orders snoozed for ${minutes} min`);
-  }, [activeRingingOrders]);
-
-  const confirmOrder = useCallback(async (order: OrderListItemDto) => {
-    try {
-      await advanceMutation.mutateAsync({
-        orderId: order.id,
-        currentStatus: 'PENDING',
-        type: order.type,
-        to: 'CONFIRMED',
-      });
-      // Remove immediately from state
-      setPendingOrders((prev) => prev.filter((o) => o.id !== order.id));
       setSnoozedOrders((prev) => {
-        if (!prev[order.id]) return prev;
-        const next = { ...prev };
-        delete next[order.id];
+        const next = {
+          ...prev,
+          [orderId]: {
+            orderId,
+            orderNumber,
+            snoozedAt: Date.now(),
+            reAlarmAt: Date.now() + minutes * 60_000,
+            minutesPending,
+          },
+        };
         writeStorageSnoozed(next);
         return next;
       });
-    } catch {
-      // Error handled by advanceMutation onError
-    }
-  }, [advanceMutation]);
+
+      notify('info', `Order #${orderNumber} snoozed for ${minutes} min`);
+    },
+    [pendingOrders],
+  );
+
+  const snoozeAll = useCallback(
+    (minutes = 5) => {
+      const current = Date.now();
+      const newSnoozes: Record<string, SnoozeRecord> = {};
+      for (const order of activeRingingOrders) {
+        const createdAtMs = new Date(order.createdAt).getTime();
+        const minutesPending = Math.max(1, Math.round((current - createdAtMs) / 60_000));
+        newSnoozes[order.id] = {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          snoozedAt: current,
+          reAlarmAt: current + minutes * 60_000,
+          minutesPending,
+        };
+      }
+      setSnoozedOrders((prev) => {
+        const next = { ...prev, ...newSnoozes };
+        writeStorageSnoozed(next);
+        return next;
+      });
+      orderAlarmAudio.stop();
+      notify('info', `All pending orders snoozed for ${minutes} min`);
+    },
+    [activeRingingOrders],
+  );
+
+  const confirmOrder = useCallback(
+    async (order: OrderListItemDto) => {
+      try {
+        await advanceMutation.mutateAsync({
+          orderId: order.id,
+          currentStatus: 'PENDING',
+          type: order.type,
+          to: 'CONFIRMED',
+        });
+        // Remove immediately from state
+        setPendingOrders((prev) => prev.filter((o) => o.id !== order.id));
+        setSnoozedOrders((prev) => {
+          if (!prev[order.id]) return prev;
+          const next = { ...prev };
+          delete next[order.id];
+          writeStorageSnoozed(next);
+          return next;
+        });
+      } catch {
+        // Error handled by advanceMutation onError
+      }
+    },
+    [advanceMutation],
+  );
 
   const value = useMemo<OrderAlarmContextValue>(
     () => ({

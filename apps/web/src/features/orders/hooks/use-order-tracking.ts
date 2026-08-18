@@ -63,10 +63,11 @@ function playStatusChime(): void {
     const now = ctx.currentTime;
 
     // Two pleasant upward tones: C5 (523Hz) -> G5 (784Hz)
-    [
+    const notes = [
       { freq: 523.25, time: now },
       { freq: 783.99, time: now + 0.15 },
-    ].forEach(({ freq, time }) => {
+    ];
+    for (const { freq, time } of notes) {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
@@ -78,7 +79,7 @@ function playStatusChime(): void {
       gain.connect(ctx.destination);
       osc.start(time);
       osc.stop(time + 0.38);
-    });
+    }
   } catch {
     // Autoplay or browser restriction — ignore gracefully
   }

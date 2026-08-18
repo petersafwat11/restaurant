@@ -101,11 +101,14 @@ class WebAudioAlarmEngine {
     // Try to unlock context if needed and start loop
     const ctx = this.getAudioContext();
     if (ctx && ctx.state === 'suspended') {
-      ctx.resume().then(() => {
-        tick();
-      }).catch(() => {
-        tick();
-      });
+      ctx
+        .resume()
+        .then(() => {
+          tick();
+        })
+        .catch(() => {
+          tick();
+        });
     } else {
       tick();
     }
