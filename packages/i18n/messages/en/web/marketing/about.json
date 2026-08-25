@@ -2,9 +2,10 @@
   "eyebrow": "Our story",
   "title": "A kebab shop in Kielce, since 2019.",
   "description": "We're a small kebab and falafel place on Ściegiennego. Everything is made to order — there's no freezer in the building.",
-  "paragraph1": "Everything is prepared fresh throughout the day.",
-  "paragraph2": "A cosy little place, run since 2019.",
-  "paragraph3": "We hope to welcome you through our doors. See you soon!",
+  "imageAlt": "Meat being carved from the spit at Szef Donald in Kielce",
+  "paragraph1": "The bread is baked through the day, so it reaches you warm. We roll the falafel by hand each morning, and the meat goes into its marinade the night before it ever meets the grill. It's slower than it needs to be. That's the point.",
+  "paragraph2": "Three of us run the place — two at the grill, one at the counter — and we've kept it small on purpose. When it's busy you might wait an extra minute. You're waiting because someone is actually making your wrap, not pulling it out of a warmer.",
+  "paragraph3": "Seven years in, not much has changed. Same corner of Ściegiennego, same recipes, same faces behind the counter. If you're in Kielce, come and eat — that's the whole idea.",
   "stats": {
     "yearsValue": "7 years",
     "yearsLabel": "Open since 2019",

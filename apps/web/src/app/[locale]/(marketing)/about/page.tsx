@@ -43,10 +43,20 @@ export default async function AboutPage({
 
       <section className="bg-surface py-section-y-mobile sm:py-section-y">
         <Container>
-          <div className="mx-auto flex max-w-2xl flex-col gap-4 text-body-l text-fg">
-            <p>{t('paragraph1')}</p>
-            <p className="text-fg-muted">{t('paragraph2')}</p>
-            <p className="text-fg-muted">{t('paragraph3')}</p>
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="aspect-[4/5] w-full overflow-hidden rounded-image-lg bg-surface-warm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1559329007-40df8a9345d8?auto=format&fit=crop&w=1100&q=85"
+                alt={t('imageAlt')}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="flex flex-col gap-4 text-body-l text-fg">
+              <p>{t('paragraph1')}</p>
+              <p className="text-fg-muted">{t('paragraph2')}</p>
+              <p className="text-fg-muted">{t('paragraph3')}</p>
+            </div>
           </div>
         </Container>
       </section>
