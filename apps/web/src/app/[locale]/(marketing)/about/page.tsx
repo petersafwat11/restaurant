@@ -43,8 +43,9 @@ export default async function AboutPage({
 
       <section className="bg-surface py-section-y-mobile sm:py-section-y">
         <Container>
-          <div className="mx-auto max-w-2xl text-body-l text-fg">
+          <div className="mx-auto flex max-w-2xl flex-col gap-4 text-body-l text-fg">
             <p>{t('paragraph1')}</p>
+            <p className="text-fg-muted">{t('paragraph2')}</p>
           </div>
         </Container>
       </section>
