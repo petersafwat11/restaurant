@@ -54,7 +54,11 @@ export function LivePanel({ period, from, to }: LivePanelProps) {
         <Stat
           label={t('repeatRate')}
           sub={t('repeatRateSub', { period: tPeriod(period) })}
-          value={live?.repeatRate.value != null ? fmtPct(live.repeatRate.value * 100, { digits: 1 }) : '—'}
+          value={
+            live?.repeatRate.value != null
+              ? fmtPct(live.repeatRate.value * 100, { digits: 1 })
+              : '—'
+          }
         />
       </div>
 

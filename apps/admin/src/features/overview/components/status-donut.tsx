@@ -2,7 +2,7 @@
 
 import { useOrdersByStatus } from '@/features/analytics/hooks';
 import type { AnalyticsPeriod, OrderStatus } from '@repo/types';
-import { Spinner, STATUS_TOKENS } from '@repo/ui';
+import { STATUS_TOKENS, Spinner } from '@repo/ui';
 import { fmtInt } from '@repo/utils';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';

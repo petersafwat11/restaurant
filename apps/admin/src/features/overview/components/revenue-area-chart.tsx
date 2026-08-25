@@ -45,7 +45,11 @@ function formatAxisTime(iso: string, period?: string, locale = 'en-US'): string 
       const m = String(d.getUTCMinutes()).padStart(2, '0');
       return `${h}:${m}`;
     }
-    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(d);
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    }).format(d);
   } catch {
     return iso;
   }
@@ -60,7 +64,12 @@ function formatTooltipLabel(iso: string, period?: string, locale = 'en-US'): str
       const m = String(d.getUTCMinutes()).padStart(2, '0');
       return `Today ${h}:${m}`;
     }
-    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d);
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(d);
   } catch {
     return iso;
   }
@@ -96,7 +105,8 @@ function ChartTooltip({
   labelOrders?: string;
 }) {
   if (!active || !payload?.length) return null;
-  const formattedLabel = typeof label === 'string' ? formatTooltipLabel(label, period, locale) : label;
+  const formattedLabel =
+    typeof label === 'string' ? formatTooltipLabel(label, period, locale) : label;
 
   return (
     <div
@@ -134,10 +144,7 @@ export default function RevenueAreaChart({
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart
-        data={points}
-        margin={{ top: 8, right: showOrders ? 32 : 16, left: 4, bottom: 4 }}
-      >
+      <AreaChart data={points} margin={{ top: 8, right: showOrders ? 32 : 16, left: 4, bottom: 4 }}>
         <defs>
           <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
             <stop
@@ -152,16 +159,8 @@ export default function RevenueAreaChart({
             />
           </linearGradient>
           <linearGradient id="ordersGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="0%"
-              stopColor="rgb(var(--chart-2))"
-              stopOpacity={0.25}
-            />
-            <stop
-              offset="100%"
-              stopColor="rgb(var(--chart-2))"
-              stopOpacity={0.0}
-            />
+            <stop offset="0%" stopColor="rgb(var(--chart-2))" stopOpacity={0.25} />
+            <stop offset="100%" stopColor="rgb(var(--chart-2))" stopOpacity={0.0} />
           </linearGradient>
         </defs>
         <CartesianGrid stroke={CHART_GRID_COLOR} vertical={false} />

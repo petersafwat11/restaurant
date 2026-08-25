@@ -36,10 +36,7 @@ export function KpiRow({ period, from, to, currency = 'USD' }: KpiRowProps) {
   );
   const sparkOrders = React.useMemo(() => (series.data ?? []).map((p) => p.orders), [series.data]);
   const sparkAov = React.useMemo(
-    () =>
-      (series.data ?? []).map((p) =>
-        p.orders > 0 ? Number(p.revenue) / p.orders : 0,
-      ),
+    () => (series.data ?? []).map((p) => (p.orders > 0 ? Number(p.revenue) / p.orders : 0)),
     [series.data],
   );
   const sparkCompletionRate = React.useMemo(
