@@ -28,13 +28,25 @@ export default function MenuPage() {
 
   const [activeCategoryId, setActiveCategoryId] = React.useState<string | null>(null);
   const [filter, setFilter] = React.useState<ItemFilter>('all');
+  // Store only the item id — the item itself is derived from live tree data so
+  // image add/remove/reorder mutations (which invalidate the tree) are
+  // reflected in the open drawer immediately.
   const [drawerState, setDrawerState] = React.useState<
-    { mode: 'edit'; item: MenuItemDto } | { mode: 'create' } | null
+    { mode: 'edit'; itemId: string } | { mode: 'create' } | null
   >(null);
   const [deletingCategory, setDeletingCategory] = React.useState<MenuCategoryDto | null>(null);
   const [createCategoryOpen, setCreateCategoryOpen] = React.useState(false);
 
   const categories = tree.data?.categories ?? [];
+
+  const editItem = React.useMemo<MenuItemDto | null>(() => {
+    if (drawerState?.mode !== 'edit') return null;
+    for (const c of categories) {
+      const found = c.items.find((i) => i.id === drawerState.itemId);
+      if (found) return found;
+    }
+    return null;
+  }, [categories, drawerState]);
 
   // Auto-select first category when the tree resolves
   React.useEffect(() => {
@@ -70,7 +82,7 @@ export default function MenuPage() {
               category={activeCategory}
               filter={filter}
               onFilterChange={setFilter}
-              onOpenItem={(item) => setDrawerState({ mode: 'edit', item })}
+              onOpenItem={(item) => setDrawerState({ mode: 'edit', itemId: item.id })}
               onCreateItem={() => setDrawerState({ mode: 'create' })}
               loading={tree.isLoading}
             />
@@ -79,7 +91,7 @@ export default function MenuPage() {
       </div>
 
       <ItemEditorDrawer
-        item={drawerState?.mode === 'edit' ? drawerState.item : null}
+        item={drawerState?.mode === 'edit' ? editItem : null}
         category={activeCategory}
         onOpenChange={(open) => !open && setDrawerState(null)}
         mode={drawerState?.mode === 'create' ? 'create' : 'edit'}

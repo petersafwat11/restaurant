@@ -19,6 +19,18 @@
       "trailing": "."
     }
   },
+  "account": {
+    "title": "Your password",
+    "description": "Change the password you use to sign in to the admin dashboard.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordHint": "At least 8 characters with uppercase, lowercase, and a number.",
+    "save": "Change password",
+    "saving": "Saving…",
+    "discard": "Discard",
+    "saved": "Password changed"
+  },
   "financials": {
     "title": "Financials",
     "description": "Tax and delivery defaults applied to every order.",

@@ -1,6 +1,7 @@
 {
   "ariaLabel": "Szczegóły klienta",
   "anonymous": "(brak nazwy)",
+  "setPassword": "Ustaw hasło",
   "segment": {
     "vip": "VIP",
     "frequent": "STALI",

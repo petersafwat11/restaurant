@@ -21,6 +21,16 @@ export const ChangePasswordSchema = z
   });
 export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
 
+/**
+ * Owner-only: force-set another user's password (staff or customer). No
+ * current-password check — the caller is authorised by the
+ * `user:set_password` permission instead.
+ */
+export const AdminSetUserPasswordSchema = z.object({
+  newPassword: PasswordSchema,
+});
+export type AdminSetUserPasswordDto = z.infer<typeof AdminSetUserPasswordSchema>;
+
 export const UserPublicSchema = z.object({
   id: z.string(),
   firstName: z.string().nullable(),

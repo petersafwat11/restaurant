@@ -53,6 +53,7 @@ const ALL_PERMISSIONS = [
   'contact:reply',
   'contact:notes',
   'flags:write',
+  'user:set_password',
 ] as const;
 
 type PermissionKey = (typeof ALL_PERMISSIONS)[number];

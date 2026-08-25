@@ -1,7 +1,17 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { hashPassword, verifyPassword } from '@repo/auth-core';
-import type { ChangePasswordDto, MeDto, UpdateProfileDto } from '@repo/types';
+import type {
+  AdminSetUserPasswordDto,
+  ChangePasswordDto,
+  MeDto,
+  UpdateProfileDto,
+} from '@repo/types';
 import { PrismaService } from '../prisma/prisma.service';
+
+interface Actor {
+  userId: string;
+  roleKeys: string[];
+}
 
 @Injectable()
 export class UsersService {
@@ -67,5 +77,29 @@ export class UsersService {
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  /**
+   * Owner-only: force-set another user's password (staff or customer).
+   * Defence-in-depth — the route is already guarded by `user:set_password`
+   * (granted to the owner role only), but the actor's roles are re-checked
+   * here so a mis-seeded role can never reach this path.
+   */
+  async adminSetPassword(actor: Actor, userId: string, dto: AdminSetUserPasswordDto): Promise<void> {
+    if (!actor.roleKeys.includes('owner')) {
+      throw new ForbiddenException('Only an owner can set another user\'s password');
+    }
+
+    const target = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!target) throw new NotFoundException('User not found');
+
+    const passwordHash = await hashPassword(dto.newPassword);
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
   }
 }

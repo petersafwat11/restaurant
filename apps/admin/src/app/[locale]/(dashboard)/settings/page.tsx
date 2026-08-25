@@ -2,7 +2,11 @@
 
 import { PwaSettingsCard } from '@/components/pwa/pwa-settings-card';
 import { usePageHeader } from '@/components/shell/page-title-context';
-import { FinancialsSettingsCard, ReservationsSettingsCard } from '@/features/settings/components';
+import {
+  AccountPasswordCard,
+  FinancialsSettingsCard,
+  ReservationsSettingsCard,
+} from '@/features/settings/components';
 import { useRestaurantSettings } from '@/features/settings/hooks';
 import { Link } from '@/i18n/navigation';
 import type { HolidayDto } from '@repo/types';
@@ -107,6 +111,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <AccountPasswordCard />
         <PwaSettingsCard />
         <FinancialsSettingsCard settings={s} />
         <ReservationsSettingsCard settings={s} />

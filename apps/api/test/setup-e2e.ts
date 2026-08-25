@@ -215,6 +215,7 @@ const ALL_PERMISSIONS = [
   'contact:reply',
   'contact:notes',
   'flags:write',
+  'user:set_password',
 ];
 
 /**

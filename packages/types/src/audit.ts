@@ -14,14 +14,14 @@ export const AUDIT_ACTIONS = [
   'staff:invite',
   'staff:create',
   'staff:role_change',
-  'staff:deactivate',
-  'staff:reactivate',
+  'staff:delete',
   'settings:write',
   'review:moderate',
   'reservation:cancel',
   'reservation:seat',
   'reservation:no_show',
   'reservation:complete',
+  'user:set_password',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

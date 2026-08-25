@@ -44,6 +44,7 @@ export const PERMISSION_KEYS = [
   'contact:notes',
   'promotion:archive',
   'flags:write',
+  'user:set_password',
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];

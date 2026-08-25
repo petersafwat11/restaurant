@@ -2,6 +2,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -227,33 +228,42 @@ export class StaffService {
     };
   }
 
-  async deactivate(actor: Actor, userId: string): Promise<{ success: true }> {
+  /**
+   * Permanently removes a user account (owner-only). Review rows are deleted
+   * first because Review.userId is FK-RESTRICT; relation-less author columns
+   * (CustomerNote, UserTag) are cleaned up so no orphaned rows remain.
+   * Everything else cascades or SET NULLs per schema.
+   */
+  async remove(actor: Actor, userId: string): Promise<{ success: true }> {
+    if (!actor.roleKeys.includes('owner')) {
+      throw new ForbiddenException('Only an owner can delete user accounts');
+    }
+    if (actor.userId === userId) {
+      throw new BadRequestException('You cannot delete your own account');
+    }
+
     const target = await this.prisma.user.findUnique({
       where: { id: userId },
       include: { roles: { include: { role: { select: { key: true } } } } },
     });
     if (!target) throw new NotFoundException('User not found');
 
-    const targetKeys = target.roles.map((r) => r.role.key);
-    if (
-      !actor.roleKeys.includes('owner') &&
-      (targetKeys.includes('owner') || targetKeys.includes('manager'))
-    ) {
-      throw new ForbiddenException('Cannot deactivate this user');
+    try {
+      await this.prisma.$transaction([
+        this.prisma.review.deleteMany({ where: { userId } }),
+        this.prisma.customerNote.deleteMany({ where: { OR: [{ userId }, { byUserId: userId }] } }),
+        this.prisma.userTag.deleteMany({ where: { OR: [{ userId }, { byUserId: userId }] } }),
+        this.prisma.user.delete({ where: { id: userId } }),
+      ]);
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+        throw new ConflictException(
+          'This user still has records referencing them and cannot be deleted',
+        );
+      }
+      throw err;
     }
 
-    await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: userId }, data: { isActive: false } }),
-      this.prisma.refreshToken.updateMany({
-        where: { userId, revokedAt: null },
-        data: { revokedAt: new Date() },
-      }),
-    ]);
-    return { success: true };
-  }
-
-  async reactivate(userId: string): Promise<{ success: true }> {
-    await this.prisma.user.update({ where: { id: userId }, data: { isActive: true } });
     return { success: true };
   }
 

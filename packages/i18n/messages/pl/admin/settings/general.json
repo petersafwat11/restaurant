@@ -19,6 +19,18 @@
       "trailing": "."
     }
   },
+  "account": {
+    "title": "Twoje hasło",
+    "description": "Zmień hasło używane do logowania do panelu administracyjnego.",
+    "currentPassword": "Obecne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Powtórz nowe hasło",
+    "passwordHint": "Minimum 8 znaków, w tym wielka i mała litera oraz cyfra.",
+    "save": "Zmień hasło",
+    "saving": "Zapisywanie…",
+    "discard": "Odrzuć",
+    "saved": "Hasło zostało zmienione"
+  },
   "financials": {
     "title": "Finanse",
     "description": "Domyślne podatki i opłaty za dostawę stosowane do każdego zamówienia.",

@@ -4,14 +4,10 @@ import { usePageHeader } from '@/components/shell/page-title-context';
 import { RequirePermission } from '@/features/auth/components';
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { CreateStaffAccountModal } from '@/features/staff/components';
-import {
-  useDeactivateStaff,
-  useReactivateStaff,
-  useStaff,
-  useUpdateStaffRole,
-} from '@/features/staff/hooks';
+import { SetPasswordModal } from '@/features/staff/components/set-password-modal';
+import { useDeleteStaff, useStaff, useUpdateStaffRole } from '@/features/staff/hooks';
 import { STAFF_ROLE_KEYS, type StaffMemberDto, type StaffRoleKey } from '@repo/types';
-import { Button, type ColumnDef, DataTable, RelativeTime } from '@repo/ui';
+import { ActionModal, Button, type ColumnDef, DataTable, RelativeTime } from '@repo/ui';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -20,9 +16,12 @@ export default function StaffPage() {
   const t = useTranslations('admin.staff');
   const { has, user } = usePermissions();
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [deleting, setDeleting] = React.useState<StaffMemberDto | null>(null);
+  const [passwordTarget, setPasswordTarget] = React.useState<StaffMemberDto | null>(null);
 
   const canWrite = has('staff:write');
   const canCreate = canWrite && Boolean(user?.roles.includes('owner'));
+  const canSetPassword = has('user:set_password');
   const currentUserId = user?.id;
 
   usePageHeader({
@@ -36,11 +35,9 @@ export default function StaffPage() {
 
   const q = useStaff();
   const updateRole = useUpdateStaffRole();
-  const deactivate = useDeactivateStaff();
-  const reactivate = useReactivateStaff();
+  const removeStaff = useDeleteStaff();
   const { mutate: mutateUpdateRole, isPending: isUpdatingRole } = updateRole;
-  const { mutate: mutateDeactivate, isPending: isDeactivating } = deactivate;
-  const { mutate: mutateReactivate, isPending: isReactivating } = reactivate;
+  const { mutate: mutateRemove, isPending: isRemoving } = removeStaff;
 
   const rows = q.data ?? [];
 
@@ -137,7 +134,7 @@ export default function StaffPage() {
         cell: ({ row }) => {
           const r = row.original;
           const isSelf = r.id === currentUserId;
-          if (!canWrite || isSelf) return null;
+          if ((!canWrite && !canSetPassword) || isSelf) return null;
           return (
             <div
               className="flex justify-end gap-1"
@@ -145,24 +142,20 @@ export default function StaffPage() {
               onKeyDown={(e) => e.stopPropagation()}
               role="presentation"
             >
-              {r.isActive ? (
+              {canSetPassword && (
+                <Button variant="ghost" size="sm" onClick={() => setPasswordTarget(r)}>
+                  {t('actions.setPassword')}
+                </Button>
+              )}
+              {canWrite && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  disabled={isDeactivating}
-                  onClick={() => mutateDeactivate(r.id)}
+                  disabled={isRemoving}
+                  onClick={() => setDeleting(r)}
                   className="text-negative hover:text-negative"
                 >
-                  {t('actions.disable')}
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isReactivating}
-                  onClick={() => mutateReactivate(r.id)}
-                >
-                  {t('actions.enable')}
+                  {t('actions.delete')}
                 </Button>
               )}
             </div>
@@ -170,17 +163,7 @@ export default function StaffPage() {
         },
       },
     ],
-    [
-      canWrite,
-      currentUserId,
-      mutateUpdateRole,
-      isUpdatingRole,
-      mutateDeactivate,
-      isDeactivating,
-      mutateReactivate,
-      isReactivating,
-      t,
-    ],
+    [canWrite, canSetPassword, currentUserId, mutateUpdateRole, isUpdatingRole, isRemoving, t],
   );
 
   return (
@@ -197,6 +180,43 @@ export default function StaffPage() {
         }
       />
       <CreateStaffAccountModal open={createOpen} onOpenChange={setCreateOpen} />
+      <SetPasswordModal
+        target={
+          passwordTarget
+            ? {
+                id: passwordTarget.id,
+                name:
+                  `${passwordTarget.firstName ?? ''} ${passwordTarget.lastName ?? ''}`.trim() ||
+                  passwordTarget.email,
+              }
+            : null
+        }
+        onOpenChange={(open) => !open && setPasswordTarget(null)}
+      />
+
+      {/* Hard delete confirmation — permanently removes the account and its
+          reviews/notes; it cannot be undone. */}
+      <ActionModal
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={deleting ? t('deleteModal.title') : ''}
+        description={
+          deleting
+            ? t('deleteModal.description', {
+                name:
+                  `${deleting.firstName ?? ''} ${deleting.lastName ?? ''}`.trim() || deleting.email,
+              })
+            : undefined
+        }
+        variant="destructive"
+        primary={{
+          label: isRemoving ? t('deleteModal.deleting') : t('deleteModal.confirm'),
+          loading: isRemoving,
+          onClick: () =>
+            deleting && mutateRemove(deleting.id, { onSuccess: () => setDeleting(null) }),
+        }}
+        secondary={{ label: t('deleteModal.cancel'), onClick: () => setDeleting(null) }}
+      />
     </RequirePermission>
   );
 }

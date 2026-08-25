@@ -1,7 +1,7 @@
 import StaffPage from '@/app/[locale]/(dashboard)/staff/page';
 import { renderPage, resetTestState } from '@/test/render-page';
 import { server } from '@/test/setup';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -63,5 +63,72 @@ describe('StaffPage', () => {
   it('blocks the page when both staff:read and staff:write are missing', () => {
     renderPage(<StaffPage />, { permissions: [] });
     expect(screen.getAllByText(/don.{0,2}t have access/i).length).toBeGreaterThan(0);
+  });
+
+  it('hard-deletes a staff member after confirmation', async () => {
+    let deleted = false;
+    server.use(
+      http.get(/\/admin\/staff/, () => HttpResponse.json(staff)),
+      http.delete(/\/admin\/staff\/u_manager/, () => {
+        deleted = true;
+        return HttpResponse.json({ success: true });
+      }),
+    );
+
+    renderPage(<StaffPage />, { user: { id: 'u_owner' } });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Maya Manager').length).toBeGreaterThan(0);
+    });
+
+    // Two "Delete" buttons (owner row is self, so only manager + invited).
+    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
+    expect(deleteButtons.length).toBe(2);
+    const firstDelete = deleteButtons[0];
+    if (!firstDelete) throw new Error('expected a Delete button');
+    fireEvent.click(firstDelete);
+
+    await waitFor(() => {
+      expect(screen.getByText('Delete staff account')).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete permanently' }));
+
+    await waitFor(() => {
+      expect(deleted).toBe(true);
+    });
+  });
+
+  it('opens the set-password modal and submits a new password', async () => {
+    const payloads: unknown[] = [];
+    server.use(
+      http.get(/\/admin\/staff/, () => HttpResponse.json(staff)),
+      http.post(/\/users\/u_manager\/password/, async ({ request }) => {
+        payloads.push(await request.json());
+        return HttpResponse.json({ success: true });
+      }),
+    );
+
+    renderPage(<StaffPage />, { user: { id: 'u_owner' } });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Maya Manager').length).toBeGreaterThan(0);
+    });
+
+    const setPasswordButtons = screen.getAllByRole('button', { name: 'Set password' });
+    const firstSetPassword = setPasswordButtons[0];
+    if (!firstSetPassword) throw new Error('expected a Set password button');
+    fireEvent.click(firstSetPassword);
+
+    await waitFor(() => {
+      expect(screen.getByText('Set new password')).toBeDefined();
+    });
+    fireEvent.change(screen.getByLabelText('New password'), {
+      target: { value: 'NewPassword123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Set password' }));
+
+    await waitFor(() => {
+      expect(payloads).toEqual([{ newPassword: 'NewPassword123' }]);
+    });
   });
 });

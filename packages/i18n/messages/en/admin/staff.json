@@ -19,8 +19,25 @@
     "disabled": "Disabled"
   },
   "actions": {
-    "disable": "Disable",
-    "enable": "Enable"
+    "delete": "Delete",
+    "setPassword": "Set password"
+  },
+  "deleteModal": {
+    "title": "Delete staff account",
+    "description": "Permanently delete {name}? Their account, sessions, reviews and notes are removed immediately. This cannot be undone.",
+    "confirm": "Delete permanently",
+    "deleting": "Deleting…",
+    "cancel": "Cancel"
+  },
+  "setPasswordModal": {
+    "title": "Set new password",
+    "description": "Choose a new password for {name}. Their current password stops working and active sessions are signed out.",
+    "newPassword": "New password",
+    "passwordHint": "At least 8 characters with uppercase, lowercase, and a number.",
+    "save": "Set password",
+    "saving": "Setting…",
+    "cancel": "Cancel",
+    "helper": "Share the new password with the user securely — it is never emailed."
   },
   "roles": {
     "owner": "Owner",

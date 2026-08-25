@@ -60,25 +60,24 @@ export function useUpdateStaffRole() {
   });
 }
 
-export function useDeactivateStaff() {
+export function useDeleteStaff() {
   const qc = useQueryClient();
   return useMutation<{ success: true }, ApiError, string>({
-    mutationFn: (userId) => getApiClient().staff.deactivate(userId),
+    mutationFn: (userId) => getApiClient().staff.remove(userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: staffKeys.all });
-      notify('success', 'Staff member deactivated');
+      notify('success', 'Staff member deleted');
     },
     onError: (err) => notify('error', err.message),
   });
 }
 
-export function useReactivateStaff() {
-  const qc = useQueryClient();
-  return useMutation<{ success: true }, ApiError, string>({
-    mutationFn: (userId) => getApiClient().staff.reactivate(userId),
+export function useAdminSetUserPassword() {
+  return useMutation<{ success: true }, ApiError, { userId: string; newPassword: string }>({
+    mutationFn: ({ userId, newPassword }) =>
+      getApiClient().users.setPassword(userId, { newPassword }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: staffKeys.all });
-      notify('success', 'Staff member reactivated');
+      notify('success', 'Password updated');
     },
     onError: (err) => notify('error', err.message),
   });

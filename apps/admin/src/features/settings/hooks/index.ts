@@ -57,3 +57,15 @@ export function useRemoveHoliday() {
     onError: (err) => notify('error', err.message),
   });
 }
+
+export function useChangeOwnPassword() {
+  return useMutation<{ success: true }, ApiError, { currentPassword: string; newPassword: string }>(
+    {
+      mutationFn: (input) => getApiClient().users.changePassword(input),
+      onSuccess: () => {
+        notify('success', 'Password changed');
+      },
+      onError: (err) => notify('error', err.message),
+    },
+  );
+}

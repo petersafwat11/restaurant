@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   AcceptStaffInviteSchema,
@@ -70,16 +70,10 @@ export class StaffController {
   }
 
   @Permissions('staff:write')
-  @Post('admin/staff/:userId/deactivate')
-  @AuditAction('staff:deactivate', 'staff', { idFrom: 'userId' })
-  deactivate(@CurrentUser() user: RequestUser, @Param('userId') userId: string) {
-    return this.staff.deactivate({ userId: user.id, roleKeys: user.roles }, userId);
-  }
-
-  @Permissions('staff:write')
-  @Post('admin/staff/:userId/reactivate')
-  @AuditAction('staff:reactivate', 'staff', { idFrom: 'userId' })
-  reactivate(@Param('userId') userId: string) {
-    return this.staff.reactivate(userId);
+  @Delete('admin/staff/:userId')
+  @HttpCode(200)
+  @AuditAction('staff:delete', 'staff', { idFrom: 'userId' })
+  remove(@CurrentUser() user: RequestUser, @Param('userId') userId: string) {
+    return this.staff.remove({ userId: user.id, roleKeys: user.roles }, userId);
   }
 }

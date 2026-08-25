@@ -2,6 +2,7 @@
 
 import { usePermissions } from '@/features/auth/hooks/use-permissions';
 import { useCustomer, useUpdateCustomerNote } from '@/features/customers/hooks';
+import { SetPasswordModal } from '@/features/staff/components/set-password-modal';
 import {
   Button,
   DetailDrawer,
@@ -29,8 +30,10 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
   const open = customerId !== null;
   const c = q.data;
   const [noteBody, setNoteBody] = React.useState('');
+  const [passwordOpen, setPasswordOpen] = React.useState(false);
 
   const canWriteNotes = has('customer:notes');
+  const canSetPassword = has('user:set_password');
 
   return (
     <DetailDrawer
@@ -63,6 +66,13 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
                 </span>
               )}
             </div>
+            {canSetPassword && (
+              <div className="mt-3">
+                <Button variant="outline" size="sm" onClick={() => setPasswordOpen(true)}>
+                  {t('setPassword')}
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex items-center px-6 py-4">
@@ -224,6 +234,22 @@ export function CustomerDrawer({ customerId, onOpenChange }: Props) {
               ),
             },
           ]}
+        />
+      )}
+      {canSetPassword && (
+        <SetPasswordModal
+          target={
+            c
+              ? {
+                  id: c.id,
+                  name:
+                    [c.firstName, c.lastName].filter(Boolean).join(' ') ||
+                    c.email ||
+                    t('anonymous'),
+                }
+              : null
+          }
+          onOpenChange={setPasswordOpen}
         />
       )}
     </DetailDrawer>

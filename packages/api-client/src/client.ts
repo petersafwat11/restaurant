@@ -51,6 +51,8 @@ import {
   type CheckoutQuoteRequestDto,
   CheckoutQuoteRequestSchema,
   CheckoutQuoteSchema,
+  type AdminSetUserPasswordDto,
+  AdminSetUserPasswordSchema,
   type ConfirmAccountDeletionDto,
   ConfirmAccountDeletionSchema,
   type ContactMessageDto,
@@ -570,6 +572,12 @@ export function createApiClient(opts: ApiClientOptions) {
       request('/users/me/change-password', {
         method: 'POST',
         body: ChangePasswordSchema.parse(input),
+        responseSchema: z.object({ success: z.literal(true) }),
+      }),
+    setPassword: (userId: string, input: AdminSetUserPasswordDto): Promise<{ success: true }> =>
+      request(`/users/${encodeURIComponent(userId)}/password`, {
+        method: 'POST',
+        body: AdminSetUserPasswordSchema.parse(input),
         responseSchema: z.object({ success: z.literal(true) }),
       }),
   };
@@ -1621,14 +1629,9 @@ export function createApiClient(opts: ApiClientOptions) {
         body: UpdateStaffRoleSchema.parse(input),
         responseSchema: StaffMemberSchema,
       }),
-    deactivate: (userId: string): Promise<{ success: true }> =>
-      request(`/admin/staff/${encodeURIComponent(userId)}/deactivate`, {
-        method: 'POST',
-        responseSchema: z.object({ success: z.literal(true) }),
-      }),
-    reactivate: (userId: string): Promise<{ success: true }> =>
-      request(`/admin/staff/${encodeURIComponent(userId)}/reactivate`, {
-        method: 'POST',
+    remove: (userId: string): Promise<{ success: true }> =>
+      request(`/admin/staff/${encodeURIComponent(userId)}`, {
+        method: 'DELETE',
         responseSchema: z.object({ success: z.literal(true) }),
       }),
   };

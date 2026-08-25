@@ -1,6 +1,7 @@
 {
   "ariaLabel": "Customer detail",
   "anonymous": "(no name)",
+  "setPassword": "Set password",
   "segment": {
     "vip": "VIP",
     "frequent": "FREQUENT",

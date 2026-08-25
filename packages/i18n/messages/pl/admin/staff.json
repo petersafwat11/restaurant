@@ -19,8 +19,25 @@
     "disabled": "Wyłączony"
   },
   "actions": {
-    "disable": "Wyłącz",
-    "enable": "Włącz"
+    "delete": "Usuń",
+    "setPassword": "Ustaw hasło"
+  },
+  "deleteModal": {
+    "title": "Usunięcie konta pracownika",
+    "description": "Trwale usunąć konto {name}? Konto, aktywne sesje, recenzje i notatki zostaną natychmiast usunięte. Tej operacji nie można cofnąć.",
+    "confirm": "Usuń trwale",
+    "deleting": "Usuwanie…",
+    "cancel": "Anuluj"
+  },
+  "setPasswordModal": {
+    "title": "Ustaw nowe hasło",
+    "description": "Wybierz nowe hasło dla użytkownika {name}. Obecne hasło przestanie działać, a aktywne sesje zostaną wylogowane.",
+    "newPassword": "Nowe hasło",
+    "passwordHint": "Minimum 8 znaków, w tym wielka i mała litera oraz cyfra.",
+    "save": "Ustaw hasło",
+    "saving": "Zapisywanie…",
+    "cancel": "Anuluj",
+    "helper": "Przekaż nowe hasło użytkownikowi w bezpieczny sposób — nigdy nie wysyłamy go e-mailem."
   },
   "roles": {
     "owner": "Właściciel",
