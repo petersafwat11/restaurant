@@ -6,9 +6,9 @@
  *    the production bundle. This is the regression backstop for "remove runtime
  *    mock fallbacks".
  *
- * 2. (H4, allowlist) External Unsplash imagery is only tolerated in the two
- *    marketing sections that still use placeholder photography pending
- *    owner-supplied licensed assets (`hero.tsx`, `story.tsx`). Any other
+ * 2. (H4, allowlist) External Unsplash imagery is only tolerated in the
+ *    marketing section that still uses placeholder photography pending
+ *    owner-supplied licensed assets (`hero.tsx`). Any other
  *    occurrence — e.g. a mock fixture creeping back into a rendered component —
  *    fails, and any NEW stock photo must be added to the allowlist consciously.
  *
@@ -67,11 +67,7 @@ describe('external/Unsplash imagery is allow-listed (H4)', () => {
   // Marketing sections that still use placeholder stock photos until the owner
   // uploads licensed assets (Phase H4 owner task). This list IS the registry of
   // imagery awaiting replacement — keep it SHRINKING, never growing.
-  const UNSPLASH_ALLOWLIST = new Set([
-    'features/landing/sections/hero.tsx',
-    'features/landing/sections/story.tsx',
-    'app/[locale]/(marketing)/about/page.tsx',
-  ]);
+  const UNSPLASH_ALLOWLIST = new Set(['features/landing/sections/hero.tsx']);
 
   it('only the allow-listed marketing sections reference images.unsplash.com', () => {
     const offenders = PROD_FILES.filter((f) =>
