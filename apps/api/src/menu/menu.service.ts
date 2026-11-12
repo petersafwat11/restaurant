@@ -36,7 +36,8 @@ import { UploadsService } from '../uploads/uploads.service';
 const TREE_TTL_SECONDS = 300;
 // Single-restaurant project — one tree cache key per locale for the whole menu.
 // v3 = added per-locale (pl/en) variants on top of the v2 restaurantId drop.
-const TREE_KEY_PREFIX = 'menu:tree:v3';
+// v4 = items carry `updatedAt` (sitemap lastmod).
+const TREE_KEY_PREFIX = 'menu:tree:v4';
 const treeKey = (locale: ContentLocale) => `${TREE_KEY_PREFIX}:${locale}`;
 const CONTENT_LOCALES: ContentLocale[] = ['pl', 'en'];
 const availabilityKey = (itemId: string) => `availability:${itemId}`;
@@ -552,6 +553,7 @@ function toItemDto(row: MenuItemWithImages, locale: ContentLocale = 'pl'): MenuI
     spiceLevel: row.spiceLevel,
     position: row.position,
     images: row.images.map(toImageDto),
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 

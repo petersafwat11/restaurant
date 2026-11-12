@@ -116,6 +116,9 @@ export const MenuItemSchema = z.object({
   spiceLevel: z.number().int().min(0).max(3),
   position: z.number().int().min(0),
   images: z.array(MenuItemImageSchema),
+  // ISO timestamp of the last edit — drives sitemap <lastmod>. Optional so
+  // older cached payloads still parse.
+  updatedAt: z.string().optional(),
 });
 export type MenuItemDto = z.infer<typeof MenuItemSchema>;
 

@@ -43,12 +43,6 @@ export class SeoService {
       },
     });
 
-    const agg = await this.prisma.review.aggregate({
-      where: { isVisible: true },
-      _avg: { rating: true },
-      _count: true,
-    });
-
     const address = restaurant.address as Record<string, string | null | undefined>;
     const geo = restaurant.geoPoint as { lat?: number; lng?: number } | null;
 
@@ -58,7 +52,6 @@ export class SeoService {
         description: pickLocaleN(locale, restaurant.description, restaurant.descriptionEn),
         url: `${this.baseUrl}`,
         telephone: restaurant.phone,
-        email: restaurant.email,
         image: restaurant.coverUrl ?? restaurant.logoUrl,
         logo: restaurant.logoUrl,
         address: {
@@ -75,13 +68,6 @@ export class SeoService {
         servesCuisine: restaurant.servesCuisine,
         priceRange: restaurant.priceRange,
         sameAs: restaurant.sameAs,
-      },
-      aggregateRating: {
-        ratingValue:
-          agg._count > 0 && agg._avg.rating != null
-            ? Math.round(agg._avg.rating * 10) / 10
-            : null,
-        reviewCount: agg._count,
       },
       menu: {
         name: `${restaurant.name} Menu`,

@@ -1,5 +1,5 @@
 /**
- * schema.org JSON-LD builders (Restaurant / Menu / AggregateRating). Pure —
+ * schema.org JSON-LD builders (Restaurant / Menu). Pure —
  * the API wraps these in an endpoint; the UI sprint injects the output into a
  * <script type="application/ld+json">. No runtime deps.
  */
@@ -10,7 +10,8 @@ export interface StructuredDataInput {
     description: string | null;
     url: string;
     telephone: string;
-    email: string;
+    /** Accepted for back-compat; never emitted (no email in public schema). */
+    email?: string;
     image: string | null;
     address: {
       line1?: string;
@@ -25,7 +26,11 @@ export interface StructuredDataInput {
     sameAs?: string[] | null;
     logo?: string | null;
   };
-  aggregateRating: { ratingValue: number | null; reviewCount: number };
+  /**
+   * Accepted for back-compat but NOT emitted: Google's review-snippet policy
+   * disallows self-serving `aggregateRating` on a business's own site.
+   */
+  aggregateRating?: { ratingValue: number | null; reviewCount: number };
   menu: {
     name: string;
     sections: {
@@ -49,7 +54,6 @@ export function buildStructuredData(input: StructuredDataInput): {
     name: r.name,
     url: r.url,
     telephone: r.telephone,
-    email: r.email,
     address: {
       '@type': 'PostalAddress',
       streetAddress: r.address.line1 ?? '',
@@ -77,15 +81,6 @@ export function buildStructuredData(input: StructuredDataInput): {
       '@type': 'GeoCoordinates',
       latitude: r.geo.lat,
       longitude: r.geo.lng,
-    };
-  }
-  if (input.aggregateRating.reviewCount > 0 && input.aggregateRating.ratingValue != null) {
-    restaurantNode.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: input.aggregateRating.ratingValue,
-      reviewCount: input.aggregateRating.reviewCount,
-      bestRating: 5,
-      worstRating: 1,
     };
   }
 

@@ -31,16 +31,10 @@ describe('structured-data', () => {
     expect(types).toContain('Menu');
   });
 
-  it('includes AggregateRating only when there are reviews', () => {
-    const withR = buildStructuredData(base);
-    const r = withR['@graph'][0] as Record<string, unknown>;
-    expect(r.aggregateRating).toBeDefined();
-
-    const noR = buildStructuredData({
-      ...base,
-      aggregateRating: { ratingValue: null, reviewCount: 0 },
-    });
-    expect((noR['@graph'][0] as Record<string, unknown>).aggregateRating).toBeUndefined();
+  it('never emits a self-serving AggregateRating or an email address', () => {
+    const r = buildStructuredData(base)['@graph'][0] as Record<string, unknown>;
+    expect(r.aggregateRating).toBeUndefined();
+    expect(r.email).toBeUndefined();
   });
 
   it('omits the Menu node when menu is null', () => {
