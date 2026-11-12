@@ -15,10 +15,16 @@ import { ORDER_TYPES } from './order';
 
 const PHONE_RE = /^[+\d\s()-]{7,}$/;
 
+// No user-facing strings live in this schema: issues carry no explicit
+// `message`, so the web checkout's locale-aware error map
+// (`getCheckoutErrorMap` in apps/web) translates them by issue code + path.
+// In Zod 4 an explicit schema message beats the resolver's error map, which is
+// how English copy previously leaked onto the Polish checkout.
+
 export const CheckoutAddressSchema = z.object({
-  line1: z.string().min(1, 'Enter your street address.').max(200),
+  line1: z.string().min(1).max(200),
   apartment: z.string().max(80).optional(),
-  city: z.string().min(1, 'Enter your city.').max(100),
+  city: z.string().min(1).max(100),
   country: z.string().length(2).default('PL'),
   notes: z.string().max(300).optional(),
   // Required: pin must be dropped on the map picker, so we always have a
@@ -66,9 +72,9 @@ export const CheckoutFormSchema = z
   .object({
     orderType: z.enum(ORDER_TYPES),
     contact: z.object({
-      name: z.string().min(1, 'Please enter your name.').max(80),
-      phone: z.string().regex(PHONE_RE, 'Enter a valid phone number.'),
-      email: z.string().email('Enter a valid email address.'),
+      name: z.string().min(1).max(80),
+      phone: z.string().regex(PHONE_RE),
+      email: z.string().email(),
     }),
     saveInfo: z.boolean().default(false),
     address: OptionalCheckoutAddressSchema,
@@ -78,15 +84,13 @@ export const CheckoutFormSchema = z
     paymentMethod: z.enum(CHECKOUT_PAYMENT_METHODS),
     tipAmount: z
       .string()
-      .regex(/^-?\d+(\.\d{1,2})?$/, 'Invalid tip amount.')
+      .regex(/^-?\d+(\.\d{1,2})?$/)
       .default('0'),
     promoCode: z.string().max(60).optional(),
     // Consumer-law: the customer must accept the Regulamin + Privacy Policy
     // before placing the order. Boolean (so the form default can be `false`)
     // refined to require an explicit tick.
-    acceptedTerms: z.boolean().refine((v) => v === true, {
-      message: 'Please accept the Terms and Privacy Policy to continue.',
-    }),
+    acceptedTerms: z.boolean().refine((v) => v === true),
   })
   .superRefine((data, ctx) => {
     if (data.orderType === 'DELIVERY') {
@@ -94,14 +98,12 @@ export const CheckoutFormSchema = z
         ctx.addIssue({
           code: 'custom',
           path: ['address', 'line1'],
-          message: 'Add your delivery address.',
         });
       }
       if (!data.address?.geoPoint) {
         ctx.addIssue({
           code: 'custom',
           path: ['address', 'geoPoint'],
-          message: 'Drop a pin on the map to confirm your location.',
         });
       }
     }
@@ -109,7 +111,6 @@ export const CheckoutFormSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['tableNumber'],
-        message: 'Table number required.',
       });
     }
   });

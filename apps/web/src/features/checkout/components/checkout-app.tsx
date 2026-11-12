@@ -52,6 +52,7 @@ const DeliveryLocationPicker = dynamic(
   { ssr: false },
 );
 import { Link, useRouter } from '@/i18n/navigation';
+import { getCheckoutErrorMap } from '@/lib/checkout-error-map';
 import { formatMoney, isWithinRadiusKm } from '@repo/utils';
 import {
   ArrowLeft,
@@ -74,6 +75,8 @@ export function CheckoutApp() {
   // is the single source so the order-type cards and the success page never
   // diverge. See features/checkout/estimate.ts.
   const tEta = useTranslations('web.shop.checkoutSuccess');
+  const tVal = useTranslations('validation');
+  const checkoutErrorMap = React.useMemo(() => getCheckoutErrorMap(tVal), [tVal]);
   const router = useRouter();
   const cartQuery = useCart();
   const createOrder = useCreateOrder();
@@ -136,7 +139,7 @@ export function CheckoutApp() {
   const onlinePaymentsEnabled = usePaymentConfig().data?.onlinePaymentsEnabled ?? false;
 
   const form = useForm<CheckoutFormValues, unknown, CheckoutFormInput>({
-    resolver: zodResolver(CheckoutFormSchema),
+    resolver: zodResolver(CheckoutFormSchema, { error: checkoutErrorMap }),
     mode: 'onBlur',
     defaultValues: {
       orderType: 'DELIVERY',

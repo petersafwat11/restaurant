@@ -5,5 +5,14 @@
   "passwordWeak": "Hasło musi zawierać wielką, małą literę i cyfrę",
   "passwordsDoNotMatch": "Hasła nie są zgodne",
   "invalidPhone": "Podaj poprawny numer telefonu",
-  "tooLong": "Maksymalnie {max} znaków"
+  "tooLong": "Maksymalnie {max} znaków",
+  "checkout": {
+    "nameRequired": "Podaj imię i nazwisko.",
+    "acceptTerms": "Zaakceptuj Regulamin i Politykę Prywatności, aby kontynuować.",
+    "addressRequired": "Podaj adres dostawy.",
+    "cityRequired": "Podaj miasto.",
+    "pinRequired": "Zaznacz pinezkę na mapie, aby potwierdzić lokalizację.",
+    "tableRequired": "Podaj numer stolika.",
+    "invalidTip": "Nieprawidłowa kwota napiwku."
+  }
 }

@@ -5,5 +5,14 @@
   "passwordWeak": "Password must include upper, lower and a digit",
   "passwordsDoNotMatch": "Passwords do not match",
   "invalidPhone": "Enter a valid phone number",
-  "tooLong": "Must be at most {max} characters"
+  "tooLong": "Must be at most {max} characters",
+  "checkout": {
+    "nameRequired": "Please enter your name.",
+    "acceptTerms": "Please accept the Terms and Privacy Policy to continue.",
+    "addressRequired": "Add your delivery address.",
+    "cityRequired": "Enter your city.",
+    "pinRequired": "Drop a pin on the map to confirm your location.",
+    "tableRequired": "Table number required.",
+    "invalidTip": "Invalid tip amount."
+  }
 }
