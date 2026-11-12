@@ -74,6 +74,8 @@ export interface DishFacts {
   sizes: SizeFact[];
   meats: OptionFact[];
   sauces: OptionFact[];
+  /** A sauce must be chosen — its surcharge is already in the prices above. */
+  saucesRequired: boolean;
   addons: OptionFact[];
   swaps: OptionFact[];
   /** Meat weight in grams for the default size (falls back to `item.grams`). */
@@ -114,18 +116,30 @@ export function getDishFacts(
   const byKind = (kind: GroupKind) => groups.filter((g) => groupKind(g) === kind);
 
   const sizeGroup = byKind('size')[0];
+  // The cheapest a customer can actually pay: required non-size groups (e.g.
+  // a sauce that carries a surcharge) add their cheapest `minSelect` options.
+  // Without this, "od X zł" and Offer.price would understate the real cost.
+  const requiredSurcharges = groups
+    .filter((g) => g !== sizeGroup && g.isRequired && g.minSelect > 0)
+    .flatMap((g) =>
+      [...g.options]
+        .map((o) => o.priceDelta)
+        .sort((a, b) => Number.parseFloat(a) - Number.parseFloat(b))
+        .slice(0, g.minSelect),
+    );
+  const base = sumMoneyStrings([item.basePrice, ...requiredSurcharges]);
   const sizes: SizeFact[] = sizeGroup
     ? sortByPrice(
         sizeGroup.options.map((o) => ({
           name: o.name.trim(),
-          price: sumMoneyStrings([item.basePrice, o.priceDelta]),
+          price: sumMoneyStrings([base, o.priceDelta]),
           grams: o.grams ?? null,
           isDefault: o.isDefault,
         })),
       )
     : [];
 
-  const fromPrice = sizeGroup?.isRequired && sizes[0] ? sizes[0].price : item.basePrice;
+  const fromPrice = sizeGroup?.isRequired && sizes[0] ? sizes[0].price : base;
   const defaultSize = sizes.find((s) => s.isDefault) ?? sizes[0];
   const gramsList = sizes.map((s) => s.grams).filter((g): g is number => typeof g === 'number');
   const grams = defaultSize?.grams ?? item.grams ?? null;
@@ -146,6 +160,7 @@ export function getDishFacts(
     sizes,
     meats: optionsOf('meat'),
     sauces: optionsOf('sauce'),
+    saucesRequired: byKind('sauce').some((g) => g.isRequired && g.minSelect > 0),
     addons,
     swaps: optionsOf('swap'),
     grams,

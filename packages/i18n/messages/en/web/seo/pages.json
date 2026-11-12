@@ -40,7 +40,8 @@
     "itemsCount": "{count, plural, one {# item} other {# items}}",
     "lastUpdated": "Updated: {date}",
     "pyszneRating": "{value}/5 — {count} ratings on Pyszne.pl",
-    "googleRating": "{value}/5 on Google ({count} reviews)"
+    "googleRating": "{value}/5 on Google ({count} reviews)",
+    "kebabPillarLink": "Kebab in Kielce"
   },
   "category": {
     "intro": "{description} We make everything in the {category} category on site at our restaurant, {address}. The prices below come straight from our menu and are always current — order with {fee} delivery (minimum order {minOrder}) or pick up yourself.",

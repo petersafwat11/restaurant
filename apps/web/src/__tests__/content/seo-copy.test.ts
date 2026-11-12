@@ -160,10 +160,12 @@ describe('dish page copy', () => {
     }
   }
 
-  it('prices sizes with integer-cent maths (no float drift)', () => {
+  it('prices include required surcharges (the +3 zł sauce), integer-cent maths', () => {
     const facts = getDishFacts(KEBAB.item, KEBAB.cat);
-    expect(facts.sizes.map((s) => s.price)).toEqual(['22.50', '25.50', '28.50', '32.50']);
-    expect(facts.fromPrice).toBe('22.50');
+    // base 22.50 + required sauce 3.00 + size delta
+    expect(facts.sizes.map((s) => s.price)).toEqual(['25.50', '28.50', '31.50', '35.50']);
+    expect(facts.fromPrice).toBe('25.50');
+    expect(facts.saucesRequired).toBe(true);
     expect(facts.maxGrams).toBe(300);
   });
 

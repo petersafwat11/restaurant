@@ -66,6 +66,13 @@ function bare(s: string | null): string {
   return (s ?? '').trim().replace(/[.\s]+$/, '');
 }
 
+/** First candidate that fits in 60 chars (drops the delivery note, then "Kielce"). */
+function fitTitle(candidates: string[]): string {
+  return (
+    candidates.find((c) => c.length <= 60) ?? clamp(candidates[candidates.length - 1] ?? '', 60)
+  );
+}
+
 /** ≤ max chars, cut on a word boundary. */
 export function clamp(text: string, max: number): string {
   if (text.length <= max) return text;
@@ -125,7 +132,11 @@ function buildPl(d: DishFacts, ctx: DishCopyContext): DishCopy {
     );
     choices.push(
       `Sos wybierasz sam: ${names}${
-        sameFee && Number.parseFloat(sameFee) > 0 ? ` (sos +${money(sameFee, L)})` : ''
+        sameFee && Number.parseFloat(sameFee) > 0
+          ? d.saucesRequired
+            ? ` (sos ${money(sameFee, L)} jest wliczony w podane ceny)`
+            : ` (sos +${money(sameFee, L)})`
+          : ''
       }. Jeśli lubisz ostrzej, wybierz sos ostry lub mieszany i dopisz prośbę w uwagach do zamówienia.`,
     );
   }
@@ -242,7 +253,11 @@ function buildPl(d: DishFacts, ctx: DishCopyContext): DishCopy {
 
   return {
     h1: `${d.name} w Kielcach`,
-    title: clamp(`${d.name} Kielce — dostawa ${ctx.deliveryFee} | Szef Donald`, 60),
+    title: fitTitle([
+      `${d.name} Kielce — dostawa ${ctx.deliveryFee} | Szef Donald`,
+      `${d.name} Kielce | Szef Donald`,
+      `${d.name} | Szef Donald`,
+    ]),
     metaDescription: clamp(
       `${d.name}${desc ? ` — ${lcFirst(desc)}` : ''}. Od ${money(d.fromPrice, L)}. Zamów z dostawą ${ctx.deliveryFee} lub odbierz przy Ściegiennego 68a w Kielcach.`,
       155,
@@ -297,7 +312,13 @@ function buildEn(d: DishFacts, ctx: DishCopyContext): DishCopy {
       `Pick a sauce: ${joinAlternatives(
         d.sauces.map((s) => (sameFee ? lcFirst(s.name) : surcharge(s, L))),
         L,
-      )}${sameFee && Number.parseFloat(sameFee) > 0 ? ` (sauce +${money(sameFee, L)})` : ''}. If you like it hotter, choose spicy or mixed and add a note to your order.`,
+      )}${
+        sameFee && Number.parseFloat(sameFee) > 0
+          ? d.saucesRequired
+            ? ` (the ${money(sameFee, L)} sauce is included in the prices above)`
+            : ` (sauce +${money(sameFee, L)})`
+          : ''
+      }. If you like it hotter, choose spicy or mixed and add a note to your order.`,
     );
   }
   if (d.addons.length > 0) {
@@ -396,7 +417,11 @@ function buildEn(d: DishFacts, ctx: DishCopyContext): DishCopy {
 
   return {
     h1: `${d.name} in Kielce`,
-    title: clamp(`${d.name} Kielce — ${ctx.deliveryFee} delivery | Szef Donald`, 60),
+    title: fitTitle([
+      `${d.name} Kielce — ${ctx.deliveryFee} delivery | Szef Donald`,
+      `${d.name} Kielce | Szef Donald`,
+      `${d.name} | Szef Donald`,
+    ]),
     metaDescription: clamp(
       `${d.name}${desc ? ` — ${lcFirst(desc)}` : ''}. From ${money(d.fromPrice, L)}. Order with ${ctx.deliveryFee} delivery or pick up at Ściegiennego 68a, Kielce.`,
       155,

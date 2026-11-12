@@ -78,7 +78,7 @@ export default async function AboutPage({ params }: Props) {
                       label: interpolate(tSeo.raw('common.ctaOrderDelivery') as string, vars),
                       href: '/menu',
                     }}
-                    secondary={{ label: 'Kebab Kielce', href: '/kebab-kielce' }}
+                    secondary={{ label: tSeo('common.kebabPillarLink'), href: '/kebab-kielce' }}
                   />
                 )}
               </div>

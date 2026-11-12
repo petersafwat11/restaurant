@@ -40,7 +40,8 @@
     "itemsCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
     "lastUpdated": "Aktualizacja: {date}",
     "pyszneRating": "{value}/5 — {count} ocen na Pyszne.pl",
-    "googleRating": "{value}/5 w Google ({count} opinii)"
+    "googleRating": "{value}/5 w Google ({count} opinii)",
+    "kebabPillarLink": "Kebab w Kielcach"
   },
   "category": {
     "intro": "{description} Wszystkie pozycje z kategorii {category} przygotowujemy na miejscu w naszym lokalu przy {address}. Ceny poniżej pochodzą prosto z naszego menu i są aktualne — zamówisz je z dostawą {fee} (minimalne zamówienie {minOrder}) albo odbierzesz osobiście.",

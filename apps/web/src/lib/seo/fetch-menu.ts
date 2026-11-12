@@ -5,6 +5,7 @@ import {
   MenuTreeSchema,
 } from '@repo/types';
 import { connection } from 'next/server';
+import { cache } from 'react';
 
 /** Revalidation window for the server-rendered menu (prices, availability). */
 export const MENU_REVALIDATE_SECONDS = 300;
@@ -22,8 +23,14 @@ export async function apiBase(): Promise<string | null> {
   return apiUrl ? apiUrl.replace(/\/+$/, '') : null;
 }
 
-/** Full menu tree for `locale`. Returns `null` (never throws) on API failure. */
-export async function fetchMenuTree(locale: string): Promise<MenuTreeDto | null> {
+/**
+ * Full menu tree for `locale`. Returns `null` (never throws) on API failure.
+ * Memoised per request (React `cache`) so layout, page and metadata share one
+ * fetch + Zod parse.
+ */
+export const fetchMenuTree = cache(async function fetchMenuTree(
+  locale: string,
+): Promise<MenuTreeDto | null> {
   const base = await apiBase();
   if (!base) return null;
   try {
@@ -37,7 +44,7 @@ export async function fetchMenuTree(locale: string): Promise<MenuTreeDto | null>
   } catch {
     return null;
   }
-}
+});
 
 /** Thrown when the API itself failed — distinct from a genuine 404. */
 export class MenuUnavailableError extends Error {
