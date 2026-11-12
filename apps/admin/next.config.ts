@@ -50,35 +50,16 @@ const config: NextConfig = {
 		"@repo/utils",
 		"@repo/realtime-client",
 	],
-	experimental: {
-		turbo: {
-			resolveAlias: {
-				"@prisma/client": { browser: prismaStub },
-				"@prisma/client/runtime/library": { browser: prismaStub },
-			},
+	// Next 16 builds with Turbopack by default; its config moved from
+	// `experimental.turbo` to the top-level `turbopack` key, and a custom
+	// `webpack()` hook now fails the Turbopack build. The client bundle must
+	// never pull in Prisma (@repo/utils re-exports money.ts, which imports
+	// @prisma/client), so alias it to an empty stub for the browser.
+	turbopack: {
+		resolveAlias: {
+			"@prisma/client": { browser: prismaStub },
+			"@prisma/client/runtime/library": { browser: prismaStub },
 		},
-	},
-	webpack: (config, { isServer }) => {
-		if (!isServer) {
-			config.resolve.alias = {
-				...(config.resolve.alias as Record<string, unknown>),
-				"@prisma/client/runtime/library": false,
-				"@prisma/client": false,
-			};
-			config.resolve.fallback = {
-				...config.resolve.fallback,
-				fs: false,
-				path: false,
-				crypto: false,
-				os: false,
-				stream: false,
-				tls: false,
-				net: false,
-				// node fallbacks
-				async_hooks: false,
-			};
-		}
-		return config;
 	},
 };
 

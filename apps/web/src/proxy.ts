@@ -38,7 +38,7 @@ function stripLocale(pathname: string): string {
 // even when the user is still logged in via the refresh token.
 const AUTH_COOKIE_NAMES = ['web_rt', 'web_at'] as const;
 
-export default function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const path = stripLocale(req.nextUrl.pathname);
   const isProtected = PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 

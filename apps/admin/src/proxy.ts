@@ -9,7 +9,7 @@ const intlMiddleware = createIntlMiddleware(routing);
  * only run the next-intl middleware here to resolve the locale prefix and
  * persist the cookie.
  */
-export default function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   return intlMiddleware(req);
 }
 

@@ -113,7 +113,7 @@ export function DishCard({
             alt={image.alt}
             fill
             sizes={sizes}
-            priority={image.priority}
+            preload={image.priority}
             className="object-cover transition-transform duration-web-motion ease-web-out group-hover:scale-[1.03]"
           />
         ) : (

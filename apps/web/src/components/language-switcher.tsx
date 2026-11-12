@@ -19,7 +19,7 @@ interface LanguageSwitcherProps {
 
 /**
  * Compact PL|EN pill toggle. Switches the URL locale via next-intl's
- * navigation helpers — the `NEXT_LOCALE` cookie is updated by the middleware
+ * navigation helpers — the `NEXT_LOCALE` cookie is updated by the proxy (next-intl middleware)
  * on the resulting request so the preference persists across pages.
  */
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {

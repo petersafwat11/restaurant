@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Account route group. Middleware (apps/web/src/middleware.ts) guards
+ * Account route group. Proxy (apps/web/src/proxy.ts) guards
  * with auth-cookie redirect to /login.
  */
 export default async function AccountLayout({

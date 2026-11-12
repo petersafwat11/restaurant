@@ -39,7 +39,6 @@ const config: NextConfig = {
 			},
 		],
 	},
-	experimental: {},
 };
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");

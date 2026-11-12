@@ -71,7 +71,7 @@ function Wordmark() {
 function AuthLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-bg">
-      <Image src="/auth-cover.jpg" alt="" fill priority sizes="100vw" className="object-cover" />
+      <Image src="/auth-cover.jpg" alt="" fill preload sizes="100vw" className="object-cover" />
       <div
         aria-hidden
         className="absolute inset-0 bg-gradient-to-br from-bg/95 via-bg/80 to-bg/95"
