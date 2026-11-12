@@ -30,7 +30,18 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "19.3.0",
-			"@types/react-dom": "19.3.0"
+			"@types/react-dom": "19.3.0",
+			"axios@1": "1.21.1",
+			"brace-expansion@2": "2.1.8",
+			"engine.io@6": "6.6.11",
+			"fast-uri@3": "3.1.9",
+			"follow-redirects@1": "1.16.3",
+			"form-data@4": "4.0.6",
+			"js-cookie@3": "3.0.8",
+			"socket.io-parser@4": "4.2.7",
+			"source-map-js@1": "1.2.2",
+			"ws@8": "8.22.2",
+			"@fastify/busboy@3": "3.2.5"
 		}
 	}
 }

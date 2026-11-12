@@ -28,13 +28,22 @@ async function bootstrap() {
     tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
   });
 
-  // Trust EXACTLY ONE proxy hop (Caddy). `trustProxy: true` would trust the
-  // entire X-Forwarded-For chain, letting a client spoof the left-most entry and
-  // forge `req.ip` — which would defeat every IP-keyed rate limit (login
-  // brute-force, the card-testing control on payment intents, etc.). With `1`,
-  // `req.ip` is the address Caddy appended; client-supplied XFF entries are
-  // ignored. Caddy is also configured with `trusted_proxies` as defence-in-depth.
-  const adapter = new FastifyAdapter({ logger: false, trustProxy: 1 });
+  // Trust only the Caddy hop. `trustProxy: true` would trust the entire
+  // X-Forwarded-For chain, letting a client spoof the left-most entry and forge
+  // `req.ip` — which would defeat every IP-keyed rate limit (login brute-force,
+  // the card-testing control on payment intents, etc.).
+  // Fastify >=5.12 dropped hop-count trust: `trustProxy: 1` now fails closed,
+  // making every request appear to come from Caddy's IP (one shared rate-limit
+  // bucket for all users). Trust by address instead: loopback plus the private
+  // ranges of the internal Docker network where Caddy runs (the API publishes
+  // no host port). proxy-addr walks XFF right-to-left and stops at the first
+  // untrusted (public) address, so `req.ip` is the client address Caddy
+  // appended; client-supplied XFF entries to its left are ignored. Mirrors
+  // Caddy's own `trusted_proxies static private_ranges`.
+  const adapter = new FastifyAdapter({
+    logger: false,
+    trustProxy: ['loopback', 'uniquelocal'],
+  });
 
   // Capture the raw request body for the eService webhook route — needed for
   // the SHA512(rawBody + app_key) signature verification. Replace Nest's default

@@ -15,8 +15,8 @@ import { RATE_LIMIT_KEY, type RateLimitOptions } from './rate-limit.decorator';
  * Global Redis-backed fixed-window rate limiter (plan §I1). Acts only on routes
  * carrying `@RateLimit(...)`; everything else passes through. Redis-backed so
  * the limit is shared across API replicas; uses Fastify's `request.ip` — the app
- * runs with `trustProxy: 1` (trust exactly the single Caddy hop), so `request.ip`
- * is the address Caddy appended and a client cannot spoof it via X-Forwarded-For.
+ * trusts only loopback/private-network proxies (the Caddy hop, see main.ts), so
+ * `request.ip` is the address Caddy appended and a client cannot spoof it via X-Forwarded-For.
  *
  * Registered after the auth guard so an authenticated caller can be keyed on
  * their stable user id. If Redis is unreachable the request is allowed through

@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@repo/types": "workspace:*",
-		"socket.io-client": "4.8.1"
+		"socket.io-client": "4.8.4"
 	},
 	"devDependencies": {
 		"@repo/tsconfig": "workspace:*",
