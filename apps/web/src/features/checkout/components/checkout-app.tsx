@@ -1127,7 +1127,7 @@ export function CheckoutApp() {
               onClick={() => setCompletedSteps((s) => ({ ...s, 4: true }))}
               className="self-start rounded-button border border-border/[var(--border-strong-alpha)] bg-transparent px-5 py-2 text-small font-medium text-fg hover:bg-surface-warm/30"
             >
-              {form.watch('orderNotes') ? t('continue') : t('skip')}
+              {form.watch('orderNotes') || heardAboutUs ? t('continue') : t('skip')}
             </button>
           </CheckoutSection>
 
