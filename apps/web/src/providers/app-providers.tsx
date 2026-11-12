@@ -2,6 +2,7 @@
 
 import { Toaster } from '@/components/toaster';
 import { getApiClient } from '@/lib/api-client';
+import { captureFirstTouch } from '@/lib/attribution';
 import { makeQueryClient } from '@/lib/query-client';
 import { getRealtimeClient } from '@/lib/realtime-client';
 import { useAuthStore } from '@/stores/auth-store';
@@ -36,6 +37,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
       client.disconnect();
     }
   }, [user]);
+
+  // First-touch order-source attribution (UTM / referrer host / landing path).
+  useEffect(() => {
+    captureFirstTouch();
+  }, []);
 
   // Register customer Web PWA service worker
   useEffect(() => {

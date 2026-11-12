@@ -206,6 +206,48 @@ export function OrderDrawerBody({ order }: OrderDrawerBodyProps) {
         </Section>
       )}
 
+      {order.attribution !== undefined && (
+        <Section title={t('body.sourceHeading')}>
+          {order.attribution ? (
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-md border-hairline bg-surface p-3 text-xs">
+              {(
+                [
+                  [
+                    'heardAboutUs',
+                    order.attribution.heardAboutUs
+                      ? t(
+                          `body.source.answers.${order.attribution.heardAboutUs}` as 'body.source.answers.other',
+                        )
+                      : null,
+                  ],
+                  ['referrer', order.attribution.referrerHost],
+                  [
+                    'utm',
+                    [
+                      order.attribution.utmSource,
+                      order.attribution.utmMedium,
+                      order.attribution.utmCampaign,
+                    ]
+                      .filter(Boolean)
+                      .join(' / ') || null,
+                  ],
+                  ['landingPath', order.attribution.landingPath],
+                ] as const
+              )
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <React.Fragment key={k}>
+                    <dt className="text-fg-subtle">{t(`body.source.${k}`)}</dt>
+                    <dd className="break-all text-fg-muted">{v}</dd>
+                  </React.Fragment>
+                ))}
+            </dl>
+          ) : (
+            <p className="text-xs text-fg-subtle">{t('body.source.none')}</p>
+          )}
+        </Section>
+      )}
+
       {canSetEta && (
         <Section title={t('body.etaHeading')}>
           <EtaControl order={order} />

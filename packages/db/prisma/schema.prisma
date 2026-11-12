@@ -271,6 +271,9 @@ model Restaurant {
   servesCuisine               String[] @default([])
   priceRange                  String?
   sameAs                      String[] @default([])
+  // Google Business Profile "write a review" link, used by the post-order
+  // review-request email and the tracking page. Null = feature off.
+  googleReviewUrl             String?
 
   // --- Legal entity & customer-support data (payment-provider readiness) -----
   // All nullable/additive: populated by the owner in admin against an official
@@ -512,6 +515,19 @@ model Order {
   legalBundleVersion  String?
   legalSnapshot       Json?
   legalSnapshotHash   String?
+  // First-touch marketing attribution (all optional, set at checkout) so the
+  // owner can measure which channels — Google, Maps, AI assistants — bring
+  // orders. Captured client-side on the first visit; the server keeps only
+  // the referrer host and the landing pathname (never a query string).
+  utmSource           String?
+  utmMedium           String?
+  utmCampaign         String?
+  referrerHost        String?
+  landingPath         String?
+  // Optional self-reported answer to "Skąd o nas wiesz?" (HEARD_ABOUT_US_OPTIONS).
+  heardAboutUs        String?
+  // Set once the post-order Google review request email was sent (idempotency).
+  reviewRequestSentAt DateTime?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 

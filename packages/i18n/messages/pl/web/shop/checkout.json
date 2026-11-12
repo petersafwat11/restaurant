@@ -96,7 +96,21 @@
     "notes": {
       "title": "Coś jeszcze? (opcjonalne)",
       "helper": "Dla kuchni — maks. 500 znaków.",
-      "placeholder": "Specjalne instrukcje dla kuchni…"
+      "placeholder": "Specjalne instrukcje dla kuchni…",
+      "heardAboutUs": {
+        "label": "Skąd o nas wiesz? (opcjonalnie)",
+        "placeholder": "Wybierz odpowiedź",
+        "options": {
+          "google_maps": "Mapy Google",
+          "google_search": "Wyszukiwarka Google",
+          "social": "Facebook / Instagram",
+          "friends": "Od znajomych",
+          "walk_by": "Przechodziłem/am obok",
+          "flyer": "Ulotka / opakowanie",
+          "ai_assistant": "Asystent AI (ChatGPT, Gemini…)",
+          "other": "Inne"
+        }
+      }
     },
     "payment": {
       "title": "Płatność",

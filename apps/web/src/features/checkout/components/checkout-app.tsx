@@ -11,6 +11,7 @@ import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hoo
 import { useCreateOrder } from '@/features/orders/hooks';
 import { usePaymentConfig } from '@/features/payments/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
+import { readFirstTouch } from '@/lib/attribution';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -20,7 +21,13 @@ import {
   type OrderType,
   type PaymentMethodKind,
 } from '@repo/types';
-import { CheckoutFormSchema, LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
+import {
+  CheckoutFormSchema,
+  HEARD_ABOUT_US_OPTIONS,
+  type HeardAboutUs,
+  LEGAL_BUNDLE_VERSION,
+  LEGAL_VERSION_CHANGED,
+} from '@repo/types';
 import {
   CheckoutSection,
   type CheckoutSectionStatus,
@@ -76,6 +83,9 @@ export function CheckoutApp() {
   // diverge. See features/checkout/estimate.ts.
   const tEta = useTranslations('web.shop.checkoutSuccess');
   const tVal = useTranslations('validation');
+  // Optional "Skąd o nas wiesz?" answer — kept outside the validated form so
+  // it can never block checkout.
+  const [heardAboutUs, setHeardAboutUs] = React.useState<HeardAboutUs | ''>('');
   const checkoutErrorMap = React.useMemo(() => getCheckoutErrorMap(tVal), [tVal]);
   const router = useRouter();
   const cartQuery = useCart();
@@ -647,6 +657,8 @@ export function CheckoutApp() {
         // timestamp, and writes the immutable snapshot/hash (plan §C2).
         legalAccepted: true,
         legalBundleVersion: LEGAL_BUNDLE_VERSION,
+        // Optional order-source attribution (first touch + self-reported).
+        attribution: { ...readFirstTouch(), heardAboutUs: heardAboutUs || null },
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
@@ -1079,6 +1091,23 @@ export function CheckoutApp() {
                 placeholder={t('sections.notes.placeholder')}
                 className="w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 p-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
               />
+            </FormField>
+            <FormField id="heard-about-us" label={t('sections.notes.heardAboutUs.label')} size="md">
+              <select
+                id="heard-about-us"
+                value={heardAboutUs}
+                onChange={(e) => setHeardAboutUs(e.target.value as HeardAboutUs | '')}
+                className="h-11 w-full rounded-input border border-border/[var(--border-strong-alpha)] bg-surface-2 px-3 text-small text-fg outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+              >
+                <option value="">{t('sections.notes.heardAboutUs.placeholder')}</option>
+                {HEARD_ABOUT_US_OPTIONS.map((o) => (
+                  <option key={o} value={o}>
+                    {t(
+                      `sections.notes.heardAboutUs.options.${o}` as 'sections.notes.heardAboutUs.options.other',
+                    )}
+                  </option>
+                ))}
+              </select>
             </FormField>
             <button
               type="button"

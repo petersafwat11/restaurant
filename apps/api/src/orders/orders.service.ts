@@ -17,7 +17,6 @@ import {
   QUEUE_RECEIPT,
 } from '@repo/jobs';
 import { LEGAL_BUNDLE_VERSION, LEGAL_VERSION_CHANGED } from '@repo/types';
-import type { Queue } from 'bullmq';
 import type {
   CheckoutQuoteDto,
   CheckoutQuoteRequestDto,
@@ -37,8 +36,10 @@ import type {
   OrderType,
   PaymentMethodKind,
 } from '@repo/types';
-import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils/money';
 import { isWithinRadiusKm } from '@repo/utils';
+import { Decimal, addAll, decimalToString, multiply, toDecimal } from '@repo/utils/money';
+import type { Queue } from 'bullmq';
+import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import {
   CSV_CONTENT_TYPE,
   PDF_CONTENT_TYPE,
@@ -48,13 +49,13 @@ import {
   exportFilename,
 } from '../common/table-export';
 import { buildSearchWhere } from '../common/table-search/build-search-where';
-import { AnalyticsProductService } from '../analytics-product/analytics-product.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
 import { PricingService } from '../pricing/pricing.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PromotionsService } from '../promotions/promotions.service';
 import { IdempotencyService } from './idempotency.service';
 import { buildLegalSnapshot, hashLegalSnapshot } from './legal-snapshot';
+import { attributionToColumns, columnsToAttribution } from './order-attribution';
 import { OrderNumberService } from './order-number';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
 import { computeEta, isTerminalStatus } from './order-tracking';
@@ -516,6 +517,8 @@ export class OrdersService {
             customerEmail: dto.contact?.email ?? null,
             customerPhone: dto.contact?.phone ?? null,
             checkoutLocale: dto.checkoutLocale,
+            // Optional first-touch / self-reported order source (SEO tracking).
+            ...attributionToColumns(dto.attribution),
             // Server-generated legal-acceptance evidence (plan §C2). The deprecated
             // acceptedTermsAt is kept in sync until a later migration drops it.
             acceptedTermsAt: legalAcceptedAt,
@@ -1169,6 +1172,7 @@ export class OrdersService {
       ]);
       dto.customer = customer;
       dto.payment = payment;
+      dto.attribution = columnsToAttribution(order);
     }
     return dto;
   }

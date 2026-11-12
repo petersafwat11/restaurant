@@ -66,6 +66,24 @@
       "CARD": "Card",
       "BLIK": "BLIK",
       "COD": "Cash on delivery"
+    },
+    "sourceHeading": "Order source",
+    "source": {
+      "heardAboutUs": "Heard about us via",
+      "referrer": "Referrer",
+      "utm": "UTM (source / medium / campaign)",
+      "landingPath": "Landing page",
+      "none": "No source data.",
+      "answers": {
+        "google_maps": "Google Maps",
+        "google_search": "Google search",
+        "social": "Facebook / Instagram",
+        "friends": "Friends",
+        "walk_by": "Walked past",
+        "flyer": "Flyer / packaging",
+        "ai_assistant": "AI assistant (ChatGPT, Gemini…)",
+        "other": "Other"
+      }
     }
   },
   "types": {

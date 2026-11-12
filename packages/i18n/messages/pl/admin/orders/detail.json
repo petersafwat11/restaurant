@@ -66,6 +66,24 @@
       "CARD": "Karta",
       "BLIK": "BLIK",
       "COD": "Za pobraniem"
+    },
+    "sourceHeading": "Źródło zamówienia",
+    "source": {
+      "heardAboutUs": "Skąd o nas wie",
+      "referrer": "Strona odsyłająca",
+      "utm": "UTM (źródło / medium / kampania)",
+      "landingPath": "Pierwsza odwiedzona strona",
+      "none": "Brak danych o źródle.",
+      "answers": {
+        "google_maps": "Mapy Google",
+        "google_search": "Wyszukiwarka Google",
+        "social": "Facebook / Instagram",
+        "friends": "Od znajomych",
+        "walk_by": "Przechodził(a) obok",
+        "flyer": "Ulotka / opakowanie",
+        "ai_assistant": "Asystent AI (ChatGPT, Gemini…)",
+        "other": "Inne"
+      }
     }
   },
   "types": {

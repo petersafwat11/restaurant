@@ -121,6 +121,46 @@ export const OrderContactSchema = z.object({
 });
 export type OrderContactDto = z.infer<typeof OrderContactSchema>;
 
+// ---- Order-source attribution ------------------------------------------------
+// First-touch marketing data captured on the customer's first visit plus an
+// optional self-reported "how did you hear about us?" answer. Purely
+// informational: it must never block checkout, so every field degrades to
+// `null` instead of failing validation (over-long strings are truncated,
+// unknown enum values are dropped).
+
+/** Answers for the optional checkout question "Skąd o nas wiesz?". */
+export const HEARD_ABOUT_US_OPTIONS = [
+  'google_maps',
+  'google_search',
+  'social',
+  'friends',
+  'walk_by',
+  'flyer',
+  'ai_assistant',
+  'other',
+] as const;
+export type HeardAboutUs = (typeof HEARD_ABOUT_US_OPTIONS)[number];
+
+const attributionText = (max: number) =>
+  z
+    .preprocess(
+      (v) => (typeof v === 'string' ? v.trim().slice(0, max) || null : v),
+      z.string().nullish(),
+    )
+    .catch(null);
+
+export const OrderAttributionSchema = z.object({
+  utmSource: attributionText(100),
+  utmMedium: attributionText(100),
+  utmCampaign: attributionText(150),
+  /** Referrer hostname only (e.g. `www.google.com`). */
+  referrerHost: attributionText(253),
+  /** Landing pathname only — the server strips any query string / hash. */
+  landingPath: attributionText(300),
+  heardAboutUs: z.enum(HEARD_ABOUT_US_OPTIONS).nullish().catch(null),
+});
+export type OrderAttributionDto = z.infer<typeof OrderAttributionSchema>;
+
 export const CreateOrderSchema = z
   .object({
     sessionKey: z.string().min(1).optional(), // required for guests
@@ -148,6 +188,8 @@ export const CreateOrderSchema = z
     // client-supplied `acceptedTermsAt`.
     legalAccepted: z.literal(true),
     legalBundleVersion: z.string().min(1).max(40),
+    // Optional order-source attribution (never blocks checkout — see above).
+    attribution: OrderAttributionSchema.optional().catch(undefined),
   })
   .refine((d) => d.type !== 'DELIVERY' || !!d.deliveryAddressId || !!d.deliveryAddress, {
     message: 'Delivery orders require deliveryAddressId or inline deliveryAddress',
@@ -298,6 +340,19 @@ export const OrderSchema = z.object({
   // Self/customer view leaves these null — the user already has their data.
   customer: OrderCustomerSchema.nullable().optional(),
   payment: OrderPaymentSchema.nullable().optional(),
+  // Admin-only (staff view): where the customer came from. Null when nothing
+  // was captured; undefined on customer-facing reads.
+  attribution: z
+    .object({
+      utmSource: z.string().nullable(),
+      utmMedium: z.string().nullable(),
+      utmCampaign: z.string().nullable(),
+      referrerHost: z.string().nullable(),
+      landingPath: z.string().nullable(),
+      heardAboutUs: z.enum(HEARD_ABOUT_US_OPTIONS).nullable(),
+    })
+    .nullable()
+    .optional(),
   // Signed HMAC tracking token. Populated by POST /orders and GET /orders/by-token
   // so guest sessions can re-read the order after a page refresh without auth.
   // All other endpoints leave this undefined.

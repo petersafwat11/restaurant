@@ -172,6 +172,59 @@ describe('orders (e2e)', () => {
     expect(owner.statusCode).toBe(200);
   });
 
+  it('stores order-source attribution and shows it only to staff', async () => {
+    const created = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        type: 'PICKUP',
+        tipAmount: '0',
+        ...orderLegal(),
+        attribution: {
+          utmSource: 'chatgpt.com',
+          utmMedium: 'referral',
+          utmCampaign: null,
+          referrerHost: 'https://www.google.com/search?q=kebab+kielce',
+          landingPath: '/menu/kebab/kebab-kapsalon?utm_source=chatgpt.com',
+          heardAboutUs: 'ai_assistant',
+        },
+      },
+      userToken,
+      { 'idempotency-key': 'idem-attribution' },
+    );
+    expect(created.statusCode).toBe(201);
+    const orderId = created.json().id;
+
+    const owner = await inject('GET', `/api/v1/orders/${orderId}`, undefined, ownerToken);
+    expect(owner.json().attribution).toEqual({
+      utmSource: 'chatgpt.com',
+      utmMedium: 'referral',
+      utmCampaign: null,
+      referrerHost: 'www.google.com',
+      landingPath: '/menu/kebab/kebab-kapsalon',
+      heardAboutUs: 'ai_assistant',
+    });
+
+    const own = await inject('GET', `/api/v1/orders/${orderId}`, undefined, userToken);
+    expect(own.json().attribution).toBeUndefined();
+  });
+
+  it('never rejects an order because of malformed attribution', async () => {
+    const created = await inject(
+      'POST',
+      '/api/v1/orders',
+      {
+        type: 'PICKUP',
+        tipAmount: '0',
+        ...orderLegal(),
+        attribution: { heardAboutUs: 'not-a-choice', utmSource: 'x'.repeat(500) },
+      },
+      userToken,
+      { 'idempotency-key': 'idem-attribution-bad' },
+    );
+    expect(created.statusCode).toBe(201);
+  });
+
   it('applies the coupon discount correctly when present on the cart', async () => {
     // Create a 10%-off promotion and apply to alice's cart.
     await inject(
@@ -406,7 +459,13 @@ describe('orders (e2e)', () => {
     const res = await inject(
       'POST',
       '/api/v1/orders',
-      { sessionKey, type: 'PICKUP', tipAmount: '0', paymentMethod: 'COD', ...orderLegal({ guest: true }) },
+      {
+        sessionKey,
+        type: 'PICKUP',
+        tipAmount: '0',
+        paymentMethod: 'COD',
+        ...orderLegal({ guest: true }),
+      },
       undefined,
       { 'idempotency-key': 'idem-cod-guest' },
     );
@@ -477,7 +536,9 @@ describe('orders (e2e)', () => {
     // The guest order is searchable by its snapshot contact in the admin list.
     const list = await inject('GET', '/api/v1/orders?search=Gabriela', undefined, ownerToken);
     expect(
-      list.json().items.some((o: { customerName: string | null }) => o.customerName === 'Guest Gabriela'),
+      list
+        .json()
+        .items.some((o: { customerName: string | null }) => o.customerName === 'Guest Gabriela'),
     ).toBe(true);
   });
 

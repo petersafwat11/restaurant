@@ -96,7 +96,21 @@
     "notes": {
       "title": "Anything else? (optional)",
       "helper": "For the kitchen — 500 chars max.",
-      "placeholder": "Special instructions for the kitchen…"
+      "placeholder": "Special instructions for the kitchen…",
+      "heardAboutUs": {
+        "label": "How did you hear about us? (optional)",
+        "placeholder": "Choose an answer",
+        "options": {
+          "google_maps": "Google Maps",
+          "google_search": "Google search",
+          "social": "Facebook / Instagram",
+          "friends": "Friends",
+          "walk_by": "Walked past",
+          "flyer": "Flyer / packaging",
+          "ai_assistant": "AI assistant (ChatGPT, Gemini…)",
+          "other": "Other"
+        }
+      }
     },
     "payment": {
       "title": "Payment",
