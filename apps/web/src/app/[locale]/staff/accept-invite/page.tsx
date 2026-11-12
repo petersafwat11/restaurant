@@ -38,7 +38,7 @@ function AcceptInvitePageInner() {
   });
 
   const form = useForm<AcceptStaffInviteDto>({
-    resolver: zodResolver(AcceptStaffInviteSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(AcceptStaffInviteSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { token, password: '', firstName: '', lastName: '' },
   });
 

@@ -24,7 +24,7 @@ export default function LoginPage() {
   const login = useLogin();
 
   const form = useForm<LoginDto>({
-    resolver: zodResolver(LoginSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(LoginSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { email: '', password: '' },
   });
 

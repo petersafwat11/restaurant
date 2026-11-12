@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
   const tValidation = useTranslations('validation');
   const forgot = useForgotPassword();
   const form = useForm<ForgotPasswordDto>({
-    resolver: zodResolver(ForgotPasswordSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(ForgotPasswordSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { email: '' },
   });
 

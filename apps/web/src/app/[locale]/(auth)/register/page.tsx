@@ -37,7 +37,7 @@ function RegisterPageInner() {
   const referralCode = sanitizeReferralCode(params.get('ref'));
 
   const form = useForm<RegisterDto>({
-    resolver: zodResolver(RegisterSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(RegisterSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { email: '', password: '', firstName: '', lastName: '', referralCode },
   });
 

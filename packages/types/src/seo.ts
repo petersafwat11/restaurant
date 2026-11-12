@@ -3,7 +3,7 @@ import { z } from 'zod';
 // JSON-LD is an open shape; we validate the envelope, not every schema.org key.
 export const StructuredDataSchema = z.object({
   '@context': z.literal('https://schema.org'),
-  '@graph': z.array(z.record(z.unknown())),
+  '@graph': z.array(z.record(z.string(), z.unknown())),
 });
 export type StructuredDataDto = z.infer<typeof StructuredDataSchema>;
 

@@ -5,7 +5,7 @@ export const NewsletterSubscribeSchema = z.object({
   email: z.string().email('Enter a valid email address.'),
   // Explicit, unticked-by-default marketing consent — must be `true`.
   consent: z.literal(true, {
-    errorMap: () => ({ message: 'You must accept to receive the newsletter.' }),
+    error: 'You must accept to receive the newsletter.',
   }),
   locale: z.string().min(2).max(5).optional(),
   source: z.string().max(40).optional(),

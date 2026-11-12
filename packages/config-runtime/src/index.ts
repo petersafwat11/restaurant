@@ -1,5 +1,5 @@
 import { config as loadDotenv } from "dotenv";
-import type { ZodSchema, z } from "zod";
+import type { z } from "zod";
 
 export interface CreateEnvOptions {
 	loadDotenv?: boolean;
@@ -10,10 +10,10 @@ export interface CreateEnvOptions {
  * Validate and freeze a process environment against a Zod schema.
  * Throws a single readable error listing all missing/invalid vars.
  */
-export function createEnv<TSchema extends ZodSchema>(
+export function createEnv<TSchema extends z.ZodType>(
 	schema: TSchema,
 	opts: CreateEnvOptions = {},
-): z.infer<TSchema> {
+): Readonly<z.infer<TSchema>> {
 	const { loadDotenv: shouldLoadDotenv = true, source = process.env } = opts;
 
 	if (shouldLoadDotenv) {

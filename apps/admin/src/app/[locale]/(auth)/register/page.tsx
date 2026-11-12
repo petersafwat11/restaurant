@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [showReferral, setShowReferral] = React.useState(false);
 
   const form = useForm<RegisterDto>({
-    resolver: zodResolver(RegisterSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(RegisterSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: {
       email: '',
       password: '',

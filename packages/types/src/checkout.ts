@@ -35,16 +35,23 @@ export type CheckoutAddressInput = z.infer<typeof CheckoutAddressSchema>;
 // an object containing only blank strings. Treat that specific placeholder as
 // absent so a hidden delivery address cannot invalidate a non-delivery order.
 // Partially entered addresses are deliberately preserved and validated.
-const OptionalCheckoutAddressSchema = z.preprocess((value) => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+// The callback parameter is annotated so the schema's *input* type stays the
+// address shape (Zod 4 otherwise types a preprocess input as `unknown`, which
+// erases the address fields from the react-hook-form value type). The body
+// still defends against arbitrary runtime values.
+const OptionalCheckoutAddressSchema = z.preprocess(
+  (value: z.input<typeof CheckoutAddressSchema> | undefined) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
 
-  const address = value as Record<string, unknown>;
-  const line1 = typeof address.line1 === 'string' ? address.line1.trim() : '';
-  const city = typeof address.city === 'string' ? address.city.trim() : '';
-  const geoPoint = address.geoPoint;
+    const address = value as Record<string, unknown>;
+    const line1 = typeof address.line1 === 'string' ? address.line1.trim() : '';
+    const city = typeof address.city === 'string' ? address.city.trim() : '';
+    const geoPoint = address.geoPoint;
 
-  return !line1 && !city && !geoPoint ? undefined : value;
-}, CheckoutAddressSchema.optional());
+    return !line1 && !city && !geoPoint ? undefined : value;
+  },
+  CheckoutAddressSchema.optional(),
+);
 
 export const TimeSlotSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('asap') }),
@@ -85,14 +92,14 @@ export const CheckoutFormSchema = z
     if (data.orderType === 'DELIVERY') {
       if (!data.address?.line1) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['address', 'line1'],
           message: 'Add your delivery address.',
         });
       }
       if (!data.address?.geoPoint) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['address', 'geoPoint'],
           message: 'Drop a pin on the map to confirm your location.',
         });
@@ -100,10 +107,12 @@ export const CheckoutFormSchema = z
     }
     if (data.orderType === 'DINE_IN' && !data.tableNumber) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['tableNumber'],
         message: 'Table number required.',
       });
     }
   });
 export type CheckoutFormInput = z.infer<typeof CheckoutFormSchema>;
+/** Raw form values before `.default()`s apply (react-hook-form field state). */
+export type CheckoutFormValues = z.input<typeof CheckoutFormSchema>;

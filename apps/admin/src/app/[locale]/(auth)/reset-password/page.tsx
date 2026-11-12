@@ -24,7 +24,7 @@ function buildFormSchema(mismatchMessage: string) {
       if (data.password !== data.confirmPassword) {
         ctx.addIssue({
           path: ['confirmPassword'],
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           message: mismatchMessage,
         });
       }
@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
   );
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(formSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { password: '', confirmPassword: '' },
   });
 

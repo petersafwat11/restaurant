@@ -19,24 +19,25 @@ export default function ContactApp() {
   const { data: restaurant } = useRestaurant();
   const [sent, setSent] = React.useState(false);
 
-  const errorMap: z.ZodErrorMap = React.useCallback(
-    (issue, ctx) => {
-      if (issue.code === z.ZodIssueCode.too_small && issue.minimum === 1) {
-        return { message: tVal('required') };
+  // Zod 4 error map: return a string to override, `undefined` for the default.
+  const errorMap: z.core.$ZodErrorMap = React.useCallback(
+    (issue) => {
+      if (issue.code === 'too_small' && issue.minimum === 1) {
+        return tVal('required');
       }
-      if (issue.code === z.ZodIssueCode.invalid_string && issue.validation === 'email') {
-        return { message: tVal('invalidEmail') };
+      if (issue.code === 'invalid_format' && issue.format === 'email') {
+        return tVal('invalidEmail');
       }
-      if (issue.code === z.ZodIssueCode.too_big && typeof issue.maximum === 'number') {
-        return { message: tVal('tooLong', { max: issue.maximum }) };
+      if (issue.code === 'too_big' && typeof issue.maximum === 'number') {
+        return tVal('tooLong', { max: issue.maximum });
       }
-      return { message: ctx.defaultError };
+      return undefined;
     },
     [tVal],
   );
 
   const form = useForm<CreateContactMessageDto>({
-    resolver: zodResolver(CreateContactMessageSchema, { errorMap }),
+    resolver: zodResolver(CreateContactMessageSchema, { error: errorMap }),
     defaultValues: { name: '', email: '', subject: '', message: '' },
   });
 

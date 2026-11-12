@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   type CheckoutFormInput,
+  type CheckoutFormValues,
   type CheckoutPaymentMethod,
   type OrderType,
   type PaymentMethodKind,
@@ -134,7 +135,7 @@ export function CheckoutApp() {
   // while loading or if it can't be resolved.
   const onlinePaymentsEnabled = usePaymentConfig().data?.onlinePaymentsEnabled ?? false;
 
-  const form = useForm<CheckoutFormInput>({
+  const form = useForm<CheckoutFormValues, unknown, CheckoutFormInput>({
     resolver: zodResolver(CheckoutFormSchema),
     mode: 'onBlur',
     defaultValues: {
@@ -247,7 +248,8 @@ export function CheckoutApp() {
   const onlinePaymentsReady = onlinePaymentsEnabled;
 
   const orderType = form.watch('orderType');
-  const tipAmount = form.watch('tipAmount');
+  // `tipAmount` is optional in the form-input type (schema `.default('0')`).
+  const tipAmount = form.watch('tipAmount') ?? '0';
   const geoPoint = form.watch('address.geoPoint');
 
   // Server-authoritative price quote — the single source of every money value
@@ -1125,7 +1127,7 @@ export function CheckoutApp() {
               render={({ field }) => (
                 <TipPicker
                   subtotal={subtotal}
-                  value={field.value}
+                  value={field.value ?? '0'}
                   onChange={field.onChange}
                   currency={currency}
                   labels={{

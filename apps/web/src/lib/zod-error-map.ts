@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 
 type Translator = (key: string, values?: Record<string, string | number | Date>) => string;
 
@@ -10,40 +10,46 @@ type Translator = (key: string, values?: Record<string, string | number | Date>)
  *
  * Schemas that pass `.refine(…, { message })` or `z.string().min(n, msg)`
  * still win — their explicit message overrides this map.
+ *
+ * Zod 4 error-map contract: return a message string to override, or
+ * `undefined` to fall through to Zod's default. Issue shapes changed from v3:
+ * `invalid_string` -> `invalid_format` (`format`), `too_small`/`too_big` use
+ * `origin` instead of `type`, and `invalid_type` exposes the raw `input`
+ * (error maps always receive it) instead of `received`.
  */
-export function getZodErrorMap(t: Translator): z.ZodErrorMap {
-  return (issue, ctx) => {
+export function getZodErrorMap(t: Translator): z.core.$ZodErrorMap {
+  return (issue) => {
     switch (issue.code) {
-      case z.ZodIssueCode.invalid_type: {
-        if (issue.received === 'undefined' || issue.received === 'null') {
-          return { message: t('required') };
+      case 'invalid_type': {
+        if (issue.input === undefined || issue.input === null) {
+          return t('required');
         }
         break;
       }
-      case z.ZodIssueCode.invalid_string: {
-        if (issue.validation === 'email') return { message: t('invalidEmail') };
+      case 'invalid_format': {
+        if (issue.format === 'email') return t('invalidEmail');
         break;
       }
-      case z.ZodIssueCode.too_small: {
-        if (issue.type === 'string') {
-          const min = (issue as { minimum?: number }).minimum;
+      case 'too_small': {
+        if (issue.origin === 'string') {
+          const min = issue.minimum;
           if (typeof min === 'number' && min > 1) {
-            return { message: t('passwordTooShort', { min }) };
+            return t('passwordTooShort', { min });
           }
-          return { message: t('required') };
+          return t('required');
         }
         break;
       }
-      case z.ZodIssueCode.too_big: {
-        if (issue.type === 'string') {
-          const max = (issue as { maximum?: number }).maximum;
+      case 'too_big': {
+        if (issue.origin === 'string') {
+          const max = issue.maximum;
           if (typeof max === 'number') {
-            return { message: t('tooLong', { max }) };
+            return t('tooLong', { max });
           }
         }
         break;
       }
     }
-    return { message: ctx.defaultError };
+    return undefined;
   };
 }

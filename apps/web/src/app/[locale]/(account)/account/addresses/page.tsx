@@ -35,7 +35,7 @@ export default function AddressesPage() {
   const [addOpen, setAddOpen] = React.useState(false);
 
   const form = useForm<CreateAddressDto>({
-    resolver: zodResolver(CreateAddressSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(CreateAddressSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: {
       label: '',
       line1: '',

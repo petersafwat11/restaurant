@@ -28,7 +28,7 @@ function ResetPasswordPageInner() {
   const reset = useResetPassword();
 
   const form = useForm<ResetPasswordDto>({
-    resolver: zodResolver(ResetPasswordSchema, { errorMap: getZodErrorMap(tValidation) }),
+    resolver: zodResolver(ResetPasswordSchema, { error: getZodErrorMap(tValidation) }),
     defaultValues: { token, password: '' },
   });
 
