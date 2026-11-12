@@ -194,7 +194,9 @@ async function seedRestaurants() {
       'Kebab i falafel na świeżo — Kielce, ul. Ściegiennego. Wszystko robione na miejscu.',
     descriptionEn: 'Fresh kebab and falafel in Kielce, on Ściegiennego — everything made to order.',
     phone: '+48 883 953 589',
-    email: 'mahmodrasul123@gmail.com',
+    // Public contact email: empty until the owner has a working address — the
+    // site hides it and no email is emitted in schema.org / llms.txt.
+    email: '',
     address: {
       line1: 'ul. Ks. Piotra Ściegiennego 68a',
       city: 'Kielce',
@@ -211,9 +213,14 @@ async function seedRestaurants() {
     // Canonical social / map profiles — emitted as schema.org `sameAs` and
     // rendered as the footer social icons.
     sameAs: [
-      'https://www.facebook.com/share/18Xj8ksRwy/?mibextid=wwXIfr',
       'https://maps.app.goo.gl/xvbbF5kpVVKvbXW8A',
+      'https://www.facebook.com/profile.php?id=100065387413019',
+      'https://www.pyszne.pl/menu/szef-donald',
+      'https://www.ubereats.com/pl/store/szef-donald/TgpANdXuXnaVmrxSDixbBQ',
+      'https://maps.apple.com/place?place-id=IF8C1321B628BEEAB',
     ],
+    // Owner-verified Google Business review link (post-order review request).
+    googleReviewUrl: 'https://g.page/r/CVAovYDd9tytEBM/review',
     timezone: 'Europe/Warsaw',
     currency: 'PLN',
     isActive: true,
@@ -223,6 +230,8 @@ async function seedRestaurants() {
     estimatedPickupMinutesMax: 20,
     // Free delivery on the web shop (owner can change it in Settings → Financials).
     defaultDeliveryFee: 0,
+    // Minimum order for delivery (matches production settings).
+    minOrderAmount: 40,
     // Delivery radius in km — owner-adjustable in admin restaurant settings.
     deliveryRadiusKm: 7,
     // Payment-provider readiness (plan §B). Only the known NIP + provisional

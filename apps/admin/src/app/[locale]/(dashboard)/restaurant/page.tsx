@@ -81,6 +81,7 @@ interface FormState {
   cuisineRaw: string; // comma-separated input; split on submit
   priceRange: string; // schema.org priceRange — "$$" or a range like "20–40 zł"; '' = unset
   sameAsRaw: string; // one URL per line; split on submit
+  googleReviewUrl: string; // '' = unset (review requests off)
   // Legal entity (payment-provider readiness). '' = unset.
   legalName: string;
   nip: string;
@@ -158,6 +159,7 @@ function fromDto(r: RestaurantAdminDto): FormState {
     cuisineRaw: r.servesCuisine.join(', '),
     priceRange: r.priceRange ?? '',
     sameAsRaw: r.sameAs.join('\n'),
+    googleReviewUrl: r.googleReviewUrl ?? '',
     legalName: r.legal.legalName ?? '',
     nip: r.legal.nip ?? '',
     regon: r.legal.regon ?? '',
@@ -237,6 +239,9 @@ function diff(initial: FormState, current: FormState): UpdateRestaurantDto {
   }
   if (initial.sameAsRaw !== current.sameAsRaw) {
     set('sameAs', splitLines(current.sameAsRaw));
+  }
+  if (initial.googleReviewUrl !== current.googleReviewUrl) {
+    set('googleReviewUrl', current.googleReviewUrl.trim() || null);
   }
   // Legal entity & support — send raw strings; the server normalizes/validates
   // (empty → null). NIP/REGON/KRS digit-strip + format-check happen server-side.
@@ -595,7 +600,7 @@ export default function RestaurantProfilePage() {
                 onChange={(e) => patch('phone', e.target.value)}
               />
             </Field>
-            <Field label={t('contact.emailLabel')} required>
+            <Field label={t('contact.emailLabel')} hint={t('contact.emailHint')}>
               <Input
                 type="email"
                 value={draft.email}
@@ -708,6 +713,17 @@ export default function RestaurantProfilePage() {
               rows={4}
               onChange={(e) => patch('sameAsRaw', e.target.value)}
               placeholder={'https://facebook.com/…\nhttps://instagram.com/…'}
+            />
+          </Field>
+          <Field
+            label={t('discovery.googleReviewUrlLabel')}
+            hint={t('discovery.googleReviewUrlHint')}
+          >
+            <Input
+              type="url"
+              value={draft.googleReviewUrl}
+              onChange={(e) => patch('googleReviewUrl', e.target.value)}
+              placeholder="https://g.page/r/…/review"
             />
           </Field>
         </SettingsSectionCard>

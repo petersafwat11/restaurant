@@ -5,6 +5,7 @@ import { cartItemToDisplay } from '@/features/cart/to-display';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useOrderTracking } from '@/features/orders/hooks/use-order-tracking';
 import { useRestaurant } from '@/features/restaurants/hooks';
+import { GoogleReviewLink } from '@/features/reviews/components/google-review-link';
 import { ReviewCta } from '@/features/reviews/components/review-cta';
 import { Link } from '@/i18n/navigation';
 import { type OrderDto, type OrderItemDto } from '@repo/types';
@@ -359,6 +360,9 @@ export function ConfirmationApp({ orderId }: ConfirmationAppProps) {
             <div className="flex flex-col gap-3">
               {(order.status === 'COMPLETED' || order.status === 'DELIVERED') && (
                 <ReviewCta orderId={order.id} variant="block" />
+              )}
+              {(order.status === 'COMPLETED' || order.status === 'DELIVERED') && (
+                <GoogleReviewLink />
               )}
               <Link
                 href="/menu"

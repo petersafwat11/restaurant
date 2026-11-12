@@ -62,3 +62,8 @@ export const JOB_WEBPUSH_ORDER_RING = 'webpush.order-ring';
 // Ring burst tuning shared by producer and processor.
 export const WEBPUSH_RING_INTERVAL_MS = 30_000;
 export const WEBPUSH_RING_MAX_STEPS = 6;
+// Post-order Google review request. Enqueued (delayed ~60 min) on the orders
+// queue when an order is handed over (DELIVERED for delivery, COMPLETED for
+// pickup / dine-in). The worker re-checks state and sends at most once.
+export const JOB_ORDER_REVIEW_REQUEST = 'order.review-request';
+export const REVIEW_REQUEST_DELAY_MS = 60 * 60 * 1000;

@@ -46,7 +46,8 @@
     "countryHint": "ISO 2-letter",
     "timezoneLabel": "Timezone",
     "currencyLabel": "Currency",
-    "currencyHint": "3-letter ISO (PLN, EUR, USD)"
+    "currencyHint": "3-letter ISO (PLN, EUR, USD)",
+    "emailHint": "Leave empty to hide the email address on the site."
   },
   "location": {
     "title": "Location",
@@ -63,7 +64,9 @@
     "priceRangeHint": "Shown in Google rich results and map cards. Enter a range like \"20–40 zł\" or a tier ($–$$$$).",
     "priceRangeOptionNone": "Not set",
     "sameAsLabel": "Social profiles",
-    "sameAsHint": "One URL per line — Facebook, Instagram, Google Business, etc. Emitted as schema.org sameAs."
+    "sameAsHint": "One URL per line — Facebook, Instagram, Google Business, etc. Emitted as schema.org sameAs.",
+    "googleReviewUrlLabel": "Google review link",
+    "googleReviewUrlHint": "The Write a review link from your Google Business Profile. Used in the review-request email (about 60 min after hand-over) and on the order tracking page. Empty = feature off."
   },
   "channels": {
     "title": "Channels",

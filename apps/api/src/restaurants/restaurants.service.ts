@@ -124,6 +124,7 @@ export class RestaurantsService {
         ...(dto.servesCuisine !== undefined ? { servesCuisine: dto.servesCuisine } : {}),
         ...(dto.priceRange !== undefined ? { priceRange: dto.priceRange } : {}),
         ...(dto.sameAs !== undefined ? { sameAs: dto.sameAs } : {}),
+        ...(dto.googleReviewUrl !== undefined ? { googleReviewUrl: dto.googleReviewUrl } : {}),
         ...(dto.estimatedDeliveryMinutesMin !== undefined
           ? { estimatedDeliveryMinutesMin: dto.estimatedDeliveryMinutesMin }
           : {}),
@@ -260,6 +261,7 @@ function toPublic(row: Restaurant, hours?: OperatingHours[]): RestaurantPublicDt
     servesCuisine: row.servesCuisine,
     priceRange: (row.priceRange ?? null) as RestaurantPublicDto['priceRange'],
     sameAs: row.sameAs,
+    googleReviewUrl: row.googleReviewUrl ?? null,
     legal: toLegal(row),
     ...(hours ? { hours: hours.map(toHoursDto) } : {}),
   };

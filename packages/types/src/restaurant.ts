@@ -230,6 +230,9 @@ export const RestaurantPublicSchema = z.object({
   servesCuisine: z.array(z.string().min(1).max(60)).default([]),
   priceRange: PriceRangeSchema.default(null),
   sameAs: z.array(z.string().url()).default([]),
+  // Google Business "write a review" link (post-order review request + tracking
+  // page). Null = feature off.
+  googleReviewUrl: z.string().nullable().default(null),
   // Legal entity & support block (sourced from flat Restaurant columns).
   legal: RestaurantLegalSchema,
   hours: z.array(OperatingHoursSchema).optional(),
@@ -255,7 +258,9 @@ export const CreateRestaurantSchema = z.object({
   logoUrl: z.string().url().nullish(),
   coverUrl: z.string().url().nullish(),
   phone: z.string().min(1).max(40),
-  email: z.string().email(),
+  // Public contact email. Empty string = hidden on the site (no email is shown
+  // or emitted in schema.org until the owner sets a working address).
+  email: z.union([z.literal(''), z.string().trim().email()]),
   address: RestaurantAddressSchema,
   geoPoint: GeoPointSchema.optional(),
   timezone: z.string().optional(),
@@ -263,6 +268,9 @@ export const CreateRestaurantSchema = z.object({
   servesCuisine: z.array(z.string().min(1).max(60)).optional(),
   priceRange: PriceRangeSchema.optional(),
   sameAs: z.array(z.string().url()).optional(),
+  googleReviewUrl: z
+    .preprocess(emptyToNull, z.string().trim().url().max(500).nullable())
+    .optional(),
   estimatedDeliveryMinutesMin: z.number().int().min(1).max(600).nullable().optional(),
   estimatedDeliveryMinutesMax: z.number().int().min(1).max(600).nullable().optional(),
   estimatedPickupMinutesMin: z.number().int().min(1).max(600).nullable().optional(),

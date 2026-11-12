@@ -27,7 +27,7 @@ export class MailerService {
   constructor(@Inject(ENV) private readonly env: ENV_TYPE) {
     if (env.RESEND_API_KEY) {
       this.resend = new Resend(env.RESEND_API_KEY);
-    } else {
+    } else if (env.SMTP_HOST) {
       this.smtp = nodemailer.createTransport({
         host: env.SMTP_HOST,
         port: env.SMTP_PORT,
@@ -37,9 +37,20 @@ export class MailerService {
     }
   }
 
+  /**
+   * True when a transport exists (Resend API key, or an SMTP host). Callers
+   * with optional mail (e.g. review requests) check this and skip with a log
+   * line instead of throwing when email is not set up.
+   */
+  isConfigured(): boolean {
+    return Boolean(this.resend || this.smtp);
+  }
+
   async send(args: SendMailArgs): Promise<void> {
     if (this.resend) {
-      await this.resend.emails.send({
+      // Resend v4 reports API failures in the result instead of throwing —
+      // surface them so BullMQ records the failure and retries.
+      const { error } = await this.resend.emails.send({
         from: this.env.MAIL_FROM,
         to: args.to,
         subject: args.subject,
@@ -50,6 +61,8 @@ export class MailerService {
           content: typeof a.content === 'string' ? a.content : a.content.toString('base64'),
         })),
       });
+      if (error) throw new Error(`Resend send failed: ${error.name}: ${error.message}`);
+      this.logger.log(`Resend → ${args.to}: ${args.subject}`);
       return;
     }
 

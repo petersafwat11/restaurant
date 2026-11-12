@@ -57,6 +57,7 @@ import { IdempotencyService } from './idempotency.service';
 import { buildLegalSnapshot, hashLegalSnapshot } from './legal-snapshot';
 import { attributionToColumns, columnsToAttribution } from './order-attribution';
 import { OrderNumberService } from './order-number';
+import { ReviewRequestService } from './review-request.service';
 import { type ActorRole, actorRoleFor, canTransition } from './order-state-machine';
 import { computeEta, isTerminalStatus } from './order-tracking';
 import { signOrderTrackingToken } from './order-tracking-token';
@@ -92,6 +93,7 @@ export class OrdersService {
     private readonly events: EventEmitter2,
     @InjectQueue(QUEUE_RECEIPT) private readonly receiptQueue: Queue,
     @InjectQueue(QUEUE_ORDERS) private readonly ordersQueue: Queue,
+    private readonly reviewRequests: ReviewRequestService,
   ) {}
 
   // ---- Shared checkout pricing -------------------------------------------
@@ -888,6 +890,9 @@ export class OrdersService {
           this.logger.error(`failed to schedule auto-complete for order ${orderId}: ${err}`),
         );
     }
+    // Order handed over -> ask for a Google review ~60 min later (best-effort,
+    // never blocks the transition; the worker sends at most once per order).
+    void this.reviewRequests.scheduleFor(orderId, updated.type, to);
     return updated;
   }
 

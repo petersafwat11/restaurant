@@ -1,6 +1,7 @@
 'use client';
 
 import { usePublicOrderTracking } from '@/features/orders/hooks';
+import { GoogleReviewLink } from '@/features/reviews/components/google-review-link';
 import type { OrderType } from '@repo/types';
 import { Container, EmptyState, OrderProgressStepper, PageSpinner } from '@repo/ui';
 import { useTranslations } from 'next-intl';
@@ -115,6 +116,12 @@ export function PublicTrackingApp({ orderId, token }: PublicTrackingAppProps) {
 
         {tracking.isTerminal && (
           <p className="text-center text-body text-fg-muted">{t('terminal')}</p>
+        )}
+
+        {(tracking.status === 'DELIVERED' || tracking.status === 'COMPLETED') && (
+          <div className="flex justify-center">
+            <GoogleReviewLink />
+          </div>
         )}
       </div>
     </Container>

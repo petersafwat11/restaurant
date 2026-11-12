@@ -20,5 +20,8 @@
     "title": "Śledzenie zamówienia",
     "eta": "Szacowany czas: <strong>{minutes} min</strong>"
   },
-  "terminal": "To zamówienie zostało zrealizowane. Dziękujemy za zakupy."
+  "terminal": "To zamówienie zostało zrealizowane. Dziękujemy za zakupy.",
+  "googleReview": {
+    "cta": "Smakowało? Zostaw opinię w Google"
+  }
 }

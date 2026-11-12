@@ -217,3 +217,10 @@ export const AuditWritePayloadSchema = z.object({
   userAgent: z.string().nullable().optional(),
 });
 export type AuditWritePayload = z.infer<typeof AuditWritePayloadSchema>;
+
+// Post-order Google review request. The worker re-reads the order (status,
+// email, consent, already-sent flag) so a stale/duplicate job is harmless.
+export const OrderReviewRequestPayloadSchema = z.object({
+  orderId: z.string(),
+});
+export type OrderReviewRequestPayload = z.infer<typeof OrderReviewRequestPayloadSchema>;

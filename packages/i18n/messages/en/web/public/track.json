@@ -20,5 +20,8 @@
     "title": "Tracking your order",
     "eta": "Estimated time: <strong>{minutes} min</strong>"
   },
-  "terminal": "This order is complete. Thanks for ordering with us."
+  "terminal": "This order is complete. Thanks for ordering with us.",
+  "googleReview": {
+    "cta": "Enjoyed it? Leave a review on Google"
+  }
 }
