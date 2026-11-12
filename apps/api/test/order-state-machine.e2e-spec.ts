@@ -1,6 +1,10 @@
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { getQueueToken } from '@nestjs/bullmq';
+import { JOB_ORDER_REVIEW_REQUEST, QUEUE_ORDERS, REVIEW_REQUEST_DELAY_MS } from '@repo/jobs';
+import type { Queue } from 'bullmq';
 import { OrdersService } from '../src/orders/orders.service';
+import { reviewRequestJobId } from '../src/orders/review-request.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { createTestApp, ensureOwnerToken, ensureRestaurant, orderLegal, resetDb, resetMenuDb } from './setup-e2e';
 
@@ -211,6 +215,50 @@ describe('order state machine (e2e)', () => {
       where: { orderId, status: 'COMPLETED' },
     });
     expect(completedEvents.length).toBeGreaterThanOrEqual(1);
+  });
+
+  async function reviewJob(id: string) {
+    const queue = app.get<Queue>(getQueueToken(QUEUE_ORDERS));
+    // Scheduling is fire-and-forget after the transition — poll briefly.
+    for (let i = 0; i < 20; i++) {
+      const job = await queue.getJob(reviewRequestJobId(id));
+      if (job) return job;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    return null;
+  }
+
+  it('schedules one delayed Google review request when a pickup order is completed', async () => {
+    for (const to of ['PREPARING', 'READY'] as const) {
+      await inject('POST', `/api/v1/orders/${orderId}/status`, { to }, ownerToken);
+    }
+    expect(await app.get<Queue>(getQueueToken(QUEUE_ORDERS)).getJob(reviewRequestJobId(orderId))).toBeFalsy();
+    const done = await inject('POST', `/api/v1/orders/${orderId}/status`, { to: 'COMPLETED' }, ownerToken);
+    expect(done.statusCode).toBe(201);
+
+    const job = await reviewJob(orderId);
+    expect(job?.name).toBe(JOB_ORDER_REVIEW_REQUEST);
+    expect(job?.data).toEqual({ orderId });
+    expect(job?.opts.delay).toBe(REVIEW_REQUEST_DELAY_MS);
+    await job?.remove();
+  });
+
+  it('schedules the review request when a delivery order is marked DELIVERED', async () => {
+    const prisma = app.get(PrismaService);
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { type: 'DELIVERY', status: 'OUT_FOR_DELIVERY' },
+    });
+    const res = await inject('POST', `/api/v1/orders/${orderId}/status`, { to: 'DELIVERED' }, ownerToken);
+    expect(res.statusCode).toBe(201);
+
+    const job = await reviewJob(orderId);
+    expect(job?.opts.delay).toBe(REVIEW_REQUEST_DELAY_MS);
+    await job?.remove();
+    const autoComplete = await app
+      .get<Queue>(getQueueToken(QUEUE_ORDERS))
+      .getJob(`order-autocomplete:${orderId}`);
+    await autoComplete?.remove();
   });
 
   it('auto-complete is a no-op when the order is not DELIVERED', async () => {
