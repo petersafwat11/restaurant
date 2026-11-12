@@ -177,6 +177,7 @@ services:
       CADDY_EMAIL: ${CADDY_EMAIL:-admin@example.com}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./conf.d:/etc/caddy/conf.d:ro
       - caddy-data:/data
       - caddy-config:/config
     networks: [app-net]

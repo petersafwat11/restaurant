@@ -46,6 +46,10 @@
     # `report-to`/`Reporting-Endpoints` (or `report-uri`) directive pointing at
     # Sentry/Report-URI/etc. before relying on this phase to surface violations.
     header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://nominatim.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    # Incident 2026-11-12: neither Next app uses Server Actions; refuse any
+    # Next-Action request (React2Shell / CVE-2025-55182 exploit vector).
+    @next_action header Next-Action *
+    respond @next_action 403
     reverse_proxy web:3000
 }
 
@@ -54,6 +58,10 @@ admin.{$DOMAIN} {
     encode zstd gzip
     import security_headers
     header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    # Incident 2026-11-12: neither Next app uses Server Actions; refuse any
+    # Next-Action request (React2Shell / CVE-2025-55182 exploit vector).
+    @next_action header Next-Action *
+    respond @next_action 403
     reverse_proxy admin:3001
 }
 
@@ -81,3 +89,6 @@ api.{$DOMAIN} {
         reverse_proxy api:4000
     }
 }
+
+# Additional projects on this VPS (e.g. /opt/hurghada-proposals) drop site files here.
+import /etc/caddy/conf.d/*.caddy
