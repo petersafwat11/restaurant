@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { resolve } from 'node:path';
 import fastifyCookie from '@fastify/cookie';
 import fastifyMultipart from '@fastify/multipart';
+import proxyAddr from '@fastify/proxy-addr';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
@@ -14,6 +15,9 @@ import { env } from './config/env';
 
 const ESERVICE_WEBHOOK_PATH = '/api/v1/payments/webhooks/eservice';
 const ESERVICE_RETURN_PATH = '/api/v1/payments/eservice/return';
+
+// Loopback + RFC 1918/4193 ranges (handles IPv4-mapped IPv6 peers).
+const isPrivatePeer = proxyAddr.compile(['loopback', 'uniquelocal']);
 
 function needsEserviceRawBody(url: string | undefined): boolean {
   return !!url && (url.startsWith(ESERVICE_WEBHOOK_PATH) || url.startsWith(ESERVICE_RETURN_PATH));
@@ -34,15 +38,15 @@ async function bootstrap() {
   // the card-testing control on payment intents, etc.).
   // Fastify >=5.12 dropped hop-count trust: `trustProxy: 1` now fails closed,
   // making every request appear to come from Caddy's IP (one shared rate-limit
-  // bucket for all users). Trust by address instead: loopback plus the private
-  // ranges of the internal Docker network where Caddy runs (the API publishes
-  // no host port). proxy-addr walks XFF right-to-left and stops at the first
-  // untrusted (public) address, so `req.ip` is the client address Caddy
-  // appended; client-supplied XFF entries to its left are ignored. Mirrors
-  // Caddy's own `trusted_proxies static private_ranges`.
+  // bucket for all users). Keep the exactly-one-hop semantics with a function
+  // that also validates the peer: trust only hop 0 (the socket peer), and only
+  // when it is a loopback/private address — i.e. Caddy on the internal Docker
+  // network (the API publishes no host port). `req.ip` is then the right-most
+  // X-Forwarded-For entry, the address Caddy appended; anything a client put
+  // further left is never consulted, even if it looks private.
   const adapter = new FastifyAdapter({
     logger: false,
-    trustProxy: ['loopback', 'uniquelocal'],
+    trustProxy: (address, hop) => hop === 0 && isPrivatePeer(address, hop),
   });
 
   // Capture the raw request body for the eService webhook route — needed for
