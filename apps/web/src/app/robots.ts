@@ -1,40 +1,69 @@
 import type { MetadataRoute } from 'next';
 
 /**
- * Native `MetadataRoute` robots — replaces the prior `app/robots.txt/route.ts`
- * proxy to `/seo/robots.txt`. Native gives us strongly typed control and skips
- * the API hop on every crawl.
+ * robots.txt. Search engines and AI crawlers are explicitly welcome — being
+ * crawlable by them is a precondition for appearing in Google / Bing and in
+ * ChatGPT, Claude, Perplexity, Gemini and Apple Intelligence answers.
  *
- * AI crawlers (GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, Google-Extended)
- * are intentionally NOT blocked — being crawlable by them is a precondition for
- * Generative Engine Optimization. See docs/seo/seo-geo-strategy.md Part E.
+ * A crawler obeys only the most specific `User-agent` group that matches it,
+ * so every named group repeats the full private-path disallow list (otherwise
+ * e.g. GPTBot would be allowed into /checkout and /account).
  */
 function baseUrl(): string {
   return (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 }
 
+const PRIVATE_PATHS = [
+  '/api/',
+  '/cart',
+  '/checkout',
+  '/account',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/track/',
+  '/staff',
+  '/en/cart',
+  '/en/checkout',
+  '/en/account',
+  '/en/login',
+  '/en/register',
+  '/en/forgot-password',
+  '/en/reset-password',
+  '/en/verify-email',
+  '/en/track/',
+  '/en/staff',
+];
+
+export const AI_AND_SEARCH_BOTS = [
+  'Googlebot',
+  'Bingbot',
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-User',
+  'Claude-SearchBot',
+  'PerplexityBot',
+  'Google-Extended',
+  'Applebot',
+  'Applebot-Extended',
+] as const;
+
 export default function robots(): MetadataRoute.Robots {
   const base = baseUrl();
   return {
     rules: [
-      {
-        userAgent: '*',
-        allow: '/',
-        disallow: [
-          '/api/',
-          '/cart',
-          '/checkout',
-          '/account',
-          '/login',
-          '/register',
-          '/forgot-password',
-          '/reset-password',
-          '/verify-email',
-          '/track/',
-          '/staff',
-        ],
-      },
+      ...AI_AND_SEARCH_BOTS.map((userAgent) => ({
+        userAgent,
+        allow: ['/', '/llms.txt'],
+        disallow: PRIVATE_PATHS,
+      })),
+      { userAgent: '*', allow: '/', disallow: PRIVATE_PATHS },
     ],
     sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

@@ -8,6 +8,7 @@ import { PaymentLogos } from '@/features/checkout/components/payment-logos';
 import { estimateEtaKey, estimatedRangeFor } from '@/features/checkout/estimate';
 import { useCheckoutQuote } from '@/features/checkout/hooks/use-checkout-quote';
 import { useLoyaltyAccount, useLoyaltyRedeemQuote } from '@/features/loyalty/hooks';
+import { PREFERRED_ORDER_TYPE_KEY } from '@/features/menu/lib/order-preference';
 import { useCreateOrder } from '@/features/orders/hooks';
 import { usePaymentConfig } from '@/features/payments/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
@@ -168,6 +169,18 @@ export function CheckoutApp() {
       acceptedTerms: false,
     },
   });
+
+  // A dish page's "Odbiór osobisty" CTA leaves a one-shot preference in
+  // sessionStorage; pre-select pickup once (the customer can still switch).
+  React.useEffect(() => {
+    try {
+      const preferred = window.sessionStorage.getItem(PREFERRED_ORDER_TYPE_KEY);
+      if (preferred === 'PICKUP') form.setValue('orderType', 'PICKUP');
+      window.sessionStorage.removeItem(PREFERRED_ORDER_TYPE_KEY);
+    } catch {
+      // Storage unavailable — keep the default order type.
+    }
+  }, [form]);
 
   // The auth store and /addresses/list both hydrate after first render, so the
   // form's `defaultValues` above land empty for an already-signed-in user.
