@@ -12,6 +12,8 @@ export interface SectionHeaderProps {
   action?: { label: string; href: string };
   /** When set, used as the `id` on the `<h2>` so a parent `<section>` can `aria-labelledby` it. */
   id?: string;
+  /** Heading level (default h2). Use h1 when the header is the page title. */
+  as?: 'h1' | 'h2';
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function SectionHeader({
   align = 'left',
   action,
   id,
+  as: Heading = 'h2',
   className,
 }: SectionHeaderProps) {
   return (
@@ -37,13 +40,13 @@ export function SectionHeader({
         {eyebrow && (
           <span className="text-eyebrow uppercase text-accent">{eyebrow}</span>
         )}
-        <h2
+        <Heading
           id={id}
           className="font-display text-h2 text-fg sm:text-h1"
           style={{ textWrap: 'balance' as React.CSSProperties['textWrap'] }}
         >
           {title}
-        </h2>
+        </Heading>
         {description && (
           <p className="max-w-[640px] text-body-l text-fg-muted">{description}</p>
         )}

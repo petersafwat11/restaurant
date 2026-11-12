@@ -4,7 +4,8 @@
     "menu": "Menu",
     "about": "O nas",
     "locations": "Lokalizacje",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "delivery": "Dostawa"
   },
   "cta": {
     "orderNow": "Zamów teraz"
@@ -12,8 +13,8 @@
   "mobileMenuTitle": "Menu",
   "languageSwitcherLabel": "Język",
   "meta": {
-    "title": "Szef Donald — Prawdziwy kebab. Robimy każdego dnia.",
-    "description": "Kebab i falafel robimy świeże przez cały dzień. Zamów online z dostawą, na wynos lub na miejscu."
+    "title": "Szef Donald — kebab w Kielcach, robiony codziennie od podstaw",
+    "description": "Kebab, falafel i kapsalon w Kielcach przy Ściegiennego 68a. Wszystko robimy na miejscu od 2019 r. Zamów online z dostawą lub odbierz osobiście."
   },
   "cart": {
     "ariaLabel": "{count, plural, =0 {Koszyk, pusty} one {Koszyk, # produkt} few {Koszyk, # produkty} many {Koszyk, # produktów} other {Koszyk, # produktu}}"

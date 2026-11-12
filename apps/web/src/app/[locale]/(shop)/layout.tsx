@@ -1,5 +1,6 @@
 import { CartContainer } from '@/components/cart-container';
 import { CartSessionProvider } from '@/components/cart-session-provider';
+import { ServerDataHydration } from '@/components/server-data-hydration';
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
 import { getCartSessionKey } from '@/lib/cart-session';
@@ -34,7 +35,10 @@ export default async function ShopLayout({
         {t('skipToContent')}
       </a>
       <SiteChrome initialVariant="solid" />
-      <main id="main">{children}</main>
+      <main id="main">
+        {/* NAP / hours / delivery terms in the server HTML for crawlers. */}
+        <ServerDataHydration restaurant={restaurant}>{children}</ServerDataHydration>
+      </main>
       <CartContainer />
       <SzefSiteFooter initialRestaurant={restaurant} />
     </CartSessionProvider>

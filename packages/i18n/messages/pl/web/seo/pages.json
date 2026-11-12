@@ -1,0 +1,332 @@
+{
+  "common": {
+    "breadcrumbHome": "Strona główna",
+    "breadcrumbMenu": "Menu",
+    "orderDirect": "Zamów bezpośrednio — dostawa {fee}, bez prowizji pośredników",
+    "orderDirectShort": "Zamów bezpośrednio na szefdonald.pl — dostawa {fee}",
+    "ctaOrderDelivery": "Zamów z dostawą {fee}",
+    "ctaPickup": "Odbiór osobisty",
+    "ctaMenu": "Zobacz pełne menu",
+    "ctaCall": "Zadzwoń: {phone}",
+    "factsHeading": "Najważniejsze informacje",
+    "factAddress": "Adres",
+    "factPhone": "Telefon",
+    "factHours": "Godziny otwarcia",
+    "factDelivery": "Dostawa",
+    "factDeliveryValue": "{fee} przy zamówieniu na szefdonald.pl, minimalne zamówienie {minOrder}, w promieniu ok. {radius} km",
+    "factPayments": "Płatności",
+    "factPaymentsValue": "karta, BLIK, gotówka",
+    "factPickup": "Odbiór osobisty",
+    "factPickupValue": "w lokalu przy ul. Ściegiennego 68a",
+    "popularHeading": "Najczęściej zamawiane",
+    "dishesHeading": "Dania i ceny",
+    "fromPrice": "od {price}",
+    "faqHeading": "Pytania i odpowiedzi",
+    "mapHeading": "Gdzie jesteśmy",
+    "mapAria": "Mapa: Szef Donald, {address}",
+    "openInMaps": "Otwórz w Mapach Google",
+    "relatedHeading": "Może Cię zainteresować",
+    "sizesHeading": "Rozmiary i ceny",
+    "sizeCol": "Rozmiar",
+    "meatCol": "Mięso",
+    "priceCol": "Cena",
+    "aboutDishHeading": "O tym daniu",
+    "categoryLink": "Wszystkie pozycje: {category}",
+    "vegetarian": "wegetariańskie",
+    "vegan": "wegańskie",
+    "glutenFree": "bez glutenu",
+    "unavailable": "Chwilowo niedostępne",
+    "seeDish": "Szczegóły",
+    "itemsCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
+    "lastUpdated": "Aktualizacja: {date}",
+    "pyszneRating": "{value}/5 — {count} ocen na Pyszne.pl",
+    "googleRating": "{value}/5 w Google ({count} opinii)"
+  },
+  "category": {
+    "intro": "{description} Wszystkie pozycje z kategorii {category} przygotowujemy na miejscu w naszym lokalu przy {address}. Ceny poniżej pochodzą prosto z naszego menu i są aktualne — zamówisz je z dostawą {fee} (minimalne zamówienie {minOrder}) albo odbierzesz osobiście.",
+    "introNoDescription": "Wszystkie pozycje z kategorii {category} przygotowujemy na miejscu w naszym lokalu przy {address}. Ceny poniżej pochodzą prosto z naszego menu i są aktualne — zamówisz je z dostawą {fee} (minimalne zamówienie {minOrder}) albo odbierzesz osobiście."
+  },
+  "kebabKielce": {
+    "lead": "Szef Donald to mały lokal z kebabem przy ul. Ks. Piotra Ściegiennego 68a w Kielcach. Działamy od 2019 roku i od początku robimy wszystko na miejscu — u nas nie ma zamrażarki. Kebab zamówisz u nas z dostawą {fee}, na wynos albo zjesz na miejscu.",
+    "sections": [
+      {
+        "heading": "Kim jesteśmy",
+        "paragraphs": [
+          "Jesteśmy kameralnym lokalem w Kielcach, a nie siecią. Za ladą stoją ci sami ludzie, którzy rano kroją warzywa i przygotowują mięso. Dzięki temu wiemy, co trafia do każdej tortilli, pity i bułki.",
+          "W sezonie wydajemy około {wraps} zawijańców tygodniowo. To dużo jak na mały lokal, ale skala pozwala nam przygotowywać mięso i surówki codziennie od nowa, zamiast przechowywać je tygodniami."
+        ]
+      },
+      {
+        "heading": "Co nas wyróżnia",
+        "paragraphs": [
+          "Nie mamy zamrażarki. Mięso, surówki, sosy i falafel przygotowujemy w ciągu dnia, a to, czego nie sprzedamy, nie wraca następnego dnia na ladę. Stawiamy na duże porcje, dobrze przyprawione mięso i świeże warzywa."
+        ],
+        "bullets": [
+          "Wszystko robione na miejscu, w lokalu przy Ściegiennego 68a.",
+          "Mięso do wyboru: kurczak, wołowina albo mieszane.",
+          "Trzy sosy: łagodny, ostry i mieszany — jeśli lubisz naprawdę ostro, napisz to w uwagach do zamówienia.",
+          "Kilka rozmiarów porcji — waga mięsa podana jest przy każdym rozmiarze w menu.",
+          "Danie wege: falafel w tortilli, picie, bułce lub na talerzu."
+        ]
+      },
+      {
+        "heading": "Jaki kebab możesz u nas zamówić",
+        "paragraphs": [
+          "Klasyka to kebab w tortilli, w picie i w bułce — mięso, surówki i sos. Jeśli wolisz zjeść widelcem, wybierz kebab na talerzu z frytkami i surówkami, kebab box albo sałatkę kebab. Dla głodnych jest kapsalon: mięso, frytki, ser i sos w jednym pojemniku. W menu znajdziesz też fryto kebab, tacos z polędwiczkami z kurczaka i zestawy z napojem w niższej cenie.",
+          "Aktualne ceny i wagi mięsa w każdym rozmiarze pokazujemy niżej i w pełnym menu — pochodzą prosto z naszego systemu zamówień, więc zawsze są aktualne."
+        ]
+      },
+      {
+        "heading": "Dostawa kebaba w Kielcach",
+        "paragraphs": [
+          "Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników. Dowozimy w promieniu około {radius} km od lokalu przy Ściegiennego 68a, minimalne zamówienie to {minOrder}. Zapłacisz kartą, BLIK-iem albo gotówką przy odbiorze.",
+          "Wolisz odebrać sam? Wybierz odbiór osobisty — przygotujemy zamówienie, a Ty odbierzesz je w lokalu. Szczegóły dostawy znajdziesz na stronie Dostawa."
+        ]
+      },
+      {
+        "heading": "Godziny otwarcia i dojazd",
+        "paragraphs": [
+          "Jesteśmy otwarci: {hours}. Lokal znajdziesz pod adresem {address}. Zadzwoń, jeśli masz pytanie albo chcesz zamówić telefonicznie: {phone}."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Gdzie zjeść kebab w Kielcach przy Ściegiennego?",
+        "a": "Szef Donald znajdziesz pod adresem {address}. Możesz zjeść na miejscu, wziąć na wynos albo zamówić z dostawą {fee} przez szefdonald.pl."
+      },
+      {
+        "q": "Ile kosztuje dostawa kebaba w Kielcach?",
+        "a": "Przy zamówieniu bezpośrednio na szefdonald.pl dostawa kosztuje {fee}. Minimalne zamówienie to {minOrder}, dowozimy w promieniu ok. {radius} km od lokalu."
+      },
+      {
+        "q": "Czy kebab jest robiony na miejscu?",
+        "a": "Tak. Wszystko przygotowujemy w lokalu w ciągu dnia — u nas nie ma zamrażarki."
+      },
+      {
+        "q": "Jakie mięso jest w kebabie?",
+        "a": "Do wyboru kurczak, wołowina albo mieszane. Wagę mięsa w każdym rozmiarze podajemy w menu."
+      },
+      {
+        "q": "W jakich godzinach jesteście otwarci?",
+        "a": "{hours}."
+      }
+    ]
+  },
+  "falafelKielce": {
+    "lead": "Szukasz falafela w Kielcach? W Szef Donald przy ul. Ks. Piotra Ściegiennego 68a falafel to pełnoprawne danie, a nie dodatek. Podajemy go w tortilli, w picie, w bułce albo na talerzu — z sałatą i sosem do wyboru.",
+    "sections": [
+      {
+        "heading": "Falafel robiony na miejscu",
+        "paragraphs": [
+          "Falafel przygotowujemy w lokalu w ciągu dnia, tak jak resztę menu — u nas nie ma zamrażarki. Dania z falafelem są wegetariańskie: nie zawierają mięsa, więc to dobry wybór, jeśli nie jesz kebaba albo zamawiasz dla mieszanej grupy.",
+          "Wielkość porcji wybierasz liczbą sztuk falafela — od standardowej po Mega. Do tego sałata i sos: łagodny, ostry albo mieszany."
+        ]
+      },
+      {
+        "heading": "Jak zamówić falafel z dostawą",
+        "paragraphs": [
+          "Zamów bezpośrednio na szefdonald.pl: dostawa kosztuje {fee}, minimalne zamówienie to {minOrder}, dowozimy w promieniu około {radius} km od lokalu. Możesz też odebrać zamówienie osobiście. Płatność kartą, BLIK-iem lub gotówką.",
+          "O alergeny zapytaj obsługę — powiemy dokładnie, co jest w środku."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Czy falafel w Szef Donald jest wegetariański?",
+        "a": "Tak, dania z falafelem nie zawierają mięsa."
+      },
+      {
+        "q": "W czym mogę zamówić falafel?",
+        "a": "W tortilli, w picie, w bułce albo na talerzu. Aktualne ceny wszystkich wersji są w menu."
+      },
+      {
+        "q": "Czy dowozicie falafel?",
+        "a": "Tak, przy zamówieniu na szefdonald.pl dostawa kosztuje {fee} (minimalne zamówienie {minOrder}, ok. {radius} km od lokalu)."
+      }
+    ]
+  },
+  "kapsalonKielce": {
+    "lead": "Kapsalon to danie z Holandii: mięso z kebaba, frytki, ser i sos podane razem w jednym pojemniku. W Kielcach zjesz go w Szef Donald przy ul. Ks. Piotra Ściegiennego 68a — albo zamówisz z dostawą {fee}.",
+    "sections": [
+      {
+        "heading": "Co jest w kapsalonie",
+        "paragraphs": [
+          "Na spód idą frytki, na nie mięso z kebaba, ser i sos. Mięso wybierasz sam: kurczak, wołowina albo mieszane, a sos: łagodny, ostry lub mieszany. To jedno z najbardziej sycących dań w naszym menu — porcję i wagę mięsa w każdym rozmiarze znajdziesz niżej.",
+          "Wszystko przygotowujemy na miejscu w ciągu dnia — u nas nie ma zamrażarki."
+        ]
+      },
+      {
+        "heading": "Kapsalon z dostawą w Kielcach",
+        "paragraphs": [
+          "Zamów bezpośrednio na szefdonald.pl: dostawa {fee}, minimalne zamówienie {minOrder}, w promieniu około {radius} km od lokalu. Kapsalon jest też dostępny w zestawie z napojem w niższej cenie. Wolisz odebrać sam? Wybierz odbiór osobisty."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Co to jest kapsalon?",
+        "a": "Danie z mięsa z kebaba, frytek, sera i sosu podane w jednym pojemniku."
+      },
+      {
+        "q": "Ile kosztuje kapsalon w Szef Donald?",
+        "a": "Aktualne ceny w każdym rozmiarze są w menu i na tej stronie — pobieramy je prosto z systemu zamówień."
+      },
+      {
+        "q": "Czy mogę zamówić kapsalon z dostawą?",
+        "a": "Tak. Przy zamówieniu na szefdonald.pl dostawa kosztuje {fee}, minimalne zamówienie to {minOrder}."
+      }
+    ]
+  },
+  "delivery": {
+    "lead": "Dowozimy kebab, falafel i pozostałe dania z naszego menu na terenie Kielc. Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników.",
+    "sections": [
+      {
+        "heading": "Obszar dostawy",
+        "paragraphs": [
+          "Dowozimy w promieniu około {radius} km od naszego lokalu przy {address}. Przy składaniu zamówienia zaznaczasz adres na mapie — od razu zobaczysz, czy jest w strefie dostawy."
+        ]
+      },
+      {
+        "heading": "Koszt dostawy i minimalne zamówienie",
+        "bullets": [
+          "Dostawa: {fee} przy zamówieniu na szefdonald.pl.",
+          "Minimalne zamówienie z dostawą: {minOrder}.",
+          "Płatność: karta, BLIK albo gotówka."
+        ]
+      },
+      {
+        "heading": "Ile czeka się na zamówienie",
+        "paragraphs": [
+          "Typowy czas dostawy to {deliveryTime} min, a zamówienie z odbiorem osobistym jest zwykle gotowe w {pickupTime} min. W godzinach największego ruchu może to potrwać dłużej — aktualny status widzisz na stronie śledzenia zamówienia."
+        ]
+      },
+      {
+        "heading": "Odbiór osobisty",
+        "paragraphs": [
+          "Możesz też zamówić online i odebrać jedzenie w lokalu przy ul. Ściegiennego 68a. Przy odbiorze osobistym nie obowiązuje opłata za dostawę."
+        ]
+      },
+      {
+        "heading": "Jak zamówić",
+        "bullets": [
+          "Wejdź w menu i wybierz dania — przy każdym wybierasz rozmiar, mięso i sos.",
+          "W koszyku wybierz dostawę albo odbiór osobisty.",
+          "Podaj dane kontaktowe i adres, wybierz płatność i złóż zamówienie.",
+          "Status zamówienia śledzisz na żywo na stronie zamówienia."
+        ]
+      },
+      {
+        "heading": "Godziny dostaw",
+        "paragraphs": [
+          "Zamówienia z dostawą przyjmujemy w godzinach otwarcia lokalu: {hours}."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Ile kosztuje dostawa?",
+        "a": "{fee} przy zamówieniu bezpośrednio na szefdonald.pl."
+      },
+      {
+        "q": "Jakie jest minimalne zamówienie?",
+        "a": "{minOrder} dla zamówień z dostawą."
+      },
+      {
+        "q": "Gdzie dowozicie?",
+        "a": "W promieniu około {radius} km od lokalu przy {address}. Przy zamówieniu zaznaczasz adres na mapie i od razu widzisz, czy jest w strefie."
+      },
+      {
+        "q": "Jak mogę zapłacić?",
+        "a": "Kartą, BLIK-iem albo gotówką."
+      },
+      {
+        "q": "Ile trwa dostawa?",
+        "a": "Zwykle {deliveryTime} min, w godzinach szczytu może potrwać dłużej."
+      }
+    ]
+  },
+  "faq": {
+    "lead": "Zebraliśmy odpowiedzi na pytania, które klienci zadają nam najczęściej — przez telefon, przy ladzie i w wiadomościach.",
+    "items": [
+      {
+        "q": "W jakich godzinach jest otwarty Szef Donald?",
+        "a": "{hours}."
+      },
+      {
+        "q": "Gdzie znajduje się lokal?",
+        "a": "{address}. Dojazd i mapę znajdziesz na stronie Lokalizacja."
+      },
+      {
+        "q": "Ile kosztuje dostawa?",
+        "a": "Przy zamówieniu bezpośrednio na szefdonald.pl dostawa kosztuje {fee}."
+      },
+      {
+        "q": "Jakie jest minimalne zamówienie z dostawą?",
+        "a": "{minOrder}."
+      },
+      {
+        "q": "Jak daleko dowozicie?",
+        "a": "W promieniu około {radius} km od lokalu przy Ściegiennego 68a."
+      },
+      {
+        "q": "Ile czeka się na dostawę?",
+        "a": "Zwykle {deliveryTime} min. Zamówienie z odbiorem osobistym jest najczęściej gotowe w {pickupTime} min."
+      },
+      {
+        "q": "Jak mogę zapłacić?",
+        "a": "Kartą, BLIK-iem albo gotówką."
+      },
+      {
+        "q": "Czy mogę odebrać zamówienie osobiście?",
+        "a": "Tak. Wybierz odbiór osobisty przy zamówieniu i odbierz jedzenie w lokalu."
+      },
+      {
+        "q": "Czy macie coś dla wegetarian?",
+        "a": "Tak — falafel w tortilli, w picie, w bułce albo na talerzu. Dania z falafelem nie zawierają mięsa."
+      },
+      {
+        "q": "Jakie mięso jest w kebabie?",
+        "a": "Do wyboru kurczak, wołowina albo mieszane."
+      },
+      {
+        "q": "Jak duże są porcje?",
+        "a": "Większość dań ma kilka rozmiarów, a przy każdym rozmiarze podajemy w menu wagę mięsa w gramach."
+      },
+      {
+        "q": "Jak ostre są sosy?",
+        "a": "Mamy sos łagodny, ostry i mieszany. Jeśli lubisz naprawdę ostro, napisz to w uwagach do zamówienia albo powiedz przy ladzie."
+      },
+      {
+        "q": "Czy jedzenie jest świeże?",
+        "a": "Tak, wszystko przygotowujemy na miejscu w ciągu dnia. U nas nie ma zamrażarki."
+      },
+      {
+        "q": "Gdzie sprawdzę alergeny?",
+        "a": "Alergeny podajemy przy daniach w menu. Jeśli masz alergię, zapytaj obsługę przed zamówieniem — powiemy dokładnie, co jest w środku."
+      },
+      {
+        "q": "Czy przyjmujecie większe zamówienia, np. dla firmy lub grupy?",
+        "a": "Tak. Przy większym zamówieniu najlepiej zadzwoń wcześniej: {phone} — ustalimy godzinę odbioru lub dostawy."
+      },
+      {
+        "q": "Czy mogę zamówić telefonicznie?",
+        "a": "Tak, zadzwoń: {phone}. Najszybciej zamówisz jednak online na szefdonald.pl."
+      },
+      {
+        "q": "Czy macie zestawy?",
+        "a": "Tak, w menu są zestawy kebab z napojem w niższej cenie niż osobno."
+      }
+    ]
+  },
+  "about": {
+    "facts": [
+      "Szef Donald to lokal z kebabem i falafelem w Kielcach przy ul. Ks. Piotra Ściegiennego 68a, działający od 2019 roku.",
+      "Wszystko przygotowujemy na miejscu w ciągu dnia — u nas nie ma zamrażarki. W sezonie wydajemy około {wraps} zawijańców tygodniowo.",
+      "W menu są kebab w tortilli, picie i bułce, kapsalon, kebab na talerzu, kebab box, sałatka kebab, tacos, polędwiczki z kurczaka, falafel oraz zestawy z napojem.",
+      "Jesteśmy otwarci: {hours}. Telefon: {phone}.",
+      "Zamówienia złożone bezpośrednio na szefdonald.pl dowozimy za {fee} w promieniu ok. {radius} km (minimalne zamówienie {minOrder}). Można też odebrać zamówienie osobiście. Płatność kartą, BLIK-iem lub gotówką."
+    ],
+    "factsHeading": "Szef Donald w skrócie"
+  }
+}

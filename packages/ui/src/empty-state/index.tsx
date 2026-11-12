@@ -12,6 +12,8 @@ export interface EmptyStateProps {
     onClick?: () => void;
   };
   size?: 'sm' | 'md' | 'lg';
+  /** Heading level for the title (default h3). Use h1 when the empty state is the page's main content. */
+  headingAs?: 'h1' | 'h2' | 'h3';
   className?: string;
 }
 
@@ -31,6 +33,7 @@ export function EmptyState({
   description,
   action,
   size = 'md',
+  headingAs: Heading = 'h3',
   className,
 }: EmptyStateProps) {
   const sizing = SIZE_CLASSES[size];
@@ -44,7 +47,7 @@ export function EmptyState({
       )}
     >
       {icon && <div className={cn('text-fg-subtle', sizing.icon)}>{icon}</div>}
-      <h3 className={cn('text-fg', sizing.title)}>{title}</h3>
+      <Heading className={cn('text-fg', sizing.title)}>{title}</Heading>
       {description && (
         <p className="mt-2 max-w-sm text-small text-fg-muted">{description}</p>
       )}

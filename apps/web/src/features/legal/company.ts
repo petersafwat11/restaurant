@@ -58,9 +58,9 @@ export function getCompanyInfo(r: RestaurantPublicDto | null): CompanyInfo {
     registryCourt: legal?.registryCourt ?? null,
     shareCapital: legal?.shareCapital ?? null,
     shareCapitalCurrency: legal?.shareCapitalCurrency ?? null,
-    email: legal?.supportEmail ?? r?.email ?? null,
+    email: legal?.supportEmail || r?.email || null,
     phone: legal?.supportPhone ?? r?.phone ?? null,
-    supportEmail: legal?.supportEmail ?? r?.email ?? null,
+    supportEmail: legal?.supportEmail || r?.email || null,
     complaintsEmail: legal?.complaintsEmail ?? null,
     privacyEmail: legal?.privacyEmail ?? null,
   };

@@ -1,28 +1,36 @@
-import { getAlternates } from '@/lib/seo/alternates';
+import { CtaRow, FactsCard } from '@/features/seo/components/seo-blocks';
+import { loadFactsLabels, seoH1, seoMetadata } from '@/features/seo/load-seo';
+import { buildSeoVars, interpolate } from '@/features/seo/seo-vars';
+import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { Container, SectionHeader } from '@repo/ui';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-export function generateStaticParams() {
-  return [{ locale: 'pl' }, { locale: 'en' }];
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return seoMetadata(locale, 'about', '/about');
 }
 
-export function generateMetadata(): Metadata {
-  return { alternates: getAlternates('/about') };
-}
-
-export default async function AboutPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+/**
+ * About (/about — "O nas"). Besides the story, it states the entity facts in
+ * plain sentences (name, cuisine, address, opening year, hours, delivery) —
+ * the form AI assistants quote when they describe a business.
+ */
+export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'web.marketing.about' });
+  const tSeo = await getTranslations({ locale, namespace: 'web.seo.pages' });
+  const restaurant = await fetchPublicRestaurant();
+  const vars = restaurant ? buildSeoVars(restaurant, locale) : null;
+  const h1 = await seoH1(locale, 'about', vars);
+  const facts = vars ? (tSeo.raw('about.facts') as string[]).map((f) => interpolate(f, vars)) : [];
+  const factsLabels = vars ? await loadFactsLabels(locale, vars) : null;
 
-  // No unverified Google rating here — the same 4.1/213 figure was removed from
-  // the homepage as unsubstantiated social proof (Slice 7 / plan §H1). If the
-  // owner wants to show a real rating, wire it from a verified source.
+  // No unverified rating here — ratings are shown only with their source on
+  // the home page.
   const stats: Array<{ key: 'years' | 'wraps'; label: string; sub: string }> = [
     { key: 'years', label: t('stats.yearsValue'), sub: t('stats.yearsLabel') },
     { key: 'wraps', label: t('stats.wrapsValue'), sub: t('stats.wrapsLabel') },
@@ -33,8 +41,9 @@ export default async function AboutPage({
       <section className="bg-bg pt-section-y-mobile sm:pt-section-y">
         <Container>
           <SectionHeader
+            as="h1"
             eyebrow={t('eyebrow')}
-            title={t('title')}
+            title={h1}
             description={t('description')}
             align="center"
           />
@@ -49,6 +58,35 @@ export default async function AboutPage({
           </div>
         </Container>
       </section>
+
+      {facts.length > 0 && restaurant && factsLabels && (
+        <section className="bg-bg py-section-y-mobile sm:py-section-y">
+          <Container>
+            <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <div className="flex flex-col gap-4">
+                <h2 className="font-display text-h3 text-fg sm:text-h2">
+                  {tSeo('about.factsHeading')}
+                </h2>
+                {facts.map((f) => (
+                  <p key={f} className="text-body-l text-fg-muted">
+                    {f}
+                  </p>
+                ))}
+                {vars && (
+                  <CtaRow
+                    primary={{
+                      label: interpolate(tSeo.raw('common.ctaOrderDelivery') as string, vars),
+                      href: '/menu',
+                    }}
+                    secondary={{ label: 'Kebab Kielce', href: '/kebab-kielce' }}
+                  />
+                )}
+              </div>
+              <FactsCard restaurant={restaurant} locale={locale} labels={factsLabels} />
+            </div>
+          </Container>
+        </section>
+      )}
 
       <section className="bg-bg py-section-y-mobile sm:py-section-y">
         <Container>

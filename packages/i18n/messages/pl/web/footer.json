@@ -12,17 +12,22 @@
       "tacos": "Tacos",
       "boxAndPlates": "Boxy i talerze",
       "drinks": "Napoje",
-      "viewFullMenu": "Zobacz całe menu →"
+      "viewFullMenu": "Zobacz całe menu →",
+      "kapsalon": "Kapsalon"
     },
     "visit": {
-      "heading": "Odwiedź nas"
+      "heading": "Odwiedź nas",
+      "delivery": "Dostawa {fee} · min. {minOrder} · do ok. {radius} km"
     },
     "company": {
       "heading": "Firma",
       "about": "O nas",
       "contact": "Kontakt",
       "loyalty": "Lojalność",
-      "referrals": "Polecenia"
+      "referrals": "Polecenia",
+      "delivery": "Dostawa",
+      "faq": "FAQ",
+      "kebabKielce": "Kebab Kielce"
     }
   },
   "bottom": {

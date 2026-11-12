@@ -2,10 +2,12 @@
 
 import { useAddToCart } from '@/features/cart/hooks';
 import { useMenuTree } from '@/features/menu/hooks';
-import { Link } from '@/i18n/navigation';
+import { dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
+import { Link, getPathname } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/routing';
 import { Container, DishCard, SectionHeader } from '@repo/ui';
 import { ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 
 type FeaturedItem = {
@@ -28,6 +30,7 @@ type FeaturedItem = {
 export function LandingFeaturedDishes() {
   const t = useTranslations('web.marketing.home.featured');
   const tChips = useTranslations('web.shop.menu.chips');
+  const locale = useLocale() as AppLocale;
   const treeQuery = useMenuTree();
   const addMutation = useAddToCart();
 
@@ -46,14 +49,14 @@ export function LandingFeaturedDishes() {
     if (!treeQuery.data) return [];
     const currency = 'PLN';
     return treeQuery.data.categories
-      .flatMap((c) => c.items)
+      .flatMap((c) => c.items.map((i) => ({ ...i, categorySlug: c.slug })))
       .filter((i) => i.isFeatured)
       .slice(0, 6)
       .map((i) => ({
-        href: `/menu#${i.slug}`,
+        href: getPathname({ locale, href: dishHref(i.categorySlug, i.slug) }),
         image: {
           src: i.images[0]?.url ?? '',
-          alt: i.images[0]?.alt ?? i.name,
+          alt: dishImageAlt(i, locale),
         },
         name: i.name,
         description: i.description ?? undefined,
@@ -73,7 +76,7 @@ export function LandingFeaturedDishes() {
           });
         },
       }));
-  }, [treeQuery.data, addMutation]);
+  }, [treeQuery.data, addMutation, locale]);
 
   // No live featured dishes → hide the section rather than show mock content.
   if (items.length === 0) return null;

@@ -1,0 +1,332 @@
+{
+  "common": {
+    "breadcrumbHome": "Home",
+    "breadcrumbMenu": "Menu",
+    "orderDirect": "Order direct — {fee} delivery, no middleman fees",
+    "orderDirectShort": "Order direct on szefdonald.pl — {fee} delivery",
+    "ctaOrderDelivery": "Order with {fee} delivery",
+    "ctaPickup": "Pick up yourself",
+    "ctaMenu": "See the full menu",
+    "ctaCall": "Call: {phone}",
+    "factsHeading": "Key facts",
+    "factAddress": "Address",
+    "factPhone": "Phone",
+    "factHours": "Opening hours",
+    "factDelivery": "Delivery",
+    "factDeliveryValue": "{fee} when ordering on szefdonald.pl, minimum order {minOrder}, within about {radius} km",
+    "factPayments": "Payment",
+    "factPaymentsValue": "card, BLIK, cash",
+    "factPickup": "Pickup",
+    "factPickupValue": "at the restaurant, ul. Ściegiennego 68a",
+    "popularHeading": "Most ordered",
+    "dishesHeading": "Dishes and prices",
+    "fromPrice": "from {price}",
+    "faqHeading": "Questions and answers",
+    "mapHeading": "Where we are",
+    "mapAria": "Map: Szef Donald, {address}",
+    "openInMaps": "Open in Google Maps",
+    "relatedHeading": "You might also like",
+    "sizesHeading": "Sizes and prices",
+    "sizeCol": "Size",
+    "meatCol": "Meat",
+    "priceCol": "Price",
+    "aboutDishHeading": "About this dish",
+    "categoryLink": "All items: {category}",
+    "vegetarian": "vegetarian",
+    "vegan": "vegan",
+    "glutenFree": "gluten-free",
+    "unavailable": "Temporarily unavailable",
+    "seeDish": "Details",
+    "itemsCount": "{count, plural, one {# item} other {# items}}",
+    "lastUpdated": "Updated: {date}",
+    "pyszneRating": "{value}/5 — {count} ratings on Pyszne.pl",
+    "googleRating": "{value}/5 on Google ({count} reviews)"
+  },
+  "category": {
+    "intro": "{description} We make everything in the {category} category on site at our restaurant, {address}. The prices below come straight from our menu and are always current — order with {fee} delivery (minimum order {minOrder}) or pick up yourself.",
+    "introNoDescription": "We make everything in the {category} category on site at our restaurant, {address}. The prices below come straight from our menu and are always current — order with {fee} delivery (minimum order {minOrder}) or pick up yourself."
+  },
+  "kebabKielce": {
+    "lead": "Szef Donald is a small kebab place at ul. Ks. Piotra Ściegiennego 68a in Kielce. We opened in 2019 and have made everything on site from day one — we have no freezer. Order your kebab with {fee} delivery, take it away or eat in.",
+    "sections": [
+      {
+        "heading": "Who we are",
+        "paragraphs": [
+          "We are a small local restaurant in Kielce, not a chain. The people behind the counter are the same people who chop the vegetables and prepare the meat in the morning, so we know what goes into every wrap, pita and bun.",
+          "In season we serve around {wraps} wraps a week. That is a lot for a small place, and it lets us prepare meat and salads fresh every day instead of storing them for weeks."
+        ]
+      },
+      {
+        "heading": "What makes us different",
+        "paragraphs": [
+          "We have no freezer. Meat, salads, sauces and falafel are prepared during the day, and whatever we do not sell does not come back to the counter tomorrow. We go for big portions, well-seasoned meat and fresh vegetables."
+        ],
+        "bullets": [
+          "Everything made on site, at Ściegiennego 68a.",
+          "Choice of meat: chicken, beef or mixed.",
+          "Three sauces: mild, spicy and mixed — if you like it really hot, say so in the order notes.",
+          "Several portion sizes — the meat weight of each size is listed on the menu.",
+          "Vegetarian option: falafel in a wrap, pita, bun or on a plate."
+        ]
+      },
+      {
+        "heading": "Which kebab can you order",
+        "paragraphs": [
+          "The classics are kebab in a tortilla wrap, in pita and in a bun — meat, salad and sauce. If you prefer a fork, go for the kebab plate with fries and salad, the kebab box or the kebab salad. For a big appetite there is kapsalon: meat, fries, cheese and sauce in one box. The menu also has fryto kebab, tacos with chicken tenders and combo deals with a drink at a lower price.",
+          "Current prices and the meat weight of every size are listed below and on the full menu — they come straight from our ordering system, so they are always up to date."
+        ]
+      },
+      {
+        "heading": "Kebab delivery in Kielce",
+        "paragraphs": [
+          "Order direct on szefdonald.pl and delivery costs {fee} — no middleman fees. We deliver within about {radius} km of the restaurant at Ściegiennego 68a, minimum order {minOrder}. Pay by card, BLIK or cash on delivery.",
+          "Prefer to collect? Choose pickup — we prepare the order and you pick it up at the restaurant. See the Delivery page for details."
+        ]
+      },
+      {
+        "heading": "Opening hours and directions",
+        "paragraphs": [
+          "We are open: {hours}. You will find us at {address}. Call us with questions or to order by phone: {phone}."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Where can I eat kebab in Kielce near Ściegiennego street?",
+        "a": "Szef Donald is at {address}. Eat in, take away, or order with {fee} delivery on szefdonald.pl."
+      },
+      {
+        "q": "How much is kebab delivery in Kielce?",
+        "a": "Ordering direct on szefdonald.pl, delivery costs {fee}. Minimum order {minOrder}, within about {radius} km of the restaurant."
+      },
+      {
+        "q": "Is the kebab made on site?",
+        "a": "Yes. Everything is prepared at the restaurant during the day — we have no freezer."
+      },
+      {
+        "q": "What meat is in the kebab?",
+        "a": "Chicken, beef or mixed — your choice. The meat weight of each size is on the menu."
+      },
+      {
+        "q": "What are your opening hours?",
+        "a": "{hours}."
+      }
+    ]
+  },
+  "falafelKielce": {
+    "lead": "Looking for falafel in Kielce? At Szef Donald, ul. Ks. Piotra Ściegiennego 68a, falafel is a proper dish, not a side. We serve it in a tortilla wrap, in pita, in a bun or on a plate — with salad and your choice of sauce.",
+    "sections": [
+      {
+        "heading": "Falafel made on site",
+        "paragraphs": [
+          "We make falafel at the restaurant during the day, like the rest of the menu — we have no freezer. Falafel dishes are vegetarian: no meat, so a good choice if you skip kebab or are ordering for a mixed group.",
+          "You choose the portion by the number of falafel pieces — from standard to Mega. Plus salad and a sauce: mild, spicy or mixed."
+        ]
+      },
+      {
+        "heading": "How to order falafel for delivery",
+        "paragraphs": [
+          "Order direct on szefdonald.pl: delivery costs {fee}, minimum order {minOrder}, within about {radius} km of the restaurant. Pickup is available too. Pay by card, BLIK or cash.",
+          "Ask our staff about allergens — we will tell you exactly what is inside."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "Is the falafel at Szef Donald vegetarian?",
+        "a": "Yes, falafel dishes contain no meat."
+      },
+      {
+        "q": "How can I order falafel?",
+        "a": "In a tortilla wrap, in pita, in a bun or on a plate. Current prices of every version are on the menu."
+      },
+      {
+        "q": "Do you deliver falafel?",
+        "a": "Yes, ordering on szefdonald.pl delivery costs {fee} (minimum order {minOrder}, about {radius} km from the restaurant)."
+      }
+    ]
+  },
+  "kapsalonKielce": {
+    "lead": "Kapsalon is a Dutch dish: kebab meat, fries, cheese and sauce served together in one box. In Kielce you can eat it at Szef Donald, ul. Ks. Piotra Ściegiennego 68a — or order it with {fee} delivery.",
+    "sections": [
+      {
+        "heading": "What is in a kapsalon",
+        "paragraphs": [
+          "Fries go at the bottom, then kebab meat, cheese and sauce. You choose the meat — chicken, beef or mixed — and the sauce: mild, spicy or mixed. It is one of the most filling dishes on our menu; portion sizes and meat weights are listed below.",
+          "Everything is prepared on site during the day — we have no freezer."
+        ]
+      },
+      {
+        "heading": "Kapsalon delivery in Kielce",
+        "paragraphs": [
+          "Order direct on szefdonald.pl: {fee} delivery, minimum order {minOrder}, within about {radius} km of the restaurant. Kapsalon also comes as a combo with a drink at a lower price. Prefer to collect? Choose pickup."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "What is a kapsalon?",
+        "a": "A dish of kebab meat, fries, cheese and sauce served in one box."
+      },
+      {
+        "q": "How much is a kapsalon at Szef Donald?",
+        "a": "Current prices for every size are on the menu and on this page — they come straight from our ordering system."
+      },
+      {
+        "q": "Can I get kapsalon delivered?",
+        "a": "Yes. Ordering on szefdonald.pl, delivery costs {fee}; minimum order {minOrder}."
+      }
+    ]
+  },
+  "delivery": {
+    "lead": "We deliver kebab, falafel and the rest of our menu across Kielce. Order direct on szefdonald.pl and delivery costs {fee} — no middleman fees.",
+    "sections": [
+      {
+        "heading": "Delivery area",
+        "paragraphs": [
+          "We deliver within about {radius} km of our restaurant at {address}. When ordering you drop a pin on the map and immediately see whether you are in the delivery zone."
+        ]
+      },
+      {
+        "heading": "Delivery fee and minimum order",
+        "bullets": [
+          "Delivery: {fee} when ordering on szefdonald.pl.",
+          "Minimum order for delivery: {minOrder}.",
+          "Payment: card, BLIK or cash."
+        ]
+      },
+      {
+        "heading": "How long does it take",
+        "paragraphs": [
+          "Typical delivery time is {deliveryTime} min; pickup orders are usually ready in {pickupTime} min. At peak times it can take longer — you can follow the live status on the order tracking page."
+        ]
+      },
+      {
+        "heading": "Pickup",
+        "paragraphs": [
+          "You can also order online and collect your food at the restaurant on ul. Ściegiennego 68a. There is no delivery fee for pickup."
+        ]
+      },
+      {
+        "heading": "How to order",
+        "bullets": [
+          "Open the menu and pick your dishes — choose size, meat and sauce for each.",
+          "In the cart choose delivery or pickup.",
+          "Enter your contact details and address, choose a payment method and place the order.",
+          "Follow the order status live on the order page."
+        ]
+      },
+      {
+        "heading": "Delivery hours",
+        "paragraphs": [
+          "We take delivery orders during our opening hours: {hours}."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "q": "How much is delivery?",
+        "a": "{fee} when ordering direct on szefdonald.pl."
+      },
+      {
+        "q": "What is the minimum order?",
+        "a": "{minOrder} for delivery orders."
+      },
+      {
+        "q": "Where do you deliver?",
+        "a": "Within about {radius} km of the restaurant at {address}. You drop a pin on the map when ordering and see straight away whether you are in the zone."
+      },
+      {
+        "q": "How can I pay?",
+        "a": "By card, BLIK or cash."
+      },
+      {
+        "q": "How long does delivery take?",
+        "a": "Usually {deliveryTime} min; it can take longer at peak times."
+      }
+    ]
+  },
+  "faq": {
+    "lead": "Answers to the questions customers ask us most often — on the phone, at the counter and in messages.",
+    "items": [
+      {
+        "q": "When is Szef Donald open?",
+        "a": "{hours}."
+      },
+      {
+        "q": "Where is the restaurant?",
+        "a": "{address}. Directions and a map are on the Location page."
+      },
+      {
+        "q": "How much is delivery?",
+        "a": "Ordering direct on szefdonald.pl, delivery costs {fee}."
+      },
+      {
+        "q": "What is the minimum order for delivery?",
+        "a": "{minOrder}."
+      },
+      {
+        "q": "How far do you deliver?",
+        "a": "Within about {radius} km of the restaurant on Ściegiennego 68a."
+      },
+      {
+        "q": "How long does delivery take?",
+        "a": "Usually {deliveryTime} min. Pickup orders are usually ready in {pickupTime} min."
+      },
+      {
+        "q": "How can I pay?",
+        "a": "By card, BLIK or cash."
+      },
+      {
+        "q": "Can I pick up my order?",
+        "a": "Yes. Choose pickup when ordering and collect your food at the restaurant."
+      },
+      {
+        "q": "Do you have vegetarian options?",
+        "a": "Yes — falafel in a wrap, pita, bun or on a plate. Falafel dishes contain no meat."
+      },
+      {
+        "q": "What meat is in the kebab?",
+        "a": "Chicken, beef or mixed — your choice."
+      },
+      {
+        "q": "How big are the portions?",
+        "a": "Most dishes come in several sizes, and the menu lists the meat weight in grams for each size."
+      },
+      {
+        "q": "How spicy are the sauces?",
+        "a": "We have mild, spicy and mixed sauce. If you like it really hot, add a note to your order or tell us at the counter."
+      },
+      {
+        "q": "Is the food fresh?",
+        "a": "Yes, everything is prepared on site during the day. We have no freezer."
+      },
+      {
+        "q": "Where can I check allergens?",
+        "a": "Allergens are listed with the dishes on the menu. If you have an allergy, ask our staff before ordering — we will tell you exactly what is inside."
+      },
+      {
+        "q": "Do you take larger orders, e.g. for a company or group?",
+        "a": "Yes. For a larger order it is best to call ahead: {phone} — we will agree on a pickup or delivery time."
+      },
+      {
+        "q": "Can I order by phone?",
+        "a": "Yes, call {phone}. Ordering online on szefdonald.pl is quickest, though."
+      },
+      {
+        "q": "Do you have combo deals?",
+        "a": "Yes, the menu has kebab + drink combos at a lower price than buying separately."
+      }
+    ]
+  },
+  "about": {
+    "facts": [
+      "Szef Donald is a kebab and falafel restaurant in Kielce at ul. Ks. Piotra Ściegiennego 68a, open since 2019.",
+      "Everything is prepared on site during the day — we have no freezer. In season we serve around {wraps} wraps a week.",
+      "The menu has kebab in a wrap, pita and bun, kapsalon, kebab plate, kebab box, kebab salad, tacos, chicken tenders, falafel and combo deals with a drink.",
+      "We are open: {hours}. Phone: {phone}.",
+      "Orders placed direct on szefdonald.pl are delivered for {fee} within about {radius} km (minimum order {minOrder}). Pickup is available too. Pay by card, BLIK or cash."
+    ],
+    "factsHeading": "Szef Donald at a glance"
+  }
+}

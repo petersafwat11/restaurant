@@ -1,6 +1,7 @@
 'use client';
 
-import { useRestaurants } from '@/features/restaurants/hooks';
+import { useRestaurant } from '@/features/restaurants/hooks';
+import { publicEmail } from '@/features/restaurants/lib/restaurant-facts';
 import {
   FALLBACK_TIMEZONE,
   directionsHref as buildDirectionsHref,
@@ -242,12 +243,12 @@ function StickyMobileBar({ tel, directionsHref }: { tel: string; directionsHref:
 /*  Page                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export default function LocationsApp() {
+export default function LocationsApp({ h1 }: { h1?: string }) {
   const t = useTranslations('web.marketing.locations');
   const locale = useLocale();
-  const query = useRestaurants();
-  const restaurants = query.data ?? [];
-  const r = restaurants[0] ?? null;
+  // Seeded server-side (ServerDataHydration) so NAP + hours are in the HTML.
+  const query = useRestaurant();
+  const r = query.data ?? null;
   const now = useClock();
 
   const longDay = (d: number) => t(`days.long.${d}` as 'days.long.0');
@@ -315,7 +316,7 @@ export default function LocationsApp() {
               className="mt-3 font-display text-h1 leading-[1.05] text-white sm:text-[clamp(2.75rem,6vw,4.5rem)]"
               style={{ textWrap: 'balance' }}
             >
-              {r.name}
+              {h1 ?? r.name}
             </h1>
             {r.description && (
               <p className="mt-4 max-w-xl text-body-l text-white/85">{r.description}</p>
@@ -402,9 +403,14 @@ export default function LocationsApp() {
                 <a href={`tel:${tel}`} className="mt-1 text-body text-fg hover:text-accent">
                   {r.phone}
                 </a>
-                <a href={`mailto:${r.email}`} className="text-body text-fg-muted hover:text-accent">
-                  {r.email}
-                </a>
+                {publicEmail(r) && (
+                  <a
+                    href={`mailto:${r.email}`}
+                    className="text-body text-fg-muted hover:text-accent"
+                  >
+                    {r.email}
+                  </a>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2">

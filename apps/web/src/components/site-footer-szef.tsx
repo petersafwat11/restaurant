@@ -4,12 +4,14 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
 import { getCompanyInfo } from '@/features/legal/company';
 import { useRestaurant } from '@/features/restaurants/hooks';
+import { shortFee, shortMinOrder } from '@/features/restaurants/lib/restaurant-facts';
 import { formatAddressLine2, hoursToRows } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
+import { SAME_AS } from '@/lib/brand';
 import type { RestaurantPublicDto } from '@repo/types';
 import { HoursTable, SiteFooter } from '@repo/ui';
 import { Facebook, Globe, Instagram, MapPin } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 /** Pick an icon + accessible label for a social/profile URL (from `sameAs`). */
 function socialMeta(url: string): { Icon: typeof Instagram; label: string } {
@@ -38,6 +40,7 @@ export function SzefSiteFooter({
   initialRestaurant?: RestaurantPublicDto | null;
 }) {
   const t = useTranslations('web.footer');
+  const locale = useLocale();
   const tCommon = useTranslations('common');
   const { data: restaurant } = useRestaurant(initialRestaurant ?? undefined);
   // Copyright legal name + NIP come from the DB legal block (never a hardcoded
@@ -62,9 +65,9 @@ export function SzefSiteFooter({
         <div className="flex flex-col gap-4">
           <Logo variant="mark" size={40} />
           <p className="text-body text-surface/80">{t('tagline')}</p>
-          {restaurant?.sameAs && restaurant.sameAs.length > 0 && (
+          {SAME_AS.length > 0 && (
             <div className="flex items-center gap-3">
-              {restaurant.sameAs.map((url) => {
+              {SAME_AS.map((url) => {
                 const { Icon, label } = socialMeta(url);
                 return (
                   <a
@@ -88,19 +91,22 @@ export function SzefSiteFooter({
           heading: t('columns.menu.heading'),
           body: (
             <>
-              <Link href="/menu#kebab" className="hover:text-accent">
+              <Link href="/kebab-kielce" className="hover:text-accent">
                 {t('columns.menu.kebab')}
               </Link>
-              <Link href="/menu#falafel" className="hover:text-accent">
+              <Link href="/falafel-kielce" className="hover:text-accent">
                 {t('columns.menu.falafel')}
               </Link>
-              <Link href="/menu#tacos" className="hover:text-accent">
+              <Link href="/kapsalon-kielce" className="hover:text-accent">
+                {t('columns.menu.kapsalon')}
+              </Link>
+              <Link href="/menu/kebab/tacos" className="hover:text-accent">
                 {t('columns.menu.tacos')}
               </Link>
-              <Link href="/menu#box" className="hover:text-accent">
+              <Link href="/menu/kebab" className="hover:text-accent">
                 {t('columns.menu.boxAndPlates')}
               </Link>
-              <Link href="/menu#drinks" className="hover:text-accent">
+              <Link href="/menu/napoje-zimne" className="hover:text-accent">
                 {t('columns.menu.drinks')}
               </Link>
               <Link href="/menu" className="text-accent hover:underline">
@@ -138,6 +144,15 @@ export function SzefSiteFooter({
                   />
                 </div>
               )}
+              {restaurant?.acceptsDelivery && (
+                <Link href="/dostawa" className="mt-2 text-surface/80 hover:text-accent">
+                  {t('columns.visit.delivery', {
+                    fee: shortFee(restaurant, locale),
+                    minOrder: shortMinOrder(restaurant, locale),
+                    radius: restaurant.deliveryRadiusKm,
+                  })}
+                </Link>
+              )}
             </>
           ),
         },
@@ -150,6 +165,12 @@ export function SzefSiteFooter({
               </Link>
               <Link href="/contact" className="hover:text-accent">
                 {t('columns.company.contact')}
+              </Link>
+              <Link href="/dostawa" className="hover:text-accent">
+                {t('columns.company.delivery')}
+              </Link>
+              <Link href="/faq" className="hover:text-accent">
+                {t('columns.company.faq')}
               </Link>
               <Link href="/account/loyalty" className="hover:text-accent">
                 {t('columns.company.loyalty')}

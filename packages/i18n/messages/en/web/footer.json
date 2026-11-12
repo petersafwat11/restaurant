@@ -12,17 +12,22 @@
       "tacos": "Tacos",
       "boxAndPlates": "Box & Plates",
       "drinks": "Drinks",
-      "viewFullMenu": "View full menu →"
+      "viewFullMenu": "View full menu →",
+      "kapsalon": "Kapsalon"
     },
     "visit": {
-      "heading": "Visit"
+      "heading": "Visit",
+      "delivery": "Delivery {fee} · min. {minOrder} · up to about {radius} km"
     },
     "company": {
       "heading": "Company",
       "about": "About",
       "contact": "Contact",
       "loyalty": "Loyalty",
-      "referrals": "Referrals"
+      "referrals": "Referrals",
+      "delivery": "Delivery",
+      "faq": "FAQ",
+      "kebabKielce": "Kebab in Kielce"
     }
   },
   "bottom": {

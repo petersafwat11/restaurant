@@ -3,8 +3,8 @@ import { LEGAL_LAST_UPDATED, getCompanyInfo } from '@/features/legal/company';
 import { LegalPage } from '@/features/legal/legal-page';
 import { LegalTableOfContents } from '@/features/legal/legal-toc';
 import { PrintControls } from '@/features/legal/print-controls';
+import { seoMetadata } from '@/features/seo/load-seo';
 import { Link } from '@/i18n/navigation';
-import { getAlternates } from '@/lib/seo/alternates';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -13,8 +13,11 @@ export function generateStaticParams() {
   return [{ locale: 'pl' }, { locale: 'en' }];
 }
 
-export function generateMetadata(): Metadata {
-  return { alternates: getAlternates('/terms') };
+export async function generateMetadata({
+  params,
+}: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return seoMetadata(locale, 'terms', '/terms');
 }
 
 function toMinsRange(min: number | null, max: number | null): MinsRange | null {

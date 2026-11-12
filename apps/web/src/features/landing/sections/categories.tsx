@@ -1,8 +1,10 @@
 'use client';
 
 import { useMenuTree } from '@/features/menu/hooks';
+import { getPathname } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/routing';
 import { CategoryCard, Container, SectionHeader } from '@repo/ui';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 
 /**
@@ -13,6 +15,7 @@ import * as React from 'react';
  */
 export function LandingCategories() {
   const t = useTranslations('web.marketing.home.categories');
+  const locale = useLocale() as AppLocale;
   const { data } = useMenuTree();
 
   const categories = React.useMemo(() => {
@@ -41,7 +44,7 @@ export function LandingCategories() {
           {categories.map((c) => (
             <CategoryCard
               key={c.slug}
-              href={`/menu#${c.slug}`}
+              href={getPathname({ locale, href: `/menu/${c.slug}` })}
               image={{ src: c.image, alt: t('categoryAlt', { label: c.label }) }}
               label={c.label}
               itemCount={c.itemCount}

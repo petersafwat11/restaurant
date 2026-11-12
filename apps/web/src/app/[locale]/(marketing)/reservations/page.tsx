@@ -1,42 +1,43 @@
-import { getAlternates } from '@/lib/seo/alternates';
+import { seoMetadata } from '@/features/seo/load-seo';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
-import { JsonLd, buildReservationSchema } from '@/lib/seo/json-ld';
+import { JsonLd } from '@/lib/seo/json-ld';
+import { restaurantId } from '@/lib/seo/schema';
+import { absoluteUrl } from '@/lib/seo/site';
 import { Container, EmptyState } from '@repo/ui';
 import { CalendarClock } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-export function generateStaticParams() {
-  return [{ locale: 'pl' }, { locale: 'en' }];
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return seoMetadata(locale, 'reservations', '/reservations');
 }
 
-export function generateMetadata(): Metadata {
-  return { alternates: getAlternates('/reservations') };
-}
-
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
-}
-
-export default async function ReservationsLandingPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function ReservationsLandingPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'web.marketing.reservations' });
-
   const restaurant = await fetchPublicRestaurant();
-  const base = siteUrl();
-  // Only emit ReserveAction JSON-LD when the restaurant actually accepts
-  // reservations — otherwise a search engine that lands a user on this page
-  // would advertise an action the restaurant has turned off.
+
+  // Only declare a ReserveAction when reservations are actually switched on —
+  // otherwise search engines would advertise an action the restaurant turned
+  // off. It extends the site-wide Restaurant node by `@id` (no duplicate node).
   const reserveSchema = restaurant?.acceptsReservations
-    ? buildReservationSchema(restaurant, {
-        siteUrl: base,
-        reservationUrl: `${base}/reservations`,
-      })
+    ? {
+        '@type': 'Restaurant',
+        '@id': restaurantId(),
+        potentialAction: {
+          '@type': 'ReserveAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: absoluteUrl(locale, '/reservations'),
+            inLanguage: locale === 'en' ? 'en' : 'pl',
+          },
+          result: { '@type': 'Reservation', name: 'Table reservation' },
+        },
+      }
     : null;
 
   return (
@@ -46,9 +47,10 @@ export default async function ReservationsLandingPage({
         <Container size="narrow">
           <EmptyState
             size="lg"
+            headingAs="h1"
             icon={<CalendarClock size={64} strokeWidth={1.25} />}
             title={t('title')}
-            description={t('description', { phone: t('phone') })}
+            description={t('description', { phone: restaurant?.phone ?? t('phone') })}
             action={{ label: t('browseMenu'), href: '/menu' }}
           />
         </Container>

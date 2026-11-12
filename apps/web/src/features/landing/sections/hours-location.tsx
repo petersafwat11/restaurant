@@ -1,6 +1,7 @@
 'use client';
 
 import { useRestaurant } from '@/features/restaurants/hooks';
+import { publicEmail } from '@/features/restaurants/lib/restaurant-facts';
 import {
   directionsHref,
   formatAddressLine2,
@@ -91,7 +92,8 @@ export function LandingHoursLocation() {
   const { data: restaurant } = useRestaurant();
   const phone = restaurant?.phone ?? '';
   const tel = phone.replace(/\s/g, '');
-  const email = restaurant?.email ?? '';
+  // Hidden when empty / invalid (set in admin).
+  const email = publicEmail(restaurant);
   const href = restaurant ? directionsHref(restaurant) : '#';
   const addressLine1 = restaurant?.address.line1 ?? '';
   const addressLine2 = restaurant ? formatAddressLine2(restaurant.address) : '';

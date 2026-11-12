@@ -1,17 +1,20 @@
-import { getPathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
+import { absoluteUrl } from './site';
 
 /**
- * Emit `<link rel="alternate" hreflang="…">` entries for every supported
- * locale at `href`. Used in per-page `generateMetadata()` so Google sees a
- * direct alternates declaration on each marketing route — the sitemap
- * carries the same data globally, but per-page metadata helps when the
- * sitemap hasn't been recrawled yet.
+ * Canonical + hreflang alternates for a route. Every indexable page MUST pass
+ * its own result: a page-level `alternates` replaces the layout's entirely.
+ *
+ * - `canonical` points at this locale's own URL.
+ * - `languages` lists pl / en plus `x-default` (the Polish default).
  */
-export function getAlternates(href: string): { languages: Record<string, string> } {
-  return {
-    languages: Object.fromEntries(
-      routing.locales.map((locale) => [locale, getPathname({ locale, href })]),
-    ),
-  };
+export function getAlternates(
+  href: string,
+  locale: string = routing.defaultLocale,
+): { canonical: string; languages: Record<string, string> } {
+  const languages: Record<string, string> = Object.fromEntries(
+    routing.locales.map((l) => [l, absoluteUrl(l, href)]),
+  );
+  languages['x-default'] = absoluteUrl(routing.defaultLocale, href);
+  return { canonical: absoluteUrl(locale, href), languages };
 }

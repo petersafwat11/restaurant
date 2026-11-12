@@ -65,6 +65,8 @@ import enWebMarketingLocations from '../messages/en/web/marketing/locations.json
 import enWebMarketingReservations from '../messages/en/web/marketing/reservations.json';
 import enWebNewsletter from '../messages/en/web/newsletter.json';
 import enWebPublicTrack from '../messages/en/web/public/track.json';
+import enWebSeoMeta from '../messages/en/web/seo/meta.json';
+import enWebSeoPages from '../messages/en/web/seo/pages.json';
 import enWebShopCart from '../messages/en/web/shop/cart.json';
 import enWebShopCheckoutSuccess from '../messages/en/web/shop/checkout-success.json';
 import enWebShopCheckout from '../messages/en/web/shop/checkout.json';
@@ -135,6 +137,8 @@ import plWebMarketingLocations from '../messages/pl/web/marketing/locations.json
 import plWebMarketingReservations from '../messages/pl/web/marketing/reservations.json';
 import plWebNewsletter from '../messages/pl/web/newsletter.json';
 import plWebPublicTrack from '../messages/pl/web/public/track.json';
+import plWebSeoMeta from '../messages/pl/web/seo/meta.json';
+import plWebSeoPages from '../messages/pl/web/seo/pages.json';
 import plWebShopCart from '../messages/pl/web/shop/cart.json';
 import plWebShopCheckoutSuccess from '../messages/pl/web/shop/checkout-success.json';
 import plWebShopCheckout from '../messages/pl/web/shop/checkout.json';
@@ -230,6 +234,10 @@ const EN_MESSAGES = {
     newsletter: enWebNewsletter,
     public: {
       track: enWebPublicTrack,
+    },
+    seo: {
+      meta: enWebSeoMeta,
+      pages: enWebSeoPages,
     },
     shop: {
       cart: enWebShopCart,
@@ -332,6 +340,10 @@ const PL_MESSAGES = {
     newsletter: plWebNewsletter,
     public: {
       track: plWebPublicTrack,
+    },
+    seo: {
+      meta: plWebSeoMeta,
+      pages: plWebSeoPages,
     },
     shop: {
       cart: plWebShopCart,

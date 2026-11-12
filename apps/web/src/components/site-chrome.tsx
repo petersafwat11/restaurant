@@ -46,6 +46,7 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
 
   const navLinks = [
     { href: '/menu', label: t('nav.menu') },
+    { href: '/dostawa', label: t('nav.delivery') },
     { href: '/about', label: t('nav.about') },
     { href: '/locations', label: t('nav.locations') },
     { href: '/contact', label: t('nav.contact') },

@@ -1,3 +1,4 @@
+import { ServerDataHydration } from '@/components/server-data-hydration';
 import { SiteChrome } from '@/components/site-chrome';
 import { SzefSiteFooter } from '@/components/site-footer-szef';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
@@ -22,7 +23,10 @@ export default async function MarketingLayout({
         {t('skipToContent')}
       </a>
       <SiteChrome initialVariant="transparent-on-hero" />
-      <main id="main">{children}</main>
+      <main id="main">
+        {/* NAP / hours / delivery terms in the server HTML for crawlers. */}
+        <ServerDataHydration restaurant={restaurant}>{children}</ServerDataHydration>
+      </main>
       <SzefSiteFooter initialRestaurant={restaurant} />
     </>
   );

@@ -1,6 +1,8 @@
 import { routing } from '@/i18n/routing';
+import { fetchMenuTree } from '@/lib/seo/fetch-menu';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
-import { JsonLd, buildRestaurantSchema } from '@/lib/seo/json-ld';
+import { JsonLd } from '@/lib/seo/json-ld';
+import { buildRestaurantNode } from '@/lib/seo/schema';
 import { AppProviders } from '@/providers/app-providers';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
@@ -93,16 +95,15 @@ export default async function LocaleLayout({ children, params }: Props) {
   // returns null silently if the API is unreachable so layout still renders.
   // Injected at the locale root so it reaches every public surface including
   // `(shop)/menu/*` and `(marketing)/*` — see docs/seo/seo-geo-strategy.md §D.
-  const restaurant = await fetchPublicRestaurant();
+  // Both fetches are cached in the Next data cache (revalidate 300 s) and
+  // deduplicated with the same calls made by pages in this request.
+  const [restaurant, tree] = await Promise.all([fetchPublicRestaurant(), fetchMenuTree(locale)]);
 
   return (
     <html lang={locale} dir="ltr" className={`${fraunces.variable} ${inter.variable}`}>
       <body className="bg-bg text-fg antialiased">
         {restaurant ? (
-          <JsonLd
-            id="ld-restaurant"
-            data={buildRestaurantSchema(restaurant, { siteUrl: siteUrl() })}
-          />
+          <JsonLd id="ld-restaurant" data={buildRestaurantNode(restaurant, locale, tree)} />
         ) : null}
         <NextIntlClientProvider>
           <AppProviders>{children}</AppProviders>

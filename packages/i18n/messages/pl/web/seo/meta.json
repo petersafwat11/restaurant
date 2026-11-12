@@ -1,0 +1,111 @@
+{
+  "home": {
+    "title": "Kebab Kielce — dostawa {fee}, Ściegiennego | Szef Donald",
+    "description": "Kebab, falafel i kapsalon w Kielcach przy Ściegiennego 68a. Wszystko robimy na miejscu od 2019 r. Zamów bezpośrednio — dostawa {fee}, bez prowizji."
+  },
+  "menu": {
+    "title": "Menu i ceny — kebab, falafel, kapsalon Kielce | Szef Donald",
+    "description": "Pełne menu Szef Donald z cenami: kebab w tortilli, picie i bułce, kapsalon, falafel, tacos, boxy i zestawy. Dostawa {fee} w Kielcach, min. {minOrder}.",
+    "h1": "Menu — kebab, falafel i kapsalon w Kielcach"
+  },
+  "about": {
+    "title": "O nas — kebab w Kielcach od 2019 roku | Szef Donald",
+    "description": "Szef Donald to mały lokal z kebabem i falafelem przy ul. Ks. Piotra Ściegiennego 68a w Kielcach. Działamy od 2019 r., wszystko robimy na miejscu.",
+    "h1": "Szef Donald — kebab i falafel w Kielcach od 2019 roku"
+  },
+  "contact": {
+    "title": "Kontakt — Szef Donald, Ściegiennego 68a, Kielce",
+    "description": "Zadzwoń lub napisz do Szef Donald: kebab i falafel przy ul. Ks. Piotra Ściegiennego 68a, 25-115 Kielce. Telefon, adres, godziny otwarcia.",
+    "h1": "Kontakt — Szef Donald w Kielcach"
+  },
+  "locations": {
+    "title": "Dojazd i godziny otwarcia — Szef Donald Kielce",
+    "description": "Szef Donald, ul. Ks. Piotra Ściegiennego 68a, 25-115 Kielce. Godziny: {hours}. Mapa i dojazd.",
+    "h1": "Dojazd i godziny otwarcia — Szef Donald Kielce"
+  },
+  "reservations": {
+    "title": "Rezerwacja stolika — Szef Donald Kielce",
+    "description": "Chcesz przyjść większą grupą do Szef Donald w Kielcach? Zadzwoń do nas — ustalimy szczegóły telefonicznie.",
+    "h1": "Rezerwacja stolika w Szef Donald"
+  },
+  "delivery": {
+    "title": "Dostawa jedzenia Kielce — kebab, dostawa {fee} | Szef Donald",
+    "description": "Kebab i falafel z dostawą w Kielcach: {fee} za dostawę przy zamówieniu na szefdonald.pl, min. {minOrder}, ok. {radius} km od Ściegiennego 68a. Karta, BLIK, gotówka.",
+    "h1": "Dostawa w Kielcach — kebab i falafel z dostawą {fee}"
+  },
+  "faq": {
+    "title": "Najczęstsze pytania — kebab Kielce | Szef Donald",
+    "description": "Godziny otwarcia, dostawa {fee}, minimalne zamówienie {minOrder}, płatności, falafel dla wegetarian, ostrość sosów, odbiór osobisty — odpowiedzi Szef Donald.",
+    "h1": "Najczęstsze pytania — Szef Donald Kielce"
+  },
+  "kebabKielce": {
+    "title": "Kebab w Kielcach z dostawą — Szef Donald",
+    "description": "Kebab w Kielcach robiony na miejscu od 2019 r.: tortilla, pita, bułka, kapsalon, talerz. Ściegiennego 68a. Zamów bezpośrednio — dostawa {fee}.",
+    "h1": "Kebab w Kielcach z dostawą — Szef Donald"
+  },
+  "falafelKielce": {
+    "title": "Falafel Kielce — danie wege z dostawą | Szef Donald",
+    "description": "Falafel w Kielcach: w tortilli, picie, bułce lub na talerzu, z sałatą i sosem do wyboru. Szef Donald, Ściegiennego 68a. Dostawa {fee} online.",
+    "h1": "Falafel w Kielcach — danie wege robione na miejscu"
+  },
+  "kapsalonKielce": {
+    "title": "Kapsalon Kielce — dostawa {fee} | Szef Donald",
+    "description": "Kapsalon w Kielcach: mięso, frytki, ser i sos w jednym pojemniku. Szef Donald, Ściegiennego 68a. Zamów z dostawą {fee} lub odbierz osobiście.",
+    "h1": "Kapsalon w Kielcach — mięso, frytki, ser i sos"
+  },
+  "terms": {
+    "title": "Regulamin zamówień — Szef Donald",
+    "description": "Regulamin składania zamówień w Szef Donald (Kielce): zamówienia, ceny, płatności, dostawa, odbiór, reklamacje."
+  },
+  "privacy": {
+    "title": "Polityka prywatności — Szef Donald",
+    "description": "Jak Szef Donald przetwarza dane osobowe klientów składających zamówienia na szefdonald.pl."
+  },
+  "cookies": {
+    "title": "Polityka plików cookie — Szef Donald",
+    "description": "Jakich plików cookie używa strona szefdonald.pl i w jakim celu."
+  },
+  "refundsComplaints": {
+    "title": "Zwroty i reklamacje — Szef Donald",
+    "description": "Jak złożyć reklamację lub poprosić o zwrot za zamówienie w Szef Donald w Kielcach."
+  },
+  "deliveryCancellation": {
+    "title": "Dostawa i anulowanie zamówień — Szef Donald",
+    "description": "Zasady dostawy, odbioru osobistego i anulowania zamówień złożonych w Szef Donald w Kielcach."
+  },
+  "promotionTerms": {
+    "title": "Regulamin promocji — Szef Donald",
+    "description": "Zasady promocji, kodów rabatowych i programu lojalnościowego Szef Donald."
+  },
+  "category": {
+    "title": "{category} Kielce — menu i ceny | Szef Donald",
+    "description": "{category} w Szef Donald, Kielce: {count} pozycji z cenami od {from}. Zamów bezpośrednio z dostawą {fee} lub odbierz przy Ściegiennego 68a.",
+    "h1": "{category} w Kielcach — menu i ceny",
+    "overrides": {
+      "kebab": {
+        "title": "Kebab Kielce — menu, ceny, dostawa {fee} | Szef Donald",
+        "h1": "Kebab w Kielcach — menu i ceny"
+      },
+      "falafel": {
+        "title": "Falafel Kielce — menu wege i ceny | Szef Donald",
+        "h1": "Falafel w Kielcach — dania wege"
+      },
+      "strips-tacos": {
+        "title": "Polędwiczki z kurczaka Kielce | Szef Donald",
+        "h1": "Polędwiczki z kurczaka w Kielcach"
+      },
+      "zestawy": {
+        "title": "Zestawy kebab + napój Kielce | Szef Donald",
+        "h1": "Zestawy z kebabem w Kielcach"
+      },
+      "dodatki": {
+        "title": "Frytki i dodatki — Szef Donald Kielce",
+        "h1": "Frytki i dodatki — Szef Donald Kielce"
+      },
+      "napoje-zimne": {
+        "title": "Napoje zimne — Szef Donald Kielce",
+        "h1": "Napoje zimne — Szef Donald Kielce"
+      }
+    }
+  }
+}

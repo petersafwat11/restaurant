@@ -2,6 +2,7 @@
 
 import { useSendContactMessage } from '@/features/contact/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks';
+import { publicEmail } from '@/features/restaurants/lib/restaurant-facts';
 import { directionsHref, formatAddressLine2 } from '@/features/restaurants/lib/restaurant-info';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type CreateContactMessageDto, CreateContactMessageSchema } from '@repo/types';
@@ -12,7 +13,7 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-export default function ContactApp() {
+export default function ContactApp({ h1 }: { h1?: string }) {
   const t = useTranslations('web.marketing.contact');
   const tVal = useTranslations('validation');
   const send = useSendContactMessage();
@@ -51,7 +52,8 @@ export default function ContactApp() {
 
   const phone = restaurant?.phone ?? '';
   const tel = phone.replace(/\s/g, '');
-  const email = restaurant?.email ?? '';
+  // Hidden when empty / invalid (the owner sets it in admin when ready).
+  const email = publicEmail(restaurant);
   const address1 = restaurant?.address.line1 ?? '';
   const address2 = restaurant ? formatAddressLine2(restaurant.address) : '';
   const mapsHref = restaurant ? directionsHref(restaurant) : '#';
@@ -61,8 +63,9 @@ export default function ContactApp() {
       <section className="bg-bg pt-section-y-mobile sm:pt-section-y">
         <Container>
           <SectionHeader
+            as="h1"
             eyebrow={t('eyebrow')}
-            title={t('title')}
+            title={h1 ?? t('title')}
             description={t('description')}
             align="center"
           />
@@ -102,21 +105,23 @@ export default function ContactApp() {
                     </div>
                   </a>
                 </li>
-                <li>
-                  <a href={`mailto:${email}`} className="group flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
-                      <Mail size={18} strokeWidth={1.75} />
-                    </span>
-                    <div className="flex flex-col leading-snug">
-                      <span className="text-caption uppercase tracking-wide text-fg-subtle">
-                        {t('emailLabel')}
+                {email && (
+                  <li>
+                    <a href={`mailto:${email}`} className="group flex items-start gap-3">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                        <Mail size={18} strokeWidth={1.75} />
                       </span>
-                      <span className="text-body font-medium text-fg group-hover:text-accent break-all">
-                        {email}
-                      </span>
-                    </div>
-                  </a>
-                </li>
+                      <div className="flex flex-col leading-snug">
+                        <span className="text-caption uppercase tracking-wide text-fg-subtle">
+                          {t('emailLabel')}
+                        </span>
+                        <span className="text-body font-medium text-fg group-hover:text-accent break-all">
+                          {email}
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                )}
                 <li>
                   <a
                     href={mapsHref}

@@ -1,0 +1,111 @@
+{
+  "home": {
+    "title": "Kebab in Kielce — {fee} delivery | Szef Donald",
+    "description": "Kebab, falafel and kapsalon in Kielce at Ściegiennego 68a. Everything made on site since 2019. Order direct — {fee} delivery, no middleman fees."
+  },
+  "menu": {
+    "title": "Menu & prices — kebab, falafel, kapsalon | Szef Donald",
+    "description": "Full Szef Donald menu with prices: kebab in a wrap, pita or bun, kapsalon, falafel, tacos, boxes and combos. {fee} delivery in Kielce, minimum {minOrder}.",
+    "h1": "Menu — kebab, falafel and kapsalon in Kielce"
+  },
+  "about": {
+    "title": "About us — kebab in Kielce since 2019 | Szef Donald",
+    "description": "Szef Donald is a small kebab and falafel place at ul. Ks. Piotra Ściegiennego 68a in Kielce. Open since 2019, everything made on site.",
+    "h1": "Szef Donald — kebab and falafel in Kielce since 2019"
+  },
+  "contact": {
+    "title": "Contact — Szef Donald, Ściegiennego 68a, Kielce",
+    "description": "Call or message Szef Donald: kebab and falafel at ul. Ks. Piotra Ściegiennego 68a, 25-115 Kielce. Phone, address and opening hours.",
+    "h1": "Contact — Szef Donald in Kielce"
+  },
+  "locations": {
+    "title": "Directions & opening hours — Szef Donald Kielce",
+    "description": "Szef Donald, ul. Ks. Piotra Ściegiennego 68a, 25-115 Kielce. Hours: {hours}. Map and directions.",
+    "h1": "Directions and opening hours — Szef Donald Kielce"
+  },
+  "reservations": {
+    "title": "Table reservations — Szef Donald Kielce",
+    "description": "Coming to Szef Donald in Kielce with a bigger group? Give us a call and we will sort out the details by phone.",
+    "h1": "Table reservations at Szef Donald"
+  },
+  "delivery": {
+    "title": "Food delivery Kielce — kebab, {fee} delivery | Szef Donald",
+    "description": "Kebab and falafel delivered in Kielce: {fee} delivery when you order on szefdonald.pl, minimum {minOrder}, about {radius} km from Ściegiennego 68a. Card, BLIK, cash.",
+    "h1": "Delivery in Kielce — kebab and falafel with {fee} delivery"
+  },
+  "faq": {
+    "title": "FAQ — kebab in Kielce | Szef Donald",
+    "description": "Opening hours, {fee} delivery, {minOrder} minimum order, payments, falafel for vegetarians, sauce heat, pickup — answers from Szef Donald.",
+    "h1": "Frequently asked questions — Szef Donald Kielce"
+  },
+  "kebabKielce": {
+    "title": "Kebab in Kielce with delivery — Szef Donald",
+    "description": "Kebab in Kielce made on site since 2019: wrap, pita, bun, kapsalon, plate. Ściegiennego 68a. Order direct — {fee} delivery.",
+    "h1": "Kebab in Kielce with delivery — Szef Donald"
+  },
+  "falafelKielce": {
+    "title": "Falafel Kielce — vegetarian with delivery | Szef Donald",
+    "description": "Falafel in Kielce: in a wrap, pita, bun or on a plate, with salad and a sauce of your choice. Szef Donald, Ściegiennego 68a. {fee} delivery online.",
+    "h1": "Falafel in Kielce — vegetarian, made on site"
+  },
+  "kapsalonKielce": {
+    "title": "Kapsalon Kielce — {fee} delivery | Szef Donald",
+    "description": "Kapsalon in Kielce: meat, fries, cheese and sauce in one box. Szef Donald at Ściegiennego 68a. Order direct with {fee} delivery or pick it up yourself.",
+    "h1": "Kapsalon in Kielce — meat, fries, cheese and sauce"
+  },
+  "terms": {
+    "title": "Terms of ordering — Szef Donald",
+    "description": "Terms for ordering from Szef Donald (Kielce): orders, prices, payment, delivery, pickup and complaints."
+  },
+  "privacy": {
+    "title": "Privacy policy — Szef Donald",
+    "description": "How Szef Donald processes the personal data of customers ordering on szefdonald.pl."
+  },
+  "cookies": {
+    "title": "Cookie policy — Szef Donald",
+    "description": "Which cookies szefdonald.pl uses and why."
+  },
+  "refundsComplaints": {
+    "title": "Refunds and complaints — Szef Donald",
+    "description": "How to file a complaint or request a refund for a Szef Donald order in Kielce."
+  },
+  "deliveryCancellation": {
+    "title": "Delivery and cancellation — Szef Donald",
+    "description": "Rules for delivery, pickup and cancelling orders placed with Szef Donald in Kielce."
+  },
+  "promotionTerms": {
+    "title": "Promotion terms — Szef Donald",
+    "description": "Rules for promotions, discount codes and the Szef Donald loyalty programme."
+  },
+  "category": {
+    "title": "{category} Kielce — menu & prices | Szef Donald",
+    "description": "{category} at Szef Donald, Kielce: {count} items from {from}. Order direct with {fee} delivery or pick up at Ściegiennego 68a.",
+    "h1": "{category} in Kielce — menu and prices",
+    "overrides": {
+      "kebab": {
+        "title": "Kebab Kielce — menu, prices, {fee} delivery | Szef Donald",
+        "h1": "Kebab in Kielce — menu and prices"
+      },
+      "falafel": {
+        "title": "Falafel Kielce — vegetarian menu | Szef Donald",
+        "h1": "Falafel in Kielce — vegetarian dishes"
+      },
+      "strips-tacos": {
+        "title": "Chicken tenders Kielce | Szef Donald",
+        "h1": "Chicken tenders in Kielce"
+      },
+      "zestawy": {
+        "title": "Kebab + drink combos Kielce | Szef Donald",
+        "h1": "Kebab combo deals in Kielce"
+      },
+      "dodatki": {
+        "title": "Fries and sides — Szef Donald Kielce",
+        "h1": "Fries and sides — Szef Donald Kielce"
+      },
+      "napoje-zimne": {
+        "title": "Cold drinks — Szef Donald Kielce",
+        "h1": "Cold drinks — Szef Donald Kielce"
+      }
+    }
+  }
+}

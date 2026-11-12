@@ -1,43 +1,25 @@
 'use client';
 
-import { useAddToCart } from '@/features/cart/hooks';
 import { useMenuTree } from '@/features/menu/hooks';
-import {
-  ALLERGENS,
-  type AllergenKey,
-  type MenuItemDto,
-  type MenuTreeDto,
-  type ModifierGroupDto,
-} from '@repo/types';
+import { itemFlagsOf, useDishOrdering } from '@/features/menu/hooks/use-dish-ordering';
+import { dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
+import { getPathname } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/routing';
+import type { MenuItemDto, MenuTreeDto } from '@repo/types';
 import {
   Container,
   DishCard,
-  type DishDetail,
   EmptyState,
   FilterPillMultiGroup,
   type FilterPillMultiOption,
-  ItemDetailSheet,
   MenuSubNav,
-  type ModifierGroupShape,
-  type NewCartLine,
   SearchInput,
 } from '@repo/ui';
 import { Flame, Leaf, SearchX, WheatOff } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
-import { toast } from 'sonner';
 
 type DietaryFilter = 'all' | 'vegetarian' | 'vegan' | 'gluten-free' | 'spicy';
-
-function itemFlagsOf(item: MenuItemDto): string[] {
-  const flags: string[] = [];
-  if (item.isVegetarian) flags.push('vegetarian');
-  if (item.isVegan) flags.push('vegan');
-  if (item.isGlutenFree) flags.push('gluten-free');
-  if (item.spiceLevel >= 2) flags.push('spicy');
-  if (item.isFeatured) flags.push('featured');
-  return flags;
-}
 
 function matchesFilters(item: MenuItemDto, filters: DietaryFilter[]): boolean {
   if (filters.length === 0 || filters.includes('all')) return true;
@@ -55,58 +37,25 @@ function matchesSearch(item: MenuItemDto, q: string): boolean {
   );
 }
 
-function adaptModifierGroup(g: ModifierGroupDto): ModifierGroupShape {
-  return {
-    id: g.id,
-    name: g.name,
-    required: g.isRequired,
-    min: g.minSelect,
-    max: g.maxSelect === 0 ? 99 : g.maxSelect,
-    options: g.options.map((o) => ({
-      id: o.id,
-      name: o.name,
-      priceDelta: o.priceDelta,
-      grams: o.grams,
-      default: o.isDefault,
-    })),
-  };
-}
-
-function adaptToDishDetail(
-  item: MenuItemDto & { modifierGroups: ModifierGroupDto[] },
-  currency: string,
-  allergenLabels: Record<AllergenKey, string>,
-): DishDetail {
-  return {
-    id: item.id,
-    name: item.name,
-    description: item.description ?? undefined,
-    longDescription: item.description ?? undefined,
-    basePrice: item.basePrice,
-    currency,
-    image: {
-      src: item.images[0]?.url ?? '',
-      alt: item.images[0]?.alt ?? item.name,
-    },
-    prepMinutes: item.prepMinutes ?? undefined,
-    calories: item.calories ?? undefined,
-    grams: item.grams ?? undefined,
-    allergens: item.allergens.map((a) => allergenLabels[a]),
-    flags: itemFlagsOf(item) as DishDetail['flags'],
-    modifierGroups: item.modifierGroups.map(adaptModifierGroup),
-    unavailable: !item.isAvailable,
-  };
-}
-
 export interface MenuAppProps {
   /** Fallback currency when the tree isn't loaded yet (avoids "" flicker). */
   currency?: string;
 }
 
+/**
+ * Interactive menu (search, diet filters, category sub-nav, add-to-cart).
+ *
+ * The page's H1 + intro are rendered by the server page; the menu tree is
+ * seeded into the query cache server-side (`ServerDataHydration`), so the full
+ * menu — categories as H2, dishes as H3 with description, price, weight and
+ * image — is in the initial HTML. Each card links to its dish page; a click
+ * opens the order sheet instead (unchanged ordering flow).
+ */
 export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
   const t = useTranslations('web.shop.menu');
+  const locale = useLocale() as AppLocale;
   const treeQuery = useMenuTree();
-  const addMutation = useAddToCart();
+  const { openDish, quickAdd, sheet, flagLabels } = useDishOrdering(currency);
 
   const filterOptions = React.useMemo<FilterPillMultiOption<DietaryFilter>[]>(
     () => [
@@ -119,46 +68,9 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     [t],
   );
 
-  const allergenLabels = React.useMemo(
-    () =>
-      Object.fromEntries(
-        ALLERGENS.map((a) => [a, t(`allergen.${a}` as 'allergen.gluten')]),
-      ) as Record<AllergenKey, string>,
-    [t],
-  );
-
-  const sheetLabels = React.useMemo(
-    () => ({
-      closeAriaLabel: t('sheet.close'),
-      allergensLabel: t('sheet.allergens'),
-      allergenNote: t('sheet.allergenNote'),
-      specialInstructionsLabel: t('sheet.specialInstructions'),
-      specialInstructionsPlaceholder: t('sheet.specialInstructionsPlaceholder'),
-      quantityLabel: t('sheet.quantity'),
-      totalLabel: t('sheet.total'),
-      soldOut: t('sheet.soldOut'),
-      addToCart: t('addToCart'),
-      formatMinChoice: (min: number) => t('sheet.minChoice', { min }),
-      formatChoose: (names: string[]) => t('sheet.chooseGroups', { names: names.join(', ') }),
-    }),
-    [t],
-  );
-
-  const flagLabels = React.useMemo(
-    () => ({
-      vegetarian: t('chips.vegetarian'),
-      vegan: t('chips.vegan'),
-      'gluten-free': t('chips.glutenFree'),
-      spicy: t('chips.spicy'),
-      featured: t('chips.featured'),
-    }),
-    [t],
-  );
-
   const [search, setSearch] = React.useState('');
   const [filters, setFilters] = React.useState<DietaryFilter[]>(['all']);
   const [activeCat, setActiveCat] = React.useState<string>('all');
-  const [sheetItem, setSheetItem] = React.useState<DishDetail | null>(null);
 
   // The sticky chrome (site nav + search/filters/subnav) is much taller on
   // mobile (rows stack) than on desktop, so a hardcoded scroll offset hides
@@ -181,8 +93,6 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-    // Re-run once the tree loads — the sticky chrome (and stickyRef) only
-    // mounts after the loading state clears, so the first measure sees no chrome.
   }, [treeQuery.data]);
 
   const tree: MenuTreeDto | undefined = treeQuery.data;
@@ -236,47 +146,6 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
     [scrollOffset],
   );
 
-  const handleAdd = React.useCallback(
-    (item: MenuItemDto & { modifierGroups: ModifierGroupDto[] }) => {
-      if (!item.isAvailable) return;
-      if (item.modifierGroups.length > 0) {
-        setSheetItem(adaptToDishDetail(item, currency, allergenLabels));
-        return;
-      }
-      addMutation.mutate({
-        menuItemId: item.id,
-        quantity: 1,
-        modifierSelections: [],
-      });
-    },
-    [addMutation, currency, allergenLabels],
-  );
-
-  const handleSheetAdd = React.useCallback(
-    (line: NewCartLine) => {
-      // Re-shape NewCartLine → AddCartItemDto.
-      const grouped = new Map<string, string[]>();
-      for (const m of line.modifiers) {
-        const arr = grouped.get(m.groupId) ?? [];
-        arr.push(m.optionId);
-        grouped.set(m.groupId, arr);
-      }
-      addMutation.mutate({
-        menuItemId: line.itemId,
-        quantity: line.quantity,
-        modifierSelections: Array.from(grouped.entries()).map(([groupId, optionIds]) => ({
-          groupId,
-          optionIds,
-        })),
-        notes: line.notes,
-      });
-      toast.success(t('toastAdded.title'), {
-        description: t('toastAdded.description', { quantity: line.quantity, name: line.name }),
-      });
-    },
-    [addMutation, t],
-  );
-
   if (treeQuery.isLoading) {
     return (
       <Container className="py-16">
@@ -304,27 +173,11 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
 
   const subnavSections = [
     { id: 'all', label: t('all'), count: allItems.length },
-    ...tree.categories.map((c) => ({ id: c.slug, label: c.name, count: c.items.length })),
+    ...tree.categories.map((c) => ({ id: c.id, label: c.name, count: c.items.length })),
   ];
 
   return (
     <>
-      <Container className="pb-12 pt-16">
-        <span className="text-eyebrow uppercase text-accent">{t('eyebrow')}</span>
-        <h1
-          className="mt-4 font-display text-h2 text-fg sm:text-h1"
-          style={{ textWrap: 'balance' as React.CSSProperties['textWrap'] }}
-        >
-          {t('heroTitle')}
-        </h1>
-        <p className="mt-4 max-w-[640px] text-body-l text-fg-muted">
-          {t('heroSummary', {
-            dishCount: allItems.length,
-            categoryCount: tree.categories.length,
-          })}
-        </p>
-      </Container>
-
       <div ref={stickyRef} className="sticky top-site-nav z-20">
         <div className="bg-bg">
           <Container className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -347,13 +200,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         <div className="border-b border-border/[var(--border-alpha)] bg-surface">
           <Container>
             <MenuSubNav
-              sections={subnavSections.map((s) => ({
-                ...s,
-                id:
-                  s.id === 'all'
-                    ? 'all'
-                    : (tree.categories.find((c) => c.slug === s.id)?.id ?? s.id),
-              }))}
+              sections={subnavSections}
               activeId={activeCat}
               onSelect={(id) => goToCategory(id)}
             />
@@ -389,9 +236,16 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
             className="pt-16"
             style={{ scrollMarginTop: scrollOffset }}
           >
+            {/* Stable anchor for `/menu#<category-slug>` links. */}
+            <span id={cat.slug} aria-hidden className="block" />
             <div className="mb-6 flex items-baseline justify-between gap-3">
               <h2 id={`h-${cat.id}`} className="font-display text-h2 text-fg">
-                {cat.name}
+                <a
+                  href={getPathname({ locale, href: `/menu/${cat.slug}` })}
+                  className="hover:text-accent"
+                >
+                  {cat.name}
+                </a>
               </h2>
               <div className="text-small text-fg-subtle">
                 {t('categoryItemCount', { count: cat.items.length })}
@@ -402,10 +256,10 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
               {cat.items.map((item) => (
                 <DishCard
                   key={item.id}
-                  href={`/menu#${item.slug}`}
+                  href={getPathname({ locale, href: dishHref(cat.slug, item.slug) })}
                   image={{
                     src: item.images[0]?.url ?? '',
-                    alt: item.images[0]?.alt ?? item.name,
+                    alt: dishImageAlt(item, locale),
                   }}
                   name={item.name}
                   description={item.description ?? undefined}
@@ -417,10 +271,13 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                   soldOutLabel={t('soldOutToday')}
                   unavailable={!item.isAvailable}
                   reserveFlagSpace
-                  onAdd={() => handleAdd(item)}
+                  onAdd={() => quickAdd(item)}
                   onClick={(e) => {
+                    // Plain click opens the order sheet (as before); modified
+                    // clicks (new tab) follow the link to the dish page.
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
                     e.preventDefault();
-                    setSheetItem(adaptToDishDetail(item, currency, allergenLabels));
+                    openDish(item);
                   }}
                 />
               ))}
@@ -429,14 +286,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
         ))}
       </Container>
 
-      <ItemDetailSheet
-        open={sheetItem !== null}
-        onOpenChange={(o) => !o && setSheetItem(null)}
-        item={sheetItem}
-        onAddToCart={handleSheetAdd}
-        labels={sheetLabels}
-        flagLabels={flagLabels}
-      />
+      {sheet}
     </>
   );
 }

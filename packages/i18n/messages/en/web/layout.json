@@ -4,7 +4,8 @@
     "menu": "Menu",
     "about": "About",
     "locations": "Locations",
-    "contact": "Contact"
+    "contact": "Contact",
+    "delivery": "Delivery"
   },
   "cta": {
     "orderNow": "Order now"
@@ -12,8 +13,8 @@
   "mobileMenuTitle": "Menu",
   "languageSwitcherLabel": "Language",
   "meta": {
-    "title": "Szef Donald — Real kebab. Made daily.",
-    "description": "Kebab and falafel made fresh through the day. Order online for delivery, pickup, or eat in."
+    "title": "Szef Donald — kebab in Kielce, made daily from scratch",
+    "description": "Kebab, falafel and kapsalon in Kielce at Ściegiennego 68a. Everything made on site since 2019. Order online for delivery or pickup."
   },
   "cart": {
     "ariaLabel": "{count, plural, =0 {Cart, empty} one {Cart, # item} other {Cart, # items}}"
