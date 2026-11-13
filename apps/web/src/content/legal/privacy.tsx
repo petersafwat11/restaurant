@@ -501,6 +501,11 @@ export function PrivacyEN({ c }: { c: CompanyInfo }) {
           <strong>OpenStreetMap / Nominatim</strong> — address search and the map shown at checkout.
         </li>
         <li>
+          <strong>Umami (self-hosted)</strong> — cookieless website statistics (visits, pages,
+          referring sites, steps toward an order) on our own server; no full IP address is stored
+          and nothing is shared with third parties.
+        </li>
+        <li>
           <strong>Diagnostics (PostHog / Sentry)</strong> — product analytics and error monitoring,
           only if enabled in production.
         </li>
@@ -665,6 +670,11 @@ export function PrivacyPL({ c }: { c: CompanyInfo }) {
         </li>
         <li>
           <strong>OpenStreetMap / Nominatim</strong> — wyszukiwanie adresu i mapa przy zamawianiu.
+        </li>
+        <li>
+          <strong>Umami (na własnym serwerze)</strong> — statystyki strony bez plików cookie
+          (wizyty, podstrony, strony odsyłające, kroki do zamówienia); nie przechowujemy pełnego
+          adresu IP i nie przekazujemy danych podmiotom trzecim.
         </li>
         <li>
           <strong>Diagnostyka (PostHog / Sentry)</strong> — analityka produktowa i monitoring

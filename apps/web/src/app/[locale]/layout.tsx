@@ -1,3 +1,4 @@
+import { Analytics } from '@/components/analytics';
 import { routing } from '@/i18n/routing';
 import { pickClientMessages } from '@/lib/i18n/client-messages';
 import { fetchMenuTree } from '@/lib/seo/fetch-menu';
@@ -114,6 +115,14 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={pickClientMessages(messages)}>
           <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
+        {/* Cookieless Umami analytics; configured at runtime, absent in dev. */}
+        {process.env.UMAMI_SCRIPT_URL && process.env.UMAMI_WEBSITE_ID ? (
+          <Analytics
+            scriptUrl={process.env.UMAMI_SCRIPT_URL}
+            websiteId={process.env.UMAMI_WEBSITE_ID}
+            domains={process.env.UMAMI_DOMAINS}
+          />
+        ) : null}
       </body>
     </html>
   );

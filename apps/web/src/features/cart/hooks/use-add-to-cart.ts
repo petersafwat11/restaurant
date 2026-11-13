@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartSessionKey } from '@/components/cart-session-provider';
+import { track } from '@/lib/analytics';
 import { getApiClient } from '@/lib/api-client';
 import { notify } from '@/lib/notify';
 import { useCartStore } from '@/stores/cart-store';
@@ -20,7 +21,8 @@ export function useAddToCart() {
     mutationFn: (input) =>
       getApiClient().cart.addItem({ sessionKey: sessionKey ?? undefined }, input),
     onMutate: () => beginMutation(),
-    onSuccess: (data) => {
+    onSuccess: (data, input) => {
+      track('add_to_cart', { quantity: input.quantity ?? 1 });
       qc.setQueryData(cartQueryKeys.current(sessionKey), data);
       setCart(data);
       notify('success', 'Added to cart');

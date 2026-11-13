@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
  *
  * D8 corrections applied here:
  *  - lists the EXACT first-party mechanisms actually used (verified by grepping
- *    the codebase): `web_at`, `web_rt`, `cart_session`, `NEXT_LOCALE`.
+ *    the codebase): `web_at`, `web_rt`, `cart_session`, `sd_src` (NEXT_LOCALE is disabled via `localeCookie: false`).
  *  - discloses that our payment provider (eService) may set cookies on its own
  *    hosted payment page during an online payment, and links to its cookie info.
  *  - does NOT hardcode a consent-banner decision. The previous copy asserted
@@ -79,11 +79,14 @@ export function CookiesEN() {
           </tr>
           <tr>
             <td>
-              <code>NEXT_LOCALE</code>
+              <code>sd_src</code>
             </td>
-            <td>Remembers your language choice</td>
+            <td>
+              Remembers how you first reached the site (referring site, campaign tag, landing page)
+              so it can be attached to your order — first-party, never shared
+            </td>
             <td>Functional</td>
-            <td>~1 year</td>
+            <td>30 days</td>
           </tr>
         </tbody>
       </table>
@@ -101,9 +104,13 @@ export function CookiesEN() {
       <h2 id="analytics">Analytics &amp; marketing</h2>
       <p>
         We do not use advertising cookies. Our location map uses OpenStreetMap, which does not set
-        tracking cookies. Product analytics and error monitoring (PostHog / Sentry) are server-side
-        and are only used if enabled in production; if enabled in a way that sets device storage, it
-        will be classified and disclosed here.{' '}
+        tracking cookies. To understand how the site is used (visits, pages, where visitors come
+        from, steps toward placing an order) we run <strong>Umami</strong>, a cookieless analytics
+        tool hosted on our own server (stats.szefdonald.pl): it stores nothing on your device, does
+        not identify you across sites, keeps no full IP address and shares no data with third
+        parties. Product analytics and error monitoring (PostHog / Sentry) are server-side and are
+        only used if enabled in production; if enabled in a way that sets device storage, it will be
+        classified and disclosed here.{' '}
         {/* LAWYER: classify any analytics storage under PKE
         + GDPR after the audit. */}
       </p>
@@ -185,11 +192,14 @@ export function CookiesPL() {
           </tr>
           <tr>
             <td>
-              <code>NEXT_LOCALE</code>
+              <code>sd_src</code>
             </td>
-            <td>Zapamiętuje wybór języka</td>
+            <td>
+              Zapamiętuje, skąd po raz pierwszy trafiłeś na stronę (strona odsyłająca, znacznik
+              kampanii, strona wejścia), aby dołączyć to do zamówienia — własny, nieudostępniany
+            </td>
             <td>Funkcjonalny</td>
-            <td>~1 rok</td>
+            <td>30 dni</td>
           </tr>
         </tbody>
       </table>
@@ -208,10 +218,14 @@ export function CookiesPL() {
       <h2 id="analytics">Analityka i marketing</h2>
       <p>
         Nie używamy reklamowych plików cookie. Nasza mapa lokalizacji korzysta z OpenStreetMap,
-        który nie ustawia plików śledzących. Analityka produktowa i monitoring błędów (PostHog /
-        Sentry) działają po stronie serwera i są używane wyłącznie, jeśli włączone w produkcji;
-        jeśli zostaną włączone w sposób ustawiający dane na urządzeniu, zostanie to tu
-        sklasyfikowane i ujawnione.{' '}
+        który nie ustawia plików śledzących. Aby zrozumieć, jak korzystasz ze strony (wizyty,
+        odwiedzane podstrony, skąd przychodzą odwiedzający, kroki prowadzące do zamówienia), używamy{' '}
+        <strong>Umami</strong> — narzędzia analitycznego bez plików cookie, działającego na naszym
+        własnym serwerze (stats.szefdonald.pl). Nie zapisuje niczego na Twoim urządzeniu, nie śledzi
+        Cię między stronami, nie przechowuje pełnego adresu IP i nie przekazuje danych podmiotom
+        trzecim. Analityka produktowa i monitoring błędów (PostHog / Sentry) działają po stronie
+        serwera i są używane wyłącznie, jeśli włączone w produkcji; jeśli zostaną włączone w sposób
+        ustawiający dane na urządzeniu, zostanie to tu sklasyfikowane i ujawnione.{' '}
         {/* LAWYER: sklasyfikuj ewentualną pamięć analityczną wg PKE +
         RODO po audycie. */}
       </p>

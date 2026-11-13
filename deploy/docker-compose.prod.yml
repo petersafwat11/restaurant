@@ -131,6 +131,10 @@ services:
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_URL: ${APP_URL_API}/api/v1
       APP_URL_API: ${APP_URL_API}
+      # Cookieless Umami analytics (stack in /opt/umami); unset = no tracker.
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+      UMAMI_DOMAINS: ${UMAMI_DOMAINS:-}
     networks: [app-net]
     healthcheck:
       # web's `/healthz` route is shadowed by next-intl middleware (which routes

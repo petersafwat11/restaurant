@@ -14,8 +14,8 @@ import { z } from 'zod';
  * Phase D, once the prose moves into version-controlled MDX. Until then the
  * order's `legalSnapshotHash` covers the captured snapshot object itself.
  */
-export const LEGAL_BUNDLE_VERSION = '2026-06-24';
-export const LEGAL_BUNDLE_EFFECTIVE_DATE = '2026-06-24';
+export const LEGAL_BUNDLE_VERSION = '2026-11-13';
+export const LEGAL_BUNDLE_EFFECTIVE_DATE = '2026-11-13';
 
 /** Documents that make up the accepted bundle (route ids; prose lives in web). */
 export const LEGAL_BUNDLE_DOCUMENTS = [

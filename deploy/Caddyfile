@@ -45,7 +45,7 @@
     # NOTE: report-only collects nothing until a collector is wired — add a
     # `report-to`/`Reporting-Endpoints` (or `report-uri`) directive pointing at
     # Sentry/Report-URI/etc. before relying on this phase to surface violations.
-    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://nominatim.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://stats.{$DOMAIN}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} wss://api.{$DOMAIN} https://nominatim.openstreetmap.org https://stats.{$DOMAIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     # Incident 2026-11-12: neither Next app uses Server Actions; refuse any
     # Next-Action request (React2Shell / CVE-2025-55182 exploit vector).
     @next_action header Next-Action *

@@ -67,4 +67,4 @@ export function getCompanyInfo(r: RestaurantPublicDto | null): CompanyInfo {
 }
 
 /** ISO date the current legal copy was last revised. Bump on every edit. */
-export const LEGAL_LAST_UPDATED = '2026-06-24';
+export const LEGAL_LAST_UPDATED = '2026-11-13';

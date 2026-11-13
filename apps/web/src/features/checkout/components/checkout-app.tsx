@@ -12,6 +12,7 @@ import { PREFERRED_ORDER_TYPE_KEY } from '@/features/menu/lib/order-preference';
 import { useCreateOrder } from '@/features/orders/hooks';
 import { usePaymentConfig } from '@/features/payments/hooks';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
+import { track } from '@/lib/analytics';
 import { readFirstTouch } from '@/lib/attribution';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,6 +93,10 @@ export function CheckoutApp() {
   const cartQuery = useCart();
   const createOrder = useCreateOrder();
   const user = useAuthStore((s) => s.user);
+  // Funnel step for analytics: the customer reached checkout.
+  React.useEffect(() => {
+    track('checkout_start');
+  }, []);
   // The API derives identity from either the authed user or a `sessionKey`
   // in the request body. For guests we forward the cart session cookie's
   // value so the server can resolve their cart and attach the order.
@@ -675,6 +680,11 @@ export function CheckoutApp() {
         // Only send sessionKey for guests; signed-in users are identified by
         // the bearer token and don't need it.
         ...(user ? {} : cartSessionKey ? { sessionKey: cartSessionKey } : {}),
+      });
+      track('order_placed', {
+        type: values.orderType,
+        payment: values.paymentMethod,
+        guest: !user,
       });
 
       // Online (card/BLIK): the order is now PENDING. Create the eService Hosted

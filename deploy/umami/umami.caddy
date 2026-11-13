@@ -1,0 +1,14 @@
+# Umami analytics for szefdonald.pl (stack in /opt/umami, reached over app-net).
+stats.szefdonald.pl {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-X-Powered-By
+		-Server
+	}
+	@next_action header Next-Action *
+	respond @next_action 403
+	reverse_proxy umami:3000
+}
