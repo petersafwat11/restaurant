@@ -685,6 +685,10 @@ export function CheckoutApp() {
         type: values.orderType,
         payment: values.paymentMethod,
         guest: !user,
+        // Umami Revenue/Attribution reports read `revenue` + `currency`.
+        // Analytics-only display value; money math stays on the server.
+        revenue: Number.parseFloat(order.grandTotal),
+        currency: order.currency,
       });
 
       // Online (card/BLIK): the order is now PENDING. Create the eService Hosted
