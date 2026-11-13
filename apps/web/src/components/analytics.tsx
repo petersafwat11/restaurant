@@ -32,6 +32,8 @@ export function Analytics({ scriptUrl, websiteId, domains }: Props) {
     <Script
       src={scriptUrl}
       data-website-id={websiteId}
+      // Real-user Core Web Vitals (LCP, INP, CLS, TTFB) → Umami "Performance".
+      data-performance="true"
       {...(domains ? { 'data-domains': domains } : {})}
       strategy="afterInteractive"
     />
