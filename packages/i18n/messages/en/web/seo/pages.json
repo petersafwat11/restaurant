@@ -94,7 +94,7 @@
     },
     "sauces": {
       "heading": "Sauces: mild, spicy or mixed",
-      "choicePaid": "With every kebab you choose one sauce: {sauces}. The sauce is required and costs {surcharge} — it is already included in the prices on this page and in the menu.",
+      "choicePaid": "With every kebab you choose one sauce: {sauces}. The sauce is required and costs {surcharge} — it is already included in the prices in the table above; in the menu it is added when you pick the sauce.",
       "choiceFree": "With every kebab you choose one sauce: {sauces}. The sauce is included in the price.",
       "paragraphs": [
         "Mild is a creamy sauce for those who want to taste the meat first and foremost. Spicy has a clear, warming heat. Mixed combines both — a good choice for your first visit. If you like it really hot, say so in the order notes. You can add an extra portion of sauce from the extras."

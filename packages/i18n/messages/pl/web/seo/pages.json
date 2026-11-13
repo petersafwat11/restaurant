@@ -94,7 +94,7 @@
     },
     "sauces": {
       "heading": "Sosy: łagodny, ostry albo mieszany",
-      "choicePaid": "Do każdego kebaba wybierasz jeden sos: {sauces}. Sos jest obowiązkowy i kosztuje {surcharge} — w cenach podanych na tej stronie i w menu ta kwota jest już uwzględniona.",
+      "choicePaid": "Do każdego kebaba wybierasz jeden sos: {sauces}. Sos jest obowiązkowy i kosztuje {surcharge} — w cenach w tabeli powyżej ta kwota jest już uwzględniona, a w menu doliczamy ją przy wyborze sosu.",
       "choiceFree": "Do każdego kebaba wybierasz jeden sos: {sauces}. Sos jest wliczony w cenę.",
       "paragraphs": [
         "Łagodny to kremowy sos dla tych, którzy chcą poczuć przede wszystkim smak mięsa. Ostry ma wyraźną, rozgrzewającą ostrość. Mieszany łączy oba smaki — dobry wybór na pierwszy raz. Jeśli lubisz naprawdę ostro, napisz to w uwagach do zamówienia. Dodatkową porcję sosu możesz dobrać w dodatkach."
