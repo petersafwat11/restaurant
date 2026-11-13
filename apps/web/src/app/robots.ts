@@ -64,6 +64,9 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: '*', allow: '/', disallow: PRIVATE_PATHS },
     ],
     sitemap: `${base}/sitemap.xml`,
-    host: base,
+    // No `Host:` line: it is a non-standard (Yandex-only) directive that expects a
+    // bare hostname; with a full URL some validators (incl. older Lighthouse
+    // robots-txt audits) flag the file as invalid, and Google ignores it anyway.
+    // The canonical host is enforced by the www→apex redirect + <link rel=canonical>.
   };
 }
