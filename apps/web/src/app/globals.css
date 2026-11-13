@@ -24,7 +24,7 @@
     --bg: 242 234 217; /* #F2EAD9 warm cream */
     --surface: 251 247 238; /* #FBF7EE lighter cream */
     --surface-elevated: 255 255 255; /* white — drawers, modals, image bg */
-    --surface-warm: 229 212 184; /* #E5D4B8 darker warm beige (newsletter band, sold-out chip bg) */
+    --surface-warm: 239 227 206; /* #EFE3CE warm beige (newsletter band, sold-out chip bg) — lightened from #E5D4B8 so copper/taupe text on it passes WCAG AA */
 
     /* Borders — espresso at alpha. Declared as the espresso triple; alpha
        comes from per-utility opacities (border-border/8, border-border-strong/16). */
@@ -34,16 +34,16 @@
     /* Foreground (espresso) */
     --fg: 42 31 24; /* #2A1F18 */
     --fg-muted: 107 93 82; /* #6B5D52 warm taupe */
-    --fg-subtle: 154 142 131; /* #9A8E83 */
+    --fg-subtle: 108 96 85; /* #6C6055 — darkened from #9A8E83 so secondary text passes WCAG AA (4.5:1) on cream, beige and tinted chips */
     --fg-disabled: 199 189 179; /* #C7BDB3 */
     --text-on-accent: 255 255 255; /* white on copper */
 
     /* Accent — copper (the only loud color) */
-    --accent: 194 65 12; /* #C2410C */
+    --accent: 181 60 11; /* #B53C0B — a touch deeper than #C2410C so copper text passes AA (4.85:1) on cream */
     --accent-hover: 154 51 10; /* #9A330A */
 
     /* Semantic state — food-world cues, not tech-world */
-    --positive: 79 123 60; /* #4F7B3C olive (herbs, falafel) */
+    --positive: 72 114 54; /* #487236 olive (herbs, falafel) — a shade deeper than #4F7B3C for AA on its tinted chips */
     --negative: 185 28 28; /* #B91C1C brick red */
     --warning: 217 119 6; /* #D97706 amber */
     --info: 30 64 175; /* #1E40AF deep navy */
@@ -82,7 +82,9 @@
     font-feature-settings: "tnum" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    /* No `text-rendering: optimizeLegibility`: Chrome already kerns by default,
+       and forcing the slow shaping path for every text run made the first
+       layout noticeably slower on phones. */
   }
 
   /* Display family (Fraunces) — applied via .font-display utility from
@@ -128,6 +130,17 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/*
+ * Below-the-fold blocks (home sections after the hero, site footer): the
+ * browser skips their layout and paint until they approach the viewport.
+ * `auto` remembers the real size after first render, so scrolling stays
+ * stable; the placeholder size only matters before that.
+ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
 }
 
 /* Skip link — focusable, visually hidden until focused */
