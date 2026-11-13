@@ -30,6 +30,7 @@ import { Container } from '@repo/ui';
 import { Leaf, Weight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 type Props = { params: Promise<{ locale: string; category: string; dish: string }> };
@@ -104,6 +105,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+/** Kebab dishes (and kebab combo sets) link back to the /kebab-kielce pillar page. */
+function isKebabCategory(categorySlug: string): boolean {
+  return /kebab|zestaw/i.test(categorySlug);
+}
+
 export default async function DishPage({ params }: Props) {
   const { locale, category: categorySlug, dish: dishSlug } = await params;
   setRequestLocale(locale);
@@ -150,11 +156,14 @@ export default async function DishPage({ params }: Props) {
           <div className="grid items-start gap-10 lg:grid-cols-[1fr_1fr] lg:gap-14">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-image-lg bg-surface-warm">
               {facts.imageUrl ? (
-                <img
+                // Above the fold (first on phones): the likely LCP, so preloaded.
+                <Image
                   src={facts.imageUrl}
                   alt={dishImageAlt(item, locale)}
-                  className="h-full w-full object-cover"
-                  fetchPriority="high"
+                  fill
+                  preload
+                  sizes="(max-width: 1024px) calc(100vw - 32px), 600px"
+                  className="object-cover"
                 />
               ) : null}
             </div>
@@ -249,6 +258,20 @@ export default async function DishPage({ params }: Props) {
                 {p}
               </p>
             ))}
+            {isKebabCategory(category.slug) && (
+              <p className="text-body-l text-fg-muted">
+                {t.rich('kebabPillarDish', {
+                  link: (chunks) => (
+                    <Link
+                      href="/kebab-kielce"
+                      className="font-medium text-accent-hover underline underline-offset-2 hover:text-accent"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </p>
+            )}
           </div>
           <div className="mt-12">
             <FaqList heading={t('faqHeading')} items={copy.faqs} />

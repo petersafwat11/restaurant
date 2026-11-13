@@ -3,6 +3,7 @@ import { MenuApp } from '@/features/menu/components/menu-app';
 import { OrderDirectBanner } from '@/features/seo/components/seo-blocks';
 import { seoH1, seoMetadata } from '@/features/seo/load-seo';
 import { buildSeoVars, interpolate } from '@/features/seo/seo-vars';
+import { Link } from '@/i18n/navigation';
 import { fetchMenuTree } from '@/lib/seo/fetch-menu';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { JsonLd } from '@/lib/seo/json-ld';
@@ -67,6 +68,18 @@ export default async function MenuPage({ params }: Props) {
             })}
           </p>
         )}
+        <p className="mt-3 max-w-[640px] text-body text-fg-muted">
+          {tSeo.rich('kebabPillarMenu', {
+            link: (chunks) => (
+              <Link
+                href="/kebab-kielce"
+                className="font-medium text-accent-hover underline underline-offset-2 hover:text-accent"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
         {vars && (
           <OrderDirectBanner
             text={interpolate(tSeo.raw('orderDirect') as string, vars)}

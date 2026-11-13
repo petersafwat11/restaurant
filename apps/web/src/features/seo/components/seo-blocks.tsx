@@ -1,11 +1,14 @@
+import { LazyMapIframe } from '@/components/lazy-map-iframe';
 import { groupHours } from '@/features/restaurants/lib/restaurant-facts';
 import { directionsHref } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
 import type { RestaurantPublicDto } from '@repo/types';
 import { Container } from '@repo/ui';
 import { ArrowRight, ChevronRight, MapPin, Truck } from 'lucide-react';
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 import type { ContentSection, QA } from '../seo-vars';
+import { RichText } from './rich-text';
 
 /**
  * Server-rendered building blocks for the SEO / AI-visibility pages. Plain
@@ -76,7 +79,7 @@ export function OrderDirectBanner({ text, href = '/menu' }: { text: string; href
   return (
     <Link
       href={href}
-      className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-small font-semibold text-accent hover:bg-accent/15"
+      className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-small font-semibold text-accent-hover hover:bg-accent/15"
     >
       <Truck size={16} aria-hidden />
       {text}
@@ -121,13 +124,15 @@ export function ContentSections({ sections }: { sections: ContentSection[] }) {
           <h2 className="font-display text-h3 text-fg sm:text-h2">{s.heading}</h2>
           {s.paragraphs?.map((p) => (
             <p key={p} className="text-body-l text-fg-muted">
-              {p}
+              <RichText text={p} />
             </p>
           ))}
           {s.bullets && s.bullets.length > 0 && (
             <ul className="list-disc space-y-1 pl-6 text-body text-fg-muted">
               {s.bullets.map((b) => (
-                <li key={b}>{b}</li>
+                <li key={b}>
+                  <RichText text={b} />
+                </li>
               ))}
             </ul>
           )}
@@ -148,7 +153,9 @@ export function FaqList({ heading, items }: { heading: string; items: QA[] }) {
         {items.map((i) => (
           <div key={i.q} className="p-5">
             <h3 className="text-body-l font-semibold text-fg">{i.q}</h3>
-            <p className="mt-2 text-body text-fg-muted">{i.a}</p>
+            <p className="mt-2 text-body text-fg-muted">
+              <RichText text={i.a} />
+            </p>
           </div>
         ))}
       </div>
@@ -179,12 +186,14 @@ export function DishLinkList({ heading, items }: { heading: string; items: DishL
               className="flex h-full gap-4 rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated p-3 transition-colors hover:border-accent/40"
             >
               {d.image?.src ? (
-                <img
+                // Thumbnail: next/image serves an 88/176 px AVIF/WebP instead of
+                // the ~700 KB original upload, lazy-loaded below the fold.
+                <Image
                   src={d.image.src}
                   alt={d.image.alt}
-                  loading="lazy"
                   width={88}
                   height={66}
+                  sizes="88px"
                   className="h-[66px] w-[88px] shrink-0 rounded-md object-cover"
                 />
               ) : null}
@@ -308,13 +317,7 @@ export function MapEmbed({
     <section className="flex flex-col gap-4">
       <h2 className="font-display text-h3 text-fg sm:text-h2">{heading}</h2>
       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-card border border-border/[var(--border-alpha)]">
-        <iframe
-          title={ariaLabel}
-          src={src}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          className="absolute inset-0 h-full w-full border-0"
-        />
+        <LazyMapIframe title={ariaLabel} src={src} className="absolute inset-0" />
       </div>
       <a
         href={directionsHref(r)}

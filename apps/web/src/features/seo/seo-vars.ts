@@ -42,6 +42,17 @@ export function buildSeoVars(r: RestaurantPublicDto, locale: string): SeoVars {
   };
 }
 
+/**
+ * Inline internal-link markup allowed in SEO copy: `[anchor](/path)`.
+ * Rendered as <Link> by `RichText`; flattened by `stripLinks` for JSON-LD.
+ */
+export const INLINE_LINK_RE = /\[([^\]]+)\]\((\/[^)\s]*)\)/g;
+
+/** The copy as plain text — link markup reduced to its anchor text. */
+export function stripLinks(text: string): string {
+  return text.replace(INLINE_LINK_RE, '$1');
+}
+
 /** Replace `{name}` placeholders; unknown names are left untouched. */
 export function interpolate(text: string, vars: Record<string, string | number>): string {
   return text.replace(/\{(\w+)\}/g, (match, key: string) =>

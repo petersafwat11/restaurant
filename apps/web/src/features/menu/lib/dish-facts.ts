@@ -220,7 +220,13 @@ export function dishImageAlt(
   item: Pick<MenuEntry, 'name' | 'description'>,
   locale: string,
 ): string {
-  const desc = (item.description ?? '').trim().replace(/[.\s]+$/, '');
+  // First sentence only: later sentences are promo copy ("Oszczędzasz 2 zł"),
+  // not a description of the photo. The split ignores decimals like "0.5L".
+  const desc =
+    (item.description ?? '')
+      .trim()
+      .split(/\.\s+(?=\p{Lu})/u)[0]
+      ?.replace(/[.\s]+$/, '') ?? '';
   const tail = locale === 'en' ? 'Szef Donald, Kielce' : 'Szef Donald Kielce';
   const useDesc = desc && desc.length > 4 && desc.toLowerCase() !== item.name.toLowerCase();
   return useDesc ? `${item.name} — ${lcFirst(desc)}, ${tail}` : `${item.name}, ${tail}`;

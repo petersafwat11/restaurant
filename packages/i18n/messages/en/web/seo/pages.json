@@ -41,76 +41,159 @@
     "lastUpdated": "Updated: {date}",
     "pyszneRating": "{value}/5 — {count} ratings on Pyszne.pl",
     "googleRating": "{value}/5 on Google ({count} reviews)",
-    "kebabPillarLink": "Kebab in Kielce"
+    "kebabPillarLink": "Kebab in Kielce",
+    "kebabPillarDish": "Read more about how we make our <link>kebab in Kielce</link> — the meat, sizes and weights, sauces and delivery — on its own page.",
+    "kebabPillarMenu": "First time here? See what makes our <link>kebab in Kielce</link> different — from the meat to the sizes and sauces."
   },
   "category": {
     "intro": "{description} We make everything in the {category} category on site at our restaurant, {address}. The prices below come straight from our menu and are always current — order with {fee} delivery (minimum order {minOrder}) or pick up yourself.",
     "introNoDescription": "We make everything in the {category} category on site at our restaurant, {address}. The prices below come straight from our menu and are always current — order with {fee} delivery (minimum order {minOrder}) or pick up yourself."
   },
   "kebabKielce": {
-    "lead": "Szef Donald is a small kebab place at ul. Ks. Piotra Ściegiennego 68a in Kielce. We opened in 2019 and have made everything on site from day one — we have no freezer. Order your kebab with {fee} delivery, take it away or eat in.",
+    "lead": "Szef Donald is a small kebab place at ul. Ks. Piotra Ściegiennego 68a in Kielce. We opened in 2019 and have made everything on site from day one — meat, salads and sauces are prepared every day, and we simply don't have a freezer. Below is everything worth knowing before you order: the meat, sizes with meat weights and prices, sauces, our other dishes, delivery, pickup and opening hours.",
+    "galleryHeading": "What our kebab looks like",
     "sections": [
       {
-        "heading": "Who we are",
+        "heading": "What makes our kebab in Kielce different",
         "paragraphs": [
-          "We are a small local restaurant in Kielce, not a chain. The people behind the counter are the same people who chop the vegetables and prepare the meat in the morning, so we know what goes into every wrap, pita and bun.",
-          "In season we serve around {wraps} wraps a week. That is a lot for a small place, and it lets us prepare meat and salads fresh every day instead of storing them for weeks."
-        ]
-      },
-      {
-        "heading": "What makes us different",
-        "paragraphs": [
-          "We have no freezer. Meat, salads, sauces and falafel are prepared during the day, and whatever we do not sell does not come back to the counter tomorrow. We go for big portions, well-seasoned meat and fresh vegetables."
+          "We are not a chain or a franchise. The people behind the counter are the same people who chop the vegetables, prepare the meat and mix the sauces in the morning. That means we know exactly what goes into every wrap, pita and bun — and we can stand behind it.",
+          "In season we serve around {wraps} wraps a week. That's a lot for a small place, but it's exactly this volume that lets us prepare the meat and salads fresh every day instead of storing them for weeks. A busy counter means a short time from preparation to your plate."
         ],
         "bullets": [
-          "Everything made on site, at Ściegiennego 68a.",
-          "Choice of meat: chicken, beef or mixed.",
-          "Three sauces: mild, spicy and mixed — if you like it really hot, say so in the order notes.",
-          "Several portion sizes — the meat weight of each size is listed on the menu.",
-          "Vegetarian option: falafel in a wrap, pita, bun or on a plate."
+          "Made on site at Ściegiennego 68a — since 2019.",
+          "No freezer: what we prepare in the morning is served the same day.",
+          "Generous portions — the meat weight for every size is shown in the menu.",
+          "Three house sauces: mild, spicy and mixed.",
+          "A vegetarian option for those who don't eat meat: falafel."
         ]
       },
       {
-        "heading": "Which kebab can you order",
+        "heading": "How a Szef Donald kebab is made",
         "paragraphs": [
-          "The classics are kebab in a tortilla wrap, in pita and in a bun — meat, salad and sauce. If you prefer a fork, go for the kebab plate with fries and salad, the kebab box or the kebab salad. For a big appetite there is kapsalon: meat, fries, cheese and sauce in one box. The menu also has fryto kebab, tacos with chicken tenders and combo deals with a drink at a lower price.",
-          "Current prices and the meat weight of every size are listed below and on the full menu — they come straight from our ordering system, so they are always up to date."
-        ]
-      },
-      {
-        "heading": "Kebab delivery in Kielce",
-        "paragraphs": [
-          "Order direct on szefdonald.pl and delivery costs {fee} — no middleman fees. We deliver within about {radius} km of the restaurant at Ściegiennego 68a, minimum order {minOrder}. Pay by card, BLIK or cash on delivery.",
-          "Prefer to collect? Choose pickup — we prepare the order and you pick it up at the restaurant. See the Delivery page for details."
-        ]
-      },
-      {
-        "heading": "Opening hours and directions",
-        "paragraphs": [
-          "We are open: {hours}. You will find us at {address}. Call us with questions or to order by phone: {phone}."
+          "The day starts with preparing the meat and chopping vegetables. The meat is roasted on a vertical spit and carved to order, just before serving — so it goes into your wrap warm, juicy and browned, not reheated. Salads are prepared throughout the day so they stay fresh and crunchy.",
+          "Every order is assembled only once it comes in. You choose the bread or serving style, the size, the meat and the sauce, and we add any extras you ask for — such as feta, cheese, fries or extra meat. Not a fan of salad? Choose the \"Dutch\" version, with fries instead of salad."
         ]
       }
     ],
-    "faq": [
+    "meat": {
+      "heading": "Meat: chicken, beef or mixed",
+      "paragraphs": [
+        "The meat is the heart of a kebab, so we don't skimp on it or on the seasoning. Chicken is milder and lighter, beef has a deeper, richer flavour, and the mixed option combines the two if you can't decide."
+      ],
+      "options": "In every kebab you choose: {meats}.",
+      "samePrice": "The price doesn't depend on the meat — you pay for the portion size."
+    },
+    "sizes": {
+      "heading": "Sizes, meat weights and prices",
+      "intro": "Most kebabs come in several sizes. The prices in the table come straight from our ordering system, so they are always up to date.",
+      "introGrams": "Most kebabs come in several sizes — from {min} g to {max} g of meat per portion. The weight is for the meat alone, without the bread, salad and sauce. The prices in the table come straight from our ordering system, so they are always up to date.",
+      "caption": "Kebab in Kielce at Szef Donald — sizes, meat weight and prices",
+      "dishCol": "Dish",
+      "sauceIncluded": "Choosing a sauce is required and costs {surcharge} — that surcharge is already included in every price in the table.",
+      "sauceFree": "Choosing a sauce is required and costs nothing extra."
+    },
+    "sauces": {
+      "heading": "Sauces: mild, spicy or mixed",
+      "choicePaid": "With every kebab you choose one sauce: {sauces}. The sauce is required and costs {surcharge} — it is already included in the prices on this page and in the menu.",
+      "choiceFree": "With every kebab you choose one sauce: {sauces}. The sauce is included in the price.",
+      "paragraphs": [
+        "Mild is a creamy sauce for those who want to taste the meat first and foremost. Spicy has a clear, warming heat. Mixed combines both — a good choice for your first visit. If you like it really hot, say so in the order notes. You can add an extra portion of sauce from the extras."
+      ]
+    },
+    "dishes": {
+      "heading": "Not just kebab in a wrap",
+      "intro": "The classics are kebab in a wrap, in pita and in a bun. If you'd rather eat with a fork or you're really hungry, try the other dishes on our menu:",
+      "link": "See: {name}",
+      "grams": "{grams} g of meat",
+      "gramsRange": "{min}–{max} g of meat",
+      "items": [
+        {
+          "slug": "kebab-kapsalon",
+          "heading": "Kapsalon",
+          "text": "A Dutch classic loved by the hungriest in Kielce: fries topped with kebab meat, cheese and sauce, all in one tray. The most filling dish on our menu."
+        },
+        {
+          "slug": "fryto-kebab",
+          "heading": "Fryto kebab",
+          "text": "A kebab wrap with fries inside — meat, salad, fries and sauce rolled up together. A good pick when a regular wrap isn't enough and you don't want cutlery."
+        },
+        {
+          "slug": "kebab-box",
+          "heading": "Kebab box",
+          "text": "Meat, fries and sauce in a handy box. Easy to take away or eat in the car, no bread."
+        },
+        {
+          "slug": "kebab-na-talerzu",
+          "heading": "Kebab plate",
+          "text": "A full meal: meat, fries, salad and sauce served on a plate. Eat in or take it away."
+        },
+        {
+          "slug": "tacos",
+          "heading": "Tacos",
+          "text": "A tortilla with three chicken tenders, fries, cheese, iceberg lettuce and sauce — for those who prefer crispy chicken to classic kebab meat."
+        },
+        {
+          "slug": "tortilla-falafel",
+          "heading": "Falafel",
+          "text": "The vegetarian alternative: crispy falafel with lettuce and sauce, in a wrap, pita, bun or on a plate. You choose the number of pieces and the sauce, just like with kebab."
+        }
+      ]
+    },
+    "sectionsBottom": [
       {
-        "q": "Where can I eat kebab in Kielce near Ściegiennego street?",
-        "a": "Szef Donald is at {address}. Eat in, take away, or order with {fee} delivery on szefdonald.pl."
+        "heading": "Kebab delivery — how it works",
+        "paragraphs": [
+          "Order directly on szefdonald.pl and delivery costs {fee} — no middleman commission. We deliver within about {radius} km of the restaurant, and the minimum order is {minOrder}. When you order, you mark your address on the map and see right away whether it's in the delivery area.",
+          "Typical delivery time is {deliveryTime} min; at peak times it may take longer, and you can follow your order status live. Pay by card, BLIK or cash. Full details — area, costs and delivery hours — are on our [kebab delivery](/dostawa) page."
+        ]
       },
       {
-        "q": "How much is kebab delivery in Kielce?",
-        "a": "Ordering direct on szefdonald.pl, delivery costs {fee}. Minimum order {minOrder}, within about {radius} km of the restaurant."
+        "heading": "Pickup and eating in",
+        "paragraphs": [
+          "Prefer to collect it yourself? Order online and choose pickup — your order is usually ready in {pickupTime} min, with no delivery fee. Or just walk in, order at the counter and eat in."
+        ]
+      }
+    ],
+    "visit": {
+      "heading": "Opening hours and directions",
+      "paragraphs": [
+        "We're open: {hours}. You'll find us at {address}. Have a question or want to order by phone? Call {phone}.",
+        "The full list of dishes with prices is in our [menu](/menu). If you don't eat meat, see our [falafel in Kielce](/falafel-kielce) page, and if you're really hungry — the one about [kapsalon](/kapsalon-kielce)."
+      ],
+      "directions": "Get directions in Google Maps"
+    },
+    "faq": [
+      {
+        "q": "Where can I eat kebab in Kielce near Ściegiennego?",
+        "a": "Szef Donald is at {address}. You can eat in, take away or order with {fee} delivery on szefdonald.pl."
       },
       {
         "q": "Is the kebab made on site?",
-        "a": "Yes. Everything is prepared at the restaurant during the day — we have no freezer."
+        "a": "Yes. We prepare the meat, salads and sauces in the restaurant every day — we have no freezer, and anything we don't sell doesn't go back on the counter the next day."
       },
       {
         "q": "What meat is in the kebab?",
-        "a": "Chicken, beef or mixed — your choice. The meat weight of each size is on the menu."
+        "a": "Chicken, beef or mixed. The price doesn't depend on the meat, and the meat weight for each size is listed in the menu."
       },
       {
-        "q": "What are your opening hours?",
-        "a": "{hours}."
+        "q": "How much meat is in a kebab?",
+        "a": "It depends on the size — the meat weight for every size is in the table on this page and with each dish in the menu."
+      },
+      {
+        "q": "What sauces do you have?",
+        "a": "Mild, spicy or mixed. You choose a sauce with every kebab; an extra portion can be added from the extras."
+      },
+      {
+        "q": "How much is kebab delivery in Kielce?",
+        "a": "Ordering directly on szefdonald.pl, delivery costs {fee}. The minimum order is {minOrder}, and we deliver within about {radius} km of the restaurant."
+      },
+      {
+        "q": "How long does an order take?",
+        "a": "Delivery usually takes {deliveryTime} min, and a pickup order is ready in about {pickupTime} min. At peak times it may take longer."
+      },
+      {
+        "q": "Do you have anything for vegetarians?",
+        "a": "Yes — falafel in a wrap, pita, bun or on a plate, with lettuce and your choice of sauce."
       }
     ]
   },
@@ -185,7 +268,8 @@
       {
         "heading": "Delivery area",
         "paragraphs": [
-          "We deliver within about {radius} km of our restaurant at {address}. When ordering you drop a pin on the map and immediately see whether you are in the delivery zone."
+          "We deliver within about {radius} km of our restaurant at {address}. When ordering you drop a pin on the map and immediately see whether you are in the delivery zone.",
+          "Not sure what to order? Our [kebab in Kielce](/kebab-kielce) page covers the meat, sizes with weights, sauces and our other dishes."
         ]
       },
       {
@@ -219,9 +303,7 @@
       },
       {
         "heading": "Delivery hours",
-        "paragraphs": [
-          "We take delivery orders during our opening hours: {hours}."
-        ]
+        "paragraphs": ["We take delivery orders during our opening hours: {hours}."]
       }
     ],
     "faq": [

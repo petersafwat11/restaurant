@@ -29,9 +29,9 @@
     "h1": "Rezerwacja stolika w Szef Donald"
   },
   "delivery": {
-    "title": "Dostawa jedzenia Kielce — kebab, dostawa {fee} | Szef Donald",
-    "description": "Kebab i falafel z dostawą w Kielcach: {fee} za dostawę przy zamówieniu na szefdonald.pl, min. {minOrder}, ok. {radius} km od Ściegiennego 68a. Karta, BLIK, gotówka.",
-    "h1": "Dostawa w Kielcach — kebab i falafel z dostawą {fee}"
+    "title": "Kebab z dostawą Kielce — dowóz {fee} online | Szef Donald",
+    "description": "Kebab z dostawą w Kielcach: dowóz {fee} przy zamówieniu na szefdonald.pl, min. {minOrder}, do ok. {radius} km od Ściegiennego 68a. Kebab, kapsalon, falafel.",
+    "h1": "Kebab z dostawą w Kielcach — dowóz {fee}"
   },
   "faq": {
     "title": "Najczęstsze pytania — kebab Kielce | Szef Donald",
@@ -39,9 +39,9 @@
     "h1": "Najczęstsze pytania — Szef Donald Kielce"
   },
   "kebabKielce": {
-    "title": "Kebab w Kielcach z dostawą — Szef Donald",
-    "description": "Kebab w Kielcach robiony na miejscu od 2019 r.: tortilla, pita, bułka, kapsalon, talerz. Ściegiennego 68a. Zamów bezpośrednio — dostawa {fee}.",
-    "h1": "Kebab w Kielcach z dostawą — Szef Donald"
+    "title": "Kebab Kielce — świeży kebab robiony na miejscu | Szef Donald",
+    "description": "Kebab w Kielcach robiony na miejscu, bez zamrażarki, od 2019 r. Kurczak, wołowina lub mieszane; tortilla, pita, bułka, kapsalon. Ściegiennego 68a.",
+    "h1": "Kebab Kielce — świeży kebab od Szefa Donalda"
   },
   "falafelKielce": {
     "title": "Falafel Kielce — danie wege z dostawą | Szef Donald",

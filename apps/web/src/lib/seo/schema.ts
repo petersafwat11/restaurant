@@ -6,6 +6,7 @@ import {
   dishImageAlt,
   getDishFacts,
 } from '@/features/menu/lib/dish-facts';
+import { stripLinks } from '@/features/seo/seo-vars';
 import { FOUNDING_YEAR, GOOGLE_MAPS_URL, SAME_AS } from '@/lib/brand';
 import type { MenuTreeDto, RestaurantPublicDto } from '@repo/types';
 import { absoluteAsset, absoluteUrl, siteUrl } from './site';
@@ -248,8 +249,8 @@ export function buildFaqNode(items: { q: string; a: string }[]): Node {
     '@type': 'FAQPage',
     mainEntity: items.map((i) => ({
       '@type': 'Question',
-      name: i.q,
-      acceptedAnswer: { '@type': 'Answer', text: i.a },
+      name: stripLinks(i.q),
+      acceptedAnswer: { '@type': 'Answer', text: stripLinks(i.a) },
     })),
   };
 }

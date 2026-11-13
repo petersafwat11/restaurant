@@ -54,7 +54,8 @@
     "yearsValue": "{years} years",
     "yearsLabel": "Open since {since}",
     "wrapsValue": "~{count} /wk",
-    "wrapsLabel": "Wraps in high season"
+    "wrapsLabel": "Wraps in high season",
+    "pillarText": "See how we make our <link>kebab in Kielce</link> — meat, sizes, sauces and delivery."
   },
   "hoursLocation": {
     "eyebrow": "Find us",
