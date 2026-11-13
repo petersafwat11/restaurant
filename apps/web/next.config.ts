@@ -5,6 +5,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 // Allow loading <Image /> from the API host. In dev that's localhost:4000; in
 // prod it's https://api.{domain}. APP_URL_API is supplied at build time.
 const apiUrl = new URL(process.env.APP_URL_API ?? "http://localhost:4000");
+const LOCAL_API_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 // Production images are built on Linux and still require standalone output.
 // Native Windows can reject Next's final workspace symlink-copy with EPERM,
@@ -29,6 +30,12 @@ const config: NextConfig = {
 		"@repo/utils",
 	],
 	images: {
+		// AVIF first (smallest), WebP fallback; the optimizer picks per Accept header.
+		formats: ["image/avif", "image/webp"],
+		// Next 16 refuses to optimize upstreams that resolve to a private IP
+		// (SSRF guard). Only relax it for a local API host (dev / local prod
+		// builds); production's api.{domain} resolves publicly and keeps the guard.
+		dangerouslyAllowLocalIP: LOCAL_API_HOSTS.has(apiUrl.hostname),
 		remotePatterns: [
 			{ protocol: "https", hostname: "images.unsplash.com" },
 			{

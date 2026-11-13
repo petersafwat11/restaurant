@@ -3,15 +3,17 @@
 import { useAddToCart } from '@/features/cart/hooks';
 import { dishImageAlt } from '@/features/menu/lib/dish-facts';
 import { ALLERGENS, type AllergenKey, type MenuItemDto, type ModifierGroupDto } from '@repo/types';
-import {
-  type DishDetail,
-  ItemDetailSheet,
-  type ModifierGroupShape,
-  type NewCartLine,
-} from '@repo/ui';
+import type { DishDetail, ModifierGroupShape, NewCartLine } from '@repo/ui';
 import { useLocale, useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import * as React from 'react';
 import { toast } from 'sonner';
+
+// The order sheet (Radix Dialog + modifier pickers) is only needed after the
+// first tap on a dish, so it is code-split out of the menu's initial bundle.
+const ItemDetailSheet = dynamic(() => import('@repo/ui').then((m) => m.ItemDetailSheet), {
+  ssr: false,
+});
 
 export type OrderableItem = MenuItemDto & { modifierGroups: ModifierGroupDto[] };
 
@@ -162,16 +164,24 @@ export function useDishOrdering(currency = 'PLN') {
     [addMutation, t],
   );
 
-  const sheet = (
-    <ItemDetailSheet
-      open={sheetItem !== null}
-      onOpenChange={(o) => !o && setSheetItem(null)}
-      item={sheetItem}
-      onAddToCart={handleSheetAdd}
-      labels={sheetLabels}
-      flagLabels={flagLabels}
-    />
-  );
+  // Mounted once a dish has been opened; it then stays mounted so the close
+  // animation can run.
+  const [sheetUsed, setSheetUsed] = React.useState(false);
+  React.useEffect(() => {
+    if (sheetItem) setSheetUsed(true);
+  }, [sheetItem]);
+
+  const sheet =
+    !sheetUsed && !sheetItem ? null : (
+      <ItemDetailSheet
+        open={sheetItem !== null}
+        onOpenChange={(o) => !o && setSheetItem(null)}
+        item={sheetItem}
+        onAddToCart={handleSheetAdd}
+        labels={sheetLabels}
+        flagLabels={flagLabels}
+      />
+    );
 
   return { openDish, quickAdd, sheet, flagLabels, allergenLabels };
 }

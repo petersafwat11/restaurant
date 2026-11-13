@@ -10,6 +10,8 @@
  * flex-column parent's `align-items: stretch` can't distort it (that once bit the footer).
  */
 
+import Image from 'next/image';
+
 interface LogoProps {
   variant?: 'full' | 'mark';
   size?: number;
@@ -18,8 +20,9 @@ interface LogoProps {
 
 export function Logo({ variant = 'full', size = 40, className }: LogoProps) {
   const emblem = (
-    // eslint-disable-next-line @next/next/no-img-element -- matches the app's <img> convention; no next/image in use
-    <img
+    // next/image: the source PNG is ~150 KB; the optimizer serves a
+    // 40/80 px AVIF/WebP of it instead.
+    <Image
       src="/logo.png"
       alt={variant === 'mark' ? 'Szef Donald' : ''}
       width={size}
@@ -27,6 +30,7 @@ export function Logo({ variant = 'full', size = 40, className }: LogoProps) {
       style={{ width: size, height: size }}
       className="block shrink-0 select-none"
       draggable={false}
+      quality={75}
     />
   );
 

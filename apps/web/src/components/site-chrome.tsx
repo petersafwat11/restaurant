@@ -3,14 +3,24 @@
 import { CartButton } from '@/components/cart-button';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
-import { MobileNav } from '@/components/mobile-nav';
-import { NotificationBell } from '@/components/notification-bell';
 import { useCart } from '@/features/cart/hooks';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { SiteNav } from '@repo/ui';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import * as React from 'react';
+
+// Code-split islands that are not needed for the first paint: the mobile
+// drawer (Radix Dialog) loads on the first hamburger tap, and the bell (plus
+// its Socket.IO subscription) only exists for signed-in users.
+const MobileNav = dynamic(() => import('@/components/mobile-nav').then((m) => m.MobileNav), {
+  ssr: false,
+});
+const NotificationBell = dynamic(
+  () => import('@/components/notification-bell').then((m) => m.NotificationBell),
+  { ssr: false },
+);
 
 interface SiteChromeProps {
   initialVariant?: 'transparent-on-hero' | 'solid';
@@ -20,6 +30,9 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
   const t = useTranslations('web.layout');
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  // Mount the drawer only once it has been opened (keeps it out of the
+  // initial bundle); it then stays mounted so the close animation runs.
+  const [mobileNavLoaded, setMobileNavLoaded] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -73,7 +86,10 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
         logo={<Logo variant="full" size={36} />}
         links={links}
         linkComponent={Link}
-        onOpenMobile={() => setMobileOpen(true)}
+        onOpenMobile={() => {
+          setMobileNavLoaded(true);
+          setMobileOpen(true);
+        }}
         notifications={
           user ? (
             <NotificationBell userId={user.id} ariaLabel={t('notifications.ariaLabel')} />
@@ -89,15 +105,17 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
         langSwitcher={<LanguageSwitcher />}
         cta={orderNowCta}
       />
-      <MobileNav
-        open={mobileOpen}
-        onOpenChange={setMobileOpen}
-        links={links}
-        langSwitcher={<LanguageSwitcher />}
-        cta={orderNowCta}
-        title={t('mobileMenuTitle')}
-        languageLabel={t('languageSwitcherLabel')}
-      />
+      {mobileNavLoaded && (
+        <MobileNav
+          open={mobileOpen}
+          onOpenChange={setMobileOpen}
+          links={links}
+          langSwitcher={<LanguageSwitcher />}
+          cta={orderNowCta}
+          title={t('mobileMenuTitle')}
+          languageLabel={t('languageSwitcherLabel')}
+        />
+      )}
     </>
   );
 }

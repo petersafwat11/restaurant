@@ -1,4 +1,3 @@
-import { ServerDataHydration } from '@/components/server-data-hydration';
 import { LandingCategories } from '@/features/landing/sections/categories';
 import { LandingFeaturedDishes } from '@/features/landing/sections/featured-dishes';
 import { LandingHero } from '@/features/landing/sections/hero';
@@ -7,6 +6,7 @@ import { LandingNewsletter } from '@/features/landing/sections/newsletter';
 import { LandingStory } from '@/features/landing/sections/story';
 import { seoMetadata } from '@/features/seo/load-seo';
 import { fetchMenuTree } from '@/lib/seo/fetch-menu';
+import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 
@@ -19,8 +19,9 @@ export async function generateMetadata({
 
 /**
  * Landing page (/) — composes the landing sections from @repo/ui primitives.
- * The menu tree is fetched server-side and seeded into the query cache so the
- * categories and featured dishes are in the initial HTML.
+ * Everything except small islands (hero badges, featured quick-add buttons,
+ * newsletter form) is a Server Component rendered from the server-fetched menu
+ * tree and restaurant record, so the page does not ship or hydrate the menu.
  */
 export default async function LandingPage({
   params,
@@ -29,15 +30,22 @@ export default async function LandingPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tree = await fetchMenuTree(locale);
+  const [tree, restaurant] = await Promise.all([fetchMenuTree(locale), fetchPublicRestaurant()]);
   return (
-    <ServerDataHydration menu={{ locale, tree }}>
+    <>
       <LandingHero />
-      <LandingCategories />
-      <LandingFeaturedDishes />
-      <LandingStory />
-      <LandingHoursLocation />
-      <LandingNewsletter />
-    </ServerDataHydration>
+      <LandingCategories tree={tree} />
+      <LandingFeaturedDishes tree={tree} />
+      {/* Off-screen on first paint: skip their layout/paint until scrolled near. */}
+      <div className="cv-auto">
+        <LandingStory />
+      </div>
+      <div className="cv-auto">
+        <LandingHoursLocation restaurant={restaurant} />
+      </div>
+      <div className="cv-auto">
+        <LandingNewsletter />
+      </div>
+    </>
   );
 }

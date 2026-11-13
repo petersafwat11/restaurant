@@ -1,27 +1,21 @@
 /**
  * Phase H1/H2 — production content integrity for the landing sections.
  *
- * Asserts the featured-dishes section renders ONLY live, server-fetched
- * content and hides itself when there is none — no mock fallback. Also
- * asserts the menu query is locale-driven (H2: `/en` requests
- * `?locale=en` and renders the EN payload).
- *
- * Mirrors the MSW + provider harness from `public-tracking-app.test.tsx`.
- * Remember: the test server runs with `onUnhandledRequest: 'error'`, so every
- * rendered component's API calls need a handler.
+ * The featured-dishes section is a Server Component rendered from the menu
+ * tree the page fetched with `fetchMenuTree(locale)` (locale-driven, H2).
+ * Asserts the selection is ONLY live content and is empty when nothing is
+ * featured — no mock fallback (the section then renders nothing) — and that
+ * the client card island renders the live dish and its quick-add button.
  */
-import { LandingFeaturedDishes } from '@/features/landing/sections/featured-dishes';
-import { server } from '@/test/setup';
+import { FeaturedDishCard } from '@/features/landing/sections/featured-dish-card';
+import { selectFeaturedDishes } from '@/features/landing/sections/featured-dishes';
 import { loadMessages } from '@repo/i18n';
 import type { MenuItemDto, MenuTreeDto } from '@repo/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import { http, HttpResponse } from 'msw';
+import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import * as React from 'react';
 import { describe, expect, it } from 'vitest';
-
-const API = 'http://localhost:4000/api/v1';
 
 // Strings that only ever appeared in the removed Szef Donald mock fixtures.
 // If any of these surface in rendered output, a mock fallback has regressed.
@@ -82,63 +76,51 @@ function treeWith(items: MenuItemDto[]): MenuTreeDto {
   };
 }
 
-function menuHandler(tree: MenuTreeDto, onUrl?: (url: URL) => void) {
-  return http.get(`${API}/menu`, ({ request }) => {
-    if (onUrl) onUrl(new URL(request.url));
-    return HttpResponse.json(tree);
-  });
-}
-
-describe('LandingFeaturedDishes (H1 — live or hidden, no mock fallback)', () => {
-  it('renders live featured dishes from the menu tree', async () => {
-    server.use(
-      menuHandler(
-        treeWith([
-          makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate', isFeatured: true }),
-          makeItem({ id: 'house-fries', name: 'House Fries', isFeatured: false }),
-        ]),
-      ),
+describe('Landing featured dishes (H1 — live or hidden, no mock fallback)', () => {
+  it('selects only live featured dishes from the menu tree', () => {
+    const items = selectFeaturedDishes(
+      treeWith([
+        makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate', isFeatured: true }),
+        makeItem({ id: 'house-fries', name: 'House Fries', isFeatured: false }),
+      ]),
+      'en',
     );
-    render(withProviders(<LandingFeaturedDishes />));
-
-    await waitFor(() => expect(screen.getByText('Shawarma Plate')).toBeTruthy());
-    // Non-featured item must not appear in the featured strip.
-    expect(screen.queryByText('House Fries')).toBeNull();
-    // And no mock dish leaked in.
-    for (const re of MOCK_DISH_STRINGS) expect(screen.queryByText(re)).toBeNull();
+    expect(items.map((i) => i.name)).toEqual(['Shawarma Plate']);
+    expect(items[0]?.href).toBe('/en/menu/kebab/shawarma-plate');
+    for (const re of MOCK_DISH_STRINGS) expect(items.some((i) => re.test(i.name))).toBe(false);
   });
 
-  it('hides the section entirely when no dish is featured (no mock fallback)', async () => {
-    server.use(
-      menuHandler(
+  it('selects nothing when no dish is featured or the menu is unavailable', () => {
+    expect(
+      selectFeaturedDishes(
         treeWith([makeItem({ id: 'house-fries', name: 'House Fries', isFeatured: false })]),
+        'pl',
       ),
-    );
-    const { container } = render(withProviders(<LandingFeaturedDishes />));
-
-    // Give the query a tick to resolve, then assert nothing rendered.
-    await waitFor(() => expect(screen.queryByText('House Fries')).toBeNull());
-    expect(container.querySelector('section')).toBeNull();
-    for (const re of MOCK_DISH_STRINGS) expect(screen.queryByText(re)).toBeNull();
-    // The mock price (24,00 zł from the fixtures) must not appear either.
-    expect(screen.queryByText(/24,00/)).toBeNull();
+    ).toEqual([]);
+    expect(selectFeaturedDishes(null, 'pl')).toEqual([]);
   });
 
-  it('requests the menu in the active locale (H2: /en → ?locale=en)', async () => {
-    let seenLocale: string | null = null;
-    server.use(
-      menuHandler(
-        treeWith([
-          makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate (EN)', isFeatured: true }),
-        ]),
-        (url) => {
-          seenLocale = url.searchParams.get('locale');
-        },
+  it('renders the live dish card with its quick-add button', () => {
+    const [dish] = selectFeaturedDishes(
+      treeWith([makeItem({ id: 'shawarma-plate', name: 'Shawarma Plate (EN)', isFeatured: true })]),
+      'en',
+    );
+    if (!dish) throw new Error('expected a featured dish');
+    render(
+      withProviders(
+        <FeaturedDishCard
+          menuItemId={dish.id}
+          href={dish.href}
+          image={dish.image}
+          name={dish.name}
+          price={dish.price}
+          flags={dish.flags}
+          addAriaLabel="Add Shawarma Plate (EN) to cart"
+        />,
       ),
     );
-    render(withProviders(<LandingFeaturedDishes />, 'en'));
-
-    await waitFor(() => expect(screen.getByText('Shawarma Plate (EN)')).toBeTruthy());
-    expect(seenLocale).toBe('en');
+    expect(screen.getByText('Shawarma Plate (EN)')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Add Shawarma Plate (EN) to cart' })).toBeTruthy();
+    for (const re of MOCK_DISH_STRINGS) expect(screen.queryByText(re)).toBeNull();
   });
 });

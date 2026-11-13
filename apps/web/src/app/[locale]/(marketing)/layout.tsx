@@ -14,8 +14,10 @@ export default async function MarketingLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'common' });
-  const restaurant = await fetchPublicRestaurant();
+  const [t, restaurant] = await Promise.all([
+    getTranslations({ locale, namespace: 'common' }),
+    fetchPublicRestaurant(),
+  ]);
 
   return (
     <>
