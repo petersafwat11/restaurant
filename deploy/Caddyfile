@@ -53,6 +53,11 @@
     reverse_proxy web:3000
 }
 
+# www → apex (one canonical host for SEO; DNS has CNAME www → apex).
+www.{$DOMAIN} {
+    redir https://{$DOMAIN}{uri} permanent
+}
+
 # Staff/owner admin — stricter CSP (no Stripe Elements here).
 admin.{$DOMAIN} {
     encode zstd gzip

@@ -41,76 +41,159 @@
     "lastUpdated": "Aktualizacja: {date}",
     "pyszneRating": "{value}/5 — {count} ocen na Pyszne.pl",
     "googleRating": "{value}/5 w Google ({count} opinii)",
-    "kebabPillarLink": "Kebab w Kielcach"
+    "kebabPillarLink": "Kebab w Kielcach",
+    "kebabPillarDish": "Więcej o tym, jak przygotowujemy nasz <link>kebab w Kielcach</link> — mięso, rozmiary z gramaturą, sosy i dostawa — przeczytasz na osobnej stronie.",
+    "kebabPillarMenu": "Pierwszy raz u nas? Zobacz, czym wyróżnia się nasz <link>kebab w Kielcach</link> — od mięsa, przez rozmiary, po sosy."
   },
   "category": {
     "intro": "{description} Wszystkie pozycje z kategorii {category} przygotowujemy na miejscu w naszym lokalu przy {address}. Ceny poniżej pochodzą prosto z naszego menu i są aktualne — zamówisz je z dostawą {fee} (minimalne zamówienie {minOrder}) albo odbierzesz osobiście.",
     "introNoDescription": "Wszystkie pozycje z kategorii {category} przygotowujemy na miejscu w naszym lokalu przy {address}. Ceny poniżej pochodzą prosto z naszego menu i są aktualne — zamówisz je z dostawą {fee} (minimalne zamówienie {minOrder}) albo odbierzesz osobiście."
   },
   "kebabKielce": {
-    "lead": "Szef Donald to mały lokal z kebabem przy ul. Ks. Piotra Ściegiennego 68a w Kielcach. Działamy od 2019 roku i od początku robimy wszystko na miejscu — u nas nie ma zamrażarki. Kebab zamówisz u nas z dostawą {fee}, na wynos albo zjesz na miejscu.",
+    "lead": "Szef Donald to mały lokal z kebabem przy ul. Ks. Piotra Ściegiennego 68a w Kielcach. Działamy od 2019 roku i od pierwszego dnia robimy wszystko na miejscu — mięso, surówki i sosy przygotowujemy codziennie, a zamrażarki u nas po prostu nie ma. Poniżej znajdziesz wszystko, co warto wiedzieć, zanim zamówisz: mięso, rozmiary z gramaturą i cenami, sosy, pozostałe dania, dostawę, odbiór i godziny otwarcia.",
+    "galleryHeading": "Tak wygląda nasz kebab",
     "sections": [
       {
-        "heading": "Kim jesteśmy",
+        "heading": "Co wyróżnia nasz kebab w Kielcach",
         "paragraphs": [
-          "Jesteśmy kameralnym lokalem w Kielcach, a nie siecią. Za ladą stoją ci sami ludzie, którzy rano kroją warzywa i przygotowują mięso. Dzięki temu wiemy, co trafia do każdej tortilli, pity i bułki.",
-          "W sezonie wydajemy około {wraps} zawijańców tygodniowo. To dużo jak na mały lokal, ale skala pozwala nam przygotowywać mięso i surówki codziennie od nowa, zamiast przechowywać je tygodniami."
-        ]
-      },
-      {
-        "heading": "Co nas wyróżnia",
-        "paragraphs": [
-          "Nie mamy zamrażarki. Mięso, surówki, sosy i falafel przygotowujemy w ciągu dnia, a to, czego nie sprzedamy, nie wraca następnego dnia na ladę. Stawiamy na duże porcje, dobrze przyprawione mięso i świeże warzywa."
+          "Nie jesteśmy siecią ani franczyzą. Za ladą stoją ci sami ludzie, którzy rano kroją warzywa, przygotowują mięso i mieszają sosy. Dzięki temu dokładnie wiemy, co trafia do każdej tortilli, pity i bułki — i możemy za to ręczyć.",
+          "W sezonie wydajemy około {wraps} zawijańców tygodniowo. Jak na mały lokal to sporo, ale właśnie ta skala pozwala nam przygotowywać mięso i surówki codziennie od nowa, zamiast przechowywać je tygodniami. Duży ruch oznacza krótki czas od przygotowania do podania."
         ],
         "bullets": [
-          "Wszystko robione na miejscu, w lokalu przy Ściegiennego 68a.",
-          "Mięso do wyboru: kurczak, wołowina albo mieszane.",
-          "Trzy sosy: łagodny, ostry i mieszany — jeśli lubisz naprawdę ostro, napisz to w uwagach do zamówienia.",
-          "Kilka rozmiarów porcji — waga mięsa podana jest przy każdym rozmiarze w menu.",
-          "Danie wege: falafel w tortilli, picie, bułce lub na talerzu."
+          "Robione na miejscu, w lokalu przy Ściegiennego 68a — od 2019 roku.",
+          "Bez zamrażarki: to, co przygotujemy rano, trafia do klientów tego samego dnia.",
+          "Duże porcje — gramaturę mięsa w każdym rozmiarze podajemy wprost w menu.",
+          "Trzy sosy robione u nas: łagodny, ostry i mieszany.",
+          "Danie wege dla tych, którzy nie jedzą mięsa: falafel."
         ]
       },
       {
-        "heading": "Jaki kebab możesz u nas zamówić",
+        "heading": "Jak powstaje kebab u Szefa Donalda",
         "paragraphs": [
-          "Klasyka to kebab w tortilli, w picie i w bułce — mięso, surówki i sos. Jeśli wolisz zjeść widelcem, wybierz kebab na talerzu z frytkami i surówkami, kebab box albo sałatkę kebab. Dla głodnych jest kapsalon: mięso, frytki, ser i sos w jednym pojemniku. W menu znajdziesz też fryto kebab, tacos z polędwiczkami z kurczaka i zestawy z napojem w niższej cenie.",
-          "Aktualne ceny i wagi mięsa w każdym rozmiarze pokazujemy niżej i w pełnym menu — pochodzą prosto z naszego systemu zamówień, więc zawsze są aktualne."
-        ]
-      },
-      {
-        "heading": "Dostawa kebaba w Kielcach",
-        "paragraphs": [
-          "Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników. Dowozimy w promieniu około {radius} km od lokalu przy Ściegiennego 68a, minimalne zamówienie to {minOrder}. Zapłacisz kartą, BLIK-iem albo gotówką przy odbiorze.",
-          "Wolisz odebrać sam? Wybierz odbiór osobisty — przygotujemy zamówienie, a Ty odbierzesz je w lokalu. Szczegóły dostawy znajdziesz na stronie Dostawa."
-        ]
-      },
-      {
-        "heading": "Godziny otwarcia i dojazd",
-        "paragraphs": [
-          "Jesteśmy otwarci: {hours}. Lokal znajdziesz pod adresem {address}. Zadzwoń, jeśli masz pytanie albo chcesz zamówić telefonicznie: {phone}."
+          "Dzień zaczynamy od przygotowania mięsa i krojenia warzyw. Mięso ścinamy na bieżąco, tuż przed podaniem — dlatego w tortilli ląduje ciepłe, soczyste i przyrumienione, a nie odgrzewane. Surówki przygotowujemy w ciągu dnia, żeby były świeże i chrupiące.",
+          "Każde zamówienie składamy dopiero, gdy do nas trafi. Wybierasz pieczywo albo formę podania, rozmiar, mięso i sos, a my dokładamy dodatki, o które prosisz — na przykład ser feta, ser żółty, frytki albo dodatkowe mięso. Lubisz bez sałatki? Wybierz wersję „holenderską”, z frytkami zamiast surówek."
         ]
       }
     ],
+    "meat": {
+      "heading": "Mięso: kurczak, wołowina albo mieszane",
+      "paragraphs": [
+        "Mięso to serce kebaba, więc nie oszczędzamy na nim ani na przyprawach. Kurczak jest delikatniejszy i lżejszy, wołowina ma wyraźniejszy, bardziej treściwy smak, a wersja mieszana łączy jedno z drugim, jeśli nie możesz się zdecydować."
+      ],
+      "options": "W każdym kebabie wybierasz: {meats}.",
+      "samePrice": "Cena nie zależy od rodzaju mięsa — płacisz za rozmiar porcji."
+    },
+    "sizes": {
+      "heading": "Rozmiary, gramatura mięsa i ceny",
+      "intro": "Większość kebabów zamówisz w kilku rozmiarach. Ceny w tabeli pochodzą prosto z naszego systemu zamówień, więc zawsze są aktualne.",
+      "introGrams": "Większość kebabów zamówisz w kilku rozmiarach — od {min} g do {max} g mięsa w porcji. Gramatura dotyczy samego mięsa, bez pieczywa, surówek i sosu. Ceny w tabeli pochodzą prosto z naszego systemu zamówień, więc zawsze są aktualne.",
+      "caption": "Kebab w Kielcach u Szefa Donalda — rozmiary, waga mięsa i ceny",
+      "dishCol": "Danie",
+      "sauceIncluded": "Wybór sosu jest obowiązkowy i kosztuje {surcharge} — ta dopłata jest już wliczona we wszystkie ceny w tabeli.",
+      "sauceFree": "Wybór sosu jest obowiązkowy i nie kosztuje nic ekstra."
+    },
+    "sauces": {
+      "heading": "Sosy: łagodny, ostry albo mieszany",
+      "choicePaid": "Do każdego kebaba wybierasz jeden sos: {sauces}. Sos jest obowiązkowy i kosztuje {surcharge} — w cenach w tabeli powyżej ta kwota jest już uwzględniona, a w menu doliczamy ją przy wyborze sosu.",
+      "choiceFree": "Do każdego kebaba wybierasz jeden sos: {sauces}. Sos jest wliczony w cenę.",
+      "paragraphs": [
+        "Łagodny to kremowy sos dla tych, którzy chcą poczuć przede wszystkim smak mięsa. Ostry ma wyraźną, rozgrzewającą ostrość. Mieszany łączy oba smaki — dobry wybór na pierwszy raz. Jeśli lubisz naprawdę ostro, napisz to w uwagach do zamówienia. Dodatkową porcję sosu możesz dobrać w dodatkach."
+      ]
+    },
+    "dishes": {
+      "heading": "Nie tylko kebab w tortilli",
+      "intro": "Klasyka to kebab w tortilli, w picie i w bułce. Jeśli wolisz zjeść widelcem albo masz większy apetyt, sprawdź pozostałe dania z naszego menu:",
+      "link": "Zobacz: {name}",
+      "grams": "{grams} g mięsa",
+      "gramsRange": "{min}–{max} g mięsa",
+      "items": [
+        {
+          "slug": "kebab-kapsalon",
+          "heading": "Kapsalon",
+          "text": "Holenderski klasyk, który w Kielcach pokochali najbardziej głodni: frytki, na nich mięso z kebaba, ser i sos, wszystko w jednym pojemniku. To najbardziej sycące danie w naszym menu."
+        },
+        {
+          "slug": "fryto-kebab",
+          "heading": "Fryto kebab",
+          "text": "Kebab w tortilli z frytkami w środku — mięso, surówki, frytki i sos zawinięte razem. Dobry wybór, gdy zwykła tortilla to za mało, a nie chcesz sięgać po sztućce."
+        },
+        {
+          "slug": "kebab-box",
+          "heading": "Kebab box",
+          "text": "Mięso, frytki i sos w poręcznym pudełku. Wygodny na wynos i do auta, bez pieczywa."
+        },
+        {
+          "slug": "kebab-na-talerzu",
+          "heading": "Kebab na talerzu",
+          "text": "Pełny obiad: mięso, frytki, surówki i sos podane na talerzu. Zjesz go na miejscu albo weźmiesz na wynos."
+        },
+        {
+          "slug": "tacos",
+          "heading": "Tacos",
+          "text": "Tortilla z trzema polędwiczkami z kurczaka, frytkami, serem, sałatą lodową i sosem — dla tych, którzy wolą chrupiące mięso zamiast klasycznego kebaba."
+        },
+        {
+          "slug": "tortilla-falafel",
+          "heading": "Falafel",
+          "text": "Wegetariańska alternatywa: chrupiące kulki falafela z sałatą i sosem, w tortilli, picie, bułce albo na talerzu. Wybierasz liczbę sztuk i sos, tak samo jak przy kebabie."
+        }
+      ]
+    },
+    "sectionsBottom": [
+      {
+        "heading": "Dostawa kebaba — jak to działa",
+        "paragraphs": [
+          "Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników. Dowozimy w promieniu około {radius} km od lokalu, minimalne zamówienie to {minOrder}. Przy składaniu zamówienia zaznaczasz adres na mapie i od razu widzisz, czy jest w strefie dostawy.",
+          "Typowy czas dostawy to {deliveryTime} min; w godzinach największego ruchu może to potrwać dłużej, a status zamówienia śledzisz na żywo. Zapłacisz kartą, BLIK-iem albo gotówką. Szczegóły — strefa, koszty i godziny dowozu — znajdziesz na stronie [kebab z dostawą](/dostawa)."
+        ]
+      },
+      {
+        "heading": "Odbiór osobisty i jedzenie na miejscu",
+        "paragraphs": [
+          "Wolisz odebrać sam? Zamów online i wybierz odbiór osobisty — zamówienie jest zwykle gotowe w {pickupTime} min, a opłata za dostawę Cię nie dotyczy. Możesz też po prostu wejść do lokalu, zamówić przy ladzie i zjeść na miejscu."
+        ]
+      }
+    ],
+    "visit": {
+      "heading": "Godziny otwarcia i dojazd",
+      "paragraphs": [
+        "Jesteśmy otwarci: {hours}. Lokal znajdziesz pod adresem {address}. Masz pytanie albo chcesz zamówić telefonicznie? Zadzwoń: {phone}.",
+        "Pełną listę dań z cenami znajdziesz w [menu](/menu). Jeśli nie jesz mięsa, zajrzyj na stronę o [falafelu w Kielcach](/falafel-kielce), a jeśli masz duży apetyt — o [kapsalonie](/kapsalon-kielce)."
+      ],
+      "directions": "Wyznacz trasę w Mapach Google"
+    },
     "faq": [
       {
         "q": "Gdzie zjeść kebab w Kielcach przy Ściegiennego?",
         "a": "Szef Donald znajdziesz pod adresem {address}. Możesz zjeść na miejscu, wziąć na wynos albo zamówić z dostawą {fee} przez szefdonald.pl."
       },
       {
+        "q": "Czy kebab jest robiony na miejscu?",
+        "a": "Tak. Mięso, surówki i sosy przygotowujemy codziennie w lokalu — nie mamy zamrażarki, a to, czego nie sprzedamy, nie wraca następnego dnia na ladę."
+      },
+      {
+        "q": "Jakie mięso jest w kebabie?",
+        "a": "Do wyboru kurczak, wołowina albo mieszane. Cena nie zależy od rodzaju mięsa, a wagę mięsa w każdym rozmiarze podajemy w menu."
+      },
+      {
+        "q": "Ile mięsa jest w kebabie?",
+        "a": "To zależy od rozmiaru — gramaturę mięsa dla każdego rozmiaru znajdziesz w tabeli na tej stronie i przy każdym daniu w menu."
+      },
+      {
+        "q": "Jakie sosy są do kebaba?",
+        "a": "Łagodny, ostry albo mieszany. Sos wybierasz przy każdym kebabie; dodatkową porcję dobierzesz w dodatkach."
+      },
+      {
         "q": "Ile kosztuje dostawa kebaba w Kielcach?",
         "a": "Przy zamówieniu bezpośrednio na szefdonald.pl dostawa kosztuje {fee}. Minimalne zamówienie to {minOrder}, dowozimy w promieniu ok. {radius} km od lokalu."
       },
       {
-        "q": "Czy kebab jest robiony na miejscu?",
-        "a": "Tak. Wszystko przygotowujemy w lokalu w ciągu dnia — u nas nie ma zamrażarki."
+        "q": "Ile czeka się na zamówienie?",
+        "a": "Dostawa trwa zwykle {deliveryTime} min, a zamówienie z odbiorem osobistym jest gotowe w ok. {pickupTime} min. W godzinach szczytu może to potrwać dłużej."
       },
       {
-        "q": "Jakie mięso jest w kebabie?",
-        "a": "Do wyboru kurczak, wołowina albo mieszane. Wagę mięsa w każdym rozmiarze podajemy w menu."
-      },
-      {
-        "q": "W jakich godzinach jesteście otwarci?",
-        "a": "{hours}."
+        "q": "Czy macie coś dla wegetarian?",
+        "a": "Tak — falafel w tortilli, picie, bułce albo na talerzu, z sałatą i sosem do wyboru."
       }
     ]
   },
@@ -180,12 +263,13 @@
     ]
   },
   "delivery": {
-    "lead": "Dowozimy kebab, falafel i pozostałe dania z naszego menu na terenie Kielc. Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników.",
+    "lead": "Kebab z dostawą w Kielcach prosto z lokalu przy Ściegiennego 68a — dowozimy kebab, kapsalon, falafel i pozostałe dania z naszego menu. Zamawiając bezpośrednio na szefdonald.pl płacisz {fee} za dostawę — bez prowizji pośredników.",
     "sections": [
       {
         "heading": "Obszar dostawy",
         "paragraphs": [
-          "Dowozimy w promieniu około {radius} km od naszego lokalu przy {address}. Przy składaniu zamówienia zaznaczasz adres na mapie — od razu zobaczysz, czy jest w strefie dostawy."
+          "Dowozimy w promieniu około {radius} km od naszego lokalu przy {address}. Przy składaniu zamówienia zaznaczasz adres na mapie — od razu zobaczysz, czy jest w strefie dostawy.",
+          "Nie wiesz, co zamówić? Na stronie [kebab Kielce](/kebab-kielce) opisujemy mięso, rozmiary z gramaturą, sosy i pozostałe dania."
         ]
       },
       {
@@ -219,9 +303,7 @@
       },
       {
         "heading": "Godziny dostaw",
-        "paragraphs": [
-          "Zamówienia z dostawą przyjmujemy w godzinach otwarcia lokalu: {hours}."
-        ]
+        "paragraphs": ["Zamówienia z dostawą przyjmujemy w godzinach otwarcia lokalu: {hours}."]
       }
     ],
     "faq": [

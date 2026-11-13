@@ -8,6 +8,7 @@ import { localePath } from '@/lib/seo/site';
 import { Hero, Stars } from '@repo/ui';
 import { Truck } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import { HeroLiveBadges } from './hero-live-badges';
 
 export async function LandingHero() {
@@ -69,12 +70,17 @@ export async function LandingHero() {
       }}
       media={
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-image-lg bg-surface-warm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* The LCP element is the H1 (text), not this photo: on phones the
+              photo sits below the fold, so it is not preloaded / high-priority
+              (that would steal bandwidth from CSS + fonts). Eager on desktop,
+              where it is beside the H1; responsive AVIF/WebP via next/image. */}
+          <Image
             src={heroImage.src}
             alt={heroImage.alt}
-            fetchPriority="high"
-            className="h-full w-full object-cover"
+            fill
+            loading="eager"
+            sizes="(max-width: 1024px) calc(100vw - 32px), 560px"
+            className="object-cover"
           />
         </div>
       }

@@ -25,9 +25,12 @@ export default async function ShopLayout({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: 'common' });
-  const initialSessionKey = await getCartSessionKey();
-  const restaurant = await fetchPublicRestaurant();
+  // Independent — fetched in parallel rather than one after another.
+  const [t, initialSessionKey, restaurant] = await Promise.all([
+    getTranslations({ locale, namespace: 'common' }),
+    getCartSessionKey(),
+    fetchPublicRestaurant(),
+  ]);
 
   return (
     <CartSessionProvider initial={initialSessionKey}>

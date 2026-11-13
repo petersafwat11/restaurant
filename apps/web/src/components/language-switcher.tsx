@@ -19,8 +19,8 @@ interface LanguageSwitcherProps {
 
 /**
  * Compact PL|EN pill toggle. Switches the URL locale via next-intl's
- * navigation helpers — the `NEXT_LOCALE` cookie is updated by the proxy (next-intl middleware)
- * on the resulting request so the preference persists across pages.
+ * navigation helpers. The locale lives in the URL (`/en/...`) and the
+ * locale-aware <Link>s keep it across pages; no locale cookie is used.
  */
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const t = useTranslations('web.layout');
@@ -53,7 +53,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             onClick={() => switchTo(code)}
             disabled={isPending}
             className={`inline-flex h-6 items-center justify-center rounded-full px-2.5 font-medium tracking-wide transition-colors duration-web-color disabled:opacity-60 ${
-              isActive ? 'bg-fg text-surface' : 'text-fg-muted hover:text-fg'
+              isActive ? 'bg-fg text-surface' : 'text-fg hover:text-accent-hover'
             }`}
           >
             {label}

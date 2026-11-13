@@ -54,7 +54,8 @@
     "yearsValue": "{years, plural, one {# rok} few {# lata} many {# lat} other {# lat}}",
     "yearsLabel": "Otwarte od {since}",
     "wrapsValue": "~{count} /tyg.",
-    "wrapsLabel": "Zawijańców w sezonie"
+    "wrapsLabel": "Zawijańców w sezonie",
+    "pillarText": "Zobacz, jak powstaje nasz <link>kebab w Kielcach</link> — mięso, rozmiary, sosy i dostawa."
   },
   "hoursLocation": {
     "eyebrow": "Znajdź nas",

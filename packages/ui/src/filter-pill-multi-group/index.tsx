@@ -70,7 +70,7 @@ export function FilterPillMultiGroup<TId extends string>({
             className={cn(
               'inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-small font-medium transition-colors duration-web-color',
               active
-                ? 'border-accent bg-accent/[0.10] text-accent'
+                ? 'border-accent bg-accent/[0.10] text-accent-hover'
                 : 'border-border/[var(--border-strong-alpha)] bg-surface-2 text-fg-muted hover:border-accent/40 hover:text-fg',
             )}
           >

@@ -21,8 +21,13 @@ const defaultHandlers = [
 
 export const server = setupServer(...defaultHandlers);
 
-beforeAll(() => {
+beforeAll(async () => {
   server.listen({ onUnhandledRequest: 'error' });
+  // `getApiClient()` loads the real client lazily on first call. In the app
+  // that keeps Zod off the critical path; in tests the cold transform of that
+  // module can exceed `waitFor`'s 1 s default under parallel load, so warm it
+  // up front.
+  await import('@/lib/api-client-impl');
 });
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

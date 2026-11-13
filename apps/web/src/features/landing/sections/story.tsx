@@ -26,6 +26,18 @@ export async function LandingStory() {
             </h2>
             <p className="text-body-l text-fg">{t('lead')}</p>
             <p className="text-body-l text-fg-muted">{t('body')}</p>
+            <p className="text-body-l text-fg-muted">
+              {t.rich('pillarText', {
+                link: (chunks) => (
+                  <Link
+                    href="/kebab-kielce"
+                    className="font-medium text-accent-hover underline underline-offset-2 hover:text-accent"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
             <Link
               href="/about"
               className="mt-2 inline-flex items-center gap-1.5 text-[15px] font-medium text-fg transition-colors hover:text-accent"

@@ -3,8 +3,9 @@
 import { useAddToCart, useCart, useRemoveCartItem, useUpdateCartItem } from '@/features/cart/hooks';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { CartSheet, FloatingCartButton } from '@repo/ui';
+import { FloatingCartButton } from '@repo/ui';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 import * as React from 'react';
 
 /**
@@ -15,10 +16,18 @@ import * as React from 'react';
  * Zustand store only holds in-flight mutation counts. Cart-mutation hooks
  * are responsible for refreshing the cache.
  */
+// The drawer (Radix Dialog) is code-split and mounted on first open; the
+// floating button stays in the initial bundle.
+const CartSheet = dynamic(() => import('@repo/ui').then((m) => m.CartSheet), { ssr: false });
+
 const HIDE_CART_ROUTES = ['/checkout', '/cart'];
 
 export function CartContainer() {
   const [open, setOpen] = React.useState(false);
+  const [sheetLoaded, setSheetLoaded] = React.useState(false);
+  React.useEffect(() => {
+    if (open) setSheetLoaded(true);
+  }, [open]);
   const [notes, setNotes] = React.useState('');
   const pathname = usePathname() ?? '';
   const router = useRouter();
@@ -64,51 +73,53 @@ export function CartContainer() {
 
   return (
     <>
-      <CartSheet
-        open={open}
-        onOpenChange={setOpen}
-        lines={lines}
-        onUpdateQty={(id, qty) =>
-          updateMutation.mutate({ cartItemId: id, input: { quantity: qty } })
-        }
-        onRemove={(id) => removeMutation.mutate({ cartItemId: id })}
-        onCheckout={onCheckout}
-        subtotal={subtotal}
-        currency={currency}
-        notes={{
-          value: notes,
-          onChange: setNotes,
-          placeholder: t('notesPlaceholder'),
-        }}
-        emptyAction={{
-          label: t('browseMenu'),
-          onClick: () => {
-            setOpen(false);
-            router.push('/menu');
-          },
-        }}
-        labels={{
-          title: t('title'),
-          closeAriaLabel: t('closeAriaLabel'),
-          formatItemCount: (count) => `(${t('itemCount', { count })})`,
-          emptyTitle: t('empty'),
-          emptyDescription: t('emptyDescription'),
-          emptyActionLabel: t('browseMenu'),
-          notesLabel: t('notesLabel'),
-          notesPlaceholder: t('notesPlaceholder'),
-          subtotal: t('subtotal'),
-          delivery: t('delivery'),
-          deliveryValue: t('deliveryCalculated'),
-          total: t('total'),
-          checkoutCta: (total) => t('checkoutCta', { total }),
-          footerHint: t('footerHint'),
-          lineItem: {
-            remove: t('remove'),
-            notePrefix: t('notePrefix'),
-            quantityAriaLabel: (name) => t('quantityAriaLabel', { name }),
-          },
-        }}
-      />
+      {sheetLoaded && (
+        <CartSheet
+          open={open}
+          onOpenChange={setOpen}
+          lines={lines}
+          onUpdateQty={(id, qty) =>
+            updateMutation.mutate({ cartItemId: id, input: { quantity: qty } })
+          }
+          onRemove={(id) => removeMutation.mutate({ cartItemId: id })}
+          onCheckout={onCheckout}
+          subtotal={subtotal}
+          currency={currency}
+          notes={{
+            value: notes,
+            onChange: setNotes,
+            placeholder: t('notesPlaceholder'),
+          }}
+          emptyAction={{
+            label: t('browseMenu'),
+            onClick: () => {
+              setOpen(false);
+              router.push('/menu');
+            },
+          }}
+          labels={{
+            title: t('title'),
+            closeAriaLabel: t('closeAriaLabel'),
+            formatItemCount: (count) => `(${t('itemCount', { count })})`,
+            emptyTitle: t('empty'),
+            emptyDescription: t('emptyDescription'),
+            emptyActionLabel: t('browseMenu'),
+            notesLabel: t('notesLabel'),
+            notesPlaceholder: t('notesPlaceholder'),
+            subtotal: t('subtotal'),
+            delivery: t('delivery'),
+            deliveryValue: t('deliveryCalculated'),
+            total: t('total'),
+            checkoutCta: (total) => t('checkoutCta', { total }),
+            footerHint: t('footerHint'),
+            lineItem: {
+              remove: t('remove'),
+              notePrefix: t('notePrefix'),
+              quantityAriaLabel: (name) => t('quantityAriaLabel', { name }),
+            },
+          }}
+        />
+      )}
       <FloatingCartButton
         itemCount={itemCount}
         total={subtotal}

@@ -1,6 +1,4 @@
-'use client';
-
-import { useRestaurant } from '@/features/restaurants/hooks';
+import { LazyMapIframe } from '@/components/lazy-map-iframe';
 import { publicEmail } from '@/features/restaurants/lib/restaurant-facts';
 import {
   directionsHref,
@@ -8,9 +6,10 @@ import {
   hoursToRows,
 } from '@/features/restaurants/lib/restaurant-info';
 import { Link } from '@/i18n/navigation';
+import type { RestaurantPublicDto } from '@repo/types';
 import { Container, HoursTable } from '@repo/ui';
 import { ArrowUpRight, MapPin, Phone, Share2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 function MapCard({
   ariaLabel,
@@ -47,13 +46,7 @@ function MapCard({
     <div className="relative overflow-hidden rounded-card border border-border/[var(--border-alpha)] bg-surface-elevated">
       <div className="relative aspect-[5/4] w-full bg-surface-warm/40">
         {embedSrc ? (
-          <iframe
-            title={ariaLabel}
-            src={embedSrc}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="absolute inset-0 h-full w-full border-0"
-          />
+          <LazyMapIframe title={ariaLabel} src={embedSrc} className="absolute inset-0" />
         ) : (
           <div
             role="img"
@@ -86,10 +79,18 @@ function MapCard({
   );
 }
 
-export function LandingHoursLocation() {
-  const t = useTranslations('web.marketing.home.hoursLocation');
-  const tCommon = useTranslations('common');
-  const { data: restaurant } = useRestaurant();
+/**
+ * "Find us" section. Server Component: address, phone and hours come from the
+ * server-fetched restaurant record (Next data cache), so nothing hydrates here;
+ * the OSM map iframe is `loading="lazy"` and only loads near the viewport.
+ */
+export async function LandingHoursLocation({
+  restaurant,
+}: {
+  restaurant: RestaurantPublicDto | null;
+}) {
+  const t = await getTranslations('web.marketing.home.hoursLocation');
+  const tCommon = await getTranslations('common');
   const phone = restaurant?.phone ?? '';
   const tel = phone.replace(/\s/g, '');
   // Hidden when empty / invalid (set in admin).

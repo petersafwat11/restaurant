@@ -1,4 +1,5 @@
 import { routing } from '@/i18n/routing';
+import { pickClientMessages } from '@/lib/i18n/client-messages';
 import { fetchMenuTree } from '@/lib/seo/fetch-menu';
 import { fetchPublicRestaurant } from '@/lib/seo/fetch-restaurant';
 import { JsonLd } from '@/lib/seo/json-ld';
@@ -6,7 +7,7 @@ import { buildRestaurantNode } from '@/lib/seo/schema';
 import { AppProviders } from '@/providers/app-providers';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { Fraunces, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import '../globals.css';
@@ -97,7 +98,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   // `(shop)/menu/*` and `(marketing)/*` — see docs/seo/seo-geo-strategy.md §D.
   // Both fetches are cached in the Next data cache (revalidate 300 s) and
   // deduplicated with the same calls made by pages in this request.
-  const [restaurant, tree] = await Promise.all([fetchPublicRestaurant(), fetchMenuTree(locale)]);
+  const [restaurant, tree, messages] = await Promise.all([
+    fetchPublicRestaurant(),
+    fetchMenuTree(locale),
+    getMessages({ locale }),
+  ]);
 
   return (
     <html lang={locale} dir="ltr" className={`${fraunces.variable} ${inter.variable}`}>
@@ -105,7 +110,8 @@ export default async function LocaleLayout({ children, params }: Props) {
         {restaurant ? (
           <JsonLd id="ld-restaurant" data={buildRestaurantNode(restaurant, locale, tree)} />
         ) : null}
-        <NextIntlClientProvider>
+        {/* Only the namespaces client components read — see pickClientMessages. */}
+        <NextIntlClientProvider messages={pickClientMessages(messages)}>
           <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
       </body>
