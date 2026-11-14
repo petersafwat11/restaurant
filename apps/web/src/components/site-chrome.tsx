@@ -5,6 +5,7 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { Logo } from '@/components/logo';
 import { useCart } from '@/features/cart/hooks';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { openCartDrawer } from '@/lib/cart-drawer';
 import { useAuthStore } from '@/stores/auth-store';
 import { SiteNav } from '@repo/ui';
 import { useTranslations } from 'next-intl';
@@ -98,7 +99,11 @@ export function SiteChrome({ initialVariant = 'solid' }: SiteChromeProps) {
         cart={
           <CartButton
             count={cartCount}
-            onClick={() => router.push('/menu')}
+            onClick={() => {
+              // Open the cart drawer where there is one; elsewhere go to
+              // checkout (items in cart) or the menu (empty cart).
+              if (!openCartDrawer()) router.push(cartCount > 0 ? '/checkout' : '/menu');
+            }}
             ariaLabel={t('cart.ariaLabel', { count: cartCount })}
           />
         }

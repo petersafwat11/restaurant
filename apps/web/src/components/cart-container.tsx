@@ -5,6 +5,7 @@ import { deliveryMinimum } from '@/features/cart/lib/delivery-minimum';
 import { cartItemToDisplay } from '@/features/cart/to-display';
 import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { registerCartDrawer } from '@/lib/cart-drawer';
 import { FloatingCartButton } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 import { useTranslations } from 'next-intl';
@@ -31,6 +32,8 @@ export function CartContainer() {
   React.useEffect(() => {
     if (open) setSheetLoaded(true);
   }, [open]);
+  // Header cart icon → open this drawer.
+  React.useEffect(() => registerCartDrawer(() => setOpen(true)), []);
   const [notes, setNotes] = React.useState('');
   const pathname = usePathname() ?? '';
   const router = useRouter();
