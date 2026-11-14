@@ -6,7 +6,11 @@ import { Flame, Leaf, Sparkles, WheatOff } from 'lucide-react';
 import * as React from 'react';
 import { Sheet, SheetContent, SheetTitle } from '../_shadcn/sheet';
 import { cn } from '../lib/cn';
-import { ModifierGroup, type ModifierGroupShape } from '../modifier-group';
+import {
+  ModifierGroup,
+  type ModifierGroupLabels,
+  type ModifierGroupShape,
+} from '../modifier-group';
 import { QuantityStepper } from '../quantity-stepper';
 import { DISH_FLAG_CLASSES, DISH_FLAG_TOKENS, type DishFlag } from '../tokens/dish-flags';
 
@@ -95,6 +99,8 @@ export interface ItemDetailSheetProps {
      * Receives the names of the unfilled groups. Default: `Choose: ${names.join(', ')}`.
      */
     formatChoose?: (groupNames: string[]) => string;
+    /** Copy for the modifier groups (Required chip, hints, sold-out chip). */
+    modifierLabels?: ModifierGroupLabels;
   };
   /**
    * Optional translated chip labels per flag. Falls back to the hardcoded
@@ -166,6 +172,7 @@ export function ItemDetailSheet({
     addToCart = 'Add to cart',
     formatMinChoice,
     formatChoose,
+    modifierLabels,
   } = labels ?? {};
   const [modState, setModState] = React.useState<Record<string, string[]>>(() =>
     defaultModifierState(item),
@@ -340,6 +347,7 @@ export function ItemDetailSheet({
                       : undefined
                   }
                   currency={item.currency}
+                  labels={modifierLabels}
                 />
               );
             })}

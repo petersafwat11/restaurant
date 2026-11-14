@@ -48,6 +48,26 @@ export function cleanGroups(groups: ModifierGroupDto[]): ModifierGroupDto[] {
     .filter((g) => g.options.length > 0);
 }
 
+/**
+ * The lowest price a customer can actually pay for a dish: base price plus the
+ * cheapest options of every required group (e.g. a sauce with a surcharge, the
+ * smallest size). Menu cards show this so the price never jumps once the dish
+ * is opened. Uses integer-cent money helpers, not float arithmetic.
+ */
+export function cheapestPrice(
+  item: Pick<MenuItemDetailDto, 'basePrice' | 'modifierGroups'>,
+): string {
+  const extras = cleanGroups(item.modifierGroups)
+    .filter((g) => g.isRequired && g.minSelect > 0)
+    .flatMap((g) =>
+      [...g.options]
+        .map((o) => o.priceDelta)
+        .sort((a, b) => Number.parseFloat(a) - Number.parseFloat(b))
+        .slice(0, g.minSelect),
+    );
+  return sumMoneyStrings([item.basePrice, ...extras]);
+}
+
 export interface SizeFact {
   name: string;
   /** Final price of the dish in this size (base + delta), 2dp string. */

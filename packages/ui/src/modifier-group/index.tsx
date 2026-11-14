@@ -26,6 +26,22 @@ export interface ModifierOptionShape {
   unavailable?: boolean;
 }
 
+/** Localizable copy for a modifier group. Defaults are English. */
+export interface ModifierGroupLabels {
+  /** Chip on required groups. Default "Required". */
+  required?: string;
+  /** Hint for single-choice groups. Default "Choose one". */
+  chooseOne?: string;
+  /** Hint for optional multi-choice groups. Default `Optional · up to ${max}`. */
+  optionalUpTo?: (max: number) => string;
+  /** Hint when exactly n must be chosen. Default `Choose ${n}`. */
+  chooseExactly?: (n: number) => string;
+  /** Hint for a min..max range (max undefined = no upper limit). */
+  chooseRange?: (min: number, max?: number) => string;
+  /** Chip on unavailable options. Default "Sold out". */
+  soldOut?: string;
+}
+
 export interface ModifierGroupProps {
   group: ModifierGroupShape;
   /** Array of selected option ids — radio = length 1, checkbox = length ≤ max. */
@@ -35,6 +51,7 @@ export interface ModifierGroupProps {
   error?: string;
   currency: string;
   className?: string;
+  labels?: ModifierGroupLabels;
 }
 
 export function ModifierGroup({
@@ -44,18 +61,26 @@ export function ModifierGroup({
   error,
   currency,
   className,
+  labels,
 }: ModifierGroupProps) {
   const isMulti = group.max > 1;
+  const {
+    required: requiredLabel = 'Required',
+    chooseOne = 'Choose one',
+    optionalUpTo = (max: number) => `Optional · up to ${max}`,
+    chooseExactly = (n: number) => `Choose ${n}`,
+    chooseRange = (min: number, max?: number) =>
+      `Choose at least ${min}${max !== undefined ? `, up to ${max}` : ''}`,
+    soldOut: soldOutLabel = 'Sold out',
+  } = labels ?? {};
 
   const hint = isMulti
     ? group.min > 0
-      ? `Choose ${
-          group.min === group.max
-            ? group.min
-            : `at least ${group.min}${group.max < 99 ? `, up to ${group.max}` : ''}`
-        }`
-      : `Optional · up to ${group.max}`
-    : 'Choose one';
+      ? group.min === group.max
+        ? chooseExactly(group.min)
+        : chooseRange(group.min, group.max < 99 ? group.max : undefined)
+      : optionalUpTo(group.max)
+    : chooseOne;
 
   const toggle = (option: ModifierOptionShape) => {
     if (option.unavailable) return;
@@ -81,7 +106,7 @@ export function ModifierGroup({
         </legend>
         {group.required && group.min > 0 && (
           <span className="shrink-0 rounded-full bg-accent/[0.10] px-2 py-0.5 text-[11px] font-medium text-accent">
-            Required
+            {requiredLabel}
           </span>
         )}
       </div>
@@ -129,7 +154,7 @@ export function ModifierGroup({
                 )}
                 {opt.unavailable && (
                   <span className="ml-2 inline-block rounded-md bg-surface-warm px-1.5 py-0.5 text-[11px] text-fg-subtle">
-                    Sold out
+                    {soldOutLabel}
                   </span>
                 )}
               </span>

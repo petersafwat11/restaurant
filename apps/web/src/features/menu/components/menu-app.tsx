@@ -2,7 +2,7 @@
 
 import { useMenuTree } from '@/features/menu/hooks';
 import { itemFlagsOf, useDishOrdering } from '@/features/menu/hooks/use-dish-ordering';
-import { dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
+import { cheapestPrice, dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
 import { getPathname } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import type { MenuItemDto, MenuTreeDto } from '@repo/types';
@@ -263,7 +263,7 @@ export function MenuApp({ currency = 'PLN' }: MenuAppProps) {
                   }}
                   name={item.name}
                   description={item.description ?? undefined}
-                  price={{ amount: item.basePrice, currency }}
+                  price={{ amount: cheapestPrice(item), currency }}
                   grams={item.grams}
                   formatWeight={(g) => t('weight', { grams: g })}
                   flags={itemFlagsOf(item) as never}

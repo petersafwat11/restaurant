@@ -62,7 +62,7 @@ const DeliveryLocationPicker = dynamic(
 );
 import { Link, useRouter } from '@/i18n/navigation';
 import { getCheckoutErrorMap } from '@/lib/checkout-error-map';
-import { formatMoney, isWithinRadiusKm } from '@repo/utils';
+import { formatMoney, isWithinRadiusKm, sumMoneyStrings } from '@repo/utils';
 import {
   ArrowLeft,
   ArrowRight,
@@ -845,6 +845,40 @@ export function CheckoutApp() {
                 />
               )}
             />
+            {/* Shown up front: the old notice sat below all six steps, so
+                single-item carts left before ever seeing why delivery failed. */}
+            {orderType === 'DELIVERY' && belowMinimum && (
+              <div
+                aria-live="polite"
+                className="flex flex-col gap-2 rounded-card border border-warning/30 bg-warning/10 p-3 text-small text-fg"
+              >
+                <span>
+                  {t('errors.minOrderMissing', {
+                    missing: formatMoney(
+                      sumMoneyStrings([minOrderAmount, `-${subtotal}`]),
+                      currency,
+                    ),
+                    amount: formatMoney(minOrderAmount, currency),
+                  })}
+                </span>
+                <span className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => form.setValue('orderType', 'PICKUP', { shouldDirty: true })}
+                    className="rounded-button bg-accent px-3 py-1.5 text-small font-medium text-text-on-accent hover:bg-accent-hover"
+                  >
+                    {t('errors.minOrderSwitchPickup')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/menu/dodatki')}
+                    className="rounded-button border border-border px-3 py-1.5 text-small font-medium text-fg hover:bg-surface-warm/40"
+                  >
+                    {t('errors.minOrderAddMore')}
+                  </button>
+                </span>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => continueFrom(1)}

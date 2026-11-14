@@ -57,6 +57,13 @@
     "total": "Total",
     "soldOut": "Sold out today — back tomorrow.",
     "minChoice": "Please choose at least {min, plural, one {one} other {#}}.",
+    "required": "Required",
+    "chooseOne": "Choose one",
+    "optionalUpTo": "Optional · up to {max}",
+    "chooseExactly": "Choose {n}",
+    "chooseRange": "Choose at least {min}",
+    "chooseRangeMax": "Choose {min} to {max}",
+    "optionSoldOut": "Sold out",
     "chooseGroups": "Choose: {names}"
   },
   "allergen": {

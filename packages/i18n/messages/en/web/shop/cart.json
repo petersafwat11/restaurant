@@ -20,5 +20,7 @@
   "itemCount": "{count, plural, one {# item} other {# items}}",
   "checkout": "Checkout",
   "checkoutCta": "Checkout · {total}",
-  "footerHint": "Delivery fee and taxes are calculated at checkout."
+  "footerHint": "Delivery fee and taxes are calculated at checkout.",
+  "belowMinimum": "Add {missing} more for delivery (minimum {minimum}). Pickup has no minimum.",
+  "addMore": "Add fries or a drink"
 }

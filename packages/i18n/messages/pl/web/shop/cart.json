@@ -20,5 +20,7 @@
   "itemCount": "{count, plural, one {# pozycja} few {# pozycje} many {# pozycji} other {# pozycji}}",
   "checkout": "Do kasy",
   "checkoutCta": "Do kasy · {total}",
-  "footerHint": "Opłata za dostawę i podatki są naliczane przy kasie."
+  "footerHint": "Opłata za dostawę i podatki są naliczane przy kasie.",
+  "belowMinimum": "Do dostawy brakuje jeszcze {missing} (minimum {minimum}). Odbiór osobisty — bez minimum.",
+  "addMore": "Dodaj frytki lub napój"
 }

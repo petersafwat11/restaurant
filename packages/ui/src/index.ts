@@ -154,6 +154,7 @@ export {
 export { MenuSubNav, type MenuSubNavProps, type MenuSubNavSection } from './menu-sub-nav';
 export {
   ModifierGroup,
+  type ModifierGroupLabels,
   type ModifierGroupProps,
   type ModifierGroupShape,
   type ModifierOptionShape,

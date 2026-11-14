@@ -1,7 +1,7 @@
 'use client';
 
 import { useAddToCart } from '@/features/cart/hooks';
-import { dishImageAlt } from '@/features/menu/lib/dish-facts';
+import { cleanGroups, dishImageAlt } from '@/features/menu/lib/dish-facts';
 import { ALLERGENS, type AllergenKey, type MenuItemDto, type ModifierGroupDto } from '@repo/types';
 import type { DishDetail, ModifierGroupShape, NewCartLine } from '@repo/ui';
 import { useLocale, useTranslations } from 'next-intl';
@@ -36,13 +36,21 @@ function adaptModifierGroup(g: ModifierGroupDto): ModifierGroupShape {
     required: g.isRequired,
     min: g.minSelect,
     max: g.maxSelect === 0 ? 99 : g.maxSelect,
-    options: g.options.map((o) => ({
-      id: o.id,
-      name: o.name,
-      priceDelta: o.priceDelta,
-      grams: o.grams,
-      default: o.isDefault,
-    })),
+    // The API returns options alphabetically (Duży, Mały, Mega, Średni); list
+    // them cheapest first so sizes read Mały → Średni → Duży → Mega.
+    options: [...g.options]
+      .sort(
+        (a, b) =>
+          Number.parseFloat(a.priceDelta) - Number.parseFloat(b.priceDelta) ||
+          a.name.localeCompare(b.name, 'pl'),
+      )
+      .map((o) => ({
+        id: o.id,
+        name: o.name,
+        priceDelta: o.priceDelta,
+        grams: o.grams,
+        default: o.isDefault,
+      })),
   };
 }
 
@@ -68,7 +76,8 @@ function adaptToDishDetail(
     grams: item.grams ?? undefined,
     allergens: item.allergens.map((a) => allergenLabels[a]),
     flags: itemFlagsOf(item) as DishDetail['flags'],
-    modifierGroups: item.modifierGroups.map(adaptModifierGroup),
+    // Drop empty or placeholder groups/options ("New group", "New option").
+    modifierGroups: cleanGroups(item.modifierGroups).map(adaptModifierGroup),
     unavailable: !item.isAvailable,
   };
 }
@@ -105,6 +114,17 @@ export function useDishOrdering(currency = 'PLN') {
       addToCart: t('addToCart'),
       formatMinChoice: (min: number) => t('sheet.minChoice', { min }),
       formatChoose: (names: string[]) => t('sheet.chooseGroups', { names: names.join(', ') }),
+      modifierLabels: {
+        required: t('sheet.required'),
+        chooseOne: t('sheet.chooseOne'),
+        optionalUpTo: (max: number) => t('sheet.optionalUpTo', { max }),
+        chooseExactly: (n: number) => t('sheet.chooseExactly', { n }),
+        chooseRange: (min: number, max?: number) =>
+          max === undefined
+            ? t('sheet.chooseRange', { min })
+            : t('sheet.chooseRangeMax', { min, max }),
+        soldOut: t('sheet.optionSoldOut'),
+      },
     }),
     [t],
   );

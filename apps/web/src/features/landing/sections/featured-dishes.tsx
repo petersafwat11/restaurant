@@ -1,4 +1,4 @@
-import { dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
+import { cheapestPrice, dishHref, dishImageAlt } from '@/features/menu/lib/dish-facts';
 import { Link, getPathname } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import type { MenuTreeDto } from '@repo/types';
@@ -35,7 +35,7 @@ export function selectFeaturedDishes(tree: MenuTreeDto | null, locale: AppLocale
       image: { src: i.images[0]?.url ?? '', alt: dishImageAlt(i, locale) },
       name: i.name,
       description: i.description ?? undefined,
-      price: { amount: i.basePrice, currency: 'PLN' },
+      price: { amount: cheapestPrice(i), currency: 'PLN' },
       flags: [
         i.isVegetarian && 'vegetarian',
         i.isVegan && 'vegan',

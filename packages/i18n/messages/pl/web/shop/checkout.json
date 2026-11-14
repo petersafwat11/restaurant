@@ -194,6 +194,9 @@
   },
   "errors": {
     "minOrderInline": "Minimalna wartość zamówienia z dostawą to {amount}. Dodaj coś jeszcze do koszyka.",
+    "minOrderMissing": "Do dostawy brakuje {missing} (minimum {amount}). Możesz dodać frytki lub napój albo odebrać zamówienie osobiście — odbiór jest bez minimum.",
+    "minOrderSwitchPickup": "Wybierz odbiór osobisty",
+    "minOrderAddMore": "Dodaj coś do zamówienia",
     "minOrderToast": "Minimalna wartość zamówienia z dostawą to {amount} — dodaj jeszcze coś.",
     "confirmAddress": "Potwierdź adres dostawy na mapie.",
     "paymentInitFailed": "Nie udało się rozpocząć płatności. Spróbuj ponownie.",

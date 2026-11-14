@@ -12,7 +12,7 @@ and is exposed by the restaurant Caddy through `conf.d/umami.caddy`.
 3. Copy `docker-compose.yml` to `/opt/umami/`, run `docker compose up -d`.
 4. Copy `umami.caddy` to `/opt/restaurant/conf.d/`, then
    `docker exec restaurant-caddy-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile`.
-5. Fresh installs create `admin`/`umami` — replace that password at once
+5. Fresh installs create `admin`/`umami` — replace that login at once
    (production: random password in `/opt/umami/admin-credentials.txt`, mode 600).
 6. Website id lives in `/opt/umami/website-id.txt`. Set in `/opt/restaurant/.env`:
    ```

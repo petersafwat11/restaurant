@@ -57,6 +57,13 @@
     "total": "Razem",
     "soldOut": "Wyprzedane na dziś — wracamy jutro.",
     "minChoice": "Wybierz co najmniej {min, plural, one {jeden} few {#} many {#} other {#}}.",
+    "required": "Wymagane",
+    "chooseOne": "Wybierz jedną opcję",
+    "optionalUpTo": "Opcjonalnie · maks. {max}",
+    "chooseExactly": "Wybierz {n}",
+    "chooseRange": "Wybierz co najmniej {min}",
+    "chooseRangeMax": "Wybierz od {min} do {max}",
+    "optionSoldOut": "Brak",
     "chooseGroups": "Wybierz: {names}"
   },
   "allergen": {

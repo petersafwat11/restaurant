@@ -1,9 +1,12 @@
 'use client';
 
 import { useAddToCart, useCart, useRemoveCartItem, useUpdateCartItem } from '@/features/cart/hooks';
+import { deliveryMinimum } from '@/features/cart/lib/delivery-minimum';
 import { cartItemToDisplay } from '@/features/cart/to-display';
+import { useRestaurant } from '@/features/restaurants/hooks/use-restaurant';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { FloatingCartButton } from '@repo/ui';
+import { formatMoney } from '@repo/utils';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import * as React from 'react';
@@ -45,6 +48,14 @@ export function CartContainer() {
   const itemCount = lines.reduce((s, l) => s + l.quantity, 0);
   const subtotal = cart?.totals.subtotal ?? '0.00';
   const currency = cart?.currency ?? 'PLN';
+  const restaurant = useRestaurant().data;
+  // Most abandoned checkouts were single items under the delivery minimum —
+  // say so in the cart and point to pickup / cheap add-ons instead.
+  const minimum = deliveryMinimum(
+    subtotal,
+    restaurant?.minOrderAmount,
+    restaurant?.acceptsDelivery ?? true,
+  );
 
   // Screen-reader announcement of cart-count changes. The first render is
   // skipped (no prior count to compare against), then a polite live region
@@ -111,7 +122,29 @@ export function CartContainer() {
             deliveryValue: t('deliveryCalculated'),
             total: t('total'),
             checkoutCta: (total) => t('checkoutCta', { total }),
-            footerHint: t('footerHint'),
+            footerHint:
+              itemCount > 0 && minimum.belowMinimum ? (
+                <span className="flex flex-col items-center gap-1.5 text-fg">
+                  <span>
+                    {t('belowMinimum', {
+                      missing: formatMoney(minimum.missing, currency),
+                      minimum: formatMoney(minimum.minimum, currency),
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    className="font-semibold text-accent underline underline-offset-2"
+                    onClick={() => {
+                      setOpen(false);
+                      router.push('/menu/dodatki');
+                    }}
+                  >
+                    {t('addMore')} →
+                  </button>
+                </span>
+              ) : (
+                t('footerHint')
+              ),
             lineItem: {
               remove: t('remove'),
               notePrefix: t('notePrefix'),

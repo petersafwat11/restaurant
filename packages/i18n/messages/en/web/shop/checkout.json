@@ -194,6 +194,9 @@
   },
   "errors": {
     "minOrderInline": "Minimum order for delivery is {amount}. Add a little more to your cart.",
+    "minOrderMissing": "Add {missing} more for delivery (minimum {amount}). Add fries or a drink, or pick up in person — pickup has no minimum.",
+    "minOrderSwitchPickup": "Switch to pickup",
+    "minOrderAddMore": "Add something",
     "minOrderToast": "Minimum order for delivery is {amount} — add a bit more.",
     "confirmAddress": "Please confirm your delivery address on the map.",
     "paymentInitFailed": "Could not start the payment. Please try again.",
