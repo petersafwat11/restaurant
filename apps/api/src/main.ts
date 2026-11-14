@@ -119,6 +119,10 @@ async function bootstrap() {
   app.enableCors({
     origin: [env.APP_URL_WEB, env.APP_URL_ADMIN],
     credentials: true,
+    // @fastify/cors v10+ defaults to GET,HEAD,POST only, which silently broke
+    // every PATCH/PUT/DELETE from the browser (cart quantity, admin order
+    // status, menu edits). List the methods the api-client actually uses.
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   // Socket.IO uses its own adapter over the Fastify HTTP server.
